@@ -9,3 +9,37 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Custom Yellow Sticker Badge & Outline for Purple Font (Matching Image) */
+.yellow-sticker-badge {
+    background-color: #facc15;
+    color: #2e1065;
+    font-weight: 800;
+    border-radius: 18px;
+    padding: 6px 20px;
+    display: inline-block;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    line-height: 1.25;
+}
+
+.purple-font-yellow-outline {
+    color: #2e1065 !important;
+    -webkit-text-stroke: 5px #facc15;
+    paint-order: stroke fill;
+    font-weight: 900;
+}
+
+.purple-font-yellow-bubble {
+    color: #2e1065 !important;
+    text-shadow:
+        -3px -3px 0 #facc15,
+         3px -3px 0 #facc15,
+        -3px  3px 0 #facc15,
+         3px  3px 0 #facc15,
+        -4px  0px 0 #facc15,
+         4px  0px 0 #facc15,
+         0px -4px 0 #facc15,
+         0px  4px 0 #facc15,
+         0px  4px 10px rgba(0, 0, 0, 0.15);
+    font-weight: 800;
+}
