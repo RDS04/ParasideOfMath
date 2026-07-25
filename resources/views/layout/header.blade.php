@@ -58,36 +58,45 @@
         </li>
 
         <!-- user menu -->
-        <li class="nav-item dropdown user-menu">
+        <li class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" style="display: flex !important; align-items: center !important;">
                 <img src="https://ui-avatars.com/api/?name={{ urlencode($currentName) }}&background=4c1d95&color=fff&bold=true"
                      class="user-image img-circle elevation-2" alt="User Avatar" style="width: 32px; height: 32px; margin-right: 8px; float: none !important; display: inline-block !important; object-fit: cover;">
                 <span class="d-none d-md-inline font-weight-bold" style="color: #4b4560;">{{ $currentName }}</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <li class="user-header" style="background: linear-gradient(135deg, #4c1d95, #2e1065);">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode($currentName) }}&background=fbbf24&color=40206b&bold=true"
-                         class="img-circle elevation-2" alt="User Avatar">
-                    <p>
-                        {{ $currentName }}
-                        <small>{{ $currentEmail }}</small>
-                    </p>
-                </li>
-                <li class="user-body">
-                    <div class="row">
-                        <div class ="col-4 text-center"><a href="#">Siswa</a></div>
-                        <div class="col-4 text-center"><a href="#">Tutor</a></div>
-                        <div class="col-4 text-center"><a href="#">Kelas</a></div>
-                    </div>
-                </li>
-                <li class="user-footer">
-                    <a href="" class="btn btn-default btn-flat float-left">Profil</a>
-                    <form method="POST" action="{{ route('logout') ?? '#' }}" class="float-right">
-                        @csrf
-                        <button type="submit" class="btn btn-brand btn-flat">Keluar</button>
-                    </form>
-                </li>
-            </ul>
+            <div class="dropdown-menu dropdown-menu-right rounded-lg shadow-md border-0 py-2" style="margin-top: 10px; width: 220px; overflow: hidden; border: 1px solid #ece7f7 !important;">
+                <!-- Header / User Info -->
+                <div class="px-3 py-2 border-bottom" style="background-color: #faf9fc;">
+                    <span class="d-block font-weight-bold text-purple-950" style="font-size: 0.9rem; color: #2e1065;">{{ $currentName }}</span>
+                    <span class="d-block text-muted text-xs truncate" style="max-width: 190px; font-size: 0.75rem;">{{ $currentEmail }}</span>
+                </div>
+                
+                <!-- Links -->
+                <a href="#" class="dropdown-item py-2 text-dark font-weight-medium d-flex align-items-center" style="font-size: 0.85rem; color: #4b4560 !important;">
+                    <i class="fas fa-user-circle mr-2 text-purple" style="color: #7c3aed; width: 20px;"></i> Profil Saya
+                </a>
+                <div class="dropdown-divider" style="border-color: #f0edf9;"></div>
+                
+                <a href="#" class="dropdown-item py-2 text-dark font-weight-medium d-flex align-items-center" style="font-size: 0.85rem; color: #4b4560 !important;">
+                    <i class="fas fa-user-graduate mr-2 text-purple" style="color: #7c3aed; width: 20px;"></i> Siswa
+                </a>
+                <a href="#" class="dropdown-item py-2 text-dark font-weight-medium d-flex align-items-center" style="font-size: 0.85rem; color: #4b4560 !important;">
+                    <i class="fas fa-chalkboard-teacher mr-2 text-purple" style="color: #7c3aed; width: 20px;"></i> Tutor
+                </a>
+                <a href="#" class="dropdown-item py-2 text-dark font-weight-medium d-flex align-items-center" style="font-size: 0.85rem; color: #4b4560 !important;">
+                    <i class="fas fa-book-open mr-2 text-purple" style="color: #7c3aed; width: 20px;"></i> Kelas
+                </a>
+                
+                <div class="dropdown-divider" style="border-color: #f0edf9;"></div>
+                
+                <!-- Logout -->
+                <form method="POST" action="{{ route('logout') ?? '#' }}" class="m-0">
+                    @csrf
+                    <button type="submit" class="dropdown-item py-2 text-danger font-weight-bold d-flex align-items-center" style="font-size: 0.85rem; border: none; background: transparent; width: 100%; text-align: left;">
+                        <i class="fas fa-sign-out-alt mr-2 text-danger" style="width: 20px;"></i> Keluar
+                    </button>
+                </form>
+            </div>
         </li>
 
         <li class="nav-item">

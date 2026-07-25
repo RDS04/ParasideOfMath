@@ -1,119 +1,113 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Paket Belajar - Paradise of Math</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #faf9fc; }
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e293b 0%, #be123c 100%);
-        }
-    </style>
-</head>
-<body class="min-h-screen bg-slate-50 pb-16">
+@extends('layout.app')
 
-    <!-- Header bar -->
-    <div class="gradient-bg py-8 px-6 text-white shadow-md relative overflow-hidden mb-10">
-        <div class="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-rose-600/20 blur-xl"></div>
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-            <div>
-                <span class="px-3 py-1 bg-rose-500 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
-                    Manajemen Harga
-                </span>
-                <h1 class="text-3xl font-serif mt-2">Kelola Paket &amp; Tarif Belajar</h1>
-                <p class="text-rose-200 text-sm mt-1">Ubah data harga, deskripsi, dan rincian paket belajar PoM secara realtime.</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="/admin" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-xl transition duration-200 border border-white/20">
-                    Kembali ke Dashboard
-                </a>
+@section('title', 'Kelola Paket Belajar · Paradise of Math')
+
+@section('content')
+    <!-- Content Header -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-3 align-items-center">
+                <div class="col-sm-6">
+                    <h1 class="m-0 font-weight-bold text-purple-950">Kelola Paket &amp; Tarif Belajar</h1>
+                    <p class="text-sm text-muted mb-0">Ubah data harga, deskripsi, dan rincian paket belajar secara realtime.</p>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-purple-600">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Kelola Paket</li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        @if (session('success'))
-            <div class="mb-8 p-4 rounded-xl text-sm font-medium border bg-emerald-50 border-emerald-200 text-emerald-800 shadow-sm" role="alert">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            @foreach($packages as $paket)
-            <div class="bg-white rounded-3xl border border-slate-100 shadow-lg shadow-slate-100/40 p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative {{ $paket->is_populer ? 'ring-2 ring-amber-400' : '' }}">
-                @if($paket->is_populer)
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-0.5 bg-amber-400 text-purple-950 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm">
-                    Terpopuler (Highlighted)
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show mb-4 rounded-xl shadow-sm border-0" role="alert">
+                    <h5><i class="icon fas fa-check"></i> Sukses!</h5>
+                    {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                @endif
+            @endif
 
-                <form action="{{ route('admin.paket.update', $paket->id) }}" method="POST" class="space-y-4 flex flex-col justify-between h-full">
-                    @csrf
-                    @method('PUT')
-
-                    <div class="space-y-4">
-                        <!-- Paket Title / Category -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nama Paket &amp; Kategori</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" name="nama_paket" value="{{ $paket->nama_paket }}" class="w-full text-sm font-bold text-slate-900 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none" required />
-                                <input type="text" name="kategori" value="{{ $paket->kategori }}" class="w-full text-xs font-bold text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none" required />
-                            </div>
+            <div class="row">
+                @foreach($packages as $paket)
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm hover:shadow-md transition duration-200 border-light" style="{{ $paket->is_populer ? 'border: 2px solid var(--pom-amber-light);' : '' }}">
+                        <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                            <span class="font-weight-bold text-purple-950 text-md">{{ $paket->nama_paket }}</span>
+                            @if($paket->is_populer)
+                                <span class="badge bg-amber-100 text-amber-800 font-bold uppercase text-[10px] px-2.5 py-1">Paling Populer</span>
+                            @endif
                         </div>
 
-                        <!-- Description -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Deskripsi Paket</label>
-                            <textarea name="deskripsi" class="w-full text-xs text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none h-16 resize-none" required>{{ $paket->deskripsi }}</textarea>
-                        </div>
+                        <div class="card-body">
+                            <form action="{{ route('admin.paket.update', $paket->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
 
-                        <!-- Price Ranges -->
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Rentang Harga (Rupiah)</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <span class="text-[10px] text-slate-400 font-semibold">Min</span>
-                                    <input type="number" name="harga_min" value="{{ $paket->harga_min }}" class="w-full text-sm font-semibold text-slate-800 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none" required />
+                                <div class="form-group mb-3">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Nama Paket &amp; Kategori</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="text" name="nama_paket" value="{{ $paket->nama_paket }}" class="form-control form-control-sm font-weight-bold" required />
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="text" name="kategori" value="{{ $paket->kategori }}" class="form-control form-control-sm" required />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 font-semibold">Max</span>
-                                    <input type="number" name="harga_max" value="{{ $paket->harga_max }}" class="w-full text-sm font-semibold text-slate-800 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 outline-none" required />
+
+                                <div class="form-group mb-3">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Deskripsi Paket</label>
+                                    <textarea name="deskripsi" class="form-control form-control-sm" rows="3" required>{{ $paket->deskripsi }}</textarea>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Details 1 - 5 -->
-                        <div class="space-y-1">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Detail Baris Rincian</label>
-                            <input type="text" name="detail_1" value="{{ $paket->detail_1 }}" placeholder="Rincian 1" class="w-full text-xs text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 outline-none" />
-                            <input type="text" name="detail_2" value="{{ $paket->detail_2 }}" placeholder="Rincian 2" class="w-full text-xs text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 outline-none" />
-                            <input type="text" name="detail_3" value="{{ $paket->detail_3 }}" placeholder="Rincian 3" class="w-full text-xs text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 outline-none" />
-                            <input type="text" name="detail_4" value="{{ $paket->detail_4 }}" placeholder="Rincian 4" class="w-full text-xs text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 outline-none" />
-                            <input type="text" name="detail_5" value="{{ $paket->detail_5 }}" placeholder="Rincian 5" class="w-full text-xs text-slate-600 border border-slate-200 rounded-lg px-2.5 py-1.5 focus:border-rose-500 outline-none" />
-                        </div>
+                                <div class="form-group mb-3">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Rentang Harga (Rupiah)</label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <span class="text-[10px] text-muted font-semibold d-block mb-1">Min (Rp)</span>
+                                            <input type="number" name="harga_min" value="{{ $paket->harga_min }}" class="form-control form-control-sm font-weight-semibold" required />
+                                        </div>
+                                        <div class="col-6">
+                                            <span class="text-[10px] text-muted font-semibold d-block mb-1">Max (Rp)</span>
+                                            <input type="number" name="harga_max" value="{{ $paket->harga_max }}" class="form-control form-control-sm font-weight-semibold" required />
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <!-- Toggle Popularity -->
-                        <div class="flex items-center gap-2 pt-1">
-                            <input type="checkbox" name="is_populer" value="1" id="populer-{{ $paket->id }}" class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500 cursor-pointer" {{ $paket->is_populer ? 'checked' : '' }}>
-                            <label for="populer-{{ $paket->id }}" class="text-xs font-bold text-slate-700 cursor-pointer select-none">Tandai Paling Populer (Warna Ungu)</label>
+                                <div class="form-group mb-3">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Detail Baris Rincian</label>
+                                    <div class="space-y-1">
+                                        <input type="text" name="detail_1" value="{{ $paket->detail_1 }}" placeholder="Rincian 1" class="form-control form-control-sm mb-1 text-xs" />
+                                        <input type="text" name="detail_2" value="{{ $paket->detail_2 }}" placeholder="Rincian 2" class="form-control form-control-sm mb-1 text-xs" />
+                                        <input type="text" name="detail_3" value="{{ $paket->detail_3 }}" placeholder="Rincian 3" class="form-control form-control-sm mb-1 text-xs" />
+                                        <input type="text" name="detail_4" value="{{ $paket->detail_4 }}" placeholder="Rincian 4" class="form-control form-control-sm mb-1 text-xs" />
+                                        <input type="text" name="detail_5" value="{{ $paket->detail_5 }}" placeholder="Rincian 5" class="form-control form-control-sm text-xs" />
+                                    </div>
+                                </div>
+
+                                <div class="custom-control custom-checkbox mb-4">
+                                    <input type="checkbox" name="is_populer" value="1" class="custom-control-input" id="populer-{{ $paket->id }}" {{ $paket->is_populer ? 'checked' : '' }}>
+                                    <label class="custom-control-label text-xs font-weight-bold text-slate-700 cursor-pointer" for="populer-{{ $paket->id }}">Tandai Paling Populer (Kartu Ungu)</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-brand btn-block btn-sm py-2 rounded-lg font-weight-bold shadow-sm">
+                                    Simpan Perubahan
+                                </button>
+                            </form>
                         </div>
                     </div>
-
-                    <button type="submit" class="w-full mt-5 py-2.5 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition duration-200 shadow-md shadow-rose-500/10">
-                        Update Data Paket
-                    </button>
-                </form>
+                </div>
+                @endforeach
             </div>
-            @endforeach
-        </div>
-    </div>
 
-</body>
-</html>
+        </div>
+    </section>
+@endsection

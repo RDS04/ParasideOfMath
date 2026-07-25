@@ -37,8 +37,8 @@ Route::get('/guru', function () {
 
 // Admin Dashboard & Pricing CRUD
 Route::middleware(['auth:web'])->group(function () {
-    Route::get('/admin', [\App\Http\Controllers\AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/paket', [\App\Http\Controllers\AdminController::class, 'inputPrice'])->name('admin.paket');
-    Route::put('/admin/paket/{id}', [\App\Http\Controllers\AdminController::class, 'updatePrice'])->name('admin.paket.update');
+    Route::get('/admin', [\App\Http\Controllers\admin\AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/paket', [\App\Http\Controllers\admin\AdminController::class, 'inputPrice'])->name('admin.paket');
+    Route::put('/admin/paket/{id}', [\App\Http\Controllers\admin\AdminController::class, 'updatePrice'])->name('admin.paket.update');
 });
 

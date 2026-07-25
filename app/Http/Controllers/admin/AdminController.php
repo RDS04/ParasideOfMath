@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\admin;
+
+use App\Http\Controllers\Controller;
 
 use App\Models\PaketBelajar;
 use Illuminate\Http\Request;
@@ -16,7 +18,7 @@ class AdminController extends Controller
         if (!Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
-        return view('admin.index');
+        return view('admin.dashboard');
     }
 
     /**

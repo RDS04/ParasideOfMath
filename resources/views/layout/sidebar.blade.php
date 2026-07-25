@@ -26,7 +26,7 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
-                    <a href="{{ $dashboardRoute }}" class="nav-link active">
+                    <a href="{{ $dashboardRoute }}" class="nav-link {{ Route::is('siswa.dashboard') || Route::is('admin.dashboard') || Route::is('guru.dashboard') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-th-large"></i>
                         <p>Dashboard</p>
                     </a>
@@ -158,6 +158,14 @@
                                     <p>Laporan Kehadiran</p>
                                 </a></li>
                         </ul>
+                    </li>
+
+                    <li class="nav-header">PENGELOLAAN HARGA</li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.paket') }}" class="nav-link {{ Route::is('admin.paket') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tags"></i>
+                            <p>Kelola Paket Belajar</p>
+                        </a>
                     </li>
 
                     <li class="nav-header">LAINNYA</li>
