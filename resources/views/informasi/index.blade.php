@@ -985,149 +985,10 @@
                 <div class="swiper pricing-swiper overflow-hidden">
                     <div class="swiper-wrapper">
                         
-                        <!-- CARD 1: SD & SMP -->
+                        @foreach(\App\Models\PaketBelajar::all() as $paket)
+                        <!-- CARD: {{ $paket->nama_paket }} -->
                         <div class="swiper-slide py-6 h-auto">
-                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
-                                <div>
-                                    <div class="mb-4">
-                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Dasar</span>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-violet-950 mb-2">SD &amp; SMP</h3>
-                                    <p class="text-slate-500 text-xs mb-6">Memperkuat konsep matematika dasar sekolah dasar dan menengah.</p>
-                                    
-                                    <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">50K</span>
-                                        <span class="text-slate-500 text-sm font-semibold">- 80K</span>
-                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
-                                    </div>
-
-                                    <!-- Feature list -->
-                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Privat 1 Orang: <strong>Rp 80.000</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 2 Orang: <strong>Rp 70K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 3 Orang: <strong>Rp 60K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 4-7 Orang: <strong>Rp 50K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>Durasi belajar 90 menit</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
-                                    Daftar Paket SD &amp; SMP
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- CARD 2: SMA -->
-                        <div class="swiper-slide py-6 h-auto">
-                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
-                                <div>
-                                    <div class="mb-4">
-                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Menengah</span>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-violet-950 mb-2">SMA</h3>
-                                    <p class="text-slate-500 text-xs mb-6">Persiapan ujian sekolah reguler dan materi pemantapan SMA.</p>
-                                    
-                                    <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">60K</span>
-                                        <span class="text-slate-500 text-sm font-semibold">- 90K</span>
-                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
-                                    </div>
-
-                                    <!-- Feature list -->
-                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Privat 1 Orang: <strong>Rp 90.000</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 2 Orang: <strong>Rp 80K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 3 Orang: <strong>Rp 70K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 4-7 Orang: <strong>Rp 60K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>Durasi belajar 90 menit</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
-                                    Daftar Paket SMA
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- CARD 3: K' Angel / K' Sofia -->
-                        <div class="swiper-slide py-6 h-auto">
-                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:scale-[1.02] hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
-                                <div>
-                                    <div class="mb-4">
-                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Spesialis</span>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-violet-950 mb-2">K' Angel / K' Sofia</h3>
-                                    <p class="text-slate-500 text-xs mb-6">Bimbingan privat intensif dibimbing langsung oleh Kak Angel atau Kak Sofia.</p>
-                                    
-                                    <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">70K</span>
-                                        <span class="text-slate-500 text-sm font-semibold">- 125K</span>
-                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
-                                    </div>
-
-                                    <!-- Feature list -->
-                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Privat 1 Orang: <strong>Rp 125.000</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 2 Orang: <strong>Rp 100K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 3 Orang: <strong>Rp 80K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 4-7 Orang: <strong>Rp 70K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>Durasi belajar 90 menit</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
-                                    Daftar Paket K' Angel / Sofia
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- CARD 4: K' Ika (HIGHLIGHTED - MOST POPULAR) -->
-                        <div class="swiper-slide py-6 h-auto">
+                            @if($paket->is_populer)
                             <div class="bg-gradient-to-b from-violet-900 to-violet-955 text-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 relative h-full min-h-[500px] shadow-xl shadow-purple-950/20 border-2 border-amber-400 animate-pulse-glow-subtle">
                                 <!-- Popular Tag badge -->
                                 <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-purple-950 text-xs font-black uppercase tracking-wider rounded-full shadow-md">
@@ -1136,141 +997,113 @@
 
                                 <div>
                                     <div class="mb-4">
-                                        <span class="px-3 py-1 bg-white/10 text-amber-300 text-xs font-bold uppercase rounded-full">Spesialis Utama</span>
+                                        <span class="px-3 py-1 bg-white/10 text-amber-300 text-xs font-bold uppercase rounded-full">{{ $paket->kategori }}</span>
                                     </div>
-                                    <h3 class="text-xl font-bold text-white mb-2">K' Ika</h3>
-                                    <p class="text-violet-200 text-xs mb-6">Bimbingan belajar eksklusif bersama Kak Ika untuk hasil pemahaman optimal.</p>
+                                    <h3 class="text-xl font-bold text-white mb-2">{{ $paket->nama_paket }}</h3>
+                                    <p class="text-violet-200 text-xs mb-6">{{ $paket->deskripsi }}</p>
                                     
                                     <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-amber-300">80K</span>
-                                        <span class="text-violet-200 text-sm font-semibold">- 150K</span>
+                                        <span class="text-3xl sm:text-4xl font-black text-amber-300">{{ $paket->harga_min >= 1000 ? ($paket->harga_min / 1000) . 'K' : $paket->harga_min }}</span>
+                                        <span class="text-violet-200 text-sm font-semibold">- {{ $paket->harga_max >= 1000 ? ($paket->harga_max / 1000) . 'K' : $paket->harga_max }}</span>
                                         <span class="text-violet-300 text-xs font-semibold ml-1">/ sesi / org</span>
                                     </div>
 
                                     <!-- Feature list -->
                                     <ul class="space-y-3 text-sm text-violet-100 mb-8">
+                                        @if($paket->detail_1)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Privat 1 Orang: <strong class="text-white">Rp 150.000</strong></span>
+                                            <span>{{ $paket->detail_1 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_2)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 2 Orang: <strong class="text-white">Rp 125K/org</strong></span>
+                                            <span>{{ $paket->detail_2 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_3)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 3 Orang: <strong class="text-white">Rp 100K/org</strong></span>
+                                            <span>{{ $paket->detail_3 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_4)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 4-7 Orang: <strong class="text-white">Rp 80K/org</strong></span>
+                                            <span>{{ $paket->detail_4 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_5)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>Durasi belajar 90 menit</span>
+                                            <span>{{ $paket->detail_5 }}</span>
                                         </li>
+                                        @endif
                                     </ul>
                                 </div>
 
                                 <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl bg-amber-400 text-purple-950 font-black shadow-md hover:bg-amber-300 hover:scale-105 transition duration-200 block">
-                                    Daftar Paket K' Ika
+                                    Daftar Paket {{ $paket->nama_paket }}
                                 </a>
                             </div>
-                        </div>
-
-                        <!-- CARD 5: SNBT / Test / Olimpiade / Kuliah / Sederajat -->
-                        <div class="swiper-slide py-6 h-auto">
+                            @else
                             <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
                                 <div>
                                     <div class="mb-4">
-                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Akademik Tinggi</span>
+                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">{{ $paket->kategori }}</span>
                                     </div>
-                                    <h3 class="text-xl font-bold text-violet-950 mb-2">SNBT / Olimpiade / Kuliah</h3>
-                                    <p class="text-slate-500 text-xs mb-6">Persiapan ujian seleksi PTN (SNBT), olimpiade, serta pendampingan materi kuliah.</p>
+                                    <h3 class="text-xl font-bold text-violet-950 mb-2">{{ $paket->nama_paket }}</h3>
+                                    <p class="text-slate-500 text-xs mb-6">{{ $paket->deskripsi }}</p>
                                     
                                     <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">125K</span>
-                                        <span class="text-slate-500 text-sm font-semibold">- 250K</span>
+                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">{{ $paket->harga_min >= 1000 ? ($paket->harga_min / 1000) . 'K' : $paket->harga_min }}</span>
+                                        <span class="text-slate-500 text-sm font-semibold">- {{ $paket->harga_max >= 1000 ? ($paket->harga_max / 1000) . 'K' : $paket->harga_max }}</span>
                                         <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
                                     </div>
 
                                     <!-- Feature list -->
                                     <ul class="space-y-3 text-sm text-slate-600 mb-8">
+                                        @if($paket->detail_1)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Privat 1 Orang: <strong>Rp 250.000</strong></span>
+                                            <span>{{ $paket->detail_1 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_2)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 2 Orang: <strong>Rp 200K/org</strong></span>
+                                            <span>{{ $paket->detail_2 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_3)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 3 Orang: <strong>Rp 150K/org</strong></span>
+                                            <span>{{ $paket->detail_3 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_4)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 4-7 Orang: <strong>Rp 125K/org</strong></span>
+                                            <span>{{ $paket->detail_4 }}</span>
                                         </li>
+                                        @endif
+                                        @if($paket->detail_5)
                                         <li class="flex items-start gap-2.5">
                                             <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>Durasi belajar 90 menit</span>
+                                            <span>{{ $paket->detail_5 }}</span>
                                         </li>
+                                        @endif
                                     </ul>
                                 </div>
 
                                 <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
-                                    Daftar Paket Ujian
+                                    Daftar Paket {{ $paket->nama_paket }}
                                 </a>
                             </div>
+                            @endif
                         </div>
-
-                        <!-- CARD 6: S2 / S3 / Naik Pangkat -->
-                        <div class="swiper-slide py-6 h-auto">
-                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
-                                <div>
-                                    <div class="mb-4">
-                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Profesional</span>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-violet-950 mb-2">S2 / S3 / Naik Pangkat</h3>
-                                    <p class="text-slate-500 text-xs mb-6">Persiapan akademis pascasarjana, kenaikan jabatan profesi, dan tes karir khusus.</p>
-                                    
-                                    <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">175K</span>
-                                        <span class="text-slate-500 text-sm font-semibold">- 300K</span>
-                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
-                                    </div>
-
-                                    <!-- Feature list -->
-                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Privat 1 Orang: <strong>Rp 300.000</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 2 Orang: <strong>Rp 250K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 3 Orang: <strong>Rp 200K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>Kelompok 4-7 Orang: <strong>Rp 175K/org</strong></span>
-                                        </li>
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>Durasi belajar 90 menit</span>
-                                        </li>
-                                    </ul>
-                                </div>
-
-                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
-                                    Daftar Paket S2/S3
-                                </a>
-                            </div>
-                        </div>
+                        @endforeach
 
                     </div>
                     <!-- Swiper Pagination -->

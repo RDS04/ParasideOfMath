@@ -57,17 +57,23 @@
             </div>
 
             <!-- Action Area -->
-            <div class="pt-2 flex flex-col sm:flex-row gap-4">
-                <a href="/" class="flex-1 text-center py-3 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition duration-200">
-                    Halaman Utama
+            <div class="pt-2 flex flex-col gap-4">
+                <a href="{{ route('admin.paket') }}" class="w-full text-center py-3 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition duration-200 shadow-md shadow-rose-500/20">
+                    Kelola Paket &amp; Tarif Belajar
                 </a>
                 
-                <form action="{{ route('logout') }}" method="POST" class="flex-1">
-                    @csrf
-                    <button type="submit" class="w-full py-3 bg-rose-500 text-white font-bold rounded-xl hover:bg-rose-600 transition duration-200 shadow-md shadow-rose-500/20">
-                        Keluar (Logout)
-                    </button>
-                </form>
+                <div class="flex gap-4">
+                    <a href="/" class="flex-1 text-center py-3 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition duration-200">
+                        Halaman Utama
+                    </a>
+                    
+                    <form action="{{ route('logout') }}" method="POST" class="flex-1">
+                        @csrf
+                        <button type="submit" class="w-full py-3 bg-slate-200 text-slate-750 font-bold rounded-xl hover:bg-slate-300 transition duration-200">
+                            Keluar (Logout)
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         

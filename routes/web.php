@@ -35,10 +35,10 @@ Route::get('/guru', function () {
     return view('guru.index');
 })->middleware('auth:web')->name('guru.dashboard');
 
-Route::get('/admin', function () {
-    if (!auth()->user()->isAdmin()) {
-        return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
-    }
-    return view('admin.index');
-})->middleware('auth:web')->name('admin.dashboard');
+// Admin Dashboard & Pricing CRUD
+Route::middleware(['auth:web'])->group(function () {
+    Route::get('/admin', [\App\Http\Controllers\AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/paket', [\App\Http\Controllers\AdminController::class, 'inputPrice'])->name('admin.paket');
+    Route::put('/admin/paket/{id}', [\App\Http\Controllers\AdminController::class, 'updatePrice'])->name('admin.paket.update');
+});
 
