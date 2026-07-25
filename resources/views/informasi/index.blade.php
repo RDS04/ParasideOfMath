@@ -156,7 +156,7 @@
                     <!-- Brand Name -->
                     <div
                         class="font-black text-lg md:text-xl purple-font-yellow-bubble whitespace-nowrap tracking-tight">
-                        Paradise<span class="text-violet-700">Of</span>Math
+                        Paradise<span class="text-violet-700">Of </span>Math
                     </div>
                 </a>
 
@@ -207,14 +207,62 @@
 
                 <!-- Auth buttons (desktop) -->
                 <div class="hidden md:flex items-center gap-3">
-                    <a href="#"
-                        class="px-5 py-2.5 rounded-xl text-sm font-bold border-2 border-violet-800 text-violet-900 hover:bg-violet-900 hover:text-white hover:border-violet-900 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
-                        Login
-                    </a>
-                    <a href="#"
-                        class="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-400 text-violet-950 shadow-md shadow-amber-400/20 hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
-                        Register
-                    </a>
+                    @if (auth()->guard('siswa')->check() || auth()->guard('web')->check())
+                        @php
+                            $user = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
+                            $dashboardRoute = auth()->guard('siswa')->check() 
+                                ? route('siswa.dashboard') 
+                                : ($user->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
+                        @endphp
+                        <!-- Profile Dropdown (Desktop) -->
+                        <div class="relative group">
+                            <button id="profile-dropdown-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 border border-violet-100 hover:bg-violet-100 hover:border-violet-200 transition duration-200">
+                                <!-- Icon -->
+                                <div class="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </div>
+                                <!-- Name -->
+                                <span class="text-sm font-bold text-violet-950 max-w-[120px] truncate">{{ $user->name }}</span>
+                                <!-- Arrow -->
+                                <svg class="w-4 h-4 text-violet-900 transition-transform group-hover:rotate-180 duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-2 w-48 bg-white border border-violet-100 rounded-2xl shadow-xl py-2 hidden group-hover:block transition duration-200 animate-fadeIn z-50">
+                                <div class="px-4 py-2 border-b border-violet-50">
+                                    <p class="text-xs text-slate-400 font-medium">Masuk sebagai</p>
+                                    <p class="text-xs font-bold text-violet-950 capitalize">{{ auth()->guard('siswa')->check() ? 'Siswa' : $user->role }}</p>
+                                </div>
+                                <a href="{{ $dashboardRoute }}" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-violet-50 hover:text-violet-900 transition duration-150">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                    </svg>
+                                    Dashboard
+                                </a>
+                                <hr class="border-violet-50 my-1">
+                                <form action="{{ route('logout') }}" method="POST" class="block w-full">
+                                    @csrf
+                                    <button type="submit" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition duration-150">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        Keluar (Logout)
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ route('login') }}"
+                            class="px-5 py-2.5 rounded-xl text-sm font-bold border-2 border-violet-800 text-violet-900 hover:bg-violet-900 hover:text-white hover:border-violet-900 hover:shadow-lg hover:shadow-violet-200 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
+                            Login
+                        </a>
+                        <a href="{{ route('login') }}#daftar"
+                            class="px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-400 text-violet-950 shadow-md shadow-amber-400/20 hover:bg-amber-300 hover:shadow-lg hover:shadow-amber-400/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
+                            Register
+                        </a>
+                    @endif
                 </div>
 
                 <!-- Mobile menu button -->
@@ -252,16 +300,47 @@
                             class="block py-2 px-3 rounded-lg hover:bg-violet-50 hover:text-violet-900 transition-colors">Kontak</a>
                     </li>
 
-                    <li class="pt-3 flex flex-col gap-2.5">
-                        <a href="#"
-                            class="text-center px-5 py-2.5 rounded-xl text-sm font-bold border-2 border-violet-800 text-violet-900 hover:bg-violet-50 transition-all">
-                            Login
-                        </a>
-                        <a href="#"
-                            class="text-center px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-400 text-violet-950 shadow-md transition-all">
-                            Register
-                        </a>
-                    </li>
+                    @if (auth()->guard('siswa')->check() || auth()->guard('web')->check())
+                        @php
+                            $user = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
+                            $dashboardRoute = auth()->guard('siswa')->check() 
+                                ? route('siswa.dashboard') 
+                                : ($user->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
+                        @endphp
+                        <li class="pt-3 border-t border-violet-100/80 flex flex-col gap-2">
+                            <div class="px-3 py-1.5 flex items-center gap-2 bg-violet-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold text-sm">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </div>
+                                <div class="truncate">
+                                    <p class="text-xs font-bold text-violet-950">{{ $user->name }}</p>
+                                    <p class="text-[10px] text-slate-400 font-medium capitalize">{{ auth()->guard('siswa')->check() ? 'Siswa' : $user->role }}</p>
+                                </div>
+                            </div>
+                            <a href="{{ $dashboardRoute }}"
+                                class="text-center px-5 py-2.5 rounded-xl text-sm font-bold bg-violet-800 text-white shadow-md hover:bg-violet-950 transition-all">
+                                Masuk Dashboard
+                            </a>
+                            <form action="{{ route('logout') }}" method="POST" class="w-full">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full text-center px-5 py-2.5 rounded-xl text-sm font-bold border-2 border-rose-600 text-rose-600 hover:bg-rose-50 transition-all">
+                                    Keluar (Logout)
+                                </button>
+                            </form>
+                        </li>
+                    @else
+                        <li class="pt-3 flex flex-col gap-2.5">
+                            <a href="{{ route('login') }}"
+                                class="text-center px-5 py-2.5 rounded-xl text-sm font-bold border-2 border-violet-800 text-violet-900 hover:bg-violet-50 transition-all">
+                                Login
+                            </a>
+                            <a href="{{ route('login') }}#daftar"
+                                class="text-center px-5 py-2.5 rounded-xl text-sm font-bold bg-amber-400 text-violet-950 shadow-md transition-all">
+                                Register
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </div>
         </div>
