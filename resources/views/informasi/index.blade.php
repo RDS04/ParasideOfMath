@@ -14,10 +14,102 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <!-- Swiper.js CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
+        }
+
+        /* Swiper Pricing Slider Styles */
+        .pricing-swiper {
+            padding-top: 2rem !important;
+            padding-bottom: 4rem !important;
+            overflow: visible !important;
+        }
+        .pricing-swiper .swiper-wrapper {
+            align-items: center !important;
+        }
+        .pricing-swiper .swiper-slide {
+            width: 385px !important;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.86);
+            filter: blur(3px);
+            opacity: 0.5;
+            z-index: 1;
+        }
+        @media (max-width: 640px) {
+            .pricing-swiper .swiper-slide {
+                width: 300px !important;
+            }
+        }
+        .pricing-swiper .swiper-slide-active {
+            transform: scale(1.06) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10 !important;
+        }
+        .swiper-button-prev-custom, .swiper-button-next-custom {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3.25rem;
+            height: 3.25rem;
+            background: linear-gradient(135deg, #7c3aed, #4c1d95);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 1.1rem;
+            box-shadow: 0 10px 20px -5px rgba(76, 29, 149, 0.4);
+            cursor: pointer;
+            z-index: 20;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .swiper-button-prev-custom:hover, .swiper-button-next-custom:hover {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #2e1065;
+            box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
+            transform: translateY(-50%) scale(1.12);
+        }
+        .swiper-button-prev-custom:active, .swiper-button-next-custom:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+        .swiper-button-prev-custom {
+            left: -1rem;
+        }
+        .swiper-button-next-custom {
+            right: -1rem;
+        }
+        @media (max-width: 1024px) {
+            .swiper-button-prev-custom {
+                left: 0.5rem;
+            }
+            .swiper-button-next-custom {
+                right: 0.5rem;
+            }
+        }
+        @media (max-width: 768px) {
+            .swiper-button-prev-custom, .swiper-button-next-custom {
+                display: none !important;
+            }
+        }
+        .pricing-swiper .swiper-pagination-bullet {
+            width: 10px;
+            height: 10px;
+            background: #cbd5e1;
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+        .pricing-swiper .swiper-pagination-bullet-active {
+            background: #4c1d95;
+            width: 24px;
+            border-radius: 5px;
         }
 
         /* 1. Yellow Sticker Badge with Dark Purple Font (EXACT Match to uploaded image) */
@@ -156,7 +248,7 @@
                     <!-- Brand Name -->
                     <div
                         class="font-black text-lg md:text-xl purple-font-yellow-bubble whitespace-nowrap tracking-tight">
-                        Paradise<span class="text-violet-700">Of </span>Math
+                        Paradise <span class="text-violet-700">Of </span> Math
                     </div>
                 </a>
 
@@ -178,6 +270,13 @@
                     <li>
                         <a href="#fasilitas" class="relative py-1 hover:text-violet-800 transition-colors group">
                             Fasilitas
+                            <span
+                                class="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 rounded-full group-hover:w-full transition-all duration-300"></span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#biaya" class="relative py-1 hover:text-violet-800 transition-colors group">
+                            Biaya
                             <span
                                 class="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 rounded-full group-hover:w-full transition-all duration-300"></span>
                         </a>
@@ -288,6 +387,9 @@
                     </li>
                     <li><a href="#fasilitas"
                             class="block py-2 px-3 rounded-lg hover:bg-violet-50 hover:text-violet-900 transition-colors">Fasilitas</a>
+                    </li>
+                    <li><a href="#biaya"
+                            class="block py-2 px-3 rounded-lg hover:bg-violet-50 hover:text-violet-900 transition-colors">Biaya</a>
                     </li>
                     <li><a href="#jadwal"
                             class="block py-2 px-3 rounded-lg hover:bg-violet-50 hover:text-violet-900 transition-colors">Jadwal</a>
@@ -857,6 +959,337 @@
     </section>
 
 
+    <!-- ================= BIAYA SECTION ================= -->
+    <section id="biaya" class="py-20 sm:py-24 md:py-28 bg-slate-50 relative overflow-hidden">
+        <!-- Ambient background elements -->
+        <div class="w-80 h-80 bg-violet-600/10 rounded-full blur-3xl absolute -top-10 -right-10 pointer-events-none animate-pulse-glow"></div>
+        <div class="w-80 h-80 bg-amber-400/10 rounded-full blur-3xl absolute -bottom-10 -left-10 pointer-events-none animate-float animate-delay-200"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-12 reveal-element">
+                <span class="yellow-sticker-badge mb-4">
+                    Investasi Pendidikan
+                </span>
+                <h2 class="font-black text-3xl sm:text-4xl md:text-5xl text-violet-950 mb-5 leading-tight">
+                    Pilihan Paket <span class="text-violet-700">Belajar Privat</span>
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed font-semibold">
+                    Geser kartu ke kanan atau ke kiri untuk melihat program les privat kami. Pilih paket terbaik sesuai kebutuhan Anda!
+                </p>
+            </div>
+
+            <!-- ChatGPT-Style Pricing Grid (Carousel Slider) -->
+            <div class="relative px-2 sm:px-12 reveal-element delay-100">
+                <!-- Swiper Container -->
+                <div class="swiper pricing-swiper overflow-hidden">
+                    <div class="swiper-wrapper">
+                        
+                        <!-- CARD 1: SD & SMP -->
+                        <div class="swiper-slide py-6 h-auto">
+                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Dasar</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-violet-950 mb-2">SD &amp; SMP</h3>
+                                    <p class="text-slate-500 text-xs mb-6">Memperkuat konsep matematika dasar sekolah dasar dan menengah.</p>
+                                    
+                                    <div class="flex items-baseline gap-1 mb-8">
+                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">50K</span>
+                                        <span class="text-slate-500 text-sm font-semibold">- 80K</span>
+                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
+                                    </div>
+
+                                    <!-- Feature list -->
+                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Privat 1 Orang: <strong>Rp 80.000</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 2 Orang: <strong>Rp 70K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 3 Orang: <strong>Rp 60K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 4-7 Orang: <strong>Rp 50K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
+                                            <span>Durasi belajar 90 menit</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
+                                    Daftar Paket SD &amp; SMP
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- CARD 2: SMA -->
+                        <div class="swiper-slide py-6 h-auto">
+                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Menengah</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-violet-950 mb-2">SMA</h3>
+                                    <p class="text-slate-500 text-xs mb-6">Persiapan ujian sekolah reguler dan materi pemantapan SMA.</p>
+                                    
+                                    <div class="flex items-baseline gap-1 mb-8">
+                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">60K</span>
+                                        <span class="text-slate-500 text-sm font-semibold">- 90K</span>
+                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
+                                    </div>
+
+                                    <!-- Feature list -->
+                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Privat 1 Orang: <strong>Rp 90.000</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 2 Orang: <strong>Rp 80K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 3 Orang: <strong>Rp 70K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 4-7 Orang: <strong>Rp 60K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
+                                            <span>Durasi belajar 90 menit</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
+                                    Daftar Paket SMA
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- CARD 3: K' Angel / K' Sofia -->
+                        <div class="swiper-slide py-6 h-auto">
+                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:scale-[1.02] hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Spesialis</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-violet-950 mb-2">K' Angel / K' Sofia</h3>
+                                    <p class="text-slate-500 text-xs mb-6">Bimbingan privat intensif dibimbing langsung oleh Kak Angel atau Kak Sofia.</p>
+                                    
+                                    <div class="flex items-baseline gap-1 mb-8">
+                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">70K</span>
+                                        <span class="text-slate-500 text-sm font-semibold">- 125K</span>
+                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
+                                    </div>
+
+                                    <!-- Feature list -->
+                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Privat 1 Orang: <strong>Rp 125.000</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 2 Orang: <strong>Rp 100K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 3 Orang: <strong>Rp 80K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 4-7 Orang: <strong>Rp 70K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
+                                            <span>Durasi belajar 90 menit</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
+                                    Daftar Paket K' Angel / Sofia
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- CARD 4: K' Ika (HIGHLIGHTED - MOST POPULAR) -->
+                        <div class="swiper-slide py-6 h-auto">
+                            <div class="bg-gradient-to-b from-violet-900 to-violet-955 text-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 relative h-full min-h-[500px] shadow-xl shadow-purple-950/20 border-2 border-amber-400 animate-pulse-glow-subtle">
+                                <!-- Popular Tag badge -->
+                                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-purple-950 text-xs font-black uppercase tracking-wider rounded-full shadow-md">
+                                    Paling Populer
+                                </div>
+
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="px-3 py-1 bg-white/10 text-amber-300 text-xs font-bold uppercase rounded-full">Spesialis Utama</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-white mb-2">K' Ika</h3>
+                                    <p class="text-violet-200 text-xs mb-6">Bimbingan belajar eksklusif bersama Kak Ika untuk hasil pemahaman optimal.</p>
+                                    
+                                    <div class="flex items-baseline gap-1 mb-8">
+                                        <span class="text-3xl sm:text-4xl font-black text-amber-300">80K</span>
+                                        <span class="text-violet-200 text-sm font-semibold">- 150K</span>
+                                        <span class="text-violet-300 text-xs font-semibold ml-1">/ sesi / org</span>
+                                    </div>
+
+                                    <!-- Feature list -->
+                                    <ul class="space-y-3 text-sm text-violet-100 mb-8">
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Privat 1 Orang: <strong class="text-white">Rp 150.000</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 2 Orang: <strong class="text-white">Rp 125K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 3 Orang: <strong class="text-white">Rp 100K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 4-7 Orang: <strong class="text-white">Rp 80K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
+                                            <span>Durasi belajar 90 menit</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl bg-amber-400 text-purple-950 font-black shadow-md hover:bg-amber-300 hover:scale-105 transition duration-200 block">
+                                    Daftar Paket K' Ika
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- CARD 5: SNBT / Test / Olimpiade / Kuliah / Sederajat -->
+                        <div class="swiper-slide py-6 h-auto">
+                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Akademik Tinggi</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-violet-950 mb-2">SNBT / Olimpiade / Kuliah</h3>
+                                    <p class="text-slate-500 text-xs mb-6">Persiapan ujian seleksi PTN (SNBT), olimpiade, serta pendampingan materi kuliah.</p>
+                                    
+                                    <div class="flex items-baseline gap-1 mb-8">
+                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">125K</span>
+                                        <span class="text-slate-500 text-sm font-semibold">- 250K</span>
+                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
+                                    </div>
+
+                                    <!-- Feature list -->
+                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Privat 1 Orang: <strong>Rp 250.000</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 2 Orang: <strong>Rp 200K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 3 Orang: <strong>Rp 150K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 4-7 Orang: <strong>Rp 125K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
+                                            <span>Durasi belajar 90 menit</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
+                                    Daftar Paket Ujian
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- CARD 6: S2 / S3 / Naik Pangkat -->
+                        <div class="swiper-slide py-6 h-auto">
+                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
+                                <div>
+                                    <div class="mb-4">
+                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">Profesional</span>
+                                    </div>
+                                    <h3 class="text-xl font-bold text-violet-950 mb-2">S2 / S3 / Naik Pangkat</h3>
+                                    <p class="text-slate-500 text-xs mb-6">Persiapan akademis pascasarjana, kenaikan jabatan profesi, dan tes karir khusus.</p>
+                                    
+                                    <div class="flex items-baseline gap-1 mb-8">
+                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">175K</span>
+                                        <span class="text-slate-500 text-sm font-semibold">- 300K</span>
+                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
+                                    </div>
+
+                                    <!-- Feature list -->
+                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Privat 1 Orang: <strong>Rp 300.000</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 2 Orang: <strong>Rp 250K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 3 Orang: <strong>Rp 200K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
+                                            <span>Kelompok 4-7 Orang: <strong>Rp 175K/org</strong></span>
+                                        </li>
+                                        <li class="flex items-start gap-2.5">
+                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
+                                            <span>Durasi belajar 90 menit</span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
+                                    Daftar Paket S2/S3
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- Swiper Pagination -->
+                    <div class="swiper-pagination"></div>
+                </div>
+
+                <!-- Custom Navigation Buttons -->
+                <div class="swiper-button-prev-custom shadow-lg"><i class="fas fa-chevron-left"></i></div>
+                <div class="swiper-button-next-custom shadow-lg"><i class="fas fa-chevron-right"></i></div>
+            </div>
+
+            <!-- Footer note below cards -->
+            <div class="mt-8 text-center text-xs font-semibold text-slate-500 reveal-element delay-200">
+                * Seluruh tarif tertera di atas dihitung per orang per sesi (durasi 90 menit). Harga dapat disesuaikan berdasarkan kesepakatan kelompok belajar.
+            </div>
+        </div>
+    </section>
+
+
     <!-- ================= JADWAL SECTION ================= -->
     <section id="jadwal" class="py-20 sm:py-24 md:py-28 bg-gradient-to-b from-violet-950 via-violet-900 to-violet-950 text-white relative overflow-hidden">
         
@@ -1113,6 +1546,179 @@
         </div>
     </section>
 
+    <!-- ================= KONTAK & ALAMAT SECTION ================= -->
+    <section id="kontak" class="py-20 sm:py-24 md:py-28 bg-white relative overflow-hidden">
+        <!-- Ambient background blobs -->
+        <div class="w-72 h-72 bg-violet-600/5 rounded-full blur-3xl absolute top-10 left-10 pointer-events-none"></div>
+        <div class="w-72 h-72 bg-amber-400/5 rounded-full blur-3xl absolute bottom-10 right-10 pointer-events-none"></div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-16 reveal-element">
+                <span class="yellow-sticker-badge mb-4">
+                    Hubungi Kami
+                </span>
+                <h2 class="font-black text-3xl sm:text-4xl md:text-5xl text-violet-950 mb-5 leading-tight">
+                    Alamat Kantor &amp; <span class="text-violet-700">Lokasi Google Map</span>
+                </h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed font-semibold">
+                    Temukan lokasi ruang belajar Paradise of Math atau hubungi kami langsung via WhatsApp untuk berkonsultasi mengenai kelas bimbingan terbaik Anda.
+                </p>
+            </div>
+
+            <!-- Two Column Layout: Contact Card & Map -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                <!-- Left: Contact Details Card (Col-span 5) -->
+                <div class="lg:col-span-5 flex flex-col justify-between bg-violet-50/70 border border-violet-100 rounded-3xl p-8 reveal-element delay-100 shadow-sm">
+                    <div>
+                        <h3 class="text-xl font-bold text-violet-950 mb-6 flex items-center gap-2">
+                            <span class="text-violet-700"><i class="fas fa-info-circle"></i></span>
+                            Informasi Kontak PoM
+                        </h3>
+
+                        <!-- Detail Items -->
+                        <div class="space-y-6">
+                            <!-- Address -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-violet-600/10 text-violet-700 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">Alamat Belajar</h4>
+                                    <p class="text-sm text-slate-600 leading-relaxed font-semibold">
+                                        Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Padang, Sumatera Barat, 25121
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- WhatsApp -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                    <i class="fab fa-whatsapp text-lg"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">WhatsApp Chat</h4>
+                                    <p class="text-sm text-slate-600 font-semibold mb-2">
+                                        Hubungi Pimpinan / Admin (Kak Kiki)
+                                    </p>
+                                    <a href="https://wa.me/628116612050" target="_blank" class="inline-flex items-center gap-2 text-sm text-white bg-emerald-600 hover:bg-emerald-500 font-extrabold px-4 py-2 rounded-xl transition duration-200 shadow-md shadow-emerald-600/10">
+                                        <i class="fab fa-whatsapp"></i> Chat WhatsApp
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Office Hours -->
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">Jam Operasional</h4>
+                                    <p class="text-sm text-slate-600 leading-relaxed font-semibold">
+                                        Senin s.d Kamis: 13.30 - 21.00 WIB<br>
+                                        Jumat: 12.00 - 21.00 WIB<br>
+                                        Sabtu (Full Day): 07.30 - 21.00 WIB<br>
+                                        <span class="text-xs text-amber-600 font-bold">* Minggu: Libur / Privat By Request</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Small Brand Branding footer -->
+                    <div class="pt-6 mt-6 border-t border-violet-200/50 text-xs text-slate-500 font-semibold flex items-center justify-between">
+                        <span>© Paradise of Math</span>
+                        <span>Sawahan, Padang Timur</span>
+                    </div>
+                </div>
+
+                <!-- Right: Google Map Iframe (Col-span 7) -->
+                <div class="lg:col-span-7 bg-white border border-violet-100 rounded-3xl p-3 reveal-element delay-200 shadow-lg shadow-violet-150/20 overflow-hidden min-h-[400px] flex">
+                    <iframe 
+                        class="w-full h-full min-h-[400px] rounded-2xl border-0" 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.275700703673!2d100.36296367472394!3d-0.944960699045907!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4b93920c71cb5%3A0x67fcd9bdfbc466e1!2sLBB%20Paradise%20Of%20Math!5e0!3m2!1sid!2sid!4v1784967251178!5m2!1sid!2sid" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="strict-origin-when-cross-origin">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FOOTER SECTION ================= -->
+    <footer class="bg-gradient-to-br from-violet-950 via-violet-900 to-violet-950 text-white pt-16 pb-8 border-t border-violet-850 relative overflow-hidden">
+        <!-- Background light effects -->
+        <div class="w-96 h-96 bg-violet-600/10 rounded-full blur-3xl absolute -top-40 -left-40 pointer-events-none animate-pulse-glow"></div>
+        <div class="w-96 h-96 bg-amber-400/5 rounded-full blur-3xl absolute -bottom-40 -right-40 pointer-events-none animate-float animate-delay-200"></div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-12 border-b border-violet-800">
+                <!-- Col 1: Brand Info -->
+                <div class="md:col-span-5 space-y-4">
+                    <a href="#" class="inline-flex items-center gap-2">
+                        <span class="text-xl sm:text-2xl font-black tracking-tight text-white">
+                            Paradise <span class="text-amber-400">of Math</span>
+                        </span>
+                    </a>
+                    <p class="text-xs sm:text-sm text-violet-200/80 leading-relaxed font-medium">
+                        Lembaga Bimbingan Belajar (LBB) Matematika terpercaya di Kota Padang. Kami berkomitmen meningkatkan pemahaman dan kecintaan siswa terhadap matematika melalui bimbingan privat berkualitas.
+                    </p>
+                    <!-- Social Media Links (Instagram & TikTok) -->
+                    <div class="pt-2 flex items-center gap-3">
+                        <!-- Instagram Button -->
+                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank" class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-gradient-to-tr hover:from-yellow-500 hover:via-pink-500 hover:to-purple-600 hover:border-transparent hover:scale-110 transition duration-300 shadow-md">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                            </svg>
+                        </a>
+                        <!-- TikTok Button -->
+                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank" class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-black hover:border-transparent hover:scale-110 hover:shadow-cyan-400/20 hover:shadow-lg transition duration-300 shadow-md">
+                            <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.59 4.23.86.97 2.07 1.62 3.39 1.83v3.71c-1.84-.02-3.61-.71-4.96-1.97-.24-.2-.46-.43-.66-.67v6.62c.04 2.64-1.28 5.12-3.51 6.47-2.3 1.48-5.3 1.68-7.74.52-2.73-1.22-4.48-4.22-4.26-7.22.18-3.08 2.37-5.78 5.37-6.5 1.09-.27 2.22-.24 3.29.07V10.7c-.89-.31-1.87-.33-2.76-.04-1.39.42-2.45 1.62-2.71 3.05-.33 1.62.43 3.3 1.88 4.09 1.34.78 3.1.66 4.31-.31.86-.68 1.35-1.74 1.33-2.84V.02z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Col 2: Program Belajar -->
+                <div class="md:col-span-3 space-y-4">
+                    <h4 class="text-sm font-extrabold text-amber-400 uppercase tracking-wider">Program Kami</h4>
+                    <ul class="space-y-2 text-xs sm:text-sm text-violet-200/70 font-semibold">
+                        <li><a href="#biaya" class="hover:text-white transition">Kelas SD &amp; SMP</a></li>
+                        <li><a href="#biaya" class="hover:text-white transition">Kelas SMA</a></li>
+                        <li><a href="#biaya" class="hover:text-white transition">Persiapan Ujian &amp; SNBT</a></li>
+                        <li><a href="#biaya" class="hover:text-white transition">Program Khusus &amp; S2/S3</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Hubungi Kami -->
+                <div class="md:col-span-4 space-y-4">
+                    <h4 class="text-sm font-extrabold text-amber-400 uppercase tracking-wider">Lokasi &amp; Kontak</h4>
+                    <ul class="space-y-3 text-xs sm:text-sm text-violet-200/70 font-semibold">
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-map-marker-alt"></i></span>
+                            <span>Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Padang, Sumatera Barat, 25121</span>
+                        </li>
+                        <li class="flex items-center gap-2.5">
+                            <span class="text-amber-400 shrink-0"><i class="fas fa-phone-alt"></i></span>
+                            <span>0811-6612-050 (Kak Kiki)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Copyright Strip -->
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-violet-300/60">
+                <span>© {{ date('Y') }} LBB Paradise of Math. Seluruh hak cipta dilindungi.</span>
+                <span class="flex gap-4">
+                    <a href="#beranda" class="hover:text-white transition">Kembali ke Atas</a>
+                </span>
+            </div>
+        </div>
+    </footer>
+
+
     <!-- ================= SCRIPTS ================= -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -1140,6 +1746,42 @@
             });
 
             revealElements.forEach(el => observer.observe(el));
+
+            // Initialize Swiper for Pricing Cards Carousel
+            const pricingSwiper = new Swiper('.pricing-swiper', {
+                slidesPerView: 'auto',
+                centeredSlides: true,
+                grabCursor: true,
+                loop: true,
+                spaceBetween: 30,
+                initialSlide: 3, // Start with Kak Ika card (index 3)
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next-custom',
+                    prevEl: '.swiper-button-prev-custom',
+                },
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: true,
+                },
+                keyboard: {
+                    enabled: true,
+                },
+                breakpoints: {
+                    320: {
+                        spaceBetween: 16
+                    },
+                    640: {
+                        spaceBetween: 24
+                    },
+                    1024: {
+                        spaceBetween: 30
+                    }
+                }
+            });
         });
     </script>
 

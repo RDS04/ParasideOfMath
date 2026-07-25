@@ -3,16 +3,25 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\AdminAuthController;
 
 Route::get('/', function () {
     return view('/informasi/index');
 });
 
-// Authentication Routes
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/register', [AuthController::class, 'register'])->name('register.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Authentication Routes (Siswa & General)
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'login')->name('login.post');
+    Route::post('/register', 'register')->name('register.post');
+    Route::post('/logout', 'logout')->name('logout');
+});
+
+// Admin Registration Routes
+Route::controller(AdminAuthController::class)->group(function () {
+    Route::get('/admin/register', 'showRegistrationForm')->name('admin.register');
+    Route::post('/admin/register', 'register')->name('admin.register.post');
+});
 
 // Protected Dashboard Routes
 Route::get('/siswa', function () {
