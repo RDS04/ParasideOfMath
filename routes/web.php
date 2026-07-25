@@ -16,7 +16,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Protected Dashboard Routes
 Route::get('/siswa', function () {
-    return view('siswa.index');
+    return view('siswa.dashboard');
 })->middleware('auth:siswa')->name('siswa.dashboard');
 
 Route::get('/guru', function () {

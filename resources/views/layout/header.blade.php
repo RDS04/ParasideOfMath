@@ -1,4 +1,12 @@
 <!-- ══════ TOP NAVBAR ══════ -->
+@php
+    $currentUser = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
+    $currentName = $currentUser ? $currentUser->name : 'Guest';
+    $currentEmail = $currentUser ? $currentUser->email : '';
+    $dashboardRoute = auth()->guard('siswa')->check() 
+        ? route('siswa.dashboard') 
+        : ($currentUser && $currentUser->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
+@endphp
 <nav class="main-header navbar navbar-expand navbar-light">
 
     <ul class="navbar-nav">
@@ -8,7 +16,7 @@
             </a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="{{ route('admin.dashboard') }}" class="nav-link">Dashboard</a>
+            <a href="{{ $dashboardRoute }}" class="nav-link">Dashboard</a>
         </li>
     </ul>
 
@@ -51,29 +59,29 @@
 
         <!-- user menu -->
         <li class="nav-item dropdown user-menu">
-            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=4c1d95&color=fff&bold=true"
-                     class="user-image img-circle elevation-2" alt="User Avatar">
-                <span class="d-none d-md-inline">{{ auth()->user()->name ?? 'Admin' }}</span>
+            <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" style="display: flex !important; align-items: center !important;">
+                <img src="https://ui-avatars.com/api/?name={{ urlencode($currentName) }}&background=4c1d95&color=fff&bold=true"
+                     class="user-image img-circle elevation-2" alt="User Avatar" style="width: 32px; height: 32px; margin-right: 8px; float: none !important; display: inline-block !important; object-fit: cover;">
+                <span class="d-none d-md-inline font-weight-bold" style="color: #4b4560;">{{ $currentName }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                 <li class="user-header" style="background: linear-gradient(135deg, #4c1d95, #2e1065);">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=fbbf24&color=40206b&bold=true"
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($currentName) }}&background=fbbf24&color=40206b&bold=true"
                          class="img-circle elevation-2" alt="User Avatar">
                     <p>
-                        {{ auth()->user()->name ?? 'Admin' }}
-                        <small>{{ auth()->user()->email ?? 'admin@paradiseofmath.test' }}</small>
+                        {{ $currentName }}
+                        <small>{{ $currentEmail }}</small>
                     </p>
                 </li>
                 <li class="user-body">
                     <div class="row">
-                        <div class="col-4 text-center"><a href="#">Siswa</a></div>
+                        <div class ="col-4 text-center"><a href="#">Siswa</a></div>
                         <div class="col-4 text-center"><a href="#">Tutor</a></div>
                         <div class="col-4 text-center"><a href="#">Kelas</a></div>
                     </div>
                 </li>
                 <li class="user-footer">
-                    <a href="{{ route('admin.profile') ?? '#' }}" class="btn btn-default btn-flat float-left">Profil</a>
+                    <a href="" class="btn btn-default btn-flat float-left">Profil</a>
                     <form method="POST" action="{{ route('logout') ?? '#' }}" class="float-right">
                         @csrf
                         <button type="submit" class="btn btn-brand btn-flat">Keluar</button>
