@@ -74,17 +74,27 @@
                     <!-- ══════ ADMIN / TUTOR NAVIGATION ══════ -->
                     <li class="nav-header">AKADEMIK</li>
 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="nav-icon fas fa-user-graduate"></i>
-                            <p>Siswa <i class="right fas fa-angle-left"></i></p>
+                    <li class="nav-item {{ Route::is('admin.siswa.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ Route::is('admin.siswa.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-user-graduate"></i>
+                            <p>Data Siswa <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.siswa.daftar.index') }}" class="nav-link {{ Route::is('admin.siswa.daftar.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
                                     <p>Daftar Siswa</p>
-                                </a></li>
+                                </a>
+                            </li>
                             <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
                                     <p>Tambah Siswa</p>
                                 </a></li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.siswa.approve.index') }}" class="nav-link {{ Route::is('admin.siswa.approve.index') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Approve Siswa</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
@@ -165,6 +175,12 @@
                         <a href="{{ route('admin.paket') }}" class="nav-link {{ Route::is('admin.paket') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tags"></i>
                             <p>Kelola Paket Belajar</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.rekening') }}" class="nav-link {{ Route::is('admin.rekening') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-credit-card"></i>
+                            <p>Kelola Rekening</p>
                         </a>
                     </li>
 

@@ -224,6 +224,32 @@
             0% { opacity: 0; transform: translateY(10px); }
             100% { opacity: 1; transform: translateY(0); }
         }
+        
+        .toggle-password-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 0;
+            color: #a8a2bd;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+            z-index: 5;
+        }
+        .toggle-password-btn:hover {
+            color: #7c3aed;
+        }
+        .field-group input.pr-12 {
+            padding-right: 48px;
+        }
+        .d-none {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="bg-[#fdfcfb]">
@@ -356,7 +382,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </span>
-                    <input type="password" id="loginPassword" name="password" placeholder="Kata sandi" autocomplete="current-password" required />
+                    <input type="password" id="loginPassword" name="password" placeholder="Kata sandi" autocomplete="current-password" class="pr-12" required />
+                    <button type="button" class="toggle-password-btn" data-target="loginPassword" tabindex="-1">
+                        <svg class="eye-icon eye-open" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg class="eye-icon eye-closed d-none" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        </svg>
+                    </button>
                     @error('password')
                         <p class="text-xs text-rose-500 mt-1 pl-1 font-medium">{{ $message }}</p>
                     @enderror
@@ -414,7 +449,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                         </svg>
                     </span>
-                    <input type="password" id="regPassword" name="password" placeholder="Kata sandi (min. 8 karakter)" autocomplete="new-password" required />
+                    <input type="password" id="regPassword" name="password" placeholder="Kata sandi (min. 8 karakter)" autocomplete="new-password" class="pr-12" required />
+                    <button type="button" class="toggle-password-btn" data-target="regPassword" tabindex="-1">
+                        <svg class="eye-icon eye-open" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg class="eye-icon eye-closed d-none" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        </svg>
+                    </button>
                     @error('password')
                         <p class="text-xs text-rose-500 mt-1 pl-1 font-medium">{{ $message }}</p>
                     @enderror
@@ -426,7 +470,16 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
                     </span>
-                    <input type="password" id="regPasswordConfirm" name="password_confirmation" placeholder="Ulangi kata sandi" autocomplete="new-password" required />
+                    <input type="password" id="regPasswordConfirm" name="password_confirmation" placeholder="Ulangi kata sandi" autocomplete="new-password" class="pr-12" required />
+                    <button type="button" class="toggle-password-btn" data-target="regPasswordConfirm" tabindex="-1">
+                        <svg class="eye-icon eye-open" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        <svg class="eye-icon eye-closed d-none" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                        </svg>
+                    </button>
                 </div>
 
 
@@ -498,6 +551,28 @@
         tabRegister.addEventListener('click', (e) => { e.preventDefault(); setActiveTab('register'); });
         switchToRegister.addEventListener('click', (e) => { e.preventDefault(); setActiveTab('register'); });
         switchToLogin.addEventListener('click', (e) => { e.preventDefault(); setActiveTab('login'); });
+
+        // Toggle Password visibility
+        const toggleButtons = document.querySelectorAll('.toggle-password-btn');
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.dataset.target;
+                const input = document.getElementById(targetId);
+                const openEye = this.querySelector('.eye-open');
+                const closedEye = this.querySelector('.eye-closed');
+
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    openEye.classList.add('d-none');
+                    closedEye.classList.remove('d-none');
+                } else {
+                    input.type = 'password';
+                    closedEye.classList.add('d-none');
+                    openEye.classList.remove('d-none');
+                }
+            });
+        });
 
         let initialTab = @json(old('name') || session('active_tab') === 'register' ? 'register' : 'login');
         if (window.location.hash === '#daftar' || window.location.hash === '#register') {

@@ -25,6 +25,17 @@
     <section class="content">
         <div class="container-fluid">
 
+            <!-- Flash Message Alerts -->
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show rounded-xl shadow-sm border-0 mb-4" role="alert" style="background-color: #d1fae5; border-color: #a7f3d0; color: #065f46;">
+                    <h5><i class="icon fas fa-check"></i> Sukses!</h5>
+                    {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color: #065f46;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
             <!-- Welcome Banner -->
             <div class="card mb-4 overflow-hidden border-0 shadow-sm" style="background: linear-gradient(135deg, #2e1065 0%, #4c1d95 100%);">
                 <div class="card-body p-4 text-white relative">

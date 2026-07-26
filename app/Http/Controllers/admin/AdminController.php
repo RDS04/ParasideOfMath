@@ -80,4 +80,149 @@ class AdminController extends Controller
 
         return back()->with('success', 'Paket ' . $paket->nama_paket . ' berhasil diupdate!');
     }
+
+    /**
+     * Tampilkan form kelola rekening / e-wallet.
+     */
+    public function inputRekening()
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+        $rekening = \App\Models\Rekening::all();
+        return view('admin.inputRekening', compact('rekening'));
+    }
+
+    /**
+     * Simpan rekening / e-wallet baru.
+     */
+    public function storeRekening(Request $request)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'tipe' => ['required', 'in:bank,ewallet'],
+            'nama_bank' => ['required', 'string', 'max:255'],
+            'nomor_rekening' => ['required', 'string', 'max:255'],
+            'atas_nama' => ['required', 'string', 'max:255'],
+        ]);
+
+        \App\Models\Rekening::create([
+            'tipe' => $request->tipe,
+            'nama_bank' => $request->nama_bank,
+            'nomor_rekening' => $request->nomor_rekening,
+            'atas_nama' => $request->atas_nama,
+        ]);
+
+        return back()->with('success', 'Rekening baru berhasil disimpan!');
+    }
+
+    /**
+     * Update data rekening / e-wallet yang ada.
+     */
+    public function updateRekening(Request $request, $id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $rekening = \App\Models\Rekening::findOrFail($id);
+
+        $request->validate([
+            'tipe' => ['required', 'in:bank,ewallet'],
+            'nama_bank' => ['required', 'string', 'max:255'],
+            'nomor_rekening' => ['required', 'string', 'max:255'],
+            'atas_nama' => ['required', 'string', 'max:255'],
+        ]);
+
+        $rekening->update([
+            'tipe' => $request->tipe,
+            'nama_bank' => $request->nama_bank,
+            'nomor_rekening' => $request->nomor_rekening,
+            'atas_nama' => $request->atas_nama,
+        ]);
+
+        return back()->with('success', 'Rekening ' . $rekening->nama_bank . ' berhasil diupdate!');
+    }
+
+    /**
+     * Hapus rekening / e-wallet.
+     */
+    public function deleteRekening($id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $rekening = \App\Models\Rekening::findOrFail($id);
+        $rekening->delete();
+
+        return back()->with('success', 'Rekening berhasil dihapus!');
+    }
+
+    /**
+     * Tampilkan Halaman Persetujuan Bukti Transfer Siswa.
+     */
+    public function approvSiswa()
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        // Fetch students ordered so that 'under_review' comes first
+        $students = \App\Models\Siswa::orderByRaw("CASE WHEN status = 'under_review' THEN 0 ELSE 1 END")
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.approvSiswa', compact('students'));
+    }
+
+    /**
+     * Setujui pendaftaran dan pembayaran siswa.
+     */
+    public function submitApprovSiswa($id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = \App\Models\Siswa::findOrFail($id);
+        $siswa->update([
+            'status' => 'active',
+        ]);
+
+        return back()->with('success', 'Akun pendaftaran ' . $siswa->name . ' berhasil disetujui dan diaktifkan!');
+    }
+
+    /**
+     * Tampilkan Halaman Detail Data Registrasi Siswa.
+     */
+    public function detailSiswa($id)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $student = \App\Models\Siswa::findOrFail($id);
+        $paket = \App\Models\PaketBelajar::find($student->paket_id);
+
+        return view('admin.detailData', compact('student', 'paket'));
+    }
+
+    /**
+     * Tampilkan Halaman Daftar Siswa Keseluruhan.
+     */
+    public function daftarSiswa()
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        // Fetch all students (e.g. active status or all sorted by registration date)
+        $students = \App\Models\Siswa::orderBy('created_at', 'desc')->get();
+
+        return view('admin.daftarSiswa', compact('students'));
+    }
 }

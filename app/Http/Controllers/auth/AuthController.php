@@ -86,15 +86,17 @@ class AuthController extends Controller
         ]);
 
         // Buat data di tabel siswa
-        Siswa::create([
+        $siswa = Siswa::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('login')
-            ->with('success', 'Akun Siswa berhasil dibuat! Silakan masuk dengan email dan kata sandi Anda.')
-            ->with('active_tab', 'login');
+        // Login as newly registered student
+        Auth::guard('siswa')->login($siswa);
+
+        return redirect()->route('siswa.register-kategori')
+            ->with('success', 'Akun Siswa berhasil dibuat! Silakan pilih kategori bimbel Anda.');
     }
 
     /**

@@ -26,7 +26,21 @@ class Siswa extends Authenticatable
         'name',
         'email',
         'password',
+        'paket_id',
+        'tipe_paket',
+        'whatsapp',
+        'sekolah',
+        'bukti_transfer',
+        'status',
     ];
+
+    /**
+     * Relasi ke Paket Belajar.
+     */
+    public function paket()
+    {
+        return $this->belongsTo(PaketBelajar::class, 'paket_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
