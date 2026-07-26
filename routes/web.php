@@ -28,6 +28,14 @@ Route::get('/siswa', function () {
     return view('siswa.dashboard');
 })->middleware('auth:siswa')->name('siswa.dashboard');
 
+Route::get('/siswa/payment', function () {
+    return view('siswa.payment');
+})->name('siswa.payment');
+
+Route::get('/siswa/register-kategori', function () {
+    return view('siswa.regisKategory');
+})->name('siswa.register-kategori');
+
 Route::get('/guru', function () {
     if (!auth()->user()->isGuru()) {
         return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
