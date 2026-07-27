@@ -85,7 +85,7 @@
     <!-- ══════ STEP INDICATOR ══════ -->
     <div class="w-full max-w-5xl mb-8">
         <div class="flex items-center justify-between max-w-xl mx-auto px-4">
-            <!-- Step 1: Register -->
+            <!-- Step 1: Register & Biodata -->
             <div class="flex flex-col items-center">
                 <div class="w-9 h-9 rounded-full bg-purple-700 flex items-center justify-center shadow-sm">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="3"
@@ -93,7 +93,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <span class="text-[10px] sm:text-xs font-bold text-purple-700 mt-2">Daftar Akun</span>
+                <span class="text-[10px] sm:text-xs font-bold text-purple-700 mt-2">Daftar &amp; Biodata</span>
             </div>
 
             <div class="flex-1 h-1 bg-purple-700 mx-2 mb-4"></div>
@@ -138,10 +138,15 @@
         <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between">
             <div>
                 <!-- Brand Header -->
-                <div class="flex items-center gap-3 mb-8">
-                    <img src="{{ asset('images/logoPM.webp') }}" alt="Logo" class="w-10 h-10 object-contain" />
-                    <span class="font-display text-lg font-bold text-purple-950">Paradise <span
-                            class="text-amber-500">of Math</span></span>
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <img src="{{ asset('images/logoPM.webp') }}" alt="Logo" class="w-10 h-10 object-contain" />
+                        <span class="font-display text-lg font-bold text-purple-950">Paradise <span
+                                class="text-amber-500">of Math</span></span>
+                    </div>
+                    <a href="{{ route('siswa.biodata') }}" class="text-xs font-semibold text-purple-700 hover:text-purple-900 transition-colors inline-flex items-center gap-1">
+                        <i class="fas fa-arrow-left"></i> Edit Biodata
+                    </a>
                 </div>
 
                 @if (session('success'))
@@ -152,8 +157,7 @@
                 @endif
 
                 <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950 mb-2">Formulir Pendaftaran</h1>
-                <p class="text-sm text-slate-500 mb-8">Silakan lengkapi data diri Anda dan pilih paket belajar yang
-                    ingin diikuti.</p>
+                <p class="text-sm text-slate-500 mb-8">Pilih paket belajar yang ingin Anda ikuti.</p>
 
                 <!-- FORM -->
                 <form action="{{ route('siswa.payment') }}" method="GET" class="space-y-5">

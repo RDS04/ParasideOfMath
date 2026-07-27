@@ -23,12 +23,12 @@ Route::controller(AdminAuthController::class)->group(function () {
     Route::post('/admin/register', 'register')->name('admin.register.post');
 });
 
-// Protected Dashboard Routes
+// Protected Dashboard & Onboarding Routes
 Route::get('/siswa', function () {
     $siswa = auth()->guard('siswa')->user();
     if ($siswa) {
         if ($siswa->status === 'pending') {
-            return redirect()->route('siswa.register-kategori');
+            return redirect()->route('siswa.biodata');
         }
         if ($siswa->status === 'under_review') {
             return redirect()->route('siswa.pending');
@@ -37,10 +37,13 @@ Route::get('/siswa', function () {
     return view('siswa.dashboard');
 })->middleware('auth:siswa')->name('siswa.dashboard');
 
+// Sequence: Login -> Biodata -> Register Kategori -> Payment -> Pending
+Route::get('/siswa/biodata', [App\Http\Controllers\siswa\SiswaController::class, 'showBiodata'])->middleware('auth:siswa')->name('siswa.biodata');
+Route::post('/siswa/biodata', [App\Http\Controllers\siswa\SiswaController::class, 'submitBiodata'])->middleware('auth:siswa')->name('siswa.biodata.submit');
+Route::get('/siswa/register-kategori', [App\Http\Controllers\siswa\SiswaController::class, 'showRegisterKategori'])->middleware('auth:siswa')->name('siswa.register-kategori');
+Route::get('/siswa/payment', [App\Http\Controllers\siswa\SiswaController::class, 'showPayment'])->middleware('auth:siswa')->name('siswa.payment');
+Route::post('/siswa/payment', [App\Http\Controllers\siswa\SiswaController::class, 'submitPayment'])->middleware('auth:siswa')->name('siswa.payment.submit');
 Route::get('/siswa/pending', [App\Http\Controllers\siswa\SiswaController::class, 'showPending'])->middleware('auth:siswa')->name('siswa.pending');
-Route::get('/siswa/payment', [App\Http\Controllers\siswa\SiswaController::class, 'showPayment'])->name('siswa.payment');
-Route::get('/siswa/register-kategori', [App\Http\Controllers\siswa\SiswaController::class, 'showRegisterKategori'])->name('siswa.register-kategori');
-Route::post('/siswa/payment', [App\Http\Controllers\siswa\SiswaController::class, 'submitPayment'])->name('siswa.payment.submit');
 
 Route::get('/guru', function () {
     if (!auth()->user()->isGuru()) {

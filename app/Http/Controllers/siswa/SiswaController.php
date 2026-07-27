@@ -9,6 +9,46 @@ use Illuminate\Http\Request;
 class SiswaController extends Controller
 {
     /**
+     * Tampilkan Halaman Form Biodata Siswa.
+     */
+    public function showBiodata()
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if ($siswa) {
+            if ($siswa->status === 'under_review') {
+                return redirect()->route('siswa.pending');
+            }
+            if ($siswa->status === 'active') {
+                return redirect()->route('siswa.dashboard');
+            }
+        }
+        return view('siswa.biodata', compact('siswa'));
+    }
+
+    /**
+     * Submit Halaman Form Biodata Siswa dan Lanjut ke Pilih Kategori.
+     */
+    public function submitBiodata(Request $request)
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if ($siswa) {
+            if ($request->filled('no_hp')) {
+                $siswa->whatsapp = $request->input('no_hp');
+            }
+            if ($request->filled('sekolah')) {
+                $siswa->sekolah = $request->input('sekolah');
+            }
+            if ($request->filled('nama_lengkap')) {
+                $siswa->name = $request->input('nama_lengkap');
+            }
+            $siswa->save();
+        }
+
+        return redirect()->route('siswa.register-kategori')
+            ->with('success', 'Biodata berhasil disimpan! Silakan pilih paket bimbel Anda.');
+    }
+
+    /**
      * Tampilkan Halaman Pilih Kategori Paket Belajar.
      */
     public function showRegisterKategori()

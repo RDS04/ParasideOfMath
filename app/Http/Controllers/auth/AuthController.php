@@ -47,8 +47,17 @@ class AuthController extends Controller
         if (Auth::guard('siswa')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
+            $siswa = Auth::guard('siswa')->user();
+            if ($siswa->status === 'pending') {
+                return redirect()->route('siswa.biodata')
+                    ->with('success', 'Selamat datang kembali! Silakan lengkapi biodata Anda.');
+            }
+            if ($siswa->status === 'under_review') {
+                return redirect()->route('siswa.pending');
+            }
+
             return redirect()->route('siswa.dashboard')
-                ->with('success', 'Selamat datang kembali, ' . Auth::guard('siswa')->user()->name . '!');
+                ->with('success', 'Selamat datang kembali, ' . $siswa->name . '!');
         }
 
         // 2. Coba login sebagai Guru atau Admin (tabel users)
@@ -95,8 +104,8 @@ class AuthController extends Controller
         // Login as newly registered student
         Auth::guard('siswa')->login($siswa);
 
-        return redirect()->route('siswa.register-kategori')
-            ->with('success', 'Akun Siswa berhasil dibuat! Silakan pilih kategori bimbel Anda.');
+        return redirect()->route('siswa.biodata')
+            ->with('success', 'Akun Siswa berhasil dibuat! Silakan lengkapi biodata Anda.');
     }
 
     /**
