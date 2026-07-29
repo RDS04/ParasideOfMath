@@ -1,28 +1,7 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.header', ['active_step' => 4])
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pembayaran Kelas · Paradise of Math</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
-
+@section('content')
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f4f2fa 0%, #ece9f5 100%);
-        }
-
-        .font-display {
-            font-family: 'Fraunces', Georgia, serif;
-        }
-
         .payment-option-card {
             transition: all 0.2s ease;
             cursor: pointer;
@@ -36,26 +15,6 @@
         .payment-option-card.active-card {
             border-color: #7c3aed !important;
             background-color: #f5f3ff !important;
-        }
-
-        .btn-brand {
-            background: linear-gradient(135deg, #7c3aed, #4c1d95);
-            border: none;
-            color: white;
-            font-weight: 700;
-            padding: 14px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px -10px rgba(76, 29, 149, 0.45);
-            transition: all 0.2s ease;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-            display: inline-block;
-        }
-
-        .btn-brand:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px -10px rgba(76, 29, 149, 0.55);
         }
 
         .instruction-box {
@@ -111,64 +70,10 @@
             background: #a78bfa;
         }
     </style>
-</head>
-
-<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
-
-    <!-- ══════ STEP INDICATOR ══════ -->
-    <div class="w-full max-w-5xl mb-8">
-        <div class="flex items-center justify-between max-w-xl mx-auto px-4">
-            <!-- Step 1: Register -->
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 rounded-full bg-purple-700 flex items-center justify-center shadow-sm">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="3"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <span class="text-[10px] sm:text-xs font-bold text-purple-700 mt-2">Daftar Akun</span>
-            </div>
-
-            <div class="flex-1 h-1 bg-purple-700 mx-2 mb-4"></div>
-
-            <!-- Step 2: Category -->
-            <div class="flex flex-col items-center">
-                <div class="w-9 h-9 rounded-full bg-purple-700 flex items-center justify-center shadow-sm">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="3"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <span class="text-[10px] sm:text-xs font-bold text-purple-700 mt-2">Pilih Paket</span>
-            </div>
-
-            <div class="flex-1 h-1 bg-purple-700 mx-2 mb-4"></div>
-
-            <!-- Step 3: Payment -->
-            <div class="flex flex-col items-center">
-                <div
-                    class="w-9 h-9 rounded-full bg-purple-700 text-white flex items-center justify-center font-bold shadow-md ring-4 ring-purple-100">
-                    3
-                </div>
-                <span class="text-[10px] sm:text-xs font-bold text-purple-700 mt-2">Pembayaran</span>
-            </div>
-
-            <div class="flex-1 h-1 bg-slate-200 mx-2 mb-4"></div>
-
-            <!-- Step 4: Finish -->
-            <div class="flex flex-col items-center">
-                <div
-                    class="w-9 h-9 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center font-bold">
-                    4
-                </div>
-                <span class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-2">Selesai</span>
-            </div>
-        </div>
-    </div>
 
     <!-- ══════ MAIN CARD CONTAINER (FORM WRAPPED) ══════ -->
     <form action="{{ route('siswa.payment.submit') }}" method="POST" enctype="multipart/form-data"
-        class="w-full max-w-5xl bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 grid grid-cols-1 lg:grid-cols-12 payment-container">
+        class="w-full max-w-6xl bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 grid grid-cols-1 lg:grid-cols-12 payment-container">
         @csrf
         <input type="hidden" name="paket_id" value="{{ $paket->id }}">
         <input type="hidden" name="tipe_paket" value="{{ request('tipe_paket', '1') }}">
@@ -446,6 +351,4 @@
             });
         });
     </script>
-</body>
-
-</html>
+@endsection

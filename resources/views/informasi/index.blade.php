@@ -30,9 +30,11 @@
             padding-bottom: 4rem !important;
             overflow: visible !important;
         }
+
         .pricing-swiper .swiper-wrapper {
             align-items: center !important;
         }
+
         .pricing-swiper .swiper-slide {
             width: 385px !important;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -41,18 +43,22 @@
             opacity: 0.5;
             z-index: 1;
         }
+
         @media (max-width: 640px) {
             .pricing-swiper .swiper-slide {
                 width: 300px !important;
             }
         }
+
         .pricing-swiper .swiper-slide-active {
             transform: scale(1.06) !important;
             filter: blur(0px) !important;
             opacity: 1 !important;
             z-index: 10 !important;
         }
-        .swiper-button-prev-custom, .swiper-button-next-custom {
+
+        .swiper-button-prev-custom,
+        .swiper-button-next-custom {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
@@ -71,34 +77,46 @@
             z-index: 20;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .swiper-button-prev-custom:hover, .swiper-button-next-custom:hover {
+
+        .swiper-button-prev-custom:hover,
+        .swiper-button-next-custom:hover {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #2e1065;
             box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
             transform: translateY(-50%) scale(1.12);
         }
-        .swiper-button-prev-custom:active, .swiper-button-next-custom:active {
+
+        .swiper-button-prev-custom:active,
+        .swiper-button-next-custom:active {
             transform: translateY(-50%) scale(0.95);
         }
+
         .swiper-button-prev-custom {
             left: -1rem;
         }
+
         .swiper-button-next-custom {
             right: -1rem;
         }
+
         @media (max-width: 1024px) {
             .swiper-button-prev-custom {
                 left: 0.5rem;
             }
+
             .swiper-button-next-custom {
                 right: 0.5rem;
             }
         }
+
         @media (max-width: 768px) {
-            .swiper-button-prev-custom, .swiper-button-next-custom {
+
+            .swiper-button-prev-custom,
+            .swiper-button-next-custom {
                 display: none !important;
             }
         }
+
         .pricing-swiper .swiper-pagination-bullet {
             width: 10px;
             height: 10px;
@@ -106,6 +124,7 @@
             opacity: 1;
             transition: all 0.3s ease;
         }
+
         .pricing-swiper .swiper-pagination-bullet-active {
             background: #4c1d95;
             width: 24px;
@@ -224,6 +243,112 @@
         .delay-300 {
             transition-delay: 300ms;
         }
+
+        /* ================= CUSTOM DIAGONAL PAGE CURL EFFECT ================= */
+        .book-perspective {
+            perspective: 2200px;
+        }
+
+        #book {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 7 / 10;
+            border-radius: 0.75rem;
+            overflow: hidden !important;
+            transform-style: preserve-3d;
+        }
+
+        /* Leaf styles for page container */
+        .leaf {
+            position: absolute;
+            inset: 0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                clip-path 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+                opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: transform, clip-path, opacity;
+        }
+
+        /* Front leaf starts flat and covers the page */
+        .leaf.front {
+            z-index: 10;
+            clip-path: polygon(0% 0%, 200% 0%, 0% 200%);
+            transform: translate3d(0, 0, 0);
+        }
+
+        /* Back leaf starts underneath and scaled down slightly for depth */
+        .leaf.back {
+            z-index: 5;
+            transform: scale(0.96) translate3d(0, 0, 0);
+            opacity: 0.9;
+        }
+
+        /* Flipped state: Front page container is clipped but stays flat for alignment */
+        .flipped .leaf.front {
+            clip-path: polygon(0% 0%, 0% 0%, 0% 0%);
+            transform: translate3d(0, 0, 0);
+            opacity: 1;
+            /* Keep solid opacity for physical paper look */
+        }
+
+        /* Flipped state: Back page active, scales up and centers */
+        .flipped .leaf.back {
+            transform: scale(1) translate3d(0, 0, 0);
+            opacity: 1;
+        }
+
+        /* Image movement for physical sliding effect */
+        .leaf img {
+            transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: transform;
+        }
+
+        /* Front page image slides to top-left when flipped */
+        .flipped .leaf.front img {
+            transform: translate3d(-18%, -18%, 0) scale(1.06);
+        }
+
+        /* Back page image starts offset to bottom-right and slides to center when flipped */
+        .leaf.back img {
+            transform: translate3d(15%, 15%, 0) scale(1.06);
+        }
+
+        .flipped .leaf.back img {
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        /* The Page Curl Roll & Shadow Effect */
+        .page-curl {
+            position: absolute;
+            width: 90px;
+            height: 250%;
+            top: 120%;
+            left: 120%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            transform-origin: center;
+            pointer-events: none;
+            z-index: 15;
+            transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: top, left, transform;
+            /* Soft, natural crease shadow (no white highlights/bling bling) */
+            background: linear-gradient(to right,
+                    rgba(0, 0, 0, 0) 0%,
+                    rgba(0, 0, 0, 0.06) 20%,
+                    rgba(0, 0, 0, 0.32) 50%,
+                    /* Peak crease shadow */
+                    rgba(0, 0, 0, 0.06) 80%,
+                    rgba(0, 0, 0, 0) 100%);
+        }
+
+        /* Flipped state: the page curl sweeps to the top-left */
+        .flipped .page-curl {
+            top: -20%;
+            left: -20%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
     </style>
 </head>
 
@@ -309,43 +434,55 @@
                     @if (auth()->guard('siswa')->check() || auth()->guard('web')->check())
                         @php
                             $user = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
-                            $dashboardRoute = auth()->guard('siswa')->check() 
-                                ? route('siswa.dashboard') 
+                            $dashboardRoute = auth()->guard('siswa')->check()
+                                ? route('siswa.dashboard')
                                 : ($user->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
                         @endphp
                         <!-- Profile Dropdown (Desktop) -->
                         <div class="relative group">
-                            <button id="profile-dropdown-btn" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 border border-violet-100 hover:bg-violet-100 hover:border-violet-200 transition duration-200">
+                            <button id="profile-dropdown-btn"
+                                class="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 border border-violet-100 hover:bg-violet-100 hover:border-violet-200 transition duration-200">
                                 <!-- Icon -->
-                                <div class="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
                                 <!-- Name -->
-                                <span class="text-sm font-bold text-violet-950 max-w-[120px] truncate">{{ $user->name }}</span>
+                                <span
+                                    class="text-sm font-bold text-violet-950 max-w-[120px] truncate">{{ $user->name }}</span>
                                 <!-- Arrow -->
-                                <svg class="w-4 h-4 text-violet-900 transition-transform group-hover:rotate-180 duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                <svg class="w-4 h-4 text-violet-900 transition-transform group-hover:rotate-180 duration-200"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
 
                             <!-- Dropdown Menu -->
-                            <div class="absolute right-0 mt-2 w-48 bg-white border border-violet-100 rounded-2xl shadow-xl py-2 hidden group-hover:block transition duration-200 animate-fadeIn z-50">
+                            <div
+                                class="absolute right-0 mt-2 w-48 bg-white border border-violet-100 rounded-2xl shadow-xl py-2 hidden group-hover:block transition duration-200 animate-fadeIn z-50">
                                 <div class="px-4 py-2 border-b border-violet-50">
                                     <p class="text-xs text-slate-400 font-medium">Masuk sebagai</p>
-                                    <p class="text-xs font-bold text-violet-950 capitalize">{{ auth()->guard('siswa')->check() ? 'Siswa' : $user->role }}</p>
+                                    <p class="text-xs font-bold text-violet-950 capitalize">
+                                        {{ auth()->guard('siswa')->check() ? 'Siswa' : $user->role }}
+                                    </p>
                                 </div>
-                                <a href="{{ $dashboardRoute }}" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-violet-50 hover:text-violet-900 transition duration-150">
+                                <a href="{{ $dashboardRoute }}"
+                                    class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-violet-50 hover:text-violet-900 transition duration-150">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                                     </svg>
                                     Dashboard
                                 </a>
                                 <hr class="border-violet-50 my-1">
                                 <form action="{{ route('logout') }}" method="POST" class="block w-full">
                                     @csrf
-                                    <button type="submit" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition duration-150">
+                                    <button type="submit"
+                                        class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition duration-150">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
                                         Keluar (Logout)
                                     </button>
@@ -405,18 +542,21 @@
                     @if (auth()->guard('siswa')->check() || auth()->guard('web')->check())
                         @php
                             $user = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
-                            $dashboardRoute = auth()->guard('siswa')->check() 
-                                ? route('siswa.dashboard') 
+                            $dashboardRoute = auth()->guard('siswa')->check()
+                                ? route('siswa.dashboard')
                                 : ($user->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
                         @endphp
                         <li class="pt-3 border-t border-violet-100/80 flex flex-col gap-2">
                             <div class="px-3 py-1.5 flex items-center gap-2 bg-violet-50 rounded-xl">
-                                <div class="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold text-sm">
+                                <div
+                                    class="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold text-sm">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
                                 <div class="truncate">
                                     <p class="text-xs font-bold text-violet-950">{{ $user->name }}</p>
-                                    <p class="text-[10px] text-slate-400 font-medium capitalize">{{ auth()->guard('siswa')->check() ? 'Siswa' : $user->role }}</p>
+                                    <p class="text-[10px] text-slate-400 font-medium capitalize">
+                                        {{ auth()->guard('siswa')->check() ? 'Siswa' : $user->role }}
+                                    </p>
                                 </div>
                             </div>
                             <a href="{{ $dashboardRoute }}"
@@ -609,34 +749,61 @@
 
             <!-- Kiri (Gambar & Visual Card) -->
             <div class="flex justify-center md:justify-start order-1 md:order-none reveal-element">
-                <div class="relative w-full max-w-xs sm:max-w-sm sticky top-28">
 
-                    <!-- Decorative background frame -->
-                    <div
-                        class="absolute -inset-3 rounded-3xl bg-gradient-to-tr from-violet-200 via-amber-200 to-violet-300 opacity-60 blur-md">
-                    </div>
+                <div class="w-full max-w-[450px] flex flex-col items-center justify-center relative">
 
-                    <!-- Main Illustration Card -->
-                    <div
-                        class="relative aspect-square rounded-3xl bg-white border border-violet-100 shadow-2xl p-6 flex flex-col items-center justify-center text-center overflow-hidden ">
-                        <div
-                            class="w-24 h-24 rounded-2xl bg-violet-100 flex items-center justify-center mb-4 text-violet-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                            </svg>
+                    <div class="w-full book-perspective">
+                        <p class="text-center text-slate-500 text-xs mb-4 font-semibold select-none">klik tepi
+                            kanan/kiri gambar, atau pakai tombol di bawah</p>
+
+                        <div id="book" class="group">
+
+                            <!-- front leaf -->
+                            <div class="leaf front">
+                                <img src="{{ asset('images/front.jpeg') }}" alt="Halaman 1"
+                                    class="w-full h-full object-fill block select-none pointer-events-none">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-transparent pointer-events-none">
+                                </div>
+                            </div>
+
+                            <!-- back leaf -->
+                            <div class="leaf back">
+                                <img src="{{ asset('images/backside.jpeg') }}" alt="Halaman 2"
+                                    class="w-full h-full object-fill block select-none pointer-events-none">
+                                <div
+                                    class="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-transparent pointer-events-none">
+                                </div>
+                            </div>
+
+                            <!-- Page curl overlay -->
+                            <div class="page-curl"></div>
+
                         </div>
-                        <span class="text-violet-950 font-bold text-sm">
-                            [ ilustrasi kartun ]
-                        </span>
-                        <span class="text-slate-400 text-xs font-mono mt-1">
-                            public/images/about-kartun.png
-                        </span>
 
-                        <div
-                            class="mt-6 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold">
-                            ⭐ 4.9/5 Rating Dari Orang Tua & Siswa
+                        <div class="flex items-center justify-center gap-4 mt-5">
+                            <button id="prevBtn" aria-label="Sebelumnya"
+                                class="w-[46px] h-[46px] rounded-full bg-white text-[#1e1b2e] flex items-center justify-center border-none cursor-pointer shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:scale-105 active:scale-95 focus:outline-none">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
+
+                            <div class="flex gap-1.5 items-center select-none">
+                                <span data-p="0"
+                                    class="dot active w-5 h-2 rounded-full bg-violet-900 transition-all duration-250 ease-out cursor-pointer"></span>
+                                <span data-p="1"
+                                    class="dot w-2 h-2 rounded-full bg-violet-900/30 transition-all duration-250 ease-out cursor-pointer"></span>
+                            </div>
+
+                            <button id="nextBtn" aria-label="Berikutnya"
+                                class="w-[46px] h-[46px] rounded-full bg-white text-[#1e1b2e] flex items-center justify-center border-none cursor-pointer shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:scale-105 active:scale-95 focus:outline-none">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -782,36 +949,43 @@
 
     <!-- ================= FASILITAS SECTION (GALERI) ================= -->
     <section id="fasilitas" class="py-20 sm:py-24 md:py-28 bg-slate-100/80 relative overflow-hidden">
-        
+
         <!-- Background Orbs -->
-        <div class="w-96 h-96 bg-violet-200/40 rounded-full blur-3xl absolute -top-10 -left-20 pointer-events-none"></div>
-        <div class="w-96 h-96 bg-amber-300/30 rounded-full blur-3xl absolute -bottom-10 -right-20 pointer-events-none"></div>
+        <div class="w-96 h-96 bg-violet-200/40 rounded-full blur-3xl absolute -top-10 -left-20 pointer-events-none">
+        </div>
+        <div class="w-96 h-96 bg-amber-300/30 rounded-full blur-3xl absolute -bottom-10 -right-20 pointer-events-none">
+        </div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
+
             <!-- Section Header -->
             <div class="text-center max-w-3xl mx-auto mb-14 reveal-element">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 text-violet-900 font-extrabold text-xs sm:text-sm mb-4 shadow-sm">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 text-violet-900 font-extrabold text-xs sm:text-sm mb-4 shadow-sm">
                     ✨ FASILITAS LENGKAP & NYAMAN
                 </div>
-                
+
                 <h2 class="font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-4 tracking-tight">
-                    <span class="yellow-sticker-badge shadow-2xl transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+                    <span
+                        class="yellow-sticker-badge shadow-2xl transform -rotate-1 hover:rotate-0 transition-transform duration-300">
                         Belajar dengan Nyaman di Paradise of Math!
                     </span>
                 </h2>
-                
+
                 <p class="text-slate-600 text-sm sm:text-base md:text-lg leading-relaxed font-normal">
-                    Fasilitas modern dan lingkungan belajar yang kondusif disiapkan khusus untuk mendukung kenyamanan maksimal siswa.
+                    Fasilitas modern dan lingkungan belajar yang kondusif disiapkan khusus untuk mendukung kenyamanan
+                    maksimal siswa.
                 </p>
             </div>
 
             <!-- Facilities Cards Grid (Asymmetrical / Staggered / Bento "Acak" Layout) -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-16 items-stretch">
-                
+
                 <!-- Card 1: Kelas Yang Nyaman (+ AC & + WiFi) - Featured Large Card (7 Columns, Tilted Left) -->
-                <div class="md:col-span-7 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-1 hover:rotate-0 transition-all duration-300 reveal-element">
-                    <div class="relative aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
+                <div
+                    class="md:col-span-7 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-1 hover:rotate-0 transition-all duration-300 reveal-element">
+                    <div
+                        class="relative aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
                         <span class="text-violet-200 font-bold text-sm sm:text-base">
                             [ foto kelas ber-AC & WiFi ]
                         </span>
@@ -820,32 +994,40 @@
                         </span>
 
                         <!-- Badge Top Left (+ AC) -->
-                        <div class="absolute top-3 left-3 bg-violet-950/90 text-amber-300 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md animate-pulse-glow">
+                        <div
+                            class="absolute top-3 left-3 bg-violet-950/90 text-amber-300 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md animate-pulse-glow">
                             + AC
                         </div>
 
                         <!-- Badge Bottom Right (+ WiFi) -->
-                        <div class="absolute bottom-3 right-3 bg-violet-950/90 text-amber-300 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md">
+                        <div
+                            class="absolute bottom-3 right-3 bg-violet-950/90 text-amber-300 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md">
                             + WiFi
                         </div>
 
                         <!-- Badge Bottom Left Tag (Kelas yang nyaman) -->
-                        <div class="absolute bottom-3 left-3 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl shadow-md transform -rotate-1">
+                        <div
+                            class="absolute bottom-3 left-3 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl shadow-md transform -rotate-1">
                             Kelas yang nyaman
                         </div>
                     </div>
                     <div class="p-4 sm:p-5 flex items-center justify-between flex-wrap gap-2">
                         <div>
-                            <h3 class="font-extrabold text-violet-950 text-base sm:text-lg">Ruang Kelas Ber-AC & High-Speed WiFi</h3>
-                            <p class="text-slate-500 text-xs sm:text-sm">Ruangan sejuk, pencahayaan optimal, dan meja-kursi nyaman untuk fokus belajar.</p>
+                            <h3 class="font-extrabold text-violet-950 text-base sm:text-lg">Ruang Kelas Ber-AC &
+                                High-Speed WiFi</h3>
+                            <p class="text-slate-500 text-xs sm:text-sm">Ruangan sejuk, pencahayaan optimal, dan
+                                meja-kursi nyaman untuk fokus belajar.</p>
                         </div>
-                        <span class="px-3 py-1 bg-violet-100 text-violet-900 font-extrabold text-xs rounded-full">★ Utama</span>
+                        <span class="px-3 py-1 bg-violet-100 text-violet-900 font-extrabold text-xs rounded-full">★
+                            Utama</span>
                     </div>
                 </div>
 
                 <!-- Card 2: Toilet Bersih (5 Columns, Tilted Right & Offset Down) -->
-                <div class="md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:rotate-2 md:translate-y-6 hover:rotate-0 transition-all duration-300 reveal-element delay-100">
-                    <div class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
+                <div
+                    class="md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:rotate-2 md:translate-y-6 hover:rotate-0 transition-all duration-300 reveal-element delay-100">
+                    <div
+                        class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
                         <span class="text-violet-200 font-bold text-sm">
                             [ foto toilet ]
                         </span>
@@ -854,19 +1036,23 @@
                         </span>
 
                         <!-- Badge Top Center Tag (Toilet Bersih) -->
-                        <div class="absolute top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-4 py-1.5 rounded-xl shadow-md transform rotate-1">
+                        <div
+                            class="absolute top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-4 py-1.5 rounded-xl shadow-md transform rotate-1">
                             Toilet Bersih
                         </div>
                     </div>
                     <div class="p-4">
                         <h3 class="font-extrabold text-violet-950 text-base mb-1">Toilet Bersih & Higienis</h3>
-                        <p class="text-slate-500 text-xs sm:text-sm">Fasilitas sanitasi yang selalu terawat dan bersih demi kenyamanan setiap hari.</p>
+                        <p class="text-slate-500 text-xs sm:text-sm">Fasilitas sanitasi yang selalu terawat dan bersih
+                            demi kenyamanan setiap hari.</p>
                     </div>
                 </div>
 
                 <!-- Card 3: Mushala Luas (5 Columns, Tilted Left & Offset Up) -->
-                <div class="md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-2 md:-translate-y-2 hover:rotate-0 transition-all duration-300 reveal-element delay-200">
-                    <div class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
+                <div
+                    class="md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-2 md:-translate-y-2 hover:rotate-0 transition-all duration-300 reveal-element delay-200">
+                    <div
+                        class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
                         <span class="text-violet-200 font-bold text-sm">
                             [ foto mushala ]
                         </span>
@@ -875,30 +1061,34 @@
                         </span>
 
                         <!-- Badge Bottom Left Tag (Mushala Luas) -->
-                        <div class="absolute bottom-3 left-3 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl shadow-md transform -rotate-2">
+                        <div
+                            class="absolute bottom-3 left-3 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl shadow-md transform -rotate-2">
                             Mushala Luas
                         </div>
                     </div>
                     <div class="p-4">
                         <h3 class="font-extrabold text-violet-950 text-base mb-1">Mushala Luas & Suci</h3>
-                        <p class="text-slate-500 text-xs sm:text-sm">Tempat ibadah yang tenang, harum, dan luas agar siswa beribadah tepat waktu.</p>
+                        <p class="text-slate-500 text-xs sm:text-sm">Tempat ibadah yang tenang, harum, dan luas agar
+                            siswa beribadah tepat waktu.</p>
                     </div>
                 </div>
 
                 <!-- Card 4: Extra Feature Highlights (7 Columns, Tilted Right) -->
-                <div class="md:col-span-7 group relative rounded-3xl bg-gradient-to-br from-violet-950 via-violet-900 to-violet-950 text-white border-2 border-amber-400/50 p-6 sm:p-7 shadow-xl hover:shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-300 flex flex-col justify-between reveal-element delay-300">
+                <div
+                    class="md:col-span-7 group relative rounded-3xl bg-gradient-to-br from-violet-950 via-violet-900 to-violet-950 text-white border-2 border-amber-400/50 p-6 sm:p-7 shadow-xl hover:shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-300 flex flex-col justify-between reveal-element delay-300">
                     <div class="flex items-center justify-between mb-4">
                         <span class="px-3 py-1 rounded-full bg-amber-400 text-violet-950 font-black text-xs">
                             💡 Kenyamanan 100%
                         </span>
                         <span class="text-xs text-amber-300 font-bold">Paradise of Math</span>
                     </div>
-                    
+
                     <h3 class="font-extrabold text-lg sm:text-xl text-amber-300 mb-3">
                         Lingkungan Belajar Bebas Bising & Kondusif
                     </h3>
                     <p class="text-violet-100 text-xs sm:text-sm mb-6 leading-relaxed">
-                        Dirancang khusus dengan standar kenyamanan tinggi untuk memastikan siswa fokus dalam memahami setiap rumus dan konsep materi.
+                        Dirancang khusus dengan standar kenyamanan tinggi untuk memastikan siswa fokus dalam memahami
+                        setiap rumus dan konsep materi.
                     </p>
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-violet-800">
@@ -925,16 +1115,19 @@
 
 
             <!-- Footer Banner Contact & Address (Matching Bottom of Uploaded Image) -->
-            <div class="reveal-element delay-300 rounded-3xl bg-gradient-to-r from-violet-950 via-violet-900 to-violet-950 text-white p-6 sm:p-8 shadow-2xl border border-violet-800">
+            <div
+                class="reveal-element delay-300 rounded-3xl bg-gradient-to-r from-violet-950 via-violet-900 to-violet-950 text-white p-6 sm:p-8 shadow-2xl border border-violet-800">
                 <div class="grid md:grid-cols-2 gap-6 items-center">
-                    
+
                     <!-- Social Media Links -->
                     <div class="flex flex-wrap items-center gap-4">
-                        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15">
+                        <div
+                            class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15">
                             <span class="text-pink-400 text-lg">📸</span>
                             <span class="text-xs sm:text-sm font-extrabold text-amber-300">@paradiseofmath</span>
                         </div>
-                        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15">
+                        <div
+                            class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15">
                             <span class="text-white text-lg">🎵</span>
                             <span class="text-xs sm:text-sm font-extrabold text-amber-300">@paradiseofmath</span>
                         </div>
@@ -962,8 +1155,12 @@
     <!-- ================= BIAYA SECTION ================= -->
     <section id="biaya" class="py-20 sm:py-24 md:py-28 bg-slate-50 relative overflow-hidden">
         <!-- Ambient background elements -->
-        <div class="w-80 h-80 bg-violet-600/10 rounded-full blur-3xl absolute -top-10 -right-10 pointer-events-none animate-pulse-glow"></div>
-        <div class="w-80 h-80 bg-amber-400/10 rounded-full blur-3xl absolute -bottom-10 -left-10 pointer-events-none animate-float animate-delay-200"></div>
+        <div
+            class="w-80 h-80 bg-violet-600/10 rounded-full blur-3xl absolute -top-10 -right-10 pointer-events-none animate-pulse-glow">
+        </div>
+        <div
+            class="w-80 h-80 bg-amber-400/10 rounded-full blur-3xl absolute -bottom-10 -left-10 pointer-events-none animate-float animate-delay-200">
+        </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <!-- Section Header -->
@@ -975,7 +1172,8 @@
                     Pilihan Paket <span class="text-violet-700">Belajar Privat</span>
                 </h2>
                 <p class="text-slate-600 text-sm sm:text-base leading-relaxed font-semibold">
-                    Geser kartu ke kanan atau ke kiri untuk melihat program les privat kami. Pilih paket terbaik sesuai kebutuhan Anda!
+                    Geser kartu ke kanan atau ke kiri untuk melihat program les privat kami. Pilih paket terbaik sesuai
+                    kebutuhan Anda!
                 </p>
             </div>
 
@@ -984,125 +1182,146 @@
                 <!-- Swiper Container -->
                 <div class="swiper pricing-swiper overflow-hidden">
                     <div class="swiper-wrapper">
-                        
+
                         @foreach(\App\Models\PaketBelajar::all() as $paket)
-                        <!-- CARD: {{ $paket->nama_paket }} -->
-                        <div class="swiper-slide py-6 h-auto">
-                            @if($paket->is_populer)
-                            <div class="bg-gradient-to-b from-violet-900 to-violet-955 text-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 relative h-full min-h-[500px] shadow-xl shadow-purple-950/20 border-2 border-amber-400 animate-pulse-glow-subtle">
-                                <!-- Popular Tag badge -->
-                                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-purple-950 text-xs font-black uppercase tracking-wider rounded-full shadow-md">
-                                    Paling Populer
-                                </div>
+                            <!-- CARD: {{ $paket->nama_paket }} -->
+                            <div class="swiper-slide py-6 h-auto">
+                                @if($paket->is_populer)
+                                    <div
+                                        class="bg-gradient-to-b from-violet-900 to-violet-955 text-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 relative h-full min-h-[500px] shadow-xl shadow-purple-950/20 border-2 border-amber-400 animate-pulse-glow-subtle">
+                                        <!-- Popular Tag badge -->
+                                        <div
+                                            class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-purple-950 text-xs font-black uppercase tracking-wider rounded-full shadow-md">
+                                            Paling Populer
+                                        </div>
 
-                                <div>
-                                    <div class="mb-4">
-                                        <span class="px-3 py-1 bg-white/10 text-amber-300 text-xs font-bold uppercase rounded-full">{{ $paket->kategori }}</span>
+                                        <div>
+                                            <div class="mb-4">
+                                                <span
+                                                    class="px-3 py-1 bg-white/10 text-amber-300 text-xs font-bold uppercase rounded-full">{{ $paket->kategori }}</span>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-white mb-2">{{ $paket->nama_paket }}</h3>
+                                            <p class="text-violet-200 text-xs mb-6">{{ $paket->deskripsi }}</p>
+
+                                            <div class="flex items-baseline gap-1 mb-8">
+                                                <span
+                                                    class="text-3xl sm:text-4xl font-black text-amber-300">{{ $paket->harga_min >= 1000 ? ($paket->harga_min / 1000) . 'K' : $paket->harga_min }}</span>
+                                                <span class="text-violet-200 text-sm font-semibold">-
+                                                    {{ $paket->harga_max >= 1000 ? ($paket->harga_max / 1000) . 'K' : $paket->harga_max }}</span>
+                                                <span class="text-violet-300 text-xs font-semibold ml-1">/ sesi / org</span>
+                                            </div>
+
+                                            <!-- Feature list -->
+                                            <ul class="space-y-3 text-sm text-violet-100 mb-8">
+                                                @if($paket->detail_1)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-amber-400 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_1 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_2)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-amber-400 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_2 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_3)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-amber-400 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_3 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_4)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-amber-400 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_4 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_5)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-amber-400 shrink-0 mt-0.5"><i
+                                                                class="fas fa-clock"></i></span>
+                                                        <span>{{ $paket->detail_5 }}</span>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
+
+                                        <a href="{{ route('login') }}#daftar"
+                                            class="w-full text-center py-3 rounded-xl bg-amber-400 text-purple-950 font-black shadow-md hover:bg-amber-300 hover:scale-105 transition duration-200 block">
+                                            Daftar Paket {{ $paket->nama_paket }}
+                                        </a>
                                     </div>
-                                    <h3 class="text-xl font-bold text-white mb-2">{{ $paket->nama_paket }}</h3>
-                                    <p class="text-violet-200 text-xs mb-6">{{ $paket->deskripsi }}</p>
-                                    
-                                    <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-amber-300">{{ $paket->harga_min >= 1000 ? ($paket->harga_min / 1000) . 'K' : $paket->harga_min }}</span>
-                                        <span class="text-violet-200 text-sm font-semibold">- {{ $paket->harga_max >= 1000 ? ($paket->harga_max / 1000) . 'K' : $paket->harga_max }}</span>
-                                        <span class="text-violet-300 text-xs font-semibold ml-1">/ sesi / org</span>
+                                @else
+                                    <div
+                                        class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
+                                        <div>
+                                            <div class="mb-4">
+                                                <span
+                                                    class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">{{ $paket->kategori }}</span>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-violet-950 mb-2">{{ $paket->nama_paket }}</h3>
+                                            <p class="text-slate-500 text-xs mb-6">{{ $paket->deskripsi }}</p>
+
+                                            <div class="flex items-baseline gap-1 mb-8">
+                                                <span
+                                                    class="text-3xl sm:text-4xl font-black text-violet-950">{{ $paket->harga_min >= 1000 ? ($paket->harga_min / 1000) . 'K' : $paket->harga_min }}</span>
+                                                <span class="text-slate-500 text-sm font-semibold">-
+                                                    {{ $paket->harga_max >= 1000 ? ($paket->harga_max / 1000) . 'K' : $paket->harga_max }}</span>
+                                                <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
+                                            </div>
+
+                                            <!-- Feature list -->
+                                            <ul class="space-y-3 text-sm text-slate-600 mb-8">
+                                                @if($paket->detail_1)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-emerald-500 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_1 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_2)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-emerald-500 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_2 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_3)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-emerald-500 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_3 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_4)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-emerald-500 shrink-0 mt-0.5"><i
+                                                                class="fas fa-check-circle"></i></span>
+                                                        <span>{{ $paket->detail_4 }}</span>
+                                                    </li>
+                                                @endif
+                                                @if($paket->detail_5)
+                                                    <li class="flex items-start gap-2.5">
+                                                        <span class="text-emerald-500 shrink-0 mt-0.5"><i
+                                                                class="fas fa-clock"></i></span>
+                                                        <span>{{ $paket->detail_5 }}</span>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </div>
+
+                                        <a href="{{ route('login') }}#daftar"
+                                            class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
+                                            Daftar Paket {{ $paket->nama_paket }}
+                                        </a>
                                     </div>
-
-                                    <!-- Feature list -->
-                                    <ul class="space-y-3 text-sm text-violet-100 mb-8">
-                                        @if($paket->detail_1)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_1 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_2)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_2 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_3)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_3 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_4)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_4 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_5)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>{{ $paket->detail_5 }}</span>
-                                        </li>
-                                        @endif
-                                    </ul>
-                                </div>
-
-                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl bg-amber-400 text-purple-950 font-black shadow-md hover:bg-amber-300 hover:scale-105 transition duration-200 block">
-                                    Daftar Paket {{ $paket->nama_paket }}
-                                </a>
+                                @endif
                             </div>
-                            @else
-                            <div class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
-                                <div>
-                                    <div class="mb-4">
-                                        <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">{{ $paket->kategori }}</span>
-                                    </div>
-                                    <h3 class="text-xl font-bold text-violet-950 mb-2">{{ $paket->nama_paket }}</h3>
-                                    <p class="text-slate-500 text-xs mb-6">{{ $paket->deskripsi }}</p>
-                                    
-                                    <div class="flex items-baseline gap-1 mb-8">
-                                        <span class="text-3xl sm:text-4xl font-black text-violet-950">{{ $paket->harga_min >= 1000 ? ($paket->harga_min / 1000) . 'K' : $paket->harga_min }}</span>
-                                        <span class="text-slate-500 text-sm font-semibold">- {{ $paket->harga_max >= 1000 ? ($paket->harga_max / 1000) . 'K' : $paket->harga_max }}</span>
-                                        <span class="text-slate-400 text-xs font-semibold ml-1">/ sesi / org</span>
-                                    </div>
-
-                                    <!-- Feature list -->
-                                    <ul class="space-y-3 text-sm text-slate-600 mb-8">
-                                        @if($paket->detail_1)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_1 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_2)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_2 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_3)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_3 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_4)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-check-circle"></i></span>
-                                            <span>{{ $paket->detail_4 }}</span>
-                                        </li>
-                                        @endif
-                                        @if($paket->detail_5)
-                                        <li class="flex items-start gap-2.5">
-                                            <span class="text-emerald-500 shrink-0 mt-0.5"><i class="fas fa-clock"></i></span>
-                                            <span>{{ $paket->detail_5 }}</span>
-                                        </li>
-                                        @endif
-                                    </ul>
-                                </div>
-
-                                <a href="{{ route('login') }}#daftar" class="w-full text-center py-3 rounded-xl border-2 border-violet-800 text-violet-900 font-bold hover:bg-violet-900 hover:text-white transition duration-200 block">
-                                    Daftar Paket {{ $paket->nama_paket }}
-                                </a>
-                            </div>
-                            @endif
-                        </div>
                         @endforeach
 
                     </div>
@@ -1117,33 +1336,41 @@
 
             <!-- Footer note below cards -->
             <div class="mt-8 text-center text-xs font-semibold text-slate-500 reveal-element delay-200">
-                * Seluruh tarif tertera di atas dihitung per orang per sesi (durasi 90 menit). Harga dapat disesuaikan berdasarkan kesepakatan kelompok belajar.
+                * Seluruh tarif tertera di atas dihitung per orang per sesi (durasi 90 menit). Harga dapat disesuaikan
+                berdasarkan kesepakatan kelompok belajar.
             </div>
         </div>
     </section>
 
 
     <!-- ================= JADWAL SECTION ================= -->
-    <section id="jadwal" class="py-20 sm:py-24 md:py-28 bg-gradient-to-b from-violet-950 via-violet-900 to-violet-950 text-white relative overflow-hidden">
-        
+    <section id="jadwal"
+        class="py-20 sm:py-24 md:py-28 bg-gradient-to-b from-violet-950 via-violet-900 to-violet-950 text-white relative overflow-hidden">
+
         <!-- Ambient Glow Background Blobs -->
-        <div class="w-96 h-96 bg-amber-400/15 rounded-full blur-3xl absolute -top-20 right-0 animate-pulse-glow pointer-events-none"></div>
-        <div class="w-96 h-96 bg-violet-600/20 rounded-full blur-3xl absolute -bottom-20 -left-20 animate-float pointer-events-none"></div>
+        <div
+            class="w-96 h-96 bg-amber-400/15 rounded-full blur-3xl absolute -top-20 right-0 animate-pulse-glow pointer-events-none">
+        </div>
+        <div
+            class="w-96 h-96 bg-violet-600/20 rounded-full blur-3xl absolute -bottom-20 -left-20 animate-float pointer-events-none">
+        </div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            
+
             <!-- Section Title -->
             <div class="text-center max-w-3xl mx-auto mb-14 reveal-element">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 font-bold text-xs sm:text-sm mb-4 backdrop-blur-md">
+                <div
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 font-bold text-xs sm:text-sm mb-4 backdrop-blur-md">
                     📅 WAKTU & SESI BELAJAR FLEKSIBEL
                 </div>
-                
+
                 <h2 class="font-black text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-4 tracking-tight">
-                    <span class="yellow-sticker-badge shadow-2xl transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+                    <span
+                        class="yellow-sticker-badge shadow-2xl transform -rotate-1 hover:rotate-0 transition-transform duration-300">
                         JADWAL YANG TERSEDIA
                     </span>
                 </h2>
-                
+
                 <p class="text-violet-200 text-sm sm:text-base md:text-lg leading-relaxed mt-2 font-normal">
                     Pilih sesi bimbingan 90 menit yang paling sesuai dengan aktivitas dan kesibukan sekolahmu.
                 </p>
@@ -1151,22 +1378,27 @@
 
             <!-- Quick Day Info Badges -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 reveal-element delay-100">
-                <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center hover:bg-white/15 hover:border-amber-400/40 transition-all duration-300">
+                <div
+                    class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center hover:bg-white/15 hover:border-amber-400/40 transition-all duration-300">
                     <div class="text-xs text-amber-300 font-bold uppercase tracking-wider mb-1">Senin s.d Kamis</div>
                     <div class="text-lg font-black text-white">5 Sesi Shift</div>
                     <div class="text-xs text-violet-200 mt-1">13.30 - 21.00 WIB</div>
                 </div>
-                <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center hover:bg-white/15 hover:border-amber-400/40 transition-all duration-300">
+                <div
+                    class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center hover:bg-white/15 hover:border-amber-400/40 transition-all duration-300">
                     <div class="text-xs text-amber-300 font-bold uppercase tracking-wider mb-1">Jumat</div>
                     <div class="text-lg font-black text-white">6 Sesi Shift</div>
                     <div class="text-xs text-violet-200 mt-1">12.00 - 21.00 WIB</div>
                 </div>
-                <div class="p-4 rounded-2xl bg-amber-400/20 backdrop-blur-md border border-amber-400/50 text-center hover:bg-amber-400/30 transition-all duration-300 shadow-lg shadow-amber-400/10">
-                    <div class="text-xs text-amber-300 font-black uppercase tracking-wider mb-1">⭐ Sabtu (Full Day)</div>
+                <div
+                    class="p-4 rounded-2xl bg-amber-400/20 backdrop-blur-md border border-amber-400/50 text-center hover:bg-amber-400/30 transition-all duration-300 shadow-lg shadow-amber-400/10">
+                    <div class="text-xs text-amber-300 font-black uppercase tracking-wider mb-1">⭐ Sabtu (Full Day)
+                    </div>
                     <div class="text-lg font-black text-amber-300">9 Sesi Lengkap</div>
                     <div class="text-xs text-amber-100 mt-1">07.30 - 21.00 WIB</div>
                 </div>
-                <div class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center hover:bg-white/15 transition-all duration-300">
+                <div
+                    class="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-center hover:bg-white/15 transition-all duration-300">
                     <div class="text-xs text-violet-300 font-bold uppercase tracking-wider mb-1">Minggu</div>
                     <div class="text-lg font-black text-slate-300">Libur Sesi</div>
                     <div class="text-xs text-violet-300 mt-1">Privat By Request</div>
@@ -1174,13 +1406,16 @@
             </div>
 
             <!-- Table Card Container -->
-            <div class="reveal-element delay-200 bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-amber-400/40">
-                
+            <div
+                class="reveal-element delay-200 bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-amber-400/40">
+
                 <!-- Table Header Card Title -->
-                <div class="bg-gradient-to-r from-violet-950 via-violet-900 to-violet-950 px-6 py-5 text-center border-b border-violet-800 flex items-center justify-between flex-wrap gap-4">
+                <div
+                    class="bg-gradient-to-r from-violet-950 via-violet-900 to-violet-950 px-6 py-5 text-center border-b border-violet-800 flex items-center justify-between flex-wrap gap-4">
                     <div class="flex items-center gap-3">
                         <div class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></div>
-                        <span class="font-extrabold text-lg text-white tracking-wide">Tabel Shift Bimbingan (90 Menit / Sesi)</span>
+                        <span class="font-extrabold text-lg text-white tracking-wide">Tabel Shift Bimbingan (90 Menit /
+                            Sesi)</span>
                     </div>
                     <span class="text-xs font-bold bg-amber-400 text-violet-950 px-3 py-1 rounded-full shadow-sm">
                         ✓ Slot Tersedia
@@ -1191,160 +1426,191 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-violet-100/80 text-violet-950 text-xs sm:text-sm font-extrabold uppercase border-b-2 border-violet-200">
+                            <tr
+                                class="bg-violet-100/80 text-violet-950 text-xs sm:text-sm font-extrabold uppercase border-b-2 border-violet-200">
                                 <th class="py-4 px-6 text-slate-900 whitespace-nowrap">Shift (90 menit)</th>
                                 <th class="py-4 px-6 text-center text-violet-900 whitespace-nowrap">Senin s.d Kamis</th>
                                 <th class="py-4 px-6 text-center text-violet-900 whitespace-nowrap">Jumat</th>
-                                <th class="py-4 px-6 text-center text-violet-950 bg-amber-200/60 whitespace-nowrap">Sabtu</th>
+                                <th class="py-4 px-6 text-center text-violet-950 bg-amber-200/60 whitespace-nowrap">
+                                    Sabtu</th>
                                 <th class="py-4 px-6 text-center text-slate-500 whitespace-nowrap">Minggu</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-violet-100 text-xs sm:text-sm font-bold text-slate-800">
-                            
+
                             <!-- Row 1: 07.30 - 09.00 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-violet-400"></span>
                                     07.30 - 09.00
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 2: 09.00 - 10.30 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200 bg-slate-50/40">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-violet-400"></span>
                                     09.00 - 10.30
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 3: 10.30 - 12.00 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-violet-400"></span>
                                     10.30 - 12.00
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 4: 12.00 - 13.30 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200 bg-slate-50/40">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     12.00 - 13.30
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 5: 13.30 - 15.00 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     13.30 - 15.00
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 6: 15.00 - 16.30 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200 bg-slate-50/40">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     15.00 - 16.30
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 7: 16.30 - 18.00 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     16.30 - 18.00
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 8: 18.00 - 19.30 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200 bg-slate-50/40">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     18.00 - 19.30
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
 
                             <!-- Row 9: 19.30 - 21.00 -->
                             <tr class="hover:bg-violet-50/70 transition-colors duration-200">
-                                <td class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
+                                <td
+                                    class="py-3.5 px-6 font-extrabold text-violet-950 flex items-center gap-2 whitespace-nowrap">
                                     <span class="w-2 h-2 rounded-full bg-amber-500"></span>
                                     19.30 - 21.00
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-violet-900 text-amber-300 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center bg-amber-50/50">
-                                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400 text-violet-950 font-black shadow-md">✓</span>
                                 </td>
                                 <td class="py-3.5 px-6 text-center text-slate-300">-</td>
                             </tr>
@@ -1354,7 +1620,8 @@
                 </div>
 
                 <!-- Footer Note -->
-                <div class="bg-violet-50 px-6 py-4 border-t border-violet-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-600">
+                <div
+                    class="bg-violet-50 px-6 py-4 border-t border-violet-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-600">
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
                         <span>Durasi per sesi bimbingan adalah <strong>90 Menit</strong></span>
@@ -1368,9 +1635,12 @@
 
             <!-- Callout CTA Below Schedule -->
             <div class="mt-12 text-center reveal-element delay-300">
-                <div class="inline-flex flex-col sm:flex-row items-center gap-4 p-4 sm:px-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
-                    <span class="text-sm font-bold text-violet-100">Ingin request jadwal khusus di luar tabel di atas?</span>
-                    <a href="#kontak" class="px-6 py-2.5 rounded-xl bg-amber-400 text-violet-950 font-extrabold shadow-md hover:bg-amber-300 hover:scale-105 transition-all duration-300 text-xs sm:text-sm">
+                <div
+                    class="inline-flex flex-col sm:flex-row items-center gap-4 p-4 sm:px-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                    <span class="text-sm font-bold text-violet-100">Ingin request jadwal khusus di luar tabel di
+                        atas?</span>
+                    <a href="#kontak"
+                        class="px-6 py-2.5 rounded-xl bg-amber-400 text-violet-950 font-extrabold shadow-md hover:bg-amber-300 hover:scale-105 transition-all duration-300 text-xs sm:text-sm">
                         Konsultasi Jadwal Sesuai Keinginan
                     </a>
                 </div>
@@ -1383,7 +1653,8 @@
     <section id="kontak" class="py-20 sm:py-24 md:py-28 bg-white relative overflow-hidden">
         <!-- Ambient background blobs -->
         <div class="w-72 h-72 bg-violet-600/5 rounded-full blur-3xl absolute top-10 left-10 pointer-events-none"></div>
-        <div class="w-72 h-72 bg-amber-400/5 rounded-full blur-3xl absolute bottom-10 right-10 pointer-events-none"></div>
+        <div class="w-72 h-72 bg-amber-400/5 rounded-full blur-3xl absolute bottom-10 right-10 pointer-events-none">
+        </div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <!-- Section Header -->
@@ -1395,14 +1666,16 @@
                     Alamat Kantor &amp; <span class="text-violet-700">Lokasi Google Map</span>
                 </h2>
                 <p class="text-slate-600 text-sm sm:text-base leading-relaxed font-semibold">
-                    Temukan lokasi ruang belajar Paradise of Math atau hubungi kami langsung via WhatsApp untuk berkonsultasi mengenai kelas bimbingan terbaik Anda.
+                    Temukan lokasi ruang belajar Paradise of Math atau hubungi kami langsung via WhatsApp untuk
+                    berkonsultasi mengenai kelas bimbingan terbaik Anda.
                 </p>
             </div>
 
             <!-- Two Column Layout: Contact Card & Map -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 <!-- Left: Contact Details Card (Col-span 5) -->
-                <div class="lg:col-span-5 flex flex-col justify-between bg-violet-50/70 border border-violet-100 rounded-3xl p-8 reveal-element delay-100 shadow-sm">
+                <div
+                    class="lg:col-span-5 flex flex-col justify-between bg-violet-50/70 border border-violet-100 rounded-3xl p-8 reveal-element delay-100 shadow-sm">
                     <div>
                         <h3 class="text-xl font-bold text-violet-950 mb-6 flex items-center gap-2">
                             <span class="text-violet-700"><i class="fas fa-info-circle"></i></span>
@@ -1413,28 +1686,34 @@
                         <div class="space-y-6">
                             <!-- Address -->
                             <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-violet-600/10 text-violet-700 flex items-center justify-center shrink-0">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-violet-600/10 text-violet-700 flex items-center justify-center shrink-0">
                                     <i class="fas fa-map-marker-alt"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">Alamat Belajar</h4>
+                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">
+                                        Alamat Belajar</h4>
                                     <p class="text-sm text-slate-600 leading-relaxed font-semibold">
-                                        Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Padang, Sumatera Barat, 25121
+                                        Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Padang, Sumatera Barat,
+                                        25121
                                     </p>
                                 </div>
                             </div>
 
                             <!-- WhatsApp -->
                             <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                                     <i class="fab fa-whatsapp text-lg"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">WhatsApp Chat</h4>
+                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">
+                                        WhatsApp Chat</h4>
                                     <p class="text-sm text-slate-600 font-semibold mb-2">
                                         Hubungi Pimpinan / Admin (Kak Kiki)
                                     </p>
-                                    <a href="https://wa.me/628116612050" target="_blank" class="inline-flex items-center gap-2 text-sm text-white bg-emerald-600 hover:bg-emerald-500 font-extrabold px-4 py-2 rounded-xl transition duration-200 shadow-md shadow-emerald-600/10">
+                                    <a href="https://wa.me/628116612050" target="_blank"
+                                        class="inline-flex items-center gap-2 text-sm text-white bg-emerald-600 hover:bg-emerald-500 font-extrabold px-4 py-2 rounded-xl transition duration-200 shadow-md shadow-emerald-600/10">
                                         <i class="fab fa-whatsapp"></i> Chat WhatsApp
                                     </a>
                                 </div>
@@ -1442,16 +1721,19 @@
 
                             <!-- Office Hours -->
                             <div class="flex items-start gap-4">
-                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
                                     <i class="fas fa-clock"></i>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">Jam Operasional</h4>
+                                    <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">Jam
+                                        Operasional</h4>
                                     <p class="text-sm text-slate-600 leading-relaxed font-semibold">
                                         Senin s.d Kamis: 13.30 - 21.00 WIB<br>
                                         Jumat: 12.00 - 21.00 WIB<br>
                                         Sabtu (Full Day): 07.30 - 21.00 WIB<br>
-                                        <span class="text-xs text-amber-600 font-bold">* Minggu: Libur / Privat By Request</span>
+                                        <span class="text-xs text-amber-600 font-bold">* Minggu: Libur / Privat By
+                                            Request</span>
                                     </p>
                                 </div>
                             </div>
@@ -1459,20 +1741,19 @@
                     </div>
 
                     <!-- Small Brand Branding footer -->
-                    <div class="pt-6 mt-6 border-t border-violet-200/50 text-xs text-slate-500 font-semibold flex items-center justify-between">
+                    <div
+                        class="pt-6 mt-6 border-t border-violet-200/50 text-xs text-slate-500 font-semibold flex items-center justify-between">
                         <span>© Paradise of Math</span>
                         <span>Sawahan, Padang Timur</span>
                     </div>
                 </div>
 
                 <!-- Right: Google Map Iframe (Col-span 7) -->
-                <div class="lg:col-span-7 bg-white border border-violet-100 rounded-3xl p-3 reveal-element delay-200 shadow-lg shadow-violet-150/20 overflow-hidden min-h-[400px] flex">
-                    <iframe 
-                        class="w-full h-full min-h-[400px] rounded-2xl border-0" 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.275700703673!2d100.36296367472394!3d-0.944960699045907!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4b93920c71cb5%3A0x67fcd9bdfbc466e1!2sLBB%20Paradise%20Of%20Math!5e0!3m2!1sid!2sid!4v1784967251178!5m2!1sid!2sid" 
-                        allowfullscreen="" 
-                        loading="lazy" 
-                        referrerpolicy="strict-origin-when-cross-origin">
+                <div
+                    class="lg:col-span-7 bg-white border border-violet-100 rounded-3xl p-3 reveal-element delay-200 shadow-lg shadow-violet-150/20 overflow-hidden min-h-[400px] flex">
+                    <iframe class="w-full h-full min-h-[400px] rounded-2xl border-0"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.275700703673!2d100.36296367472394!3d-0.944960699045907!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2fd4b93920c71cb5%3A0x67fcd9bdfbc466e1!2sLBB%20Paradise%20Of%20Math!5e0!3m2!1sid!2sid!4v1784967251178!5m2!1sid!2sid"
+                        allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin">
                     </iframe>
                 </div>
             </div>
@@ -1480,10 +1761,15 @@
     </section>
 
     <!-- ================= FOOTER SECTION ================= -->
-    <footer class="bg-gradient-to-br from-violet-950 via-violet-900 to-violet-950 text-white pt-16 pb-8 border-t border-violet-850 relative overflow-hidden">
+    <footer
+        class="bg-gradient-to-br from-violet-950 via-violet-900 to-violet-950 text-white pt-16 pb-8 border-t border-violet-850 relative overflow-hidden">
         <!-- Background light effects -->
-        <div class="w-96 h-96 bg-violet-600/10 rounded-full blur-3xl absolute -top-40 -left-40 pointer-events-none animate-pulse-glow"></div>
-        <div class="w-96 h-96 bg-amber-400/5 rounded-full blur-3xl absolute -bottom-40 -right-40 pointer-events-none animate-float animate-delay-200"></div>
+        <div
+            class="w-96 h-96 bg-violet-600/10 rounded-full blur-3xl absolute -top-40 -left-40 pointer-events-none animate-pulse-glow">
+        </div>
+        <div
+            class="w-96 h-96 bg-amber-400/5 rounded-full blur-3xl absolute -bottom-40 -right-40 pointer-events-none animate-float animate-delay-200">
+        </div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 pb-12 border-b border-violet-800">
@@ -1495,20 +1781,27 @@
                         </span>
                     </a>
                     <p class="text-xs sm:text-sm text-violet-200/80 leading-relaxed font-medium">
-                        Lembaga Bimbingan Belajar (LBB) Matematika terpercaya di Kota Padang. Kami berkomitmen meningkatkan pemahaman dan kecintaan siswa terhadap matematika melalui bimbingan privat berkualitas.
+                        Lembaga Bimbingan Belajar (LBB) Matematika terpercaya di Kota Padang. Kami berkomitmen
+                        meningkatkan pemahaman dan kecintaan siswa terhadap matematika melalui bimbingan privat
+                        berkualitas.
                     </p>
                     <!-- Social Media Links (Instagram & TikTok) -->
                     <div class="pt-2 flex items-center gap-3">
                         <!-- Instagram Button -->
-                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank" class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-gradient-to-tr hover:from-yellow-500 hover:via-pink-500 hover:to-purple-600 hover:border-transparent hover:scale-110 transition duration-300 shadow-md">
+                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank"
+                            class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-gradient-to-tr hover:from-yellow-500 hover:via-pink-500 hover:to-purple-600 hover:border-transparent hover:scale-110 transition duration-300 shadow-md">
                             <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                                <path
+                                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                             </svg>
                         </a>
                         <!-- TikTok Button -->
-                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank" class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-black hover:border-transparent hover:scale-110 hover:shadow-cyan-400/20 hover:shadow-lg transition duration-300 shadow-md">
-                            <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.59 4.23.86.97 2.07 1.62 3.39 1.83v3.71c-1.84-.02-3.61-.71-4.96-1.97-.24-.2-.46-.43-.66-.67v6.62c.04 2.64-1.28 5.12-3.51 6.47-2.3 1.48-5.3 1.68-7.74.52-2.73-1.22-4.48-4.22-4.26-7.22.18-3.08 2.37-5.78 5.37-6.5 1.09-.27 2.22-.24 3.29.07V10.7c-.89-.31-1.87-.33-2.76-.04-1.39.42-2.45 1.62-2.71 3.05-.33 1.62.43 3.3 1.88 4.09 1.34.78 3.1.66 4.31-.31.86-.68 1.35-1.74 1.33-2.84V.02z"/>
+                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank"
+                            class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-black hover:border-transparent hover:scale-110 hover:shadow-cyan-400/20 hover:shadow-lg transition duration-300 shadow-md">
+                            <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.59 4.23.86.97 2.07 1.62 3.39 1.83v3.71c-1.84-.02-3.61-.71-4.96-1.97-.24-.2-.46-.43-.66-.67v6.62c.04 2.64-1.28 5.12-3.51 6.47-2.3 1.48-5.3 1.68-7.74.52-2.73-1.22-4.48-4.22-4.26-7.22.18-3.08 2.37-5.78 5.37-6.5 1.09-.27 2.22-.24 3.29.07V10.7c-.89-.31-1.87-.33-2.76-.04-1.39.42-2.45 1.62-2.71 3.05-.33 1.62.43 3.3 1.88 4.09 1.34.78 3.1.66 4.31-.31.86-.68 1.35-1.74 1.33-2.84V.02z" />
                             </svg>
                         </a>
                     </div>
@@ -1531,7 +1824,8 @@
                     <ul class="space-y-3 text-xs sm:text-sm text-violet-200/70 font-semibold">
                         <li class="flex items-start gap-2.5">
                             <span class="text-amber-400 shrink-0 mt-0.5"><i class="fas fa-map-marker-alt"></i></span>
-                            <span>Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Padang, Sumatera Barat, 25121</span>
+                            <span>Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Padang, Sumatera Barat,
+                                25121</span>
                         </li>
                         <li class="flex items-center gap-2.5">
                             <span class="text-amber-400 shrink-0"><i class="fas fa-phone-alt"></i></span>
@@ -1542,7 +1836,8 @@
             </div>
 
             <!-- Copyright Strip -->
-            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-violet-300/60">
+            <div
+                class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-violet-300/60">
                 <span>© {{ date('Y') }} LBB Paradise of Math. Seluruh hak cipta dilindungi.</span>
                 <span class="flex gap-4">
                     <a href="#beranda" class="hover:text-white transition">Kembali ke Atas</a>
@@ -1616,6 +1911,49 @@
                 }
             });
         });
+    </script>
+    <script>
+        const book = document.getElementById('book');
+        const dots = document.querySelectorAll('.dot');
+        let page = 0;
+
+        function setPage(p) {
+            page = Math.max(0, Math.min(1, p));
+            book.classList.toggle('flipped', page === 1);
+            dots.forEach(d => {
+                const active = Number(d.dataset.p) === page;
+                d.classList.toggle('bg-violet-900', active);
+                d.classList.toggle('w-5', active);
+                d.classList.toggle('bg-violet-900/30', !active);
+                d.classList.toggle('w-2', !active);
+            });
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => setPage(page + 1));
+        document.getElementById('prevBtn').addEventListener('click', () => setPage(page - 1));
+        dots.forEach(d => d.addEventListener('click', () => setPage(Number(d.dataset.p))));
+
+        book.addEventListener('click', (e) => {
+            const r = book.getBoundingClientRect();
+            const x = e.clientX - r.left;
+            if (x > r.width * 0.75) setPage(page + 1);
+            else if (x < r.width * 0.25) setPage(page - 1);
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') setPage(page + 1);
+            if (e.key === 'ArrowLeft') setPage(page - 1);
+        });
+
+        let touchStartX = null;
+        book.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+        book.addEventListener('touchend', (e) => {
+            if (touchStartX === null) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (dx < -40) setPage(page + 1);
+            if (dx > 40) setPage(page - 1);
+            touchStartX = null;
+        }, { passive: true });
     </script>
 
 </body>

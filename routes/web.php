@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\admin\AdminController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Siswa\SiswaController;
 
 Route::get('/', function () {
     return view('/informasi/index');
@@ -37,14 +38,14 @@ Route::get('/siswa', function () {
     return view('siswa.dashboard');
 })->middleware('auth:siswa')->name('siswa.dashboard');
 
-// Sequence: Login -> Biodata -> Register Kategori -> Payment -> Pending
-Route::get('/siswa/biodata', [App\Http\Controllers\siswa\SiswaController::class, 'showBiodata'])->middleware('auth:siswa')->name('siswa.biodata');
-Route::post('/siswa/biodata', [App\Http\Controllers\siswa\SiswaController::class, 'submitBiodata'])->middleware('auth:siswa')->name('siswa.biodata.submit');
-Route::get('/siswa/register-kategori', [App\Http\Controllers\siswa\SiswaController::class, 'showRegisterKategori'])->middleware('auth:siswa')->name('siswa.register-kategori');
-Route::get('/siswa/payment', [App\Http\Controllers\siswa\SiswaController::class, 'showPayment'])->middleware('auth:siswa')->name('siswa.payment');
-Route::post('/siswa/payment', [App\Http\Controllers\siswa\SiswaController::class, 'submitPayment'])->middleware('auth:siswa')->name('siswa.payment.submit');
-Route::get('/siswa/pending', [App\Http\Controllers\siswa\SiswaController::class, 'showPending'])->middleware('auth:siswa')->name('siswa.pending');
-
+Route::controller(SiswaController::class)->group(function () {
+    Route::get('/siswa/biodata', 'showBiodata')->middleware('auth:siswa')->name('siswa.biodata');
+    Route::post('/siswa/biodata', 'submitBiodata')->middleware('auth:siswa')->name('siswa.biodata.submit');
+    Route::get('/siswa/register-kategori', 'showRegisterKategori')->middleware('auth:siswa')->name('siswa.register-kategori');
+    Route::get('/siswa/payment', 'showPayment')->middleware('auth:siswa')->name('siswa.payment');
+    Route::post('/siswa/payment', 'submitPayment')->middleware('auth:siswa')->name('siswa.payment.submit');
+    Route::get('/siswa/pending', 'showPending')->middleware('auth:siswa')->name('siswa.pending');
+});
 Route::get('/guru', function () {
     if (!auth()->user()->isGuru()) {
         return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
@@ -52,18 +53,18 @@ Route::get('/guru', function () {
     return view('guru.index');
 })->middleware('auth:web')->name('guru.dashboard');
 
-// Admin Dashboard & Pricing CRUD
-Route::middleware(['auth:web'])->group(function () {
-    Route::get('/admin', [\App\Http\Controllers\admin\AdminController::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/paket', [\App\Http\Controllers\admin\AdminController::class, 'inputPrice'])->name('admin.paket');
-    Route::put('/admin/paket/{id}', [\App\Http\Controllers\admin\AdminController::class, 'updatePrice'])->name('admin.paket.update');
-    Route::get('/admin/rekening', [\App\Http\Controllers\admin\AdminController::class, 'inputRekening'])->name('admin.rekening');
-    Route::post('/admin/rekening', [\App\Http\Controllers\admin\AdminController::class, 'storeRekening'])->name('admin.rekening.store');
-    Route::put('/admin/rekening/{id}', [\App\Http\Controllers\admin\AdminController::class, 'updateRekening'])->name('admin.rekening.update');
-    Route::delete('/admin/rekening/{id}', [\App\Http\Controllers\admin\AdminController::class, 'deleteRekening'])->name('admin.rekening.delete');
-    Route::get('/admin/siswa/approve', [\App\Http\Controllers\admin\AdminController::class, 'approvSiswa'])->name('admin.siswa.approve.index');
-    Route::post('/admin/siswa/approve/{id}', [\App\Http\Controllers\admin\AdminController::class, 'submitApprovSiswa'])->name('admin.siswa.approve.submit');
-    Route::get('/admin/siswa/detail/{id}', [\App\Http\Controllers\admin\AdminController::class, 'detailSiswa'])->name('admin.siswa.detail');
-    Route::get('/admin/siswa', [\App\Http\Controllers\admin\AdminController::class, 'daftarSiswa'])->name('admin.siswa.daftar.index');
-});
+
+Route::controller(AdminController::class)->group(function(){
+    Route::get('/admin', 'index')->name('admin.dashboard');
+    Route::get('/admin/paket', 'inputPrice')->name('admin.paket');
+    Route::put('/admin/paket/{id}', 'updatePrice')->name('admin.paket.update');
+    Route::get('/admin/rekening', 'inputRekening')->name('admin.rekening');
+    Route::post('/admin/rekening', 'storeRekening')->name('admin.rekening.store');
+    Route::put('/admin/rekening/{id}', 'updateRekening')->name('admin.rekening.update');
+    Route::delete('/admin/rekening/{id}', 'deleteRekening')->name('admin.rekening.delete');
+    Route::get('/admin/siswa/approve', 'approvSiswa')->name('admin.siswa.approve.index');
+    Route::post('/admin/siswa/approve/{id}', 'submitApprovSiswa')->name('admin.siswa.approve.submit');
+    Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
+    Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
+})->middleware('auth:web');
 
