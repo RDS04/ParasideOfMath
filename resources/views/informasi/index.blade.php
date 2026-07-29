@@ -36,21 +36,27 @@
         }
 
         .pricing-swiper .swiper-slide {
+            position: relative;
+            z-index: 1;
             width: 385px !important;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             transform: scale(0.86);
             filter: blur(3px);
             opacity: 0.5;
-            z-index: 1;
         }
 
         @media (max-width: 640px) {
             .pricing-swiper .swiper-slide {
                 width: 300px !important;
             }
+            .pricing-swiper .swiper-slide-active {
+                transform: translateX(12px) scale(1.06) !important;
+                z-index: 20 !important;
+            }
         }
 
         .pricing-swiper .swiper-slide-active {
+            position: relative;
             transform: scale(1.06) !important;
             filter: blur(0px) !important;
             opacity: 1 !important;
