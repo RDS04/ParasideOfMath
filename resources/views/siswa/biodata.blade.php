@@ -1,7 +1,7 @@
 @extends('layouts.header', ['active_step' => 2])
 
 @section('content')
-  <div class="w-full max-w-6xl bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 p-6 sm:p-10">
+  <div class="w-full max-w-7xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 p-6 sm:p-10">
     <!-- Brand Header -->
     <div class="flex items-center justify-between mb-8 pb-6 border-b border-purple-100">
       <div class="flex items-center gap-3">
@@ -10,12 +10,12 @@
       </div>
     </div>
 
-    <!-- Mini Progress Bar for 7 Bagian -->
+    <!-- Mini Progress Bar for 6 Bagian -->
     <div class="mb-8">
       <div class="h-2 w-full bg-purple-100 rounded-full overflow-hidden">
-        <div class="h-full bg-gradient-to-r from-purple-500 to-purple-900 rounded-full transition-all duration-300" id="progressFill" style="width:14.3%"></div>
+        <div class="h-full bg-gradient-to-r from-purple-500 to-purple-900 rounded-full transition-all duration-300" id="progressFill" style="width:16.7%"></div>
       </div>
-      <div class="text-xs font-bold text-slate-500 mt-2" id="progressText">Bagian 2 dari 7</div>
+      <div class="text-xs font-bold text-slate-500 mt-2" id="progressText">Bagian 1 dari 6</div>
     </div>
 
     <!-- Notifications -->
@@ -34,9 +34,9 @@
     <form id="wizardForm" action="{{ route('siswa.biodata.submit') }}" method="POST" novalidate>
       @csrf
 
-      <!-- BAGIAN 2 — DATA SISWA -->
-      <section class="step-panel active space-y-5" data-step="2">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 2 dari 7</span>
+      <!-- BAGIAN 1 — DATA SISWA -->
+      <section class="step-panel active space-y-5" data-step="1">
+        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 1 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Data Siswa</h1>
         <p class="text-sm text-slate-500">Isi data diri siswa dengan lengkap dan benar sesuai identitas resmi.</p>
 
@@ -80,7 +80,7 @@
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kelas<span class="text-amber-600 ml-1">*</span></label>
             <select name="kelas" class="form-input cursor-pointer">
               <option value="">Pilih kelas</option>
-              <optgroup label="SD">
+              <optgroup label="SD" id="kelas_sd">
                 <option>Kelas 1 SD</option>
                 <option>Kelas 2 SD</option>
                 <option>Kelas 3 SD</option>
@@ -88,17 +88,19 @@
                 <option>Kelas 5 SD</option>
                 <option>Kelas 6 SD</option>
               </optgroup>
-              <optgroup label="SMP">
+              <optgroup label="SMP" id="kelas_smp">
                 <option>Kelas 7 SMP</option>
                 <option>Kelas 8 SMP</option>
                 <option>Kelas 9 SMP</option>
               </optgroup>
-              <optgroup label="SMA">
+              <optgroup label="SMA" id="kelas_sma">
                 <option>Kelas 10 SMA</option>
                 <option>Kelas 11 SMA</option>
                 <option>Kelas 12 SMA</option>
               </optgroup>
-            </select>
+              <option value="lainnya">Lainnya</option>
+              </select>
+            <!-- <input type="text" name="kelas" placeholder="Kelas" class="form-input hidden" > -->
             <div class="error">Kelas wajib dipilih.</div>
           </div>
           <div class="field" data-required="true">
@@ -132,9 +134,9 @@
         </div>
       </section>
 
-      <!-- BAGIAN 3 — MINAT & SUMBER INFO -->
-      <section class="step-panel space-y-5" data-step="3">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 3 dari 7</span>
+      <!-- BAGIAN 2 — MINAT & SUMBER INFO -->
+      <section class="step-panel space-y-5" data-step="2">
+        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 2 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Minat Belajar &amp; Sumber Informasi</h1>
         <p class="text-sm text-slate-500">Ceritakan bagaimana kamu mengenal PM dan pelajaran apa yang ingin di les kan.</p>
 
@@ -270,9 +272,9 @@
         </div>
       </section>
 
-      <!-- BAGIAN 4 — JADWAL PULANG SEKOLAH -->
-      <section class="step-panel space-y-5" data-step="4">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 4 dari 7</span>
+      <!-- BAGIAN 3 — JADWAL PULANG SEKOLAH -->
+      <section class="step-panel space-y-5" data-step="3">
+        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 3 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Jadwal Pulang Sekolah</h1>
         <p class="text-sm text-slate-500">Isi jam pulang sekolah siswa untuk setiap hari.</p>
 
@@ -316,9 +318,9 @@
         </div>
       </section>
 
-      <!-- BAGIAN 5 — KEGIATAN RUTIN -->
-      <section class="step-panel space-y-5" data-step="5">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 5 dari 7</span>
+      <!-- BAGIAN 4 — KEGIATAN RUTIN -->
+      <section class="step-panel space-y-5" data-step="4">
+        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 4 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Kegiatan Rutin Selain Jadwal Sekolah</h1>
         <p class="text-sm text-slate-500">Contoh: les lain, ekstrakurikuler, ngaji, olahraga, dll.</p>
 
@@ -331,9 +333,9 @@
         </div>
       </section>
 
-      <!-- BAGIAN 6 — DATA IBU -->
-      <section class="step-panel space-y-5" data-step="6">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 6 dari 7</span>
+      <!-- BAGIAN 5 — DATA IBU -->
+      <section class="step-panel space-y-5" data-step="5">
+        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 5 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Data Ibu</h1>
         <p class="text-sm text-slate-500">Isi data diri ibu kandung / wali siswa.</p>
 
@@ -375,9 +377,9 @@
         </div>
       </section>
 
-      <!-- BAGIAN 7 — DATA AYAH -->
-      <section class="step-panel space-y-5" data-step="7">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 7 dari 7</span>
+      <!-- BAGIAN 6 — DATA AYAH -->
+      <section class="step-panel space-y-5" data-step="6">
+        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 6 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Data Ayah</h1>
         <p class="text-sm text-slate-500">Isi data diri ayah kandung / wali siswa.</p>
 
@@ -491,9 +493,9 @@
   </style>
 
   <script>
-    const steps = ['2', '3', '4', '5', '6', '7', 'done'];
+    const steps = ['1', '2', '3', '4', '5', '6', 'done'];
     let current = 0;
-    const totalBagian = 7;
+    const totalBagian = 6;
 
     const panels = document.querySelectorAll('.step-panel');
     const btnBack = document.getElementById('btnBack');
@@ -508,12 +510,12 @@
 
       const isDone = steps[current] === 'done';
       btnBack.style.display = current === 0 ? 'none' : 'inline-flex';
-      btnNext.textContent = (current === steps.length - 2) ? 'Kirim Formulir ✓' : 'Lanjut →';
+      btnNext.textContent = (current === steps.length - 1) ? 'Kirim Formulir ✓' : 'Lanjut →';
       navRow.style.display = isDone ? 'none' : 'flex';
 
       const bagianNumber = isDone ? totalBagian : parseInt(steps[current]);
       progressFill.style.width = ((bagianNumber) / totalBagian * 100) + '%';
-      progressText.textContent = isDone ? 'Selesai — 7 dari 7 bagian' : `Bagian ${bagianNumber} dari ${totalBagian}`;
+      progressText.textContent = isDone ? 'Selesai — 6 dari 6 bagian' : `Bagian ${bagianNumber} dari ${totalBagian}`;
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -555,7 +557,7 @@
       if (steps[current] === 'done') return;
       if (!validateCurrentStep()) return;
 
-      if (current === steps.length - 2) {
+      if (current === steps.length - 1) {
         // last real step before 'done' -> submit form to proceed to regisKategory
         form.submit();
       } else {
@@ -594,5 +596,17 @@
     });
 
     renderStep();
+
+    // Tampilkan input kelas tambahan saat "Lainnya" dipilih
+  //   const kelasSelect = document.querySelector('select[name="kelas"]');
+  //   const kelaslainnya = document.querySelector('input[name="lainnya"]');
+
+  //   kelasSelect.addEventListener('change', function() {
+  //     if (this.value === 'lainnya') {
+  //       kelaslainnya.classList.remove("hidden");
+  //     } else {
+  //       kelaslainnya.classList.add("hidden");
+  //     }
+  //   });
   </script>
 @endsection

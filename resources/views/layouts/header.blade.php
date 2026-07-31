@@ -83,7 +83,7 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
 
     <!-- ══════ STEP INDICATOR ══════ -->
-    <div class="w-full max-w-6xl mb-8">
+    <div class="w-full max-w-7xl mb-8">
         <div class="flex items-center justify-between max-w-3xl mx-auto px-4">
             <!-- Step 1: Registrasi -->
             <div class="flex flex-col items-center">
@@ -199,7 +199,7 @@
             </div>
         </div>
     </div>
-    <div class="content-wrapper">
+    <div class="content-wrapper w-full flex justify-center">
         @yield('content')
     </div>
 </body>

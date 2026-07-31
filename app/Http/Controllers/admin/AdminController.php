@@ -225,4 +225,16 @@ class AdminController extends Controller
 
         return view('admin.daftarSiswa', compact('students'));
     }
+
+
+    public function tambahSiswa()
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        
+
+        return view('admin.tambahSiswa');
+    }
 }

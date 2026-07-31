@@ -66,5 +66,6 @@ Route::controller(AdminController::class)->group(function(){
     Route::post('/admin/siswa/approve/{id}', 'submitApprovSiswa')->name('admin.siswa.approve.submit');
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
+    Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
 })->middleware('auth:web');
 
