@@ -1,11 +1,8 @@
 @extends('layouts.header', ['active_step' => 2])
 
 @section('content')
-<<<<<<< HEAD
   <div class="w-full max-w-7xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 p-6 sm:p-10">
-=======
-  <div class="w-full max-w-6xl  bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 p-6 sm:p-10">
->>>>>>> ad755aedb5eefb6dbadb1b7b2953995a096e88ea
+
     <!-- Brand Header -->
     <div class="flex items-center justify-between mb-8 pb-6 border-b border-purple-100">
       <div class="flex items-center gap-3">
