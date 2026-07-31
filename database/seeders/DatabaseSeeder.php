@@ -24,7 +24,10 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $this->call(PaketBelajarSeeder::class);
+        $this->call([
+            PaketBelajarSeeder::class,
+            MapelSeeder::class,
+        ]);
 
         if (\App\Models\Rekening::count() == 0) {
             \App\Models\Rekening::create([

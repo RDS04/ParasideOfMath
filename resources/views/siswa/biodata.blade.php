@@ -180,69 +180,7 @@
           </div>
         </div>
 
-        <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mata Pelajaran &amp; Jumlah Minimal Shift/Minggu<span class="text-amber-600 ml-1">*</span></label>
-          <div class="text-xs text-slate-400 mb-3">Pilih semua pelajaran yang ingin di les kan di PM.</div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Matematika Wajib 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Matematika Wajib 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Matematika Lanjut 3x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Matematika Lanjut 3x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Matematika Wajib + Lanjut 4x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Matematika Wajib + Matematika Lanjut 4x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Fisika 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Fisika 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Kimia 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Kimia 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Biologi 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Biologi 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Bahasa Inggris 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Bahasa Inggris 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Bahasa Indonesia 1x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Bahasa Indonesia 1x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Bahasa Indonesia 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Bahasa Indonesia 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Sejarah 1x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Sejarah 1x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Sejarah 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Sejarah 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Matematika TKA 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Matematika TKA 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Bahasa Indonesia TKA 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Bahasa Indonesia TKA 2x</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="checkbox" name="mapel" value="Bahasa Inggris TKA 2x" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Bahasa Inggris TKA 2x</span>
-            </label>
-          </div>
-          <div class="error">Pilih minimal satu mata pelajaran.</div>
-        </div>
+       
 
         <div class="field" data-required="true">
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nilai UN / Rapor Terakhir Sesuai Pelajaran yang Akan Di Les kan<span class="text-amber-600 ml-1">*</span></label>
@@ -447,6 +385,47 @@
     </div>
   </div>
 
+  <!-- Custom Confirmation Modal -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <!-- Backdrop with blur -->
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs opacity-0 transition-opacity duration-300"></div>
+    
+    <!-- Modal Card -->
+    <div class="relative bg-white rounded-3xl shadow-2xl border border-purple-100 max-w-md w-full p-6 text-center transform scale-95 opacity-0 transition-all duration-300 ease-out" id="modalCard">
+      <!-- Icon -->
+      <div class="w-16 h-16 bg-amber-50 border border-amber-200 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+        <i class="fas fa-exclamation-triangle text-2xl animate-bounce"></i>
+      </div>
+      
+      <!-- Title -->
+      <h3 class="font-display text-xl font-bold text-purple-950 mb-2">Konfirmasi Kirim Data</h3>
+      <!-- Message -->
+      <p class="text-sm text-slate-500 leading-relaxed mb-6">
+        Pastikan data sudah terisi dengan benar dan tersimpan kedalam database.
+      </p>
+      
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button type="button" id="btnCancelSubmit" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-all text-sm border border-slate-200 order-2 sm:order-1">
+          Periksa Kembali
+        </button>
+        <button type="button" id="btnConfirmSubmit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 text-white font-bold transition-all text-sm shadow-md shadow-purple-900/20 order-1 sm:order-2 flex-1">
+          Kirim & Lanjut
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 z-50 hidden flex-col items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs">
+    <div class="relative w-20 h-20 flex items-center justify-center">
+      <div class="absolute inset-0 rounded-full border-4 border-purple-200/30"></div>
+      <div class="absolute inset-0 rounded-full border-4 border-t-purple-600 border-r-purple-600 animate-spin"></div>
+      <img src="{{ asset('images/logoPM.webp') }}" alt="Logo" class="w-10 h-10 object-contain animate-pulse" />
+    </div>
+    <p class="text-white font-bold mt-4 tracking-wide text-sm">Menyimpan data dan mengalihkan ke menu pilih paket...</p>
+  </div>
+
   <style>
     .step-panel {
       display: none;
@@ -491,6 +470,10 @@
     .error {
       display: none;
     }
+
+    .backdrop-blur-xs {
+      backdrop-filter: blur(2px);
+    }
   </style>
 
   <script>
@@ -506,12 +489,93 @@
     const navRow = document.getElementById('navRow');
     const form = document.getElementById('wizardForm');
 
+    // LocalStorage keys prefix
+    const STORAGE_PREFIX = 'siswa_biodata_';
+
+    // Function to save form data to LocalStorage
+    function saveFormData() {
+      const elements = form.querySelectorAll('input, select, textarea');
+      elements.forEach(el => {
+        if (!el.name || el.name === '_token') return;
+
+        if (el.type === 'radio') {
+          if (el.checked) {
+            localStorage.setItem(STORAGE_PREFIX + el.name, el.value);
+          }
+        } else if (el.type === 'checkbox') {
+          const checkboxes = form.querySelectorAll(`input[name="${el.name}"][type="checkbox"]`);
+          const checkedValues = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
+          localStorage.setItem(STORAGE_PREFIX + el.name, JSON.stringify(checkedValues));
+        } else {
+          localStorage.setItem(STORAGE_PREFIX + el.name, el.value);
+        }
+      });
+      // Also save current step
+      localStorage.setItem('siswa_biodata_step', current);
+    }
+
+    // Function to load form data from LocalStorage
+    function loadFormData() {
+      const elements = form.querySelectorAll('input, select, textarea');
+      
+      // Load and set the current step
+      const savedStep = localStorage.getItem('siswa_biodata_step');
+      if (savedStep !== null) {
+        const stepNum = parseInt(savedStep);
+        if (!isNaN(stepNum) && stepNum >= 0 && stepNum < steps.length) {
+          current = stepNum;
+        }
+      }
+
+      elements.forEach(el => {
+        if (!el.name || el.name === '_token') return;
+
+        const savedValue = localStorage.getItem(STORAGE_PREFIX + el.name);
+        if (savedValue === null) return;
+
+        if (el.type === 'radio') {
+          if (el.value === savedValue) {
+            el.checked = true;
+            // Dispatch change event to clean up errors if needed
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        } else if (el.type === 'checkbox') {
+          try {
+            const checkedValues = JSON.parse(savedValue);
+            if (Array.isArray(checkedValues)) {
+              el.checked = checkedValues.includes(el.value);
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          } catch (e) {
+            console.error('Error parsing checkbox value', e);
+          }
+        } else {
+          el.value = savedValue;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+    }
+
+    // Function to clear form data from LocalStorage
+    function clearFormData() {
+      const keys = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith(STORAGE_PREFIX) || key === 'siswa_biodata_step')) {
+          keys.push(key);
+        }
+      }
+      keys.forEach(key => localStorage.removeItem(key));
+    }
+
     function renderStep() {
       panels.forEach(p => p.classList.toggle('active', p.dataset.step === steps[current]));
 
       const isDone = steps[current] === 'done';
       btnBack.style.display = current === 0 ? 'none' : 'inline-flex';
-      btnNext.textContent = (current === steps.length - 1) ? 'Kirim Formulir ✓' : 'Lanjut →';
+      
+      // On the 6th step (index 5), the next button should say "Kirim Formulir ✓"
+      btnNext.textContent = (current === steps.length - 2) ? 'Kirim Formulir ✓' : 'Lanjut →';
       navRow.style.display = isDone ? 'none' : 'flex';
 
       const bagianNumber = isDone ? totalBagian : parseInt(steps[current]);
@@ -554,16 +618,64 @@
       return valid;
     }
 
+    // Modal & Loading Elements
+    const confirmModal = document.getElementById('confirmModal');
+    const modalCard = document.getElementById('modalCard');
+    const btnCancelSubmit = document.getElementById('btnCancelSubmit');
+    const btnConfirmSubmit = document.getElementById('btnConfirmSubmit');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    function showConfirmationModal() {
+      confirmModal.classList.remove('hidden');
+      confirmModal.classList.add('flex');
+      setTimeout(() => {
+        confirmModal.querySelector('.absolute').classList.remove('opacity-0');
+        confirmModal.querySelector('.absolute').classList.add('opacity-100');
+        modalCard.classList.remove('scale-95', 'opacity-0');
+        modalCard.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideConfirmationModal() {
+      confirmModal.querySelector('.absolute').classList.remove('opacity-100');
+      confirmModal.querySelector('.absolute').classList.add('opacity-0');
+      modalCard.classList.remove('scale-100', 'opacity-100');
+      modalCard.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        confirmModal.classList.remove('flex');
+        confirmModal.classList.add('hidden');
+      }, 300);
+    }
+
+    btnCancelSubmit.addEventListener('click', hideConfirmationModal);
+
+    btnConfirmSubmit.addEventListener('click', () => {
+      hideConfirmationModal();
+      
+      // Show loading overlay
+      loadingOverlay.classList.remove('hidden');
+      loadingOverlay.classList.add('flex');
+      
+      // Clear localStorage data before submitting so it starts fresh next time
+      clearFormData();
+      
+      // Submit the form
+      setTimeout(() => {
+        form.submit();
+      }, 1200);
+    });
+
     btnNext.addEventListener('click', () => {
       if (steps[current] === 'done') return;
       if (!validateCurrentStep()) return;
 
-      if (current === steps.length - 1) {
-        // last real step before 'done' -> submit form to proceed to regisKategory
-        form.submit();
+      if (current === steps.length - 2) {
+        // Last data step (Step 6) -> show confirmation modal
+        showConfirmationModal();
       } else {
         current++;
         renderStep();
+        saveFormData(); // Save current step
       }
     });
 
@@ -571,11 +683,14 @@
       if (current > 0) {
         current--;
         renderStep();
+        saveFormData(); // Save current step
       }
     });
 
-    // clear invalid state as user fixes fields
+    // Save data automatically on input/change events
     form.addEventListener('input', (e) => {
+      saveFormData();
+
       const field = e.target.closest('.field');
       if (!field || field.dataset.required !== 'true') return;
 
@@ -590,24 +705,16 @@
     });
 
     form.addEventListener('change', (e) => {
+      saveFormData();
+
       if (e.target.type === 'radio' || e.target.type === 'checkbox') {
         const field = e.target.closest('.field');
         if (field) field.classList.remove('invalid');
       }
     });
 
+    // Initialization
+    loadFormData();
     renderStep();
-
-    // Tampilkan input kelas tambahan saat "Lainnya" dipilih
-  //   const kelasSelect = document.querySelector('select[name="kelas"]');
-  //   const kelaslainnya = document.querySelector('input[name="lainnya"]');
-
-  //   kelasSelect.addEventListener('change', function() {
-  //     if (this.value === 'lainnya') {
-  //       kelaslainnya.classList.remove("hidden");
-  //     } else {
-  //       kelaslainnya.classList.add("hidden");
-  //     }
-  //   });
   </script>
 @endsection

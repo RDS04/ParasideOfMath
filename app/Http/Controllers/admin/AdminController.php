@@ -15,7 +15,7 @@ class AdminController extends Controller
      */
     public function index()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
         return view('admin.dashboard');
@@ -26,7 +26,7 @@ class AdminController extends Controller
      */
     public function inputPrice()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
         $packages = PaketBelajar::all();
@@ -38,7 +38,7 @@ class AdminController extends Controller
      */
     public function updatePrice(Request $request, $id)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -86,7 +86,7 @@ class AdminController extends Controller
      */
     public function inputRekening()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
         $rekening = \App\Models\Rekening::all();
@@ -98,7 +98,7 @@ class AdminController extends Controller
      */
     public function storeRekening(Request $request)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -124,7 +124,7 @@ class AdminController extends Controller
      */
     public function updateRekening(Request $request, $id)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -152,7 +152,7 @@ class AdminController extends Controller
      */
     public function deleteRekening($id)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -167,7 +167,7 @@ class AdminController extends Controller
      */
     public function approvSiswa()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -184,7 +184,7 @@ class AdminController extends Controller
      */
     public function submitApprovSiswa($id)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -201,7 +201,7 @@ class AdminController extends Controller
      */
     public function detailSiswa($id)
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -216,7 +216,7 @@ class AdminController extends Controller
      */
     public function daftarSiswa()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
@@ -227,9 +227,70 @@ class AdminController extends Controller
     }
 
 
+    public function inputMapel()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+        $mapels = \App\Models\Mapel::all();
+        return view('admin.inputMapel', compact('mapels'));
+    }
+
+    public function storeMapel(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'nama_mapel' => ['required', 'string', 'max:255'],
+            'shift' => ['required', 'integer', 'min:1'],
+        ]);
+
+        \App\Models\Mapel::create([
+            'nama_mapel' => $request->nama_mapel,
+            'shift' => $request->shift,
+        ]);
+
+        return back()->with('success', 'Mata Pelajaran baru berhasil disimpan!');
+    }
+
+    public function updateMapel(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $mapel = \App\Models\Mapel::findOrFail($id);
+
+        $request->validate([
+            'nama_mapel' => ['required', 'string', 'max:255'],
+            'shift' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $mapel->update([
+            'nama_mapel' => $request->nama_mapel,
+            'shift' => $request->shift,
+        ]);
+
+        return back()->with('success', 'Mata Pelajaran ' . $mapel->nama_mapel . ' berhasil diupdate!');
+    }
+
+    public function deleteMapel($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $mapel = \App\Models\Mapel::findOrFail($id);
+        $mapel->delete();
+
+        return back()->with('success', 'Mata Pelajaran berhasil dihapus!');
+    }
+
     public function tambahSiswa()
     {
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 

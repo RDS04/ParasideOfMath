@@ -27,7 +27,7 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
                     <a href="{{ $dashboardRoute }}" class="nav-link {{ Route::is('siswa.dashboard') || Route::is('admin.dashboard') || Route::is('guru.dashboard') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-th-large"></i>
+                        <i class="nav-icon fas fa-tachometer-alt text-purple-400"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
@@ -38,19 +38,19 @@
                     
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-book-reader"></i>
+                            <i class="nav-icon fas fa-chalkboard text-purple-400"></i>
                             <p>Kelas Saya</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-calendar-alt"></i>
+                            <i class="nav-icon fas fa-calendar-alt text-amber-400"></i>
                             <p>Jadwal Belajar</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-award"></i>
+                            <i class="nav-icon fas fa-file-alt text-teal-400"></i>
                             <p>Materi & Tugas</p>
                         </a>
                     </li>
@@ -59,13 +59,13 @@
                     
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-file-invoice-dollar"></i>
+                            <i class="nav-icon fas fa-receipt text-rose-400"></i>
                             <p>Tagihan Belajar</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-history"></i>
+                            <i class="nav-icon fas fa-history text-emerald-400"></i>
                             <p>Riwayat Pembayaran</p>
                         </a>
                     </li>
@@ -76,22 +76,25 @@
 
                     <li class="nav-item {{ Route::is('admin.siswa.*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Route::is('admin.siswa.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-user-graduate"></i>
+                            <i class="nav-icon fas fa-user-graduate text-purple-400"></i>
                             <p>Data Siswa <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
                                 <a href="{{ route('admin.siswa.daftar.index') }}" class="nav-link {{ Route::is('admin.siswa.daftar.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
+                                    <i class="fas fa-users nav-icon text-purple-400"></i>
                                     <p>Daftar Siswa</p>
                                 </a>
                             </li>
-                            <li class="nav-item"><a href="{{ route('admin.siswa.tambah.index') }}" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.siswa.tambah.index') }}" class="nav-link {{ Route::is('admin.siswa.tambah.index') ? 'active' : '' }}">
+                                    <i class="fas fa-user-plus nav-icon text-success"></i>
                                     <p>Tambah Siswa</p>
-                                </a></li>
+                                </a>
+                            </li>
                             <li class="nav-item">
                                 <a href="{{ route('admin.siswa.approve.index') }}" class="nav-link {{ Route::is('admin.siswa.approve.index') ? 'active' : '' }}">
-                                    <i class="far fa-circle nav-icon"></i>
+                                    <i class="fas fa-user-check nav-icon text-warning"></i>
                                     <p>Approve Siswa</p>
                                 </a>
                             </li>
@@ -99,112 +102,171 @@
                     </li>
 
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="nav-icon fas fa-chalkboard-teacher"></i>
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-chalkboard-teacher text-amber-400"></i>
                             <p>Tutor <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-id-card nav-icon text-amber-400"></i>
                                     <p>Daftar Tutor</p>
-                                </a></li>
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-plus-circle nav-icon text-success"></i>
                                     <p>Tambah Tutor</p>
-                                </a></li>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="nav-icon fas fa-calendar-alt"></i>
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-alt text-teal-400"></i>
                             <p>Jadwal Les <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-calendar-week nav-icon text-teal-400"></i>
                                     <p>Kalender Jadwal</p>
-                                </a></li>
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-calendar-plus nav-icon text-success"></i>
                                     <p>Tambah Jadwal</p>
-                                </a></li>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="nav-icon fas fa-book-open"></i>
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-book-open text-info"></i>
                             <p>Materi &amp; Soal <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-folder-open nav-icon text-warning"></i>
                                     <p>Bank Soal</p>
-                                </a></li>
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-tags nav-icon text-info"></i>
                                     <p>Kategori Materi</p>
-                                </a></li>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
                     <li class="nav-header">KEUANGAN</li>
 
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="nav-icon fas fa-wallet"></i>
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-wallet text-emerald-400"></i>
                             <p>Pembayaran <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-history nav-icon text-emerald-400"></i>
                                     <p>Riwayat Pembayaran</p>
-                                </a></li>
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-file-invoice nav-icon text-rose-400"></i>
                                     <p>Invoice</p>
-                                </a></li>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="nav-icon fas fa-chart-line"></i>
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-chart-line text-rose-400"></i>
                             <p>Laporan <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-chart-bar nav-icon text-success"></i>
                                     <p>Laporan Pendapatan</p>
-                                </a></li>
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-clipboard-list nav-icon text-primary"></i>
                                     <p>Laporan Kehadiran</p>
-                                </a></li>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
                     <li class="nav-header">PENGELOLAAN HARGA</li>
                     <li class="nav-item">
                         <a href="{{ route('admin.paket') }}" class="nav-link {{ Route::is('admin.paket') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-tags"></i>
+                            <i class="nav-icon fas fa-box-open text-amber-400"></i>
                             <p>Kelola Paket Belajar</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.rekening') }}" class="nav-link {{ Route::is('admin.rekening') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-credit-card"></i>
+                            <i class="nav-icon fas fa-credit-card text-teal-400"></i>
                             <p>Kelola Rekening</p>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="{{ route('admin.mapel') }}" class="nav-link {{ Route::is('admin.mapel') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-book text-info"></i>
+                            <p>Kelola Mata Pelajaran</p>
                         </a>
                     </li>
 
                     <li class="nav-header">LAINNYA</li>
 
                     <li class="nav-item">
-                        <a href="#" class="nav-link"><i class="nav-icon fas fa-users-cog"></i>
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-users-cog text-slate-400"></i>
                             <p>Pengguna &amp; Peran <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-users nav-icon text-slate-400"></i>
                                     <p>Daftar Pengguna</p>
-                                </a></li>
-                            <li class="nav-item"><a href="#" class="nav-link"><i class="far fa-circle nav-icon"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" class="nav-link">
+                                    <i class="fas fa-user-shield nav-icon text-rose-400"></i>
                                     <p>Peran &amp; Izin</p>
-                                </a></li>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 @endif
 
-                <li class="nav-item"><a href="#" class="nav-link"><i class="nav-icon fas fa-cog"></i>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon fas fa-cog text-slate-300"></i>
                         <p>Pengaturan</p>
-                    </a></li>
+                    </a>
+                </li>
             </ul>
         </nav>
     </div>
 </aside>
+
+<!-- ══════ STYLE UNTUK SUB-MENU MENJOROK KE DALAM ══════ -->
+<style>
+    .nav-sidebar .nav-treeview {
+        padding-left: 15px !important;
+    }
+</style>

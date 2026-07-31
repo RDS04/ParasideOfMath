@@ -62,6 +62,10 @@ Route::controller(AdminController::class)->group(function(){
     Route::post('/admin/rekening', 'storeRekening')->name('admin.rekening.store');
     Route::put('/admin/rekening/{id}', 'updateRekening')->name('admin.rekening.update');
     Route::delete('/admin/rekening/{id}', 'deleteRekening')->name('admin.rekening.delete');
+    Route::get('/admin/mapel', 'inputMapel')->name('admin.mapel');
+    Route::post('/admin/mapel', 'storeMapel')->name('admin.mapel.store');
+    Route::put('/admin/mapel/{id}', 'updateMapel')->name('admin.mapel.update');
+    Route::delete('/admin/mapel/{id}', 'deleteMapel')->name('admin.mapel.delete');
     Route::get('/admin/siswa/approve', 'approvSiswa')->name('admin.siswa.approve.index');
     Route::post('/admin/siswa/approve/{id}', 'submitApprovSiswa')->name('admin.siswa.approve.submit');
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
