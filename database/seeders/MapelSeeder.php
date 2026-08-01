@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Mapel;
 
 class MapelSeeder extends Seeder
 {
@@ -30,7 +31,7 @@ class MapelSeeder extends Seeder
         ];
 
         foreach ($mapels as $mapel) {
-            \App\Models\Mapel::firstOrCreate($mapel);
+            Mapel::firstOrCreate($mapel);
         }
     }
 }
