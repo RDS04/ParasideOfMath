@@ -789,11 +789,7 @@
 
                         <div class="flex items-center justify-center gap-4 mt-5">
                             <button id="prevBtn" aria-label="Sebelumnya"
-                                class="w-[46px] h-[46px] rounded-full bg-white text-[#1e1b2e] flex items-center justify-center border-none cursor-pointer shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:scale-105 active:scale-95 focus:outline-none">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                    <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
+                                class=" rounded-full text-[#1e1b2e] flex items-center justify-center border-none cursor-pointer shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:scale-105 active:scale-95 focus:outline-none">
                             </button>
 
                             <div class="flex gap-1.5 items-center select-none">
@@ -804,11 +800,7 @@
                             </div>
 
                             <button id="nextBtn" aria-label="Berikutnya"
-                                class="w-[46px] h-[46px] rounded-full bg-white text-[#1e1b2e] flex items-center justify-center border-none cursor-pointer shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:scale-105 active:scale-95 focus:outline-none">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                                    <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2.5"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
+                                class=" rounded-full text-[#1e1b2e] flex items-center justify-center border-none cursor-pointer shadow-[0_8px_20px_-6px_rgba(0,0,0,0.5)] transition-transform duration-150 ease-out hover:-translate-y-0.5 hover:scale-105 active:scale-95 focus:outline-none">
                             </button>
                         </div>
                     </div>
