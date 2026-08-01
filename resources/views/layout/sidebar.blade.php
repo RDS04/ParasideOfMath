@@ -70,8 +70,8 @@
                         </a>
                     </li>
 
-                @else
-                    <!-- ══════ ADMIN / TUTOR NAVIGATION ══════ -->
+                @elseif ($currentUser && $currentUser->isAdmin())
+                    <!-- ══════ ADMIN NAVIGATION ══════ -->
                     <li class="nav-header">AKADEMIK</li>
 
                     <li class="nav-item {{ Route::is('admin.siswa.*') ? 'menu-open' : '' }}">
@@ -250,6 +250,40 @@
                                 </a>
                             </li>
                         </ul>
+                    </li>
+                @elseif ($currentUser && $currentUser->isGuru())
+                    <!-- ══════ GURU (TUTOR) NAVIGATION ══════ -->
+                    <li class="nav-header">MENGAJAR</li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-calendar-check text-purple-400"></i>
+                            <p>Jadwal Mengajar</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-chalkboard-teacher text-amber-400"></i>
+                            <p>Kelas Bimbingan</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-users text-teal-400"></i>
+                            <p>Daftar Siswa Anda</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-book-reader text-rose-400"></i>
+                            <p>Materi &amp; Modul</p>
+                        </a>
+                    </li>
+                    <li class="nav-header">LAINNYA</li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-id-card text-info"></i>
+                            <p>Profil Pengajar</p>
+                        </a>
                     </li>
                 @endif
 

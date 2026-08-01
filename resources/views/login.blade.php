@@ -132,7 +132,7 @@
             display: flex;
             transition: color 0.2s;
         }
-        .field-group input {
+        .field-group input, .field-group select {
             width: 100%;
             padding: 13px 16px 13px 46px;
             border-radius: 12px;
@@ -143,13 +143,24 @@
             color: #241b3d;
             transition: all 0.2s ease;
         }
+        .field-group select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a8a2bd' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            padding-right: 40px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
         .field-group input::placeholder { color: #a8a2bd; }
-        .field-group input:focus {
+        .field-group input:focus, .field-group select:focus {
             background: white;
             border-color: #7c3aed;
             box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
         }
-        .field-group input:focus + .icon { color: #7c3aed; }
+        .field-group input:focus + .icon, .field-group select:focus + .icon { color: #7c3aed; }
 
         .check-custom {
             appearance: none;
@@ -429,6 +440,18 @@
                     @error('name')
                         <p class="text-xs text-rose-500 mt-1 pl-1 font-medium">{{ $message }}</p>
                     @enderror
+                </div>
+
+                <div class="field-group">
+                    <span class="icon">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                    <select id="regRole" name="role" required>
+                        <option value="siswa" {{ old('role') == 'siswa' ? 'selected' : '' }}>Daftar sebagai Siswa</option>
+                        <option value="guru" {{ old('role') == 'guru' ? 'selected' : '' }}>Daftar sebagai Guru (Tutor)</option>
+                    </select>
                 </div>
 
                 <div class="field-group">

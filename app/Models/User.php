@@ -71,4 +71,12 @@ class User extends Authenticatable
     {
         return $this->role === 'siswa';
     }
+
+    /**
+     * Get the Guru profile associated with the User.
+     */
+    public function guruProfile()
+    {
+        return $this->hasOne(Guru::class, 'user_id');
+    }
 }

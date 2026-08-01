@@ -45,16 +45,22 @@ Route::controller(SiswaController::class)->group(function () {
     Route::get('/siswa/payment', 'showPayment')->middleware('auth:siswa')->name('siswa.payment');
     Route::post('/siswa/payment', 'submitPayment')->middleware('auth:siswa')->name('siswa.payment.submit');
     Route::get('/siswa/pending', 'showPending')->middleware('auth:siswa')->name('siswa.pending');
+
 });
-Route::get('/guru', function () {
-    if (!auth()->user()->isGuru()) {
-        return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
-    }
-    return view('guru.index');
-})->middleware('auth:web')->name('guru.dashboard');
+Route::controller(AuthController::class)->prefix('guru')->group(function () {
+    Route::get('/register', 'showGuruRegisterForm')->name('guru.register');
+    Route::post('/register', 'registerGuru')->name('guru.register.post');
 
-
-Route::controller(AdminController::class)->group(function(){
+    Route::middleware('auth:web')->group(function () {
+        Route::get('/', function () {
+            if (!auth()->user()->isGuru()) {
+                return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+            }
+            return view('guru.index');
+        })->name('guru.dashboard');
+    });
+});
+Route::controller(AdminController::class)->group(function () {
     Route::get('/admin', 'index')->name('admin.dashboard');
     Route::get('/admin/paket', 'inputPrice')->name('admin.paket');
     Route::put('/admin/paket/{id}', 'updatePrice')->name('admin.paket.update');
