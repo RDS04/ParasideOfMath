@@ -464,16 +464,7 @@
     </div>
   </div>
 
-  <!-- Loading Overlay -->
-  <div id="loadingOverlay"
-    class="fixed inset-0 z-50 hidden flex-col items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs">
-    <div class="relative w-20 h-20 flex items-center justify-center">
-      <div class="absolute inset-0 rounded-full border-4 border-purple-200/30"></div>
-      <div class="absolute inset-0 rounded-full border-4 border-t-purple-600 border-r-purple-600 animate-spin"></div>
-      <img src="{{ asset('images/logoPM.webp') }}" alt="Logo" class="w-10 h-10 object-contain animate-pulse" />
-    </div>
-    <p class="text-white font-bold mt-4 tracking-wide text-sm">Menyimpan data dan mengalihkan ke menu pilih paket...</p>
-  </div>
+
 
   <style>
     .step-panel {
@@ -673,7 +664,6 @@
     const modalCard = document.getElementById('modalCard');
     const btnCancelSubmit = document.getElementById('btnCancelSubmit');
     const btnConfirmSubmit = document.getElementById('btnConfirmSubmit');
-    const loadingOverlay = document.getElementById('loadingOverlay');
 
     function showConfirmationModal() {
       confirmModal.classList.remove('hidden');
@@ -702,9 +692,10 @@
     btnConfirmSubmit.addEventListener('click', () => {
       hideConfirmationModal();
 
-      // Show loading overlay
-      loadingOverlay.classList.remove('hidden');
-      loadingOverlay.classList.add('flex');
+      // Show global loading overlay
+      if (window.showLoading) {
+        window.showLoading('Menyimpan data dan mengalihkan ke menu pilih paket...');
+      }
 
       // Submit the form
       setTimeout(() => {
