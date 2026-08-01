@@ -17,10 +17,41 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        if (User::where('email', 'test@example.com')->doesntExist()) {
-            User::factory()->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
+        // 1. Seed Administrator (users table)
+        if (User::where('email', 'admin@example.com')->doesntExist()) {
+            User::create([
+                'name' => 'Admin Test',
+                'email' => 'admin@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'admin',
+            ]);
+        }
+
+        // 2. Seed Guru / Tutor (users & gurus table)
+        if (User::where('email', 'guru@example.com')->doesntExist()) {
+            $guruUser = User::create([
+                'name' => 'Guru Test',
+                'email' => 'guru@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'role' => 'guru',
+            ]);
+
+            \App\Models\Guru::create([
+                'user_id' => $guruUser->id,
+                'no_telp' => '08123456789',
+                'alamat' => 'Jl. Pendidikan No. 45',
+                'spesialisasi' => 'Matematika SMA / Wajib',
+                'status' => 'aktif',
+            ]);
+        }
+
+        // 3. Seed Siswa / Student (siswa table)
+        if (\App\Models\Siswa::where('email', 'siswa@example.com')->doesntExist()) {
+            \App\Models\Siswa::create([
+                'name' => 'Siswa Test',
+                'email' => 'siswa@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'status' => 'active', // Langsung active agar bisa akses dashboard
             ]);
         }
 

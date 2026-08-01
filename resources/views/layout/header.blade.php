@@ -10,7 +10,7 @@
 <nav class="main-header navbar navbar-expand navbar-light">
 
     <ul class="navbar-nav">
-        <li class="nav-item">
+        <li class="nav-item {{ auth()->guard('siswa')->check() ? 'd-none d-md-inline-block' : '' }}">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button">
                 <i class="fas fa-bars"></i>
             </a>

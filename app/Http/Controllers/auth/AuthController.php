@@ -80,70 +80,32 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        $role = $request->input('role', 'siswa');
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:siswa'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah terdaftar.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min' => 'Kata sandi minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+        ]);
 
-        if ($role === 'guru') {
-            $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-            ], [
-                'name.required' => 'Nama lengkap wajib diisi.',
-                'email.required' => 'Alamat email wajib diisi.',
-                'email.email' => 'Format email tidak valid.',
-                'email.unique' => 'Email ini sudah terdaftar.',
-                'password.required' => 'Kata sandi wajib diisi.',
-                'password.min' => 'Kata sandi minimal harus 8 karakter.',
-                'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
-            ]);
+        // Buat data di tabel siswa
+        $siswa = Siswa::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
 
-            // Buat data di tabel users dengan role guru
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => 'guru',
-            ]);
+        // Login as newly registered student
+        Auth::guard('siswa')->login($siswa);
 
-            // Buat profil guru di tabel gurus
-            \App\Models\Guru::create([
-                'user_id' => $user->id,
-                'status' => 'aktif',
-            ]);
-
-            // Login as newly registered guru using web guard
-            Auth::guard('web')->login($user);
-
-            return redirect()->route('guru.dashboard')
-                ->with('success', 'Akun Guru berhasil dibuat! Selamat datang di dashboard Anda.');
-        } else {
-            $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'string', 'email', 'max:255', 'unique:siswa'],
-                'password' => ['required', 'string', 'min:8', 'confirmed'],
-            ], [
-                'name.required' => 'Nama lengkap wajib diisi.',
-                'email.required' => 'Alamat email wajib diisi.',
-                'email.email' => 'Format email tidak valid.',
-                'email.unique' => 'Email ini sudah terdaftar.',
-                'password.required' => 'Kata sandi wajib diisi.',
-                'password.min' => 'Kata sandi minimal harus 8 karakter.',
-                'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
-            ]);
-
-            // Buat data di tabel siswa
-            $siswa = Siswa::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-
-            // Login as newly registered student
-            Auth::guard('siswa')->login($siswa);
-
-            return redirect()->route('siswa.biodata')
-                ->with('success', 'Akun Siswa berhasil dibuat! Silakan lengkapi biodata Anda.');
-        }
+        return redirect()->route('siswa.biodata')
+            ->with('success', 'Akun Siswa berhasil dibuat! Silakan lengkapi biodata Anda.');
     }
 
     /**

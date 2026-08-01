@@ -50,11 +50,15 @@
     @include('layout.sidebar')
 
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
+    <div class="content-wrapper {{ auth()->guard('siswa')->check() ? 'pb-24 md:pb-0' : '' }}">
         @yield('content')
     </div>
 
     @include('layout.footer')
+
+    @if (auth()->guard('siswa')->check())
+        @include('layout.sideMobile')
+    @endif
 
 </div>
 <!-- ./wrapper -->

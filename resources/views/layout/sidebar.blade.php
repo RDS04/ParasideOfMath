@@ -7,7 +7,7 @@
         ? route('siswa.dashboard') 
         : ($currentUser && $currentUser->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
 @endphp
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<aside class="main-sidebar sidebar-dark-primary elevation-4 {{ auth()->guard('siswa')->check() ? 'hidden md:block' : '' }}">
     <a href="#" class="brand-link">
         <img src="https://placehold.co/32x32/fbbf24/4c1d95?text=PoM" alt="Paradise of Math"
             class="brand-image img-circle elevation-3" style="opacity:.9">
