@@ -95,7 +95,7 @@
           <div class="field" data-required="true">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kelas<span
                 class="text-amber-600 ml-1">*</span></label>
-            <select name="kelas" class="form-input cursor-pointer">
+            <select name="kelas" id="kelasSelect" class="form-input cursor-pointer">
               <option value="">Pilih kelas</option>
               <optgroup label="SD" id="kelas_sd">
                 <option>Kelas 1 SD</option>
@@ -117,7 +117,7 @@
               </optgroup>
               <option value="lainnya">Lainnya</option>
             </select>
-            <!-- <input type="text" name="kelas" placeholder="Kelas" class="form-input hidden" > -->
+            <input type="text" id="kelasLainnya" placeholder="Tulis kelas kamu" class="form-input hidden mt-3">
             <div class="error">Kelas wajib dipilih.</div>
           </div>
           <div class="field" data-required="true">
@@ -759,6 +759,27 @@
         if (field) field.classList.remove('invalid');
       }
     });
+
+    const kelasSelect = document.getElementById('kelasSelect');
+    const kelasLainnya = document.getElementById('kelasLainnya');
+
+    function toggleKelasLainnya() {
+      if (kelasSelect.value === 'lainnya') {
+        kelasLainnya.classList.remove('hidden');
+        kelasLainnya.name = 'kelas';       // input teks yang jadi sumber value
+        kelasSelect.removeAttribute('name'); // select dilepas dari pengiriman form
+        kelasLainnya.required = true;
+      } else {
+        kelasLainnya.classList.add('hidden');
+        kelasLainnya.removeAttribute('name');
+        kelasSelect.name = 'kelas';         // select jadi sumber value lagi
+        kelasLainnya.value = '';
+        kelasLainnya.required = false;
+      }
+    }
+
+    kelasSelect.addEventListener('change', toggleKelasLainnya);
+    toggleKelasLainnya(); // jalankan sekali saat halaman dimuat (untuk kasus reload dari LocalStorage)
 
     // Initialization
     loadFormData();
