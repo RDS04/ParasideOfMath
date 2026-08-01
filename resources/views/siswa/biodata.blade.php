@@ -1,27 +1,31 @@
 @extends('layouts.header', ['active_step' => 2])
 
 @section('content')
-  <div class="w-full max-w-7xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 p-6 sm:p-10">
+  <div
+    class="w-full max-w-7xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-purple-100 p-6 sm:p-10">
 
     <!-- Brand Header -->
     <div class="flex items-center justify-between mb-8 pb-6 border-b border-purple-100">
       <div class="flex items-center gap-3">
         <img src="{{ asset('images/logoPM.webp') }}" alt="Logo" class="w-10 h-10 object-contain" />
-        <span class="font-display text-lg font-bold text-purple-950">Paradise <span class="text-amber-500">of Math</span></span>
+        <span class="font-display text-lg font-bold text-purple-950">Paradise <span class="text-amber-500">of
+            Math</span></span>
       </div>
     </div>
 
     <!-- Mini Progress Bar for 6 Bagian -->
     <div class="mb-8">
       <div class="h-2 w-full bg-purple-100 rounded-full overflow-hidden">
-        <div class="h-full bg-gradient-to-r from-purple-500 to-purple-900 rounded-full transition-all duration-300" id="progressFill" style="width:16.7%"></div>
+        <div class="h-full bg-gradient-to-r from-purple-500 to-purple-900 rounded-full transition-all duration-300"
+          id="progressFill" style="width:16.7%"></div>
       </div>
       <div class="text-xs font-bold text-slate-500 mt-2" id="progressText">Bagian 1 dari 6</div>
     </div>
 
     <!-- Notifications -->
     @if (session('success'))
-      <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-emerald-50 border-emerald-200 text-emerald-800" role="alert">
+      <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-emerald-50 border-emerald-200 text-emerald-800"
+        role="alert">
         {{ session('success') }}
       </div>
     @endif
@@ -37,40 +41,51 @@
 
       <!-- BAGIAN 1 — DATA SISWA -->
       <section class="step-panel active space-y-5" data-step="1">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 1 dari 6</span>
+        <span
+          class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian
+          1 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Data Siswa</h1>
         <p class="text-sm text-slate-500">Isi data diri siswa dengan lengkap dan benar sesuai identitas resmi.</p>
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap Siswa<span class="text-amber-600 ml-1">*</span></label>
-          <input type="text" name="nama_lengkap"
-            value="{{ old('nama_lengkap', auth()->guard('siswa')->user()?->name) }}"
-            placeholder="Contoh: Muhammad Iqbal Ramadhan"
-            class="form-input">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap Siswa<span
+              class="text-amber-600 ml-1">*</span></label>
+          <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', auth()->guard('siswa')->user()?->name) }}"
+            placeholder="Contoh: Muhammad Iqbal Ramadhan" class="form-input">
           <div class="error">Nama lengkap wajib diisi.</div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Panggilan<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Panggilan<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="text" name="nama_panggilan" placeholder="Contoh: Iqbal" class="form-input">
             <div class="error">Nama panggilan wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. HP Siswa<span class="text-amber-600 ml-1">*</span></label>
-            <input type="tel" name="no_hp" placeholder="08xx-xxxx-xxxx" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. HP Siswa (WA)<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="tel" name="no_hp" value="{{ old('no_hp', auth()->guard('siswa')->user()?->whatsapp) }}"
+              placeholder="08xx-xxxx-xxxx" class="form-input">
             <div class="error">Nomor HP wajib diisi.</div>
+          </div>
+          <div class="field" data-required="false">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. Telepon Rumah</label>
+            <input type="tel" name="no_telp" placeholder="Contoh: 0285-xxxxxx / 08xx" class="form-input">
+            <div class="error">No. Telepon Rumah wajib diisi jika diperlukan.</div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tempat Lahir<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tempat Lahir<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="text" name="tempat_lahir" placeholder="Contoh: Pekalongan" class="form-input">
             <div class="error">Tempat lahir wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Lahir<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Lahir<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="date" name="tanggal_lahir" class="form-input">
             <div class="error">Tanggal lahir wajib diisi.</div>
           </div>
@@ -78,7 +93,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kelas<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kelas<span
+                class="text-amber-600 ml-1">*</span></label>
             <select name="kelas" class="form-input cursor-pointer">
               <option value="">Pilih kelas</option>
               <optgroup label="SD" id="kelas_sd">
@@ -100,13 +116,15 @@
                 <option>Kelas 12 SMA</option>
               </optgroup>
               <option value="lainnya">Lainnya</option>
-              </select>
+            </select>
             <!-- <input type="text" name="kelas" placeholder="Kelas" class="form-input hidden" > -->
             <div class="error">Kelas wajib dipilih.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sekolah<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="sekolah" placeholder="Nama sekolah asal" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sekolah<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="text" name="sekolah" value="{{ old('sekolah', auth()->guard('siswa')->user()?->sekolah) }}"
+              placeholder="Nama sekolah asal" class="form-input">
             <div class="error">Nama sekolah wajib diisi.</div>
           </div>
         </div>
@@ -123,36 +141,48 @@
         </div>
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat Rumah<span class="text-amber-600 ml-1">*</span></label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat Rumah<span
+              class="text-amber-600 ml-1">*</span></label>
           <textarea name="alamat" placeholder="Alamat lengkap tempat tinggal" class="form-input min-h-[90px]"></textarea>
           <div class="error">Alamat rumah wajib diisi.</div>
         </div>
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Akun Sosmed (Instagram &amp; TikTok)<span class="text-amber-600 ml-1">*</span></label>
-          <input type="text" name="sosmed_umum" placeholder="Contoh: IG @nama_siswa · TikTok @nama_siswa" class="form-input">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Akun Sosmed (Instagram
+            &amp; TikTok)<span class="text-amber-600 ml-1">*</span></label>
+          <input type="text" name="sosmed_umum" placeholder="Contoh: IG @nama_siswa · TikTok @nama_siswa"
+            class="form-input">
           <div class="error">Nama akun sosmed wajib diisi.</div>
         </div>
       </section>
 
       <!-- BAGIAN 2 — MINAT & SUMBER INFO -->
       <section class="step-panel space-y-5" data-step="2">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 2 dari 6</span>
+        <span
+          class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian
+          2 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Minat Belajar &amp; Sumber Informasi</h1>
-        <p class="text-sm text-slate-500">Ceritakan bagaimana kamu mengenal PM dan pelajaran apa yang ingin di les kan.</p>
+        <p class="text-sm text-slate-500">Ceritakan bagaimana kamu mengenal PM dan pelajaran apa yang ingin di les kan.
+        </p>
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mengetahui info PM dari mana?<span class="text-amber-600 ml-1">*</span></label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mengetahui info PM dari
+            mana?<span class="text-amber-600 ml-1">*</span></label>
           <div class="flex flex-col gap-3">
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="radio" name="sumber_info" value="Sosial media (TikTok, Instagram, dll)" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+            <label
+              class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+              <input type="radio" name="sumber_info" value="Sosial media (TikTok, Instagram, dll)"
+                class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
               <span>Sosial media (TikTok, Instagram, dll)</span>
             </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="radio" name="sumber_info" value="Ajakan teman yang sudah join di PM" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+            <label
+              class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+              <input type="radio" name="sumber_info" value="Ajakan teman yang sudah join di PM"
+                class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
               <span>Ajakan teman yang sudah join di PM (isikan nama temannya di kolom bawah)</span>
             </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+            <label
+              class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
               <input type="radio" name="sumber_info" value="Yang lain" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
               <span>Yang lain</span>
             </label>
@@ -161,8 +191,10 @@
         </div>
 
         <div class="field" data-required="false">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Teman / Keterangan Lainnya</label>
-          <input type="text" name="sumber_info_detail" placeholder="Isi jika memilih ajakan teman / yang lain" class="form-input">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Teman / Keterangan
+            Lainnya</label>
+          <input type="text" name="sumber_info_detail" placeholder="Isi jika memilih ajakan teman / yang lain"
+            class="form-input">
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -180,78 +212,67 @@
           </div>
         </div>
 
-       
+
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nilai UN / Rapor Terakhir Sesuai Pelajaran yang Akan Di Les kan<span class="text-amber-600 ml-1">*</span></label>
-          <textarea name="nilai_terakhir" placeholder="Contoh: Matematika 85, Fisika 78, ..." class="form-input min-h-[90px]"></textarea>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nilai UN / Rapor Terakhir
+            Sesuai Pelajaran yang Akan Di Les kan<span class="text-amber-600 ml-1">*</span></label>
+          <textarea name="nilai_terakhir" placeholder="Contoh: Matematika 85, Fisika 78, ..."
+            class="form-input min-h-[90px]"></textarea>
           <div class="error">Kolom ini wajib diisi.</div>
         </div>
 
-        <div class="field" data-required="false">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilihan Guru Matematika</label>
-          <div class="flex flex-col gap-3">
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="radio" name="pilihan_guru" value="Kak Ika (Master)" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Kak Ika (Master)</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="radio" name="pilihan_guru" value="Kak Angel (Co Master)" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Kak Angel (Co Master)</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="radio" name="pilihan_guru" value="Kak Sofia (Co Master)" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Kak Sofia (Co Master)</span>
-            </label>
-            <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-              <input type="radio" name="pilihan_guru" value="Keyawan" class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-              <span>Keyawan</span>
-            </label>
-          </div>
-        </div>
       </section>
 
       <!-- BAGIAN 3 — JADWAL PULANG SEKOLAH -->
       <section class="step-panel space-y-5" data-step="3">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 3 dari 6</span>
+        <span
+          class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian
+          3 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Jadwal Pulang Sekolah</h1>
         <p class="text-sm text-slate-500">Isi jam pulang sekolah siswa untuk setiap hari.</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Senin<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="pulang_senin" placeholder="Contoh: 15.00" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Senin<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="time" name="pulang_senin" class="form-input">
             <div class="error">Jam pulang Senin wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Selasa<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="pulang_selasa" placeholder="Contoh: 15.00" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Selasa<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="time" name="pulang_selasa" class="form-input">
             <div class="error">Jam pulang Selasa wajib diisi.</div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Rabu<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="pulang_rabu" placeholder="Contoh: 15.00" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Rabu<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="time" name="pulang_rabu" class="form-input">
             <div class="error">Jam pulang Rabu wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kamis<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="pulang_kamis" placeholder="Contoh: 15.00" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kamis<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="time" name="pulang_kamis" class="form-input">
             <div class="error">Jam pulang Kamis wajib diisi.</div>
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumat<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="pulang_jumat" placeholder="Contoh: 11.00" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumat<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="time" name="pulang_jumat" class="form-input">
             <div class="error">Jam pulang Jumat wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sabtu<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="pulang_sabtu" placeholder="Contoh: 12.00 / Libur" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Sabtu<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="time" name="pulang_sabtu" class="form-input">
             <div class="error">Jam pulang Sabtu wajib diisi.</div>
           </div>
         </div>
@@ -259,12 +280,15 @@
 
       <!-- BAGIAN 4 — KEGIATAN RUTIN -->
       <section class="step-panel space-y-5" data-step="4">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 4 dari 6</span>
+        <span
+          class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian
+          4 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Kegiatan Rutin Selain Jadwal Sekolah</h1>
         <p class="text-sm text-slate-500">Contoh: les lain, ekstrakurikuler, ngaji, olahraga, dll.</p>
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hari Apa dari Jam Berapa Sampai Jam Berapa?<span class="text-amber-600 ml-1">*</span></label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hari Apa dari Jam Berapa
+            Sampai Jam Berapa?<span class="text-amber-600 ml-1">*</span></label>
           <textarea name="kegiatan_rutin"
             placeholder="Contoh: Selasa & Kamis les renang 16.00-17.30, Sabtu ngaji 08.00-10.00"
             class="form-input min-h-[120px]"></textarea>
@@ -274,24 +298,29 @@
 
       <!-- BAGIAN 5 — DATA IBU -->
       <section class="step-panel space-y-5" data-step="5">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 5 dari 6</span>
+        <span
+          class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian
+          5 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Data Ibu</h1>
         <p class="text-sm text-slate-500">Isi data diri ibu kandung / wali siswa.</p>
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap Ibu<span class="text-amber-600 ml-1">*</span></label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap Ibu<span
+              class="text-amber-600 ml-1">*</span></label>
           <input type="text" name="ibu_nama_lengkap" placeholder="Nama lengkap ibu" class="form-input">
           <div class="error">Nama lengkap ibu wajib diisi.</div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Panggilan Ibu<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Panggilan Ibu<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="text" name="ibu_nama_panggilan" placeholder="Nama panggilan ibu" class="form-input">
             <div class="error">Nama panggilan ibu wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. HP Ibu<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. HP Ibu<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="tel" name="ibu_no_hp" placeholder="08xx-xxxx-xxxx" class="form-input">
             <div class="error">No. HP ibu wajib diisi.</div>
           </div>
@@ -299,12 +328,14 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Umur Ibu<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Umur Ibu<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="number" name="ibu_umur" placeholder="Contoh: 42" min="15" max="90" class="form-input">
             <div class="error">Umur ibu wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pekerjaan Ibu<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pekerjaan Ibu<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="text" name="ibu_pekerjaan" placeholder="Contoh: Ibu Rumah Tangga / PNS" class="form-input">
             <div class="error">Pekerjaan ibu wajib diisi.</div>
           </div>
@@ -318,24 +349,29 @@
 
       <!-- BAGIAN 6 — DATA AYAH -->
       <section class="step-panel space-y-5" data-step="6">
-        <span class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian 6 dari 6</span>
+        <span
+          class="inline-block bg-purple-100 text-purple-700 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Bagian
+          6 dari 6</span>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950">Data Ayah</h1>
         <p class="text-sm text-slate-500">Isi data diri ayah kandung / wali siswa.</p>
 
         <div class="field" data-required="true">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap Ayah<span class="text-amber-600 ml-1">*</span></label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap Ayah<span
+              class="text-amber-600 ml-1">*</span></label>
           <input type="text" name="ayah_nama_lengkap" placeholder="Nama lengkap ayah" class="form-input">
           <div class="error">Nama lengkap ayah wajib diisi.</div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Panggilan Ayah<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Panggilan Ayah<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="text" name="ayah_nama_panggilan" placeholder="Nama panggilan ayah" class="form-input">
             <div class="error">Nama panggilan ayah wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. HP Ayah<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. HP Ayah<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="tel" name="ayah_no_hp" placeholder="08xx-xxxx-xxxx" class="form-input">
             <div class="error">No. HP ayah wajib diisi.</div>
           </div>
@@ -343,13 +379,16 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Umur Ayah<span class="text-amber-600 ml-1">*</span></label>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Umur Ayah<span
+                class="text-amber-600 ml-1">*</span></label>
             <input type="number" name="ayah_umur" placeholder="Contoh: 45" min="15" max="95" class="form-input">
             <div class="error">Umur ayah wajib diisi.</div>
           </div>
           <div class="field" data-required="true">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pekerjaan Ayah<span class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="ayah_pekerjaan" placeholder="Contoh: Wiraswasta / Karyawan Swasta" class="form-input">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pekerjaan Ayah<span
+                class="text-amber-600 ml-1">*</span></label>
+            <input type="text" name="ayah_pekerjaan" placeholder="Contoh: Wiraswasta / Karyawan Swasta"
+              class="form-input">
             <div class="error">Pekerjaan ayah wajib diisi.</div>
           </div>
         </div>
@@ -362,16 +401,20 @@
 
       <!-- SELESAI -->
       <section class="step-panel text-center py-12" data-step="done">
-        <div class="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+        <div
+          class="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
           ✓
         </div>
         <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950 mb-3">Formulir Berhasil Dikirim</h1>
-        <p class="text-slate-500 max-w-md mx-auto">Terima kasih! Data pendaftaran akan segera diproses oleh tim Paradise of Math.</p>
+        <p class="text-slate-500 max-w-md mx-auto">Terima kasih! Data pendaftaran akan segera diproses oleh tim Paradise
+          of Math.</p>
       </section>
 
       <!-- Action Navigation Buttons -->
       <div class="flex justify-between items-center gap-4 pt-6 border-t border-purple-100 mt-8" id="navRow">
-        <button type="button" class="px-8 py-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold transition-all text-sm border border-slate-200" id="btnBack">
+        <button type="button"
+          class="px-8 py-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold transition-all text-sm border border-slate-200"
+          id="btnBack">
           ← Kembali
         </button>
         <button type="button" class="btn-brand px-8 py-3 text-sm flex-1 md:flex-none" id="btnNext">
@@ -389,27 +432,32 @@
   <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
     <!-- Backdrop with blur -->
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs opacity-0 transition-opacity duration-300"></div>
-    
+
     <!-- Modal Card -->
-    <div class="relative bg-white rounded-3xl shadow-2xl border border-purple-100 max-w-md w-full p-6 text-center transform scale-95 opacity-0 transition-all duration-300 ease-out" id="modalCard">
+    <div
+      class="relative bg-white rounded-3xl shadow-2xl border border-purple-100 max-w-md w-full p-6 text-center transform scale-95 opacity-0 transition-all duration-300 ease-out"
+      id="modalCard">
       <!-- Icon -->
-      <div class="w-16 h-16 bg-amber-50 border border-amber-200 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+      <div
+        class="w-16 h-16 bg-amber-50 border border-amber-200 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
         <i class="fas fa-exclamation-triangle text-2xl animate-bounce"></i>
       </div>
-      
+
       <!-- Title -->
       <h3 class="font-display text-xl font-bold text-purple-950 mb-2">Konfirmasi Kirim Data</h3>
       <!-- Message -->
       <p class="text-sm text-slate-500 leading-relaxed mb-6">
         Pastikan data sudah terisi dengan benar dan tersimpan kedalam database.
       </p>
-      
+
       <!-- Actions -->
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
-        <button type="button" id="btnCancelSubmit" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-all text-sm border border-slate-200 order-2 sm:order-1">
+        <button type="button" id="btnCancelSubmit"
+          class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-all text-sm border border-slate-200 order-2 sm:order-1">
           Periksa Kembali
         </button>
-        <button type="button" id="btnConfirmSubmit" class="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 text-white font-bold transition-all text-sm shadow-md shadow-purple-900/20 order-1 sm:order-2 flex-1">
+        <button type="button" id="btnConfirmSubmit"
+          class="px-5 py-3 rounded-xl bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 text-white font-bold transition-all text-sm shadow-md shadow-purple-900/20 order-1 sm:order-2 flex-1">
           Kirim & Lanjut
         </button>
       </div>
@@ -417,7 +465,8 @@
   </div>
 
   <!-- Loading Overlay -->
-  <div id="loadingOverlay" class="fixed inset-0 z-50 hidden flex-col items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs">
+  <div id="loadingOverlay"
+    class="fixed inset-0 z-50 hidden flex-col items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs">
     <div class="relative w-20 h-20 flex items-center justify-center">
       <div class="absolute inset-0 rounded-full border-4 border-purple-200/30"></div>
       <div class="absolute inset-0 rounded-full border-4 border-t-purple-600 border-r-purple-600 animate-spin"></div>
@@ -441,6 +490,7 @@
         opacity: 0;
         transform: translateY(6px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -517,7 +567,7 @@
     // Function to load form data from LocalStorage
     function loadFormData() {
       const elements = form.querySelectorAll('input, select, textarea');
-      
+
       // Load and set the current step
       const savedStep = localStorage.getItem('siswa_biodata_step');
       if (savedStep !== null) {
@@ -573,7 +623,7 @@
 
       const isDone = steps[current] === 'done';
       btnBack.style.display = current === 0 ? 'none' : 'inline-flex';
-      
+
       // On the 6th step (index 5), the next button should say "Kirim Formulir ✓"
       btnNext.textContent = (current === steps.length - 2) ? 'Kirim Formulir ✓' : 'Lanjut →';
       navRow.style.display = isDone ? 'none' : 'flex';
@@ -651,14 +701,11 @@
 
     btnConfirmSubmit.addEventListener('click', () => {
       hideConfirmationModal();
-      
+
       // Show loading overlay
       loadingOverlay.classList.remove('hidden');
       loadingOverlay.classList.add('flex');
-      
-      // Clear localStorage data before submitting so it starts fresh next time
-      clearFormData();
-      
+
       // Submit the form
       setTimeout(() => {
         form.submit();

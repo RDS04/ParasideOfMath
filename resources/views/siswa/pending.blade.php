@@ -114,5 +114,23 @@
 
     </div>
 
+    <!-- Script to clear onboarding local storage data after completion -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Remove wizard step tracker
+            localStorage.removeItem('siswa_biodata_step');
+            localStorage.removeItem('siswa_regis_step');
+
+            // Find and remove all form field inputs from local storage
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('siswa_biodata_') || key.startsWith('siswa_regis_'))) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+        });
+    </script>
 </body>
 </html>

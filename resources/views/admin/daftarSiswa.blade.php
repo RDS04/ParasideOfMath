@@ -57,6 +57,7 @@
                                         <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold">Sekolah/Kelas</th>
                                         <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold">Paket Bimbel</th>
                                         <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold text-center">Status</th>
+                                        <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -95,6 +96,11 @@
                                                     <span class="badge bg-slate-100 text-slate-600 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-slate-200">Pilih Paket</span>
                                                 @endif
                                             </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <a href="{{ route('admin.siswa.detail', $student->id) }}" class="btn btn-xs btn-outline-purple font-weight-bold rounded-lg px-2.5 py-1 text-xs">
+                                                    <i class="fas fa-eye mr-1"></i> Detail
+                                                </a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -118,6 +124,17 @@
             color: white;
             background-color: #10b981;
             border-color: #10b981;
+        }
+        .btn-outline-purple {
+            color: #7c3aed;
+            border-color: #d8d3e8;
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+        .btn-outline-purple:hover {
+            color: white;
+            background-color: #7c3aed;
+            border-color: #7c3aed;
         }
         .animate-pulse {
             animation: pulse-glow 2s infinite;

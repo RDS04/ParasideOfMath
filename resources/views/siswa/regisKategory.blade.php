@@ -16,6 +16,7 @@
                 opacity: 0;
                 transform: translateY(6px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -82,7 +83,8 @@
                     <div class="step-panel active space-y-5" data-step="1">
                         <!-- Name (Prefilled or editable) -->
                         <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Lengkap<span class="text-amber-600 ml-1">*</span></label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama
+                                Lengkap<span class="text-amber-600 ml-1">*</span></label>
                             <input type="text" name="name"
                                 value="{{ auth()->guard('siswa')->check() ? auth()->guard('siswa')->user()->name : '' }}"
                                 placeholder="Contoh: Budi Santoso" class="form-input" required />
@@ -91,7 +93,8 @@
 
                         <!-- Email (Prefilled or editable) -->
                         <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat Email<span class="text-amber-600 ml-1">*</span></label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat
+                                Email<span class="text-amber-600 ml-1">*</span></label>
                             <input type="email" name="email"
                                 value="{{ auth()->guard('siswa')->check() ? auth()->guard('siswa')->user()->email : '' }}"
                                 placeholder="budi@example.com" class="form-input" required />
@@ -100,7 +103,8 @@
 
                         <!-- Dropdown Package Selector -->
                         <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Paket Belajar<span class="text-amber-600 ml-1">*</span></label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Paket
+                                Belajar<span class="text-amber-600 ml-1">*</span></label>
                             <select id="paketSelect" name="paket_id" class="form-input cursor-pointer" required>
                                 @foreach(\App\Models\PaketBelajar::all() as $paket)
                                     <option value="{{ $paket->id }}" {{ $loop->first ? 'selected' : '' }}>
@@ -113,7 +117,8 @@
 
                         <!-- Dropdown Tipe Paket Selector (Privat / Kelompok) -->
                         <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Tipe Pertemuan (Jumlah Peserta)<span class="text-amber-600 ml-1">*</span></label>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Tipe
+                                Pertemuan (Jumlah Peserta)<span class="text-amber-600 ml-1">*</span></label>
                             <select id="tipeSelect" name="tipe_paket" class="form-input cursor-pointer" required>
                                 <!-- Dynamically populated via JS based on selected package -->
                             </select>
@@ -124,14 +129,17 @@
                     <!-- STEP 2 — PILIH MATA PELAJARAN -->
                     <div class="step-panel space-y-5" data-step="2">
                         <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mata Pelajaran
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mata
+                                Pelajaran
                                 &amp; Jumlah Minimal Shift/Minggu<span class="text-amber-600 ml-1">*</span></label>
-                            <div class="text-xs text-slate-400 mb-3">Pilih semua pelajaran yang ingin di les kan di PM.</div>
+                            <div class="text-xs text-slate-400 mb-3">Pilih semua pelajaran yang ingin di les kan di PM.
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach(\App\Models\Mapel::all() as $mapel)
                                     <label
                                         class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-                                        <input type="checkbox" name="mapel[]" value="{{ $mapel->nama_mapel }} {{ $mapel->shift }}x"
+                                        <input type="checkbox" name="mapel[]"
+                                            value="{{ $mapel->nama_mapel }} {{ $mapel->shift }}x"
                                             class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
                                         <span>{{ $mapel->nama_mapel }} {{ $mapel->shift }}x</span>
                                     </label>
@@ -139,11 +147,121 @@
                             </div>
                             <div class="error">Pilih minimal satu mata pelajaran.</div>
                         </div>
+
+                        <!-- Pilihan Guru Matematika (Dinamis) -->
+                        <div class="field hidden mt-4" data-required="false" id="guruMatematikaContainer">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilihan
+                                Guru Matematika</label>
+                            <div class="flex flex-col gap-3">
+                                <label
+                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                    <input type="radio" name="pilihan_guru" value="Kak Ika (Master)"
+                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+                                    <span>Kak Ika (Master)</span>
+                                </label>
+                                <label
+                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                    <input type="radio" name="pilihan_guru" value="Kak Angel (Co Master)"
+                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+                                    <span>Kak Angel (Co Master)</span>
+                                </label>
+                                <label
+                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                    <input type="radio" name="pilihan_guru" value="Kak Sofia (Co Master)"
+                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+                                    <span>Kak Sofia (Co Master)</span>
+                                </label>
+                                <label
+                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                    <input type="radio" name="pilihan_guru" value="Karyawan"
+                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+                                    <span>Karyawan</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Pilihan Guru Bahasa Inggris (Dinamis) -->
+                        <div class="field hidden mt-4" data-required="false" id="guruInggrisContainer">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilihan
+                                Guru Bahasa Inggris</label>
+                            <div class="flex flex-col gap-3">
+                                <label
+                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                    <input type="radio" name="pilihan_guru_inggris" value="Kak Angel"
+                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+                                    <span>Kak Angel</span>
+                                </label>
+                                <label
+                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                    <input type="radio" name="pilihan_guru_inggris" value="Kak Sofia"
+                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+                                    <span>Kak Sofia</span>
+                                </label>
+                                <label
+                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                    <input type="radio" name="pilihan_guru_inggris" value="Karyawan"
+                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
+                                    <span>Karyawan</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3 — JADWAL & FREKUENSI BELAJAR -->
+                    <div class="step-panel space-y-5" data-step="3">
+                        <!-- Jumlah Pertemuan (Dinamis) -->
+                        <div class="field mt-4" data-required="true" id="pertemuanSemingguField">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumlah Pertemuan (Ditentukan Berdasarkan Total Shift Pelajaran)<span class="text-amber-600 ml-1">*</span></label>
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                @for($i = 1; $i <= 10; $i++)
+                                    <label class="choice flex items-center justify-center p-3 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950 font-bold" id="label-pertemuan-{{ $i }}">
+                                        <input type="radio" name="jumlah_pertemuan" value="{{ $i }}" class="sr-only">
+                                        <span>{{ $i }}x</span>
+                                    </label>
+                                @endfor
+                            </div>
+                            <div class="error" id="pertemuanError">Pilih jumlah pertemuan.</div>
+                        </div>
+
+                        <!-- Hari Pertemuan (Statis 2 Dropdown) -->
+                        <div class="field hidden mt-4" data-required="true" id="datePickersContainer">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Hari Pertemuan Belajar (Senin s/d Sabtu)<span class="text-amber-600 ml-1">*</span></label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="field" data-required="true">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hari Pertemuan Ke-1<span class="text-amber-600 ml-1">*</span></label>
+                                    <select name="hari_pertemuan[]" class="form-input text-sm cursor-pointer" required>
+                                        <option value="">Pilih hari</option>
+                                        <option value="Senin">Senin</option>
+                                        <option value="Selasa">Selasa</option>
+                                        <option value="Rabu">Rabu</option>
+                                        <option value="Kamis">Kamis</option>
+                                        <option value="Jumat">Jumat</option>
+                                        <option value="Sabtu">Sabtu</option>
+                                    </select>
+                                    <div class="error">Hari pertemuan wajib dipilih.</div>
+                                </div>
+                                <div class="field" data-required="true">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hari Pertemuan Ke-2<span class="text-amber-600 ml-1">*</span></label>
+                                    <select name="hari_pertemuan[]" class="form-input text-sm cursor-pointer" required>
+                                        <option value="">Pilih hari</option>
+                                        <option value="Senin">Senin</option>
+                                        <option value="Selasa">Selasa</option>
+                                        <option value="Rabu">Rabu</option>
+                                        <option value="Kamis">Kamis</option>
+                                        <option value="Jumat">Jumat</option>
+                                        <option value="Sabtu">Sabtu</option>
+                                    </select>
+                                    <div class="error">Hari pertemuan wajib dipilih.</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Navigation Action Buttons -->
                     <div class="flex justify-between items-center gap-4 pt-4 mt-6" id="navRow">
-                        <button type="button" class="px-6 py-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold transition-all text-sm border border-slate-200 hidden" id="btnBack">
+                        <button type="button"
+                            class="px-6 py-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold transition-all text-sm border border-slate-200 hidden"
+                            id="btnBack">
                             ← Kembali
                         </button>
                         <button type="button" class="btn-brand flex-1 font-bold text-md" id="btnNext">
@@ -307,11 +425,11 @@
                     if (det) {
                         const icon = index === 4 ? 'fa-clock text-violet-500' : 'fa-check-circle text-emerald-500';
                         listHtml += `
-                                <li class="flex items-start gap-2.5 p-2 rounded-lg transition-all duration-200">
-                                    <span class="shrink-0 mt-0.5"><i class="fas ${icon}"></i></span>
-                                    <span>${det}</span>
-                                </li>
-                            `;
+                                        <li class="flex items-start gap-2.5 p-2 rounded-lg transition-all duration-200">
+                                            <span class="shrink-0 mt-0.5"><i class="fas ${icon}"></i></span>
+                                            <span>${det}</span>
+                                        </li>
+                                    `;
                     }
                 });
                 detailList.innerHTML = listHtml;
@@ -351,7 +469,11 @@
                     btnBack.classList.add('hidden');
                     btnNext.classList.remove('hidden');
                     btnSubmit.classList.add('hidden');
-                } else {
+                } else if (currentStep === 2) {
+                    btnBack.classList.remove('hidden');
+                    btnNext.classList.remove('hidden');
+                    btnSubmit.classList.add('hidden');
+                } else if (currentStep === 3) {
                     btnBack.classList.remove('hidden');
                     btnNext.classList.add('hidden');
                     btnSubmit.classList.remove('hidden');
@@ -399,15 +521,22 @@
             }
 
             btnNext.addEventListener('click', () => {
-                if (validateStep(1)) {
-                    currentStep = 2;
-                    renderSteps();
+                if (currentStep === 1) {
+                    if (validateStep(1)) {
+                        currentStep = 2;
+                        renderSteps();
+                    }
+                } else if (currentStep === 2) {
+                    if (validateStep(2)) {
+                        currentStep = 3;
+                        renderSteps();
+                    }
                 }
             });
 
             btnBack.addEventListener('click', () => {
-                if (currentStep === 2) {
-                    currentStep = 1;
+                if (currentStep > 1) {
+                    currentStep--;
                     renderSteps();
                 }
             });
@@ -419,50 +548,188 @@
                         currentStep = 2;
                         renderSteps();
                     }
-                } else {
-                    if (!validateStep(2)) {
+                } else if (currentStep === 2) {
+                    e.preventDefault();
+                    if (validateStep(2)) {
+                        currentStep = 3;
+                        renderSteps();
+                    }
+                } else if (currentStep === 3) {
+                    if (!validateStep(3)) {
                         e.preventDefault();
                     }
                 }
             });
 
-            // Clear invalid states as the user types/changes inputs
+            // Generic function to check if a field is filled
+            function isFieldFilled(field) {
+                const radios = field.querySelectorAll('input[type=radio]');
+                const checks = field.querySelectorAll('input[type=checkbox]');
+                if (radios.length) {
+                    return Array.from(radios).some(r => r.checked);
+                }
+                if (checks.length) {
+                    return Array.from(checks).some(c => c.checked);
+                }
+                const input = field.querySelector('input, select, textarea');
+                if (input) {
+                    if (input.type === 'email') {
+                        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        return emailPattern.test(input.value.trim());
+                    }
+                    return !!input.value.trim();
+                }
+                return true;
+            }
+
             form.addEventListener('input', (e) => {
                 const field = e.target.closest('.field');
-                if (!field || field.dataset.required !== 'true') return;
-
-                const checks = field.querySelectorAll('input[type=checkbox]');
-                let filled;
-                if (checks.length) filled = Array.from(checks).some(c => c.checked);
-                else {
-                    if (e.target.type === 'email') {
-                        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        filled = emailPattern.test(e.target.value.trim());
-                    } else {
-                        filled = e.target.value.trim().length > 0;
-                    }
+                if (field && isFieldFilled(field)) {
+                    field.classList.remove('invalid');
                 }
-
-                if (filled) field.classList.remove('invalid');
             });
 
             form.addEventListener('change', (e) => {
                 const field = e.target.closest('.field');
-                if (!field) return;
-
-                if (e.target.type === 'checkbox' || e.target.tagName === 'SELECT') {
-                    const checks = field.querySelectorAll('input[type=checkbox]');
-                    let filled = true;
-                    if (checks.length) {
-                        filled = Array.from(checks).some(c => c.checked);
-                    } else {
-                        const selectEl = field.querySelector('select');
-                        filled = selectEl ? !!selectEl.value.trim() : true;
-                    }
-
-                    if (filled) field.classList.remove('invalid');
+                if (field && isFieldFilled(field)) {
+                    field.classList.remove('invalid');
                 }
             });
+
+            // Dynamic teacher selection display based on checked subjects
+            const checkboxes = form.querySelectorAll('input[type="checkbox"][name="mapel[]"]');
+            const mathContainer = document.getElementById('guruMatematikaContainer');
+            const inggrisContainer = document.getElementById('guruInggrisContainer');
+
+            function updateTeacherContainers() {
+                let hasMath = false;
+                let hasInggris = false;
+
+                checkboxes.forEach(cb => {
+                    if (cb.checked) {
+                        const val = cb.value.toLowerCase();
+                        if (val.includes('matematika')) {
+                            hasMath = true;
+                        }
+                        if (val.includes('inggris')) {
+                            hasInggris = true;
+                        }
+                    }
+                });
+
+                if (hasMath) {
+                    mathContainer.classList.remove('hidden');
+                } else {
+                    mathContainer.classList.add('hidden');
+                    mathContainer.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+                }
+
+                if (hasInggris) {
+                    inggrisContainer.classList.remove('hidden');
+                } else {
+                    inggrisContainer.classList.add('hidden');
+                    inggrisContainer.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+                }
+            }
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateTeacherContainers);
+            });
+
+            updateTeacherContainers();
+
+            // Dynamic schedule picker logic based on chosen mapel shift count
+            const pertemuanRadios = document.querySelectorAll('input[name="jumlah_pertemuan"]');
+            const pertemuanField = document.getElementById('pertemuanSemingguField');
+            const dateContainer = document.getElementById('datePickersContainer');
+            const dateGrid = document.getElementById('dateInputsGrid');
+
+            function getSelectedShiftsCount() {
+                let totalShifts = 0;
+                checkboxes.forEach(cb => {
+                    if (cb.checked) {
+                        const val = cb.value;
+                        if (val) {
+                            const match = val.match(/(\d+)x/);
+                            if (match) {
+                                totalShifts += parseInt(match[1]);
+                            }
+                        }
+                    }
+                });
+                return totalShifts;
+            }
+
+            function updateMeetingOptions() {
+                const minMeetings = getSelectedShiftsCount();
+                
+                pertemuanRadios.forEach(radio => {
+                    const val = parseInt(radio.value);
+                    const label = document.getElementById(`label-pertemuan-${val}`);
+                    
+                    if (val < minMeetings) {
+                        radio.disabled = true;
+                        label.classList.add('opacity-40', 'cursor-not-allowed');
+                        label.classList.remove('hover:border-purple-500');
+                        if (radio.checked) {
+                            radio.checked = false;
+                            label.classList.remove('border-purple-600', 'bg-purple-50');
+                        }
+                    } else {
+                        radio.disabled = false;
+                        label.classList.remove('opacity-40', 'cursor-not-allowed');
+                        label.classList.add('hover:border-purple-500');
+                    }
+                });
+
+                // Auto-select minimum option if none is selected or selected is less than minMeetings
+                let selectedRadio = document.querySelector('input[name="jumlah_pertemuan"]:checked');
+                if (minMeetings > 0) {
+                    if (!selectedRadio || parseInt(selectedRadio.value) < minMeetings) {
+                        const targetRadio = document.querySelector(`input[name="jumlah_pertemuan"][value="${minMeetings}"]`);
+                        if (targetRadio) {
+                            targetRadio.checked = true;
+                            highlightMeetingRadio(minMeetings);
+                        }
+                    }
+                    dateContainer.classList.remove('hidden');
+                } else {
+                    if (selectedRadio) {
+                        selectedRadio.checked = false;
+                    }
+                    highlightMeetingRadio(0);
+                    dateContainer.classList.add('hidden');
+                }
+            }
+
+            function highlightMeetingRadio(selectedValue) {
+                pertemuanRadios.forEach(radio => {
+                    const val = parseInt(radio.value);
+                    const label = document.getElementById(`label-pertemuan-${val}`);
+                    if (val === selectedValue) {
+                        label.classList.add('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
+                        label.classList.remove('bg-slate-50', 'border-purple-100');
+                    } else {
+                        label.classList.remove('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
+                        label.classList.add('bg-slate-50', 'border-purple-100');
+                    }
+                });
+            }
+
+            pertemuanRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const val = parseInt(this.value);
+                    highlightMeetingRadio(val);
+                    dateContainer.classList.remove('hidden');
+                    pertemuanField.classList.remove('invalid');
+                });
+            });
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateMeetingOptions);
+            });
+
+            updateMeetingOptions();
 
             // Initial step setup
             renderSteps();

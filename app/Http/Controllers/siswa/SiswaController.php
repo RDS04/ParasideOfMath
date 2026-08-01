@@ -41,6 +41,8 @@ class SiswaController extends Controller
             if ($request->filled('nama_lengkap')) {
                 $siswa->name = $request->input('nama_lengkap');
             }
+            // Save all other form inputs in the biodata array
+            $siswa->biodata = $request->except(['_token', 'no_hp', 'sekolah', 'nama_lengkap']);
             $siswa->save();
         }
 
@@ -126,7 +128,21 @@ class SiswaController extends Controller
             $detailString = $paket->detail_4;
 
         $harga = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
-        $total = $harga;
+        
+        $jumlahPertemuan = (int)$request->input('jumlah_pertemuan', 0);
+        if ($jumlahPertemuan === 0) {
+            $totalShifts = 0;
+            $mapels = $request->input('mapel', []);
+            if (is_array($mapels)) {
+                foreach ($mapels as $m) {
+                    if (preg_match('/(\d+)x/i', $m, $matches)) {
+                        $totalShifts += (int)$matches[1];
+                    }
+                }
+            }
+            $jumlahPertemuan = $totalShifts > 0 ? $totalShifts : 1;
+        }
+        $total = $harga * $jumlahPertemuan;
 
         $banks = \App\Models\Rekening::where('tipe', 'bank')->get();
         $ewallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
@@ -179,10 +195,46 @@ class SiswaController extends Controller
             elseif ($request->tipe_paket == '4')
                 $detailString = $paket->detail_4;
 
+            // Build a string for mapel & guru details
+            $mapelList = $request->input('mapel', []);
+            $guruMatematika = $request->input('pilihan_guru');
+            $guruInggris = $request->input('pilihan_guru_inggris');
+            $jumlahPertemuan = $request->input('jumlah_pertemuan');
+            $hariPertemuan = $request->input('hari_pertemuan', []);
+
+            $extraDetails = [];
+            if (!empty($mapelList)) {
+                $extraDetails[] = 'Mapel: ' . implode(', ', $mapelList);
+            }
+            
+            $guruSelected = [];
+            if ($guruMatematika) {
+                $guruSelected[] = 'Math: ' . $guruMatematika;
+            }
+            if ($guruInggris) {
+                $guruSelected[] = 'English: ' . $guruInggris;
+            }
+            if (!empty($guruSelected)) {
+                $extraDetails[] = 'Guru: ' . implode(', ', $guruSelected);
+            }
+
+            if ($jumlahPertemuan) {
+                $extraDetails[] = 'Sesi: ' . $jumlahPertemuan . 'x';
+            }
+
+            if (!empty($hariPertemuan)) {
+                $extraDetails[] = 'Hari: ' . implode(', ', $hariPertemuan);
+            }
+
+            $finalTipePaket = $detailString;
+            if (!empty($extraDetails)) {
+                $finalTipePaket .= ' (' . implode(' | ', $extraDetails) . ')';
+            }
+
             // Simpan pendaftaran ke database
             $siswa->update([
                 'paket_id' => $request->paket_id,
-                'tipe_paket' => $detailString,
+                'tipe_paket' => $finalTipePaket,
                 'bukti_transfer' => 'uploads/bukti_transfer/' . $filename,
                 'status' => 'under_review',
             ]);

@@ -78,6 +78,27 @@
         <input type="hidden" name="paket_id" value="{{ $paket->id }}">
         <input type="hidden" name="tipe_paket" value="{{ request('tipe_paket', '1') }}">
 
+        <!-- Pass chosen mapels & teachers -->
+        @if(request('mapel'))
+            @foreach(request('mapel') as $m)
+                <input type="hidden" name="mapel[]" value="{{ $m }}">
+            @endforeach
+        @endif
+        @if(request('pilihan_guru'))
+            <input type="hidden" name="pilihan_guru" value="{{ request('pilihan_guru') }}">
+        @endif
+        @if(request('pilihan_guru_inggris'))
+            <input type="hidden" name="pilihan_guru_inggris" value="{{ request('pilihan_guru_inggris') }}">
+        @endif
+        @if(request('jumlah_pertemuan'))
+            <input type="hidden" name="jumlah_pertemuan" value="{{ request('jumlah_pertemuan') }}">
+        @endif
+        @if(request('hari_pertemuan'))
+            @foreach(request('hari_pertemuan') as $hri)
+                <input type="hidden" name="hari_pertemuan[]" value="{{ $hri }}">
+            @endforeach
+        @endif
+
         <!-- ══════════════ LEFT COLUMN: PAYMENT METHODS (7 COLS) ══════════════ -->
         <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between scrollable-left">
             <div>
@@ -245,11 +266,52 @@
                         <div class="flex justify-between items-start gap-4">
                             <div>
                                 <span class="d-block font-bold text-violet-950">Bimbel {{ $paket->nama_paket }}</span>
-                                <small
-                                    class="text-slate-400 text-xxs block mt-0.5">({{ explode(':', $detailString)[0] }})</small>
+                                <small class="text-slate-400 text-xxs block mt-0.5">({{ explode(':', $detailString)[0] }})</small>
                             </div>
-                            <span class="font-bold text-violet-950">Rp {{ number_format($harga, 0, ',', '.') }}</span>
+                            <span class="font-bold text-violet-950">Rp {{ number_format($harga, 0, ',', '.') }} <span class="text-xs text-slate-400 font-normal">/ sesi</span></span>
                         </div>
+                        
+                        @if(request('mapel'))
+                        <div class="flex justify-between items-start gap-4 pt-2 border-t border-slate-100">
+                            <div>
+                                <span class="d-block font-medium text-slate-700 text-xs">Mata Pelajaran Terpilih</span>
+                                <ul class="list-disc pl-4 text-xxs text-slate-500 mt-1 space-y-1">
+                                    @foreach(request('mapel') as $m)
+                                        <li>{{ $m }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            <span class="text-xs font-semibold text-slate-700">
+                                @php
+                                    $totalShifts = 0;
+                                    foreach(request('mapel') as $m) {
+                                        if (preg_match('/(\d+)x/i', $m, $matches)) {
+                                            $totalShifts += (int)$matches[1];
+                                        }
+                                    }
+                                @endphp
+                                Total: {{ $totalShifts }}x shift
+                            </span>
+                        </div>
+                        @endif
+
+                        @if(request('jumlah_pertemuan'))
+                        <div class="flex justify-between items-start gap-4 pt-2 border-t border-slate-100">
+                            <div>
+                                <span class="d-block font-medium text-slate-700 text-xs">Jadwal Pertemuan Belajar</span>
+                                @if(request('hari_pertemuan'))
+                                <ul class="list-disc pl-4 text-xxs text-slate-500 mt-1 space-y-1">
+                                    @foreach(request('hari_pertemuan') as $index => $hri)
+                                        <li>Pertemuan {{ $index + 1 }}: Hari {{ $hri }}</li>
+                                    @endforeach
+                                </ul>
+                                @endif
+                            </div>
+                            <span class="text-xs font-semibold text-slate-700 shrink-0">
+                                {{ request('jumlah_pertemuan') }}x
+                            </span>
+                        </div>
+                        @endif
                     </div>
 
                     <div class="border-t border-dashed border-slate-100 my-4"></div>
