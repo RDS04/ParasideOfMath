@@ -28,10 +28,13 @@ Route::controller(AdminAuthController::class)->group(function () {
 Route::get('/siswa', function () {
     $siswa = auth()->guard('siswa')->user();
     if ($siswa) {
+        if ($siswa->status === 'active') {
+            return view('siswa.dashboard');
+        }
         if ($siswa->status === 'pending') {
             return redirect()->route('siswa.biodata');
         }
-        if ($siswa->status === 'under_review') {
+        if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
             return redirect()->route('siswa.pending');
         }
     }
@@ -77,5 +80,8 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
+    Route::post('/admin/save-token', 'saveFcmToken')->name('admin.save_token');
+    Route::get('/admin/notifications', 'getNotifications')->name('admin.notifications.get');
+    Route::post('/admin/notifications/read', 'markNotificationsRead')->name('admin.notifications.read');
 })->middleware('auth:web');
 

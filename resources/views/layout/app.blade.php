@@ -4,7 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-role" content="{{ Auth::user() ? Auth::user()->role : '' }}">
     <title>@yield('title', 'Paradise of Math')</title>
+
+    @if(auth()->check() && auth()->user()->isAdmin())
+        <!-- Firebase SDK Compat -->
+        <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
+        <script>
+            try {
+                firebase.initializeApp({
+                    apiKey: "{{ env('FIREBASE_API_KEY', 'mock-api-key') }}",
+                    authDomain: "{{ env('FIREBASE_PROJECT_ID', 'mock-project') }}.firebaseapp.com",
+                    projectId: "{{ env('FIREBASE_PROJECT_ID', 'mock-project') }}",
+                    storageBucket: "{{ env('FIREBASE_PROJECT_ID', 'mock-project') }}.appspot.com",
+                    messagingSenderId: "{{ env('FIREBASE_MESSAGING_SENDER_ID', 'mock-sender-id') }}",
+                    appId: "{{ env('FIREBASE_APP_ID', 'mock-app-id') }}"
+                });
+                window.FCM_VAPID_KEY = "{{ env('FIREBASE_VAPID_KEY', '') }}";
+            } catch(e) {
+                console.error("Firebase Initialization Error:", e);
+            }
+        </script>
+    @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">

@@ -294,8 +294,66 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        
-
         return view('admin.tambahSiswa');
+    }
+
+    /**
+     * Simpan token FCM dari Admin browser.
+     */
+    public function saveFcmToken(Request $request)
+    {
+        $request->validate([
+            'token' => ['required', 'string'],
+        ]);
+
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            \Illuminate\Support\Facades\DB::table('fcm_tokens')->updateOrInsert(
+                ['user_id' => Auth::id(), 'token' => $request->token],
+                ['updated_at' => now(), 'created_at' => now()]
+            );
+            return response()->json(['message' => 'FCM Token berhasil disimpan']);
+        }
+
+        return response()->json(['error' => 'Akses ditolak'], 403);
+    }
+
+    /**
+     * Ambil daftar notifikasi untuk header navbar Admin.
+     */
+    public function getNotifications()
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            return response()->json(['error' => 'Akses ditolak'], 403);
+        }
+
+        $notifications = \Illuminate\Support\Facades\DB::table('notifications')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        $unreadCount = \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('is_read', false)
+            ->count();
+
+        return response()->json([
+            'notifications' => $notifications,
+            'unread_count' => $unreadCount
+        ]);
+    }
+
+    /**
+     * Tandai semua notifikasi telah dibaca.
+     */
+    public function markNotificationsRead()
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            return response()->json(['error' => 'Akses ditolak'], 403);
+        }
+
+        \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return response()->json(['message' => 'Notifikasi ditandai telah dibaca']);
     }
 }

@@ -134,5 +134,54 @@ document.addEventListener('DOMContentLoaded', () => {
         const customText = link.dataset.loadingText || 'Mengalihkan halaman...';
         window.showLoading(customText);
     });
+
+    // 3. Register FCM if Admin
+    const userRoleMeta = document.querySelector('meta[name="user-role"]');
+    const userRole = userRoleMeta ? userRoleMeta.getAttribute('content') : '';
+
+    if (userRole === 'admin') {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then((registration) => {
+                    console.log('FCM SW registered successfully:', registration);
+                    
+                    // Request Notification Permission
+                    Notification.requestPermission().then((permission) => {
+                        if (permission === 'granted') {
+                            console.log('Notification permission granted.');
+                            if (window.firebase && window.FCM_VAPID_KEY) {
+                                try {
+                                    const messaging = firebase.messaging();
+                                    messaging.getToken({ vapidKey: window.FCM_VAPID_KEY })
+                                        .then((currentToken) => {
+                                            if (currentToken) {
+                                                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                                                const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+                                                
+                                                fetch('/admin/save-token', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRF-TOKEN': csrfToken
+                                                    },
+                                                    body: JSON.stringify({ token: currentToken })
+                                                })
+                                                .then(r => r.json())
+                                                .then(data => console.log('FCM token saved on server:', data))
+                                                .catch(err => console.error('Failed to save FCM token:', err));
+                                            }
+                                        });
+                                } catch (e) {
+                                    console.error('Firebase messaging token retrieval failed:', e);
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch((err) => {
+                    console.error('FCM SW registration failed:', err);
+                });
+        }
+    }
 });
 

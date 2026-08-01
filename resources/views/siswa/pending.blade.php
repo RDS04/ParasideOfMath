@@ -90,9 +90,15 @@
                 <span class="d-block text-xs text-slate-500 mt-0.5">{{ $siswa->tipe_paket }}</span>
                 <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between">
                     <span class="text-xs text-slate-400 font-medium">Status Pendaftaran</span>
+                    @if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer))
+                    <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                        Menunggu Konfirmasi
+                    </span>
+                    @else
                     <span class="px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
                         Pending
                     </span>
+                    @endif
                 </div>
             </div>
         @endif

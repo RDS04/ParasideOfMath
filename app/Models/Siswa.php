@@ -65,4 +65,28 @@ class Siswa extends Authenticatable
             'biodata' => 'array',
         ];
     }
+
+    /**
+     * Check if user is Admin.
+     */
+    public function isAdmin(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Check if user is Guru (Teacher).
+     */
+    public function isGuru(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Check if user is Siswa (Student).
+     */
+    public function isSiswa(): bool
+    {
+        return true;
+    }
 }

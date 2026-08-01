@@ -6,6 +6,19 @@
     $dashboardRoute = auth()->guard('siswa')->check() 
         ? route('siswa.dashboard') 
         : ($currentUser && $currentUser->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
+    
+    $isAdmin = auth()->check() && auth()->user()->isAdmin();
+    $notifications = [];
+    $unreadCount = 0;
+    if ($isAdmin) {
+        $notifications = \Illuminate\Support\Facades\DB::table('notifications')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+        $unreadCount = \Illuminate\Support\Facades\DB::table('notifications')
+            ->where('is_read', false)
+            ->count();
+    }
 @endphp
 <nav class="main-header navbar navbar-expand navbar-light">
 
@@ -35,27 +48,65 @@
     <ul class="navbar-nav ml-auto">
 
         <!-- notifications -->
-        <li class="nav-item dropdown">
+        @if ($isAdmin)
+        <li class="nav-item dropdown" id="notifDropdown">
             <a class="nav-link" data-toggle="dropdown" href="#">
-                <i class="far fa-bell"></i>
-                <span class="badge badge-warning navbar-badge">4</span>
+                <i class="far fa-bell" style="font-size: 1.15rem;"></i>
+                @if ($unreadCount > 0)
+                <span id="notifBadge" class="badge badge-warning navbar-badge" style="font-size: 0.65rem; padding: 2px 4px; right: 4px; top: 4px;">{{ $unreadCount }}</span>
+                @endif
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <span class="dropdown-item dropdown-header">4 Notifikasi Baru</span>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-user-plus mr-2 text-purple"></i> Siswa baru mendaftar
-                    <span class="float-right text-muted text-sm">5 menit</span>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fas fa-calendar-check mr-2 text-purple"></i> Jadwal les diperbarui
-                    <span class="float-right text-muted text-sm">1 jam</span>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item dropdown-footer">Lihat semua notifikasi</a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right rounded-lg shadow-md border-0" style="margin-top: 10px; width: 290px; overflow: hidden; border: 1px solid #ece7f7 !important;">
+                <span id="notifHeader" class="dropdown-item dropdown-header font-weight-bold" style="background-color: #faf9fc; color: #2e1065;">{{ $unreadCount }} Notifikasi Baru</span>
+                <div class="dropdown-divider" style="border-color: #f0edf9;"></div>
+                
+                <div style="max-height: 250px; overflow-y: auto;">
+                    @forelse ($notifications as $notif)
+                    <a href="{{ $notif->link ?? '#' }}" class="dropdown-item py-2.5 d-flex align-items-start {{ !$notif->is_read ? 'bg-purple-50/40' : '' }}" style="border-bottom: 1px solid #f6f4fa; white-space: normal;">
+                        <i class="fas fa-user-plus mr-2.5 text-purple mt-1" style="color: #7c3aed; font-size: 0.9rem;"></i>
+                        <div style="flex: 1;">
+                            <span class="d-block font-weight-bold text-dark text-xs" style="color: #332a4e !important;">{{ $notif->title }}</span>
+                            <span class="d-block text-muted text-xxs mt-0.5" style="font-size: 0.72rem; line-height: 1.25;">{{ $notif->message }}</span>
+                            <span class="d-block text-muted text-xxs mt-1 text-right" style="font-size: 0.65rem;">{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</span>
+                        </div>
+                    </a>
+                    @empty
+                    <div class="py-4 text-center text-muted text-xs">
+                        <i class="far fa-bell-slash d-block mb-1 text-purple" style="font-size: 1.2rem; color: #a8a2bd;"></i>
+                        Tidak ada notifikasi baru
+                    </div>
+                    @endforelse
+                </div>
+
+                <div class="dropdown-divider" style="border-color: #f0edf9;"></div>
+                <a href="{{ route('admin.siswa.approve.index') }}" class="dropdown-item dropdown-footer py-2 text-purple font-weight-bold text-center" style="font-size: 0.8rem; color: #7c3aed !important;">Lihat Semua Antrean</a>
             </div>
         </li>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const dropdown = document.getElementById('notifDropdown');
+                if (dropdown) {
+                    // Gunakan jQuery event selector karena AdminLTE memicu dropdown bootstrap via jQuery
+                    $(dropdown).on('show.bs.dropdown', function () {
+                        // Mark all as read when dropdown opens
+                        fetch('{{ route("admin.notifications.read") }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json'
+                            }
+                        }).then(r => r.json()).then(data => {
+                            const badge = document.getElementById('notifBadge');
+                            if (badge) badge.style.display = 'none';
+                            const header = document.getElementById('notifHeader');
+                            if (header) header.textContent = '0 Notifikasi Baru';
+                        }).catch(err => console.error("Gagal membaca notifikasi:", err));
+                    });
+                }
+            });
+        </script>
+        @endif
 
         <!-- user menu -->
         <li class="nav-item dropdown">

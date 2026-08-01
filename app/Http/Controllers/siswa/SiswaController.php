@@ -15,11 +15,11 @@ class SiswaController extends Controller
     {
         $siswa = auth()->guard('siswa')->user();
         if ($siswa) {
-            if ($siswa->status === 'under_review') {
-                return redirect()->route('siswa.pending');
-            }
             if ($siswa->status === 'active') {
                 return redirect()->route('siswa.dashboard');
+            }
+            if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
+                return redirect()->route('siswa.pending');
             }
         }
         return view('siswa.biodata', compact('siswa'));
@@ -57,11 +57,11 @@ class SiswaController extends Controller
     {
         $siswa = auth()->guard('siswa')->user();
         if ($siswa) {
-            if ($siswa->status === 'under_review') {
-                return redirect()->route('siswa.pending');
-            }
             if ($siswa->status === 'active') {
                 return redirect()->route('siswa.dashboard');
+            }
+            if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
+                return redirect()->route('siswa.pending');
             }
         }
         return view('siswa.regisKategory');
@@ -104,11 +104,11 @@ class SiswaController extends Controller
     {
         $siswa = auth()->guard('siswa')->user();
         if ($siswa) {
-            if ($siswa->status === 'under_review') {
-                return redirect()->route('siswa.pending');
-            }
             if ($siswa->status === 'active') {
                 return redirect()->route('siswa.dashboard');
+            }
+            if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
+                return redirect()->route('siswa.pending');
             }
         }
 
@@ -238,6 +238,28 @@ class SiswaController extends Controller
                 'bukti_transfer' => 'uploads/bukti_transfer/' . $filename,
                 'status' => 'under_review',
             ]);
+
+            // Buat Notifikasi Database untuk Admin
+            $title = "Pendaftaran Siswa Baru";
+            $message = "Siswa " . $siswa->name . " telah mengunggah bukti transfer untuk bimbingan belajar.";
+            $link = route('admin.siswa.approve.index');
+
+            \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                'title' => $title,
+                'message' => $message,
+                'link' => $link,
+                'is_read' => false,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Kirim Push Notification FCM ke Admin
+            try {
+                $firebaseService = new \App\Services\FirebaseService();
+                $firebaseService->sendToAdmins($title, $message, $link);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal mengirim FCM: " . $e->getMessage());
+            }
         }
 
         return redirect()->route('siswa.pending')
