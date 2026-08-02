@@ -81,6 +81,109 @@
 
     @if (auth()->guard('siswa')->check())
         @include('layout.sideMobile')
+
+        @php
+            $globalSiswa = auth()->guard('siswa')->user();
+            $globalBiodata = $globalSiswa->biodata ?? [];
+            $globalHariPertemuan = $globalBiodata['hari_pertemuan'] ?? [];
+            $globalTanggalMulai = $globalBiodata['tanggal_mulai'] ?? null;
+            
+            // Fallback parsing
+            if (empty($globalHariPertemuan) && $globalSiswa->tipe_paket) {
+                if (preg_match('/Hari:\s*([^)|]+)/i', $globalSiswa->tipe_paket, $globalMatches)) {
+                    $globalHariPertemuan = array_map('trim', explode(',', $globalMatches[1]));
+                }
+                if (preg_match('/Mulai:\s*([\d\-]+)/i', $globalSiswa->tipe_paket, $globalMatches)) {
+                    $globalD = trim($globalMatches[1]);
+                    if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $globalD, $globalDMatches)) {
+                        $globalTanggalMulai = $globalDMatches[3] . '-' . $globalDMatches[2] . '-' . $globalDMatches[1];
+                    }
+                }
+            }
+            if (!$globalTanggalMulai && $globalSiswa->created_at) {
+                $globalTanggalMulai = $globalSiswa->created_at->format('Y-m-d');
+            }
+            
+            $globalPaket = $globalSiswa->paket;
+            $globalJamMulai = $globalPaket ? ($globalPaket->jam_mulai ?? '15:30') : '15:30';
+            $globalDurationMinutes = 90;
+            if ($globalPaket && preg_match('/(\d+)\s*menit/i', $globalPaket->detail_5, $globalDurationMatches)) {
+                $globalDurationMinutes = (int) $globalDurationMatches[1];
+            }
+            $globalJamSelesai = date('H:i', strtotime($globalJamMulai . " + {$globalDurationMinutes} minutes"));
+            
+            $globalJumlahPertemuan = $globalBiodata['jumlah_pertemuan'] ?? null;
+            if (!$globalJumlahPertemuan && $globalSiswa->tipe_paket) {
+                if (preg_match('/Sesi:\s*(\d+)x/i', $globalSiswa->tipe_paket, $globalMatches)) {
+                    $globalJumlahPertemuan = (int) $globalMatches[1];
+                }
+            }
+        @endphp
+        
+        @if(!empty($globalHariPertemuan) && $globalTanggalMulai && $globalJumlahPertemuan)
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Hindari notifikasi berulang di navigasi halaman yang sama
+                if (sessionStorage.getItem('notified_session_1')) return;
+                
+                const selectedDays = @json($globalHariPertemuan);
+                const startDateStr = "{{ $globalTanggalMulai }}";
+                const limitSesi = {{ $globalJumlahPertemuan }};
+                const jamMulai = "{{ $globalJamMulai }}";
+                const jamSelesai = "{{ $globalJamSelesai }}";
+                
+                const dayMap = {
+                    'Minggu': 0, 'Senin': 1, 'Selasa': 2, 'Rabu': 3,
+                    'Kamis': 4, 'Jumat': 5, 'Sabtu': 6
+                };
+                const scheduledDayNums = selectedDays.map(d => dayMap[d]);
+                const startLimitDate = new Date(startDateStr);
+                startLimitDate.setHours(0,0,0,0);
+                
+                // Hitung tanggal sesi
+                const scheduledDates = [];
+                let tempDate = new Date(startLimitDate);
+                for (let d = 0; d < 365; d++) {
+                    if (scheduledDates.length >= limitSesi) break;
+                    const dayOfWeek = tempDate.getDay();
+                    if (scheduledDayNums.includes(dayOfWeek)) {
+                        const y = tempDate.getFullYear();
+                        const m = String(tempDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(tempDate.getDate()).padStart(2, '0');
+                        scheduledDates.push(`${y}-${m}-${day}`);
+                    }
+                    tempDate.setDate(tempDate.getDate() + 1);
+                }
+                
+                if (scheduledDates.length > 0) {
+                    const today = new Date();
+                    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                    if (scheduledDates[0] === todayStr) {
+                        sessionStorage.setItem('notified_session_1', 'true');
+                        // Kirim Notifikasi Native Browser (HP / PC)
+                        if ("Notification" in window) {
+                            if (Notification.permission === "granted") {
+                                showNativeNotification();
+                            } else if (Notification.permission !== "denied") {
+                                Notification.requestPermission().then(permission => {
+                                    if (permission === "granted") {
+                                        showNativeNotification();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                function showNativeNotification() {
+                    new Notification("Sesi 1 Mulai Hari Ini!", {
+                        body: `Jam Sesi: ${jamMulai} - ${jamSelesai}. Ayo bersiap untuk belajar di Paradise of Math!`,
+                        icon: "/images/logoPM.webp"
+                    });
+                }
+            });
+        </script>
+        @endif
     @endif
 
 </div>

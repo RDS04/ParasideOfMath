@@ -223,38 +223,8 @@
                             <div class="error" id="pertemuanError">Pilih jumlah pertemuan.</div>
                         </div>
 
-                        <!-- Hari Pertemuan (Statis 2 Dropdown) -->
-                        <div class="field hidden mt-4" data-required="true" id="datePickersContainer">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Hari Pertemuan Belajar (Senin s/d Sabtu)<span class="text-amber-600 ml-1">*</span></label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="field" data-required="true">
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hari Pertemuan Ke-1<span class="text-amber-600 ml-1">*</span></label>
-                                    <select name="hari_pertemuan[]" class="form-input text-sm cursor-pointer" required>
-                                        <option value="">Pilih hari</option>
-                                        <option value="Senin">Senin</option>
-                                        <option value="Selasa">Selasa</option>
-                                        <option value="Rabu">Rabu</option>
-                                        <option value="Kamis">Kamis</option>
-                                        <option value="Jumat">Jumat</option>
-                                        <option value="Sabtu">Sabtu</option>
-                                    </select>
-                                    <div class="error">Hari pertemuan wajib dipilih.</div>
-                                </div>
-                                <div class="field" data-required="true">
-                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hari Pertemuan Ke-2<span class="text-amber-600 ml-1">*</span></label>
-                                    <select name="hari_pertemuan[]" class="form-input text-sm cursor-pointer" required>
-                                        <option value="">Pilih hari</option>
-                                        <option value="Senin">Senin</option>
-                                        <option value="Selasa">Selasa</option>
-                                        <option value="Rabu">Rabu</option>
-                                        <option value="Kamis">Kamis</option>
-                                        <option value="Jumat">Jumat</option>
-                                        <option value="Sabtu">Sabtu</option>
-                                    </select>
-                                    <div class="error">Hari pertemuan wajib dipilih.</div>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Hari Pertemuan & Tanggal Mulai (Dinamis) -->
+                        <div class="hidden mt-4" id="datePickersContainer"></div>
                     </div>
 
                     <!-- Navigation Action Buttons -->
@@ -642,7 +612,51 @@
             const pertemuanRadios = document.querySelectorAll('input[name="jumlah_pertemuan"]');
             const pertemuanField = document.getElementById('pertemuanSemingguField');
             const dateContainer = document.getElementById('datePickersContainer');
-            const dateGrid = document.getElementById('dateInputsGrid');
+
+            function generateDayDropdowns(num) {
+                if (num > 0) {
+                    dateContainer.classList.remove('hidden');
+                    let html = `
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Hari Pertemuan Belajar (Senin s/d Sabtu)<span class="text-amber-600 ml-1">*</span></label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    `;
+                    for (let i = 1; i <= num; i++) {
+                        html += `
+                            <div class="field" data-required="true">
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hari Pertemuan Ke-${i}<span class="text-amber-600 ml-1">*</span></label>
+                                <select name="hari_pertemuan[]" class="form-input text-sm cursor-pointer" required>
+                                    <option value="">Pilih hari</option>
+                                    <option value="Senin">Senin</option>
+                                    <option value="Selasa">Selasa</option>
+                                    <option value="Rabu">Rabu</option>
+                                    <option value="Kamis">Kamis</option>
+                                    <option value="Jumat">Jumat</option>
+                                    <option value="Sabtu">Sabtu</option>
+                                </select>
+                                <div class="error">Hari pertemuan wajib dipilih.</div>
+                            </div>
+                        `;
+                    }
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const todayStr = `${year}-${month}-${day}`;
+
+                    html += `
+                        </div>
+                        <div class="field mt-4" data-required="true" id="startDateContainer">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Tanggal Mulai Les<span class="text-amber-600 ml-1">*</span></label>
+                            <input type="date" name="tanggal_mulai" class="form-input text-sm cursor-pointer" required min="${todayStr}">
+                            <div class="error">Tanggal mulai les wajib dipilih.</div>
+                        </div>
+                    `;
+                    dateContainer.innerHTML = html;
+                } else {
+                    dateContainer.innerHTML = '';
+                    dateContainer.classList.add('hidden');
+                }
+            }
 
             function getSelectedShiftsCount() {
                 let totalShifts = 0;
@@ -690,7 +704,10 @@
                         if (targetRadio) {
                             targetRadio.checked = true;
                             highlightMeetingRadio(minMeetings);
+                            generateDayDropdowns(minMeetings);
                         }
+                    } else {
+                        generateDayDropdowns(parseInt(selectedRadio.value));
                     }
                     dateContainer.classList.remove('hidden');
                 } else {
@@ -698,6 +715,7 @@
                         selectedRadio.checked = false;
                     }
                     highlightMeetingRadio(0);
+                    generateDayDropdowns(0);
                     dateContainer.classList.add('hidden');
                 }
             }
@@ -720,6 +738,7 @@
                 radio.addEventListener('change', function () {
                     const val = parseInt(this.value);
                     highlightMeetingRadio(val);
+                    generateDayDropdowns(val);
                     dateContainer.classList.remove('hidden');
                     pertemuanField.classList.remove('invalid');
                 });

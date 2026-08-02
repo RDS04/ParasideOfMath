@@ -55,6 +55,7 @@ class AdminController extends Controller
             'detail_3' => ['nullable', 'string', 'max:255'],
             'detail_4' => ['nullable', 'string', 'max:255'],
             'detail_5' => ['nullable', 'string', 'max:255'],
+            'jam_mulai' => ['nullable', 'string', 'max:10'],
         ]);
 
         // If this package is marked as popular, remove popularity from other packages
@@ -76,6 +77,7 @@ class AdminController extends Controller
             'detail_3' => $request->detail_3,
             'detail_4' => $request->detail_4,
             'detail_5' => $request->detail_5,
+            'jam_mulai' => $request->jam_mulai ?? '15:30',
         ]);
 
         return back()->with('success', 'Paket ' . $paket->nama_paket . ' berhasil diupdate!');

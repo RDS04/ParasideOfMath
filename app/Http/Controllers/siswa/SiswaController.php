@@ -160,6 +160,7 @@ class SiswaController extends Controller
             'tipe_paket' => ['required'],
             'payment_method' => ['required', 'in:bank,ewallet'],
             'bukti_transfer' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'tanggal_mulai' => ['nullable', 'date'],
         ], [
             'bukti_transfer.required' => 'Bukti transfer pembayaran wajib diunggah.',
             'bukti_transfer.file' => 'Bukti transfer harus berupa file valid.',
@@ -201,6 +202,7 @@ class SiswaController extends Controller
             $guruInggris = $request->input('pilihan_guru_inggris');
             $jumlahPertemuan = $request->input('jumlah_pertemuan');
             $hariPertemuan = $request->input('hari_pertemuan', []);
+            $tanggalMulai = $request->input('tanggal_mulai');
 
             $extraDetails = [];
             if (!empty($mapelList)) {
@@ -226,17 +228,33 @@ class SiswaController extends Controller
                 $extraDetails[] = 'Hari: ' . implode(', ', $hariPertemuan);
             }
 
+            if ($tanggalMulai) {
+                $extraDetails[] = 'Mulai: ' . date('d-m-Y', strtotime($tanggalMulai));
+            }
+
             $finalTipePaket = $detailString;
             if (!empty($extraDetails)) {
                 $finalTipePaket .= ' (' . implode(' | ', $extraDetails) . ')';
             }
 
-            // Simpan pendaftaran ke database
+            // Simpan pendaftaran ke database dengan array biodata diperbarui
+            $biodata = $siswa->biodata ?? [];
+            if (!empty($hariPertemuan)) {
+                $biodata['hari_pertemuan'] = $hariPertemuan;
+            }
+            if ($tanggalMulai) {
+                $biodata['tanggal_mulai'] = $tanggalMulai;
+            }
+            if ($jumlahPertemuan) {
+                $biodata['jumlah_pertemuan'] = (int)$jumlahPertemuan;
+            }
+
             $siswa->update([
                 'paket_id' => $request->paket_id,
                 'tipe_paket' => $finalTipePaket,
                 'bukti_transfer' => 'uploads/bukti_transfer/' . $filename,
                 'status' => 'under_review',
+                'biodata' => $biodata,
             ]);
 
             // Buat Notifikasi Database untuk Admin
@@ -283,5 +301,76 @@ class SiswaController extends Controller
             return (int) str_replace('.', '', $matches[1]);
         }
         return $default;
+    }
+
+    /**
+     * Tampilkan Halaman Jadwal Belajar Siswa (Kalender).
+     */
+    public function showJadwal()
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+
+        // Ambil data jadwal dari kolom biodata
+        $biodata = $siswa->biodata ?? [];
+        $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+        $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+        $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+
+        // Fallback parsing dari tipe_paket jika di biodata kosong
+        if (empty($hariPertemuan) && $siswa->tipe_paket) {
+            if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+            }
+            if (preg_match('/Mulai:\s*([\d\-]+)/i', $siswa->tipe_paket, $matches)) {
+                $d = trim($matches[1]);
+                if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $d, $dMatches)) {
+                    $tanggalMulai = $dMatches[3] . '-' . $dMatches[2] . '-' . $dMatches[1];
+                }
+            }
+        }
+
+        // Tambahan parse jumlahPertemuan dari tipe_paket jika di biodata kosong
+        if (!$jumlahPertemuan && $siswa->tipe_paket) {
+            if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
+                $jumlahPertemuan = (int) $matches[1];
+            }
+        }
+
+        // Jika tanggal mulai belum ditentukan (untuk siswa lama), gunakan tanggal pendaftaran
+        if (!$tanggalMulai) {
+            $tanggalMulai = $siswa->created_at ? $siswa->created_at->format('Y-m-d') : date('Y-m-d');
+        }
+
+        // Ambil mapel terpilih dari tipe_paket
+        $mapels = [];
+        if ($siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+            $mapels = array_map('trim', explode(',', $matches[1]));
+        }
+
+        // Ambil jam mulai dari paket, dan hitung jam selesai dari durasi detail_5
+        $paket = $siswa->paket;
+        $jamMulai = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
+        $durationMinutes = 90;
+        if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5, $durationMatches)) {
+            $durationMinutes = (int) $durationMatches[1];
+        }
+        $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+
+        // Parse Guru dari tipe_paket
+        $gurus = [];
+        $hasGuru = false;
+        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+            $gurus = array_map('trim', explode(',', $matches[1]));
+            foreach ($gurus as $g) {
+                if (!empty($g) && $g !== '-' && strtolower($g) !== 'belum ditentukan') {
+                    $hasGuru = true;
+                }
+            }
+        }
+
+        return view('siswa.jadwal', compact('siswa', 'hariPertemuan', 'tanggalMulai', 'mapels', 'jumlahPertemuan', 'jamMulai', 'jamSelesai', 'hasGuru', 'gurus'));
     }
 }

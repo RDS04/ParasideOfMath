@@ -48,6 +48,7 @@ Route::controller(SiswaController::class)->group(function () {
     Route::get('/siswa/payment', 'showPayment')->middleware('auth:siswa')->name('siswa.payment');
     Route::post('/siswa/payment', 'submitPayment')->middleware('auth:siswa')->name('siswa.payment.submit');
     Route::get('/siswa/pending', 'showPending')->middleware('auth:siswa')->name('siswa.pending');
+    Route::get('/siswa/jadwal', 'showJadwal')->middleware('auth:siswa')->name('siswa.jadwal');
 
 });
 Route::controller(AuthController::class)->prefix('guru')->group(function () {

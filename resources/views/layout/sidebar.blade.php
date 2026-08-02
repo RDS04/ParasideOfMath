@@ -43,7 +43,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('siswa.jadwal') }}" class="nav-link {{ Route::is('siswa.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-alt text-amber-400"></i>
                             <p>Jadwal Belajar</p>
                         </a>

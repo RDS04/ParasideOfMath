@@ -93,6 +93,11 @@
                                     </div>
                                 </div>
 
+                                <div class="form-group mb-3">
+                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Jam Mulai Default</label>
+                                    <input type="time" name="jam_mulai" value="{{ $paket->jam_mulai ?? '15:30' }}" class="form-control form-control-sm" required />
+                                </div>
+
                                 <div class="custom-control custom-checkbox mb-4">
                                     <input type="checkbox" name="is_populer" value="1" class="custom-control-input" id="populer-{{ $paket->id }}" {{ $paket->is_populer ? 'checked' : '' }}>
                                     <label class="custom-control-label text-xs font-weight-bold text-slate-700 cursor-pointer" for="populer-{{ $paket->id }}">Tandai Paling Populer (Kartu Ungu)</label>

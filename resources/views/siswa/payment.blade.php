@@ -98,6 +98,9 @@
                 <input type="hidden" name="hari_pertemuan[]" value="{{ $hri }}">
             @endforeach
         @endif
+        @if(request('tanggal_mulai'))
+            <input type="hidden" name="tanggal_mulai" value="{{ request('tanggal_mulai') }}">
+        @endif
 
         <!-- ══════════════ LEFT COLUMN: PAYMENT METHODS (7 COLS) ══════════════ -->
         <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between scrollable-left">
@@ -305,6 +308,9 @@
                                         <li>Pertemuan {{ $index + 1 }}: Hari {{ $hri }}</li>
                                     @endforeach
                                 </ul>
+                                @endif
+                                @if(request('tanggal_mulai'))
+                                <small class="text-slate-400 text-xxs block mt-1"><i class="far fa-calendar-alt mr-1"></i>Mulai: {{ date('d-m-Y', strtotime(request('tanggal_mulai'))) }}</small>
                                 @endif
                             </div>
                             <span class="text-xs font-semibold text-slate-700 shrink-0">
