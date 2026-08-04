@@ -35,13 +35,6 @@
                 @if ($isSiswa)
                     <!-- ══════ STUDENT NAVIGATION ══════ -->
                     <li class="nav-header">BELAJAR</li>
-                    
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-chalkboard text-purple-400"></i>
-                            <p>Kelas Saya</p>
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a href="{{ route('siswa.jadwal') }}" class="nav-link {{ Route::is('siswa.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-alt text-amber-400"></i>
@@ -101,14 +94,14 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                    <li class="nav-item {{ Route::is('admin.guru.daftar.index') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ Route::is('admin.guru.daftar.index') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chalkboard-teacher text-amber-400"></i>
                             <p>Tutor <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('admin.guru.daftar.index') }}" class="nav-link {{ Route::is('admin.guru.daftar.index') ? 'active' : '' }}">
                                     <i class="fas fa-id-card nav-icon text-amber-400"></i>
                                     <p>Daftar Tutor</p>
                                 </a>

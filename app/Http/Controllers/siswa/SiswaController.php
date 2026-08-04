@@ -373,4 +373,79 @@ class SiswaController extends Controller
 
         return view('siswa.jadwal', compact('siswa', 'hariPertemuan', 'tanggalMulai', 'mapels', 'jumlahPertemuan', 'jamMulai', 'jamSelesai', 'hasGuru', 'gurus'));
     }
+
+    /**
+     * Tampilkan Halaman Data Akademik (Biodata terdaftar) Siswa.
+     */
+    public function showAkademik()
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+
+        return view('siswa.dataAkademik', compact('siswa'));
+    }
+
+    /**
+     * Tampilkan Halaman Invoice Belajar Siswa.
+     */
+    public function showInvoice()
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+
+        $paket = $siswa->paket;
+        $biodata = $siswa->biodata ?? [];
+        
+        // Parse details for invoice
+        $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+        $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+        $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+
+        // Fallback parsing from tipe_paket
+        if (empty($hariPertemuan) && $siswa->tipe_paket) {
+            if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+            }
+        }
+
+        if (!$jumlahPertemuan && $siswa->tipe_paket) {
+            if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
+                $jumlahPertemuan = (int) $matches[1];
+            }
+        }
+
+        // Get single session price
+        $detailString = '';
+        if ($siswa->tipe_paket) {
+            // Find which detail match
+            if ($paket) {
+                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+            }
+        }
+        $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
+        
+        // Total price
+        $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+
+        // Get mapel
+        $mapels = [];
+        if ($siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+            $mapels = array_map('trim', explode(',', $matches[1]));
+        }
+
+        // Get guru
+        $gurus = [];
+        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+            $gurus = array_map('trim', explode(',', $matches[1]));
+        }
+
+        return view('siswa.invoice', compact('siswa', 'paket', 'hariPertemuan', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus'));
+    }
 }

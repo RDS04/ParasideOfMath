@@ -82,7 +82,25 @@
                 $ayahUmur = isset($bio['ayah_umur']) && $bio['ayah_umur'] ? $bio['ayah_umur'] . ' Tahun' : '-';
                 $ayahPekerjaan = $bio['ayah_pekerjaan'] ?? '-';
                 $ayahInstagram = $bio['ayah_instagram'] ?? '-';
+
+                $hariPilihan = $bio['hari_pertemuan'] ?? [];
+                if (empty($hariPilihan) && $student->tipe_paket) {
+                    if (preg_match('/Hari:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                        $hariPilihan = array_map('trim', explode(',', $matches[1]));
+                    }
+                }
+                $hariPilihanLower = array_map('strtolower', $hariPilihan);
             @endphp
+
+            @if(empty($student->biodata))
+                <div class="alert alert-warning alert-dismissible fade show mb-4 rounded-xl shadow-sm border-0" role="alert" style="background-color: #fffbeb; border-color: #fef3c7; color: #b45309;">
+                    <h5><i class="icon fas fa-exclamation-triangle"></i> Data Registrasi Belum Lengkap</h5>
+                    Siswa ini belum mengisi formulir biodata lengkap. Silakan minta siswa untuk melengkapi datanya terlebih dahulu di dashboard siswa.
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color: #b45309;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
 
             <div class="row">
                 <!-- LEFT COLUMN: Profile Brief, Receipt & Approval (4 cols) -->
@@ -126,6 +144,26 @@
                                         <tr>
                                             <td class="text-muted py-2">Detail Pilihan</td>
                                             <td class="text-purple-900 font-weight-bold py-2 text-xs">{{ $student->tipe_paket ?? '-' }}</td>
+                                        </tr>
+                                        <tr class="border-top border-light">
+                                            <td class="text-muted py-2">Guru Pendamping</td>
+                                            <td class="py-2">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <span class="font-weight-bold text-slate-800 text-xs text-truncate mr-1" style="max-width: 180px;">
+                                                        @php
+                                                            $currentGurus = [];
+                                                            if ($student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
+                                                                $currentGurus = array_map('trim', explode(',', $matches[1]));
+                                                            }
+                                                            $displayGuru = !empty($currentGurus) ? implode(', ', $currentGurus) : 'Belum ditentukan';
+                                                        @endphp
+                                                        <i class="fas fa-chalkboard-teacher mr-1 text-purple-600"></i>{{ $displayGuru }}
+                                                    </span>
+                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px]" data-toggle="modal" data-target="#editTutorModal" style="border-color: #cbd5e1; color: #475569;">
+                                                        <i class="fas fa-edit mr-0.5 text-purple-600"></i> Atur
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endif
                                 </tbody>
@@ -247,36 +285,115 @@
                                 <!-- Part 3: Jadwal Pulang & Kegiatan Rutin -->
                                 <div class="mb-4">
                                     <h6 class="font-weight-bold text-purple-950 uppercase text-xs tracking-wider mb-3 pb-2 border-bottom text-purple-700"><i class="fas fa-calendar-alt mr-1.5"></i> 3. Jadwal Sekolah &amp; Rutinitas Lain</h6>
+                                    
+                                    
+
                                     <div class="row">
+                                        <!-- Hari Bimbel Pilihan -->
                                         <div class="col-12 mb-3">
-                                            <span class="text-xs text-muted d-block mb-1.5 font-weight-bold">Jam Pulang Sekolah</span>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-xs text-muted font-weight-bold mb-0">Hari Pilihan untuk Bimbel</span>
+                                                <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2.5 py-1 font-weight-bold text-[10px]" data-toggle="modal" data-target="#editBimbelDaysModal" style="border-color: #cbd5e1; color: #475569;">
+                                                    <i class="fas fa-edit mr-1 text-purple-600"></i> Edit Hari Bimbel
+                                                </button>
+                                            </div>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @if(!empty($hariPilihan))
+                                                    @foreach($hariPilihan as $h)
+                                                        <span class="badge bg-purple-100 text-purple-800 font-bold px-3 py-2 rounded-lg text-xs" style="border: 1px solid #d8d3e8;">
+                                                            <i class="fas fa-calendar-check mr-1.5 text-purple-600"></i>{{ $h }}
+                                                        </span>
+                                                    @endforeach
+                                                @else
+                                                    <span class="text-slate-500 text-xs font-italic">Belum memilih hari bimbingan</span>
+                                                @endif
+                                            </div>
+                                        </div>
+
+                                        <!-- Jam Pulang Sekolah -->
+                                        <div class="col-12 mb-3">
+                                            <span class="text-xs text-muted d-block mb-1.5 font-weight-bold">Jam Pulang Sekolah &amp; Penyelarasan Hari Bimbel</span>
                                             <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
-                                                <div class="p-2 bg-light rounded text-center" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                                                    <span class="d-block text-[10px] text-muted">Senin</span>
-                                                    <strong class="text-purple-950 text-xs">{{ $pulangSenin }}</strong>
+                                                <!-- Senin -->
+                                                @php $isSeninBimbel = in_array('senin', $hariPilihanLower); @endphp
+                                                <div class="p-2 rounded text-center position-relative" style="background-color: {{ $isSeninBimbel ? '#faf5ff' : '#f8fafc' }}; border: 1px solid {{ $isSeninBimbel ? '#c084fc' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    @if($isSeninBimbel)
+                                                        <span class="position-absolute" style="top: 2px; right: 4px; font-size: 8px; color: #7c3aed;"><i class="fas fa-star"></i></span>
+                                                    @endif
+                                                    <span class="d-block text-[10px] text-muted font-weight-bold" style="color: {{ $isSeninBimbel ? '#7c3aed' : '' }} !important;">Senin</span>
+                                                    <strong class="text-purple-950 text-xs d-block my-0.5">{{ $pulangSenin }}</strong>
+                                                    @if($isSeninBimbel)
+                                                        <span class="d-block text-[8px] font-bold text-purple-700 uppercase" style="font-size: 8px; line-height: 1;">Pilihan Bimbel</span>
+                                                    @endif
                                                 </div>
-                                                <div class="p-2 bg-light rounded text-center" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                                                    <span class="d-block text-[10px] text-muted">Selasa</span>
-                                                    <strong class="text-purple-950 text-xs">{{ $pulangSelasa }}</strong>
+
+                                                <!-- Selasa -->
+                                                @php $isSelasaBimbel = in_array('selasa', $hariPilihanLower); @endphp
+                                                <div class="p-2 rounded text-center position-relative" style="background-color: {{ $isSelasaBimbel ? '#faf5ff' : '#f8fafc' }}; border: 1px solid {{ $isSelasaBimbel ? '#c084fc' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    @if($isSelasaBimbel)
+                                                        <span class="position-absolute" style="top: 2px; right: 4px; font-size: 8px; color: #7c3aed;"><i class="fas fa-star"></i></span>
+                                                    @endif
+                                                    <span class="d-block text-[10px] text-muted font-weight-bold" style="color: {{ $isSelasaBimbel ? '#7c3aed' : '' }} !important;">Selasa</span>
+                                                    <strong class="text-purple-950 text-xs d-block my-0.5">{{ $pulangSelasa }}</strong>
+                                                    @if($isSelasaBimbel)
+                                                        <span class="d-block text-[8px] font-bold text-purple-700 uppercase" style="font-size: 8px; line-height: 1;">Pilihan Bimbel</span>
+                                                    @endif
                                                 </div>
-                                                <div class="p-2 bg-light rounded text-center" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                                                    <span class="d-block text-[10px] text-muted">Rabu</span>
-                                                    <strong class="text-purple-950 text-xs">{{ $pulangRabu }}</strong>
+
+                                                <!-- Rabu -->
+                                                @php $isRabuBimbel = in_array('rabu', $hariPilihanLower); @endphp
+                                                <div class="p-2 rounded text-center position-relative" style="background-color: {{ $isRabuBimbel ? '#faf5ff' : '#f8fafc' }}; border: 1px solid {{ $isRabuBimbel ? '#c084fc' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    @if($isRabuBimbel)
+                                                        <span class="position-absolute" style="top: 2px; right: 4px; font-size: 8px; color: #7c3aed;"><i class="fas fa-star"></i></span>
+                                                    @endif
+                                                    <span class="d-block text-[10px] text-muted font-weight-bold" style="color: {{ $isRabuBimbel ? '#7c3aed' : '' }} !important;">Rabu</span>
+                                                    <strong class="text-purple-950 text-xs d-block my-0.5">{{ $pulangRabu }}</strong>
+                                                    @if($isRabuBimbel)
+                                                        <span class="d-block text-[8px] font-bold text-purple-700 uppercase" style="font-size: 8px; line-height: 1;">Pilihan Bimbel</span>
+                                                    @endif
                                                 </div>
-                                                <div class="p-2 bg-light rounded text-center" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                                                    <span class="d-block text-[10px] text-muted">Kamis</span>
-                                                    <strong class="text-purple-950 text-xs">{{ $pulangKamis }}</strong>
+
+                                                <!-- Kamis -->
+                                                @php $isKamisBimbel = in_array('kamis', $hariPilihanLower); @endphp
+                                                <div class="p-2 rounded text-center position-relative" style="background-color: {{ $isKamisBimbel ? '#faf5ff' : '#f8fafc' }}; border: 1px solid {{ $isKamisBimbel ? '#c084fc' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    @if($isKamisBimbel)
+                                                        <span class="position-absolute" style="top: 2px; right: 4px; font-size: 8px; color: #7c3aed;"><i class="fas fa-star"></i></span>
+                                                    @endif
+                                                    <span class="d-block text-[10px] text-muted font-weight-bold" style="color: {{ $isKamisBimbel ? '#7c3aed' : '' }} !important;">Kamis</span>
+                                                    <strong class="text-purple-950 text-xs d-block my-0.5">{{ $pulangKamis }}</strong>
+                                                    @if($isKamisBimbel)
+                                                        <span class="d-block text-[8px] font-bold text-purple-700 uppercase" style="font-size: 8px; line-height: 1;">Pilihan Bimbel</span>
+                                                    @endif
                                                 </div>
-                                                <div class="p-2 bg-light rounded text-center" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                                                    <span class="d-block text-[10px] text-muted">Jumat</span>
-                                                    <strong class="text-purple-950 text-xs">{{ $pulangJumat }}</strong>
+
+                                                <!-- Jumat -->
+                                                @php $isJumatBimbel = in_array('jumat', $hariPilihanLower); @endphp
+                                                <div class="p-2 rounded text-center position-relative" style="background-color: {{ $isJumatBimbel ? '#faf5ff' : '#f8fafc' }}; border: 1px solid {{ $isJumatBimbel ? '#c084fc' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    @if($isJumatBimbel)
+                                                        <span class="position-absolute" style="top: 2px; right: 4px; font-size: 8px; color: #7c3aed;"><i class="fas fa-star"></i></span>
+                                                    @endif
+                                                    <span class="d-block text-[10px] text-muted font-weight-bold" style="color: {{ $isJumatBimbel ? '#7c3aed' : '' }} !important;">Jumat</span>
+                                                    <strong class="text-purple-950 text-xs d-block my-0.5">{{ $pulangJumat }}</strong>
+                                                    @if($isJumatBimbel)
+                                                        <span class="d-block text-[8px] font-bold text-purple-700 uppercase" style="font-size: 8px; line-height: 1;">Pilihan Bimbel</span>
+                                                    @endif
                                                 </div>
-                                                <div class="p-2 bg-light rounded text-center" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                                                    <span class="d-block text-[10px] text-muted">Sabtu</span>
-                                                    <strong class="text-purple-950 text-xs">{{ $pulangSabtu }}</strong>
+
+                                                <!-- Sabtu -->
+                                                @php $isSabtuBimbel = in_array('sabtu', $hariPilihanLower); @endphp
+                                                <div class="p-2 rounded text-center position-relative" style="background-color: {{ $isSabtuBimbel ? '#faf5ff' : '#f8fafc' }}; border: 1px solid {{ $isSabtuBimbel ? '#c084fc' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    @if($isSabtuBimbel)
+                                                        <span class="position-absolute" style="top: 2px; right: 4px; font-size: 8px; color: #7c3aed;"><i class="fas fa-star"></i></span>
+                                                    @endif
+                                                    <span class="d-block text-[10px] text-muted font-weight-bold" style="color: {{ $isSabtuBimbel ? '#7c3aed' : '' }} !important;">Sabtu</span>
+                                                    <strong class="text-purple-950 text-xs d-block my-0.5">{{ $pulangSabtu }}</strong>
+                                                    @if($isSabtuBimbel)
+                                                        <span class="d-block text-[8px] font-bold text-purple-700 uppercase" style="font-size: 8px; line-height: 1;">Pilihan Bimbel</span>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div class="col-12 mb-2">
                                             <span class="text-xs text-muted d-block">Kegiatan Rutin Selain Sekolah</span>
                                             <span class="font-weight-semibold text-slate-700 text-sm">{{ $kegiatanRutin }}</span>
@@ -338,6 +455,130 @@
             </div>
         </div>
     </section>
+
+    <!-- Modal Edit Hari Bimbel -->
+    <div class="modal fade" id="editBimbelDaysModal" tabindex="-1" role="dialog" aria-labelledby="editBimbelDaysModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+                <form action="{{ route('admin.siswa.update-bimbel-days', $student->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                        <h5 class="modal-title font-weight-bold text-md text-white" id="editBimbelDaysModalLabel" style="color: #fff;">Edit Hari Bimbel</h5>
+                        <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 text-left">
+                        <p class="text-xs text-muted mb-3">Pilih hari-hari pelaksanaan bimbingan belajar untuk siswa ini. Anda dapat memilih lebih dari satu hari.</p>
+                        
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold text-purple-950 text-xs d-block mb-2">Hari Bimbel:</label>
+                            <div class="row">
+                                @php
+                                    $daftarHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                @endphp
+                                @foreach($daftarHari as $hari)
+                                    @php
+                                        $isChecked = in_array(strtolower($hari), $hariPilihanLower);
+                                    @endphp
+                                    <div class="col-6 mb-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" name="hari_pertemuan[]" value="{{ $hari }}" class="custom-control-input" id="checkHari{{ $hari }}" {{ $isChecked ? 'checked' : '' }}>
+                                            <label class="custom-control-label text-sm text-slate-700 font-weight-semibold" style="cursor: pointer;" for="checkHari{{ $hari }}">{{ $hari }}</label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Tutor Pendamping -->
+    <div class="modal fade" id="editTutorModal" tabindex="-1" role="dialog" aria-labelledby="editTutorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+                <form action="{{ route('admin.siswa.assign-tutor', $student->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                        <h5 class="modal-title font-weight-bold text-md text-white" id="editTutorModalLabel" style="color: #fff;">Atur Guru Pendamping</h5>
+                        <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 text-left">
+                        <p class="text-xs text-muted mb-3">Pilih guru-guru pendamping yang ditugaskan untuk mengajar siswa ini. Anda dapat memilih lebih dari satu guru.</p>
+                        
+                        <!-- Search Box -->
+                        <div class="input-group mb-3 shadow-sm" style="border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-white border-right-0 text-muted" style="border: 0;"><i class="fas fa-search"></i></span>
+                            </div>
+                            <input type="text" id="searchTutorInput" class="form-control border-left-0 text-xs" placeholder="Cari nama atau spesialisasi guru..." style="height: 38px; border: 0; outline: none; font-size: 0.8rem;">
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold text-purple-950 text-xs d-block mb-2">Pilih Guru / Tutor:</label>
+                            <div class="row">
+                                @if(isset($gurusList) && !$gurusList->isEmpty())
+                                    @foreach($gurusList as $g)
+                                        @php
+                                            $isChecked = in_array($g->user->name ?? '', $currentGurus);
+                                        @endphp
+                                        <div class="col-md-6 mb-3 tutor-item-row" data-name="{{ strtolower($g->user->name ?? '') }}" data-spesialisasi="{{ strtolower($g->spesialisasi ?? 'matematika') }}">
+                                            <div class="custom-control custom-checkbox p-2 rounded border" style="background-color: #f8fafc; border-color: #e2e8f0; height: 100%;">
+                                                <input type="checkbox" name="tutors[]" value="{{ $g->user->name ?? '' }}" class="custom-control-input" id="checkGuru{{ $g->id }}" {{ $isChecked ? 'checked' : '' }}>
+                                                <label class="custom-control-label text-xs text-slate-700 font-weight-semibold d-flex flex-column" style="cursor: pointer; padding-left: 8px;" for="checkGuru{{ $g->id }}">
+                                                    <span class="font-weight-bold text-purple-950">{{ $g->user->name ?? '' }}</span>
+                                                    <span class="text-[10px] text-muted">{{ $g->user->email ?? '' }}</span>
+                                                    <span class="text-[10px] text-purple-600 mt-1 font-weight-bold">Spesialisasi: {{ $g->spesialisasi ?? 'Matematika' }}</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="col-12 text-center py-3">
+                                        <span class="text-xs text-muted font-italic">Belum ada guru/tutor terdaftar.</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">Simpan Penugasan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchTutorInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+                    const items = document.querySelectorAll('.tutor-item-row');
+                    items.forEach(item => {
+                        const name = item.getAttribute('data-name');
+                        const spec = item.getAttribute('data-spesialisasi');
+                        if (name.includes(query) || spec.includes(query)) {
+                            item.style.setProperty('display', '', 'important');
+                        } else {
+                            item.style.setProperty('display', 'none', 'important');
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 
     <!-- Custom CSS for purple brand elements -->
     <style>

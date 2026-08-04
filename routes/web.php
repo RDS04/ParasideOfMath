@@ -49,7 +49,8 @@ Route::controller(SiswaController::class)->group(function () {
     Route::post('/siswa/payment', 'submitPayment')->middleware('auth:siswa')->name('siswa.payment.submit');
     Route::get('/siswa/pending', 'showPending')->middleware('auth:siswa')->name('siswa.pending');
     Route::get('/siswa/jadwal', 'showJadwal')->middleware('auth:siswa')->name('siswa.jadwal');
-
+    Route::get('/siswa/akademik', 'showAkademik')->middleware('auth:siswa')->name('siswa.akademik');
+    Route::get('/siswa/invoice', 'showInvoice')->middleware('auth:siswa')->name('siswa.invoice');
 });
 Route::controller(AuthController::class)->prefix('guru')->group(function () {
     Route::get('/register', 'showGuruRegisterForm')->name('guru.register');
@@ -78,8 +79,12 @@ Route::controller(AdminController::class)->group(function () {
     Route::delete('/admin/mapel/{id}', 'deleteMapel')->name('admin.mapel.delete');
     Route::get('/admin/siswa/approve', 'approvSiswa')->name('admin.siswa.approve.index');
     Route::post('/admin/siswa/approve/{id}', 'submitApprovSiswa')->name('admin.siswa.approve.submit');
+    Route::post('/admin/siswa/reject/{id}', 'rejectSiswa')->name('admin.siswa.reject.submit');
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
+    Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
+    Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
+    Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
     Route::post('/admin/save-token', 'saveFcmToken')->name('admin.save_token');
     Route::get('/admin/notifications', 'getNotifications')->name('admin.notifications.get');

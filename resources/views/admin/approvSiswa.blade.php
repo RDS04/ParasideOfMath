@@ -89,18 +89,30 @@
                                                     <span class="badge bg-emerald-100 text-emerald-800 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-emerald-200">Aktif</span>
                                                 @elseif ($student->status === 'under_review')
                                                     <span class="badge bg-amber-100 text-amber-800 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-amber-200 animate-pulse">Menunggu Verifikasi</span>
+                                                @elseif ($student->status === 'rejected')
+                                                    <span class="badge bg-rose-100 text-rose-800 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-rose-200">Ditolak</span>
                                                 @else
                                                     <span class="badge bg-slate-100 text-slate-600 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-slate-200">Pilih Paket</span>
                                                 @endif
                                             </td>
                                             <td class="px-4 py-3 text-right">
                                                 @if ($student->status === 'under_review')
-                                                    <form action="{{ route('admin.siswa.approve.submit', $student->id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui pendaftaran dan mengaktifkan akun {{ $student->name }}?')">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-sm btn-success rounded-lg font-weight-bold px-3">
-                                                            <i class="fas fa-check-circle mr-1"></i> Approve
-                                                        </button>
-                                                    </form>
+                                                    <div class="d-flex justify-content-end align-items-center">
+                                                        <form action="{{ route('admin.siswa.approve.submit', $student->id) }}" method="POST" class="d-inline mr-2" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui pendaftaran dan mengaktifkan akun {{ $student->name }}?')">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-success rounded-lg font-weight-bold px-3">
+                                                                <i class="fas fa-check-circle mr-1"></i> Approve
+                                                            </button>
+                                                        </form>
+                                                        <form action="{{ route('admin.siswa.reject.submit', $student->id) }}" method="POST" class="d-inline m-0" onsubmit="return confirm('Apakah Anda yakin ingin menolak pendaftaran {{ $student->name }}?')">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-sm btn-danger rounded-lg font-weight-bold px-3">
+                                                                <i class="fas fa-times-circle mr-1"></i> Tolak
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                @elseif ($student->status === 'rejected')
+                                                    <span class="text-xs text-rose-600 font-weight-bold"><i class="fas fa-times-circle mr-1"></i> Ditolak</span>
                                                 @else
                                                     <button type="button" class="btn btn-sm btn-light border-0 rounded-lg text-slate-400 font-weight-bold px-3" disabled>
                                                         <i class="fas fa-check-circle mr-1"></i> Selesai

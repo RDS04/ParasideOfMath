@@ -199,6 +199,24 @@ class AdminController extends Controller
     }
 
     /**
+     * Tolak pendaftaran dan pembayaran siswa.
+     */
+    public function rejectSiswa($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = \App\Models\Siswa::findOrFail($id);
+        $siswa->update([
+            'status' => 'rejected',
+            'bukti_transfer' => null, // clear payment proof to allow re-upload
+        ]);
+
+        return back()->with('success', 'Pendaftaran ' . $siswa->name . ' telah ditolak. Bukti transfer telah dikosongkan agar siswa dapat mengunggah ulang pembayaran baru.');
+    }
+
+    /**
      * Tampilkan Halaman Detail Data Registrasi Siswa.
      */
     public function detailSiswa($id)
@@ -209,8 +227,87 @@ class AdminController extends Controller
 
         $student = \App\Models\Siswa::findOrFail($id);
         $paket = \App\Models\PaketBelajar::find($student->paket_id);
+        $gurusList = \App\Models\Guru::with('user')->get();
 
-        return view('admin.detailData', compact('student', 'paket'));
+        return view('admin.detailData', compact('student', 'paket', 'gurusList'));
+    }
+
+    /**
+     * Atur / assign guru pendamping untuk siswa.
+     */
+    public function assignTutor(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'tutors' => ['required', 'array'],
+            'tutors.*' => ['string', 'max:255'],
+        ]);
+
+        $siswa = \App\Models\Siswa::findOrFail($id);
+        
+        $tutorsSelected = $request->tutors; // e.g. ["Budi", "Asep"]
+        $tutorsStr = implode(', ', $tutorsSelected);
+
+        // Update biodata
+        $biodata = $siswa->biodata ?? [];
+        $biodata['tutor_names'] = $tutorsSelected;
+
+        // Update tipe_paket descriptor (e.g. "Guru: Belum ditentukan" -> "Guru: Budi, Asep")
+        if ($siswa->tipe_paket) {
+            // Check if "Guru: " already exists in tipe_paket
+            if (preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket)) {
+                $newTipePaket = preg_replace('/Guru:\s*([^|)]+)/i', 'Guru: ' . $tutorsStr, $siswa->tipe_paket);
+            } else {
+                // If it doesn't exist, append it
+                // e.g. "Hari: Senin | Sesi: 8x" -> "Hari: Senin | Sesi: 8x | Guru: Budi, Asep"
+                $newTipePaket = $siswa->tipe_paket . ' | Guru: ' . $tutorsStr;
+            }
+            $siswa->tipe_paket = trim($newTipePaket);
+        } else {
+            $siswa->tipe_paket = 'Guru: ' . $tutorsStr;
+        }
+
+        $siswa->update([
+            'biodata' => $biodata,
+            'tipe_paket' => $siswa->tipe_paket,
+        ]);
+
+        return back()->with('success', 'Guru pendamping untuk ' . $siswa->name . ' berhasil diatur menjadi: ' . $tutorsStr);
+    }
+
+    /**
+     * Update hari bimbingan / bimbel siswa.
+     */
+    public function updateBimbelDays(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'hari_pertemuan' => ['required', 'array'],
+            'hari_pertemuan.*' => ['string', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu'],
+        ]);
+
+        $siswa = \App\Models\Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        $biodata['hari_pertemuan'] = $request->hari_pertemuan;
+
+        // Sync with tipe_paket string descriptor (e.g. "Hari: Senin, Rabu | ...")
+        if ($siswa->tipe_paket) {
+            $daysStr = implode(', ', $request->hari_pertemuan);
+            $newTipePaket = preg_replace('/Hari:\s*([^|]+)/i', 'Hari: ' . $daysStr . ' ', $siswa->tipe_paket);
+            $siswa->tipe_paket = trim($newTipePaket);
+        }
+
+        $siswa->update([
+            'biodata' => $biodata,
+        ]);
+
+        return back()->with('success', 'Jadwal hari bimbingan bimbel untuk ' . $siswa->name . ' berhasil diperbarui!');
     }
 
     /**
@@ -226,6 +323,21 @@ class AdminController extends Controller
         $students = \App\Models\Siswa::orderBy('created_at', 'desc')->get();
 
         return view('admin.daftarSiswa', compact('students'));
+    }
+
+    /**
+     * Tampilkan Halaman Daftar Guru/Tutor Keseluruhan.
+     */
+    public function daftarGuru()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        // Fetch all tutors with their user details
+        $gurus = \App\Models\Guru::with('user')->orderBy('created_at', 'desc')->get();
+
+        return view('admin.daftarGuru', compact('gurus'));
     }
 
 

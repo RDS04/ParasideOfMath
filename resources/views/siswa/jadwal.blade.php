@@ -137,10 +137,10 @@
                         </div>
                     </div>
 
-                    <!-- Agenda Sesi Bulan Ini -->
+                    <!-- Agenda Sesi Belajar -->
                     <div class="card border-0 shadow-sm" style="border-radius: 20px;">
                         <div class="card-header bg-white border-0 py-3">
-                            <h6 class="card-title font-weight-bold text-purple-950 mb-0">Agenda Sesi Bulan Ini</h6>
+                            <h6 class="card-title font-weight-bold text-purple-950 mb-0">Agenda Semua Sesi Belajar ({{ $jumlahPertemuan ?: 0 }} Sesi)</h6>
                         </div>
                         <div class="card-body p-0 max-h-[300px] overflow-y-auto" id="agendaListContainer" style="max-height: 300px; overflow-y: auto;">
                             <!-- Agenda sessions rendered dynamically here -->
@@ -151,118 +151,7 @@
         @endif
 
         <!-- Section Menu Akademik -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card border-0 shadow-sm" style="border-radius: 20px;">
-                    <div class="card-header bg-white border-0 pt-4 pb-2">
-                        <h5 class="font-weight-bold text-purple-950 mb-1">Layanan &amp; Fitur Akademik</h5>
-                        <p class="text-xs text-muted mb-0">Akses cepat menu bimbingan belajar dan administrasi Anda.</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="academic-menu-grid">
-                            <!-- Menu 1 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #d1fae5; color: #065f46;">
-                                    <i class="fas fa-qrcode"></i>
-                                </div>
-                                <span class="academic-menu-label">Presence QR Code</span>
-                            </div>
-                            <!-- Menu 2 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #fef3c7; color: #92400e;">
-                                    <i class="fas fa-id-card"></i>
-                                </div>
-                                <span class="academic-menu-label">Student e-Card</span>
-                            </div>
-                            <!-- Menu 3 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #ecfeff; color: #0e7490;">
-                                    <i class="fas fa-credit-card"></i>
-                                </div>
-                                <span class="academic-menu-label">Invoice Payment</span>
-                            </div>
-                            <!-- Menu 4 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #d1fae5; color: #065f46;">
-                                    <i class="fas fa-book-reader"></i>
-                                </div>
-                                <span class="academic-menu-label">Registered Course</span>
-                            </div>
-                            <!-- Menu 5 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #d1fae5; color: #065f46;">
-                                    <i class="fas fa-poll"></i>
-                                </div>
-                                <span class="academic-menu-label">Exam Result</span>
-                            </div>
-                            <!-- Menu 6 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #d1fae5; color: #065f46;">
-                                    <i class="fas fa-book"></i>
-                                </div>
-                                <span class="academic-menu-label">Thesis</span>
-                            </div>
-                            <!-- Menu 7 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #d1fae5; color: #065f46;">
-                                    <i class="fas fa-comments"></i>
-                                </div>
-                                <span class="academic-menu-label">Lecturer Consultation</span>
-                            </div>
-                            <!-- Menu 8 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #fef3c7; color: #92400e;">
-                                    <i class="fas fa-award"></i>
-                                </div>
-                                <span class="academic-menu-label">Transcript</span>
-                            </div>
-                            <!-- Menu 9 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #fef3c7; color: #92400e;">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <span class="academic-menu-label">Learning Progress</span>
-                            </div>
-                            <!-- Menu 10 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #d1fae5; color: #065f46;">
-                                    <i class="fas fa-clipboard-check"></i>
-                                </div>
-                                <span class="academic-menu-label">Assessment</span>
-                            </div>
-                            <!-- Menu 11 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #d1fae5; color: #065f46;">
-                                    <i class="fas fa-file-signature"></i>
-                                </div>
-                                <span class="academic-menu-label">Input KRS</span>
-                            </div>
-                            <!-- Menu 12 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #fef3c7; color: #92400e;">
-                                    <i class="fas fa-user-graduate"></i>
-                                </div>
-                                <span class="academic-menu-label">Academic Data</span>
-                            </div>
-                            <!-- Menu 13 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #e0e7ff; color: #3730a3;">
-                                    <i class="fas fa-hotel"></i>
-                                </div>
-                                <span class="academic-menu-label">Accreditation</span>
-                            </div>
-                            <!-- Menu 14 -->
-                            <div class="academic-menu-item">
-                                <div class="academic-menu-icon-wrapper" style="background-color: #e0e7ff; color: #3730a3;">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <span class="academic-menu-label">Majors' Accreditation</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        
     </div>
 </section>
 
@@ -360,6 +249,12 @@
         color: #40206b !important;
         box-shadow: 0 4px 10px rgba(245, 158, 11, 0.25);
     }
+
+    .calendar-day-cell.scheduled.completed {
+        background: linear-gradient(135deg, #a7f3d0 0%, #10b981 100%) !important;
+        color: #047857 !important;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+    }
     
     .schedule-dot {
         width: 5px;
@@ -369,9 +264,11 @@
         position: absolute;
         bottom: 6px;
     }
+    .calendar-day-cell.scheduled.completed .schedule-dot {
+        background-color: #047857;
+    }
 
     .agenda-item {
-        border-left: 4px solid #7c3aed;
         transition: all 0.2s ease;
         cursor: pointer;
     }
@@ -452,6 +349,8 @@
         const startDateStr = "{{ $tanggalMulai }}";
         const mapels = @json($mapels);
         const limitSesi = {{ $jumlahPertemuan ?? 0 }};
+        const jamMulai = "{{ $jamMulai }}";
+        const jamSelesai = "{{ $jamSelesai }}";
         
         const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const monthNames = [
@@ -542,8 +441,10 @@
             }
         }
 
-        let currentMonth = new Date().getMonth();
-        let currentYear = new Date().getFullYear();
+        // Initialize calendar view to the start date of tutoring
+        const startDateObj = new Date(startDateStr);
+        let currentMonth = !isNaN(startDateObj.getTime()) ? startDateObj.getMonth() : new Date().getMonth();
+        let currentYear = !isNaN(startDateObj.getTime()) ? startDateObj.getFullYear() : new Date().getFullYear();
 
         const grid = document.getElementById('calendarDaysGrid');
         const monthYearLabel = document.getElementById('currentMonthYear');
@@ -600,18 +501,33 @@
 
                 if (scheduleInfo) {
                     cell.classList.add('scheduled');
+
+                    // Check if completed
+                    const now = new Date();
+                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                    const endParts = jamSelesai.split(':');
+                    const endMinutes = parseInt(endParts[0]) * 60 + (parseInt(endParts[1]) || 0);
+                    
+                    const isPast = currentDate.getTime() < today.getTime();
+                    const isFinishedToday = isToday && (currentMinutes > endMinutes);
+                    const isCompleted = isPast || isFinishedToday;
+
+                    if (isCompleted) {
+                        cell.classList.add('completed');
+                    }
+
                     const dot = document.createElement('span');
                     dot.className = 'schedule-dot';
                     cell.appendChild(dot);
                     
-                    cell.title = `Sesi ${scheduleInfo.sessionIndex} dari ${limitSesi}`;
+                    cell.title = `Sesi ${scheduleInfo.sessionIndex} dari ${limitSesi} (${isCompleted ? 'Selesai' : 'Belum Mulai'})`;
 
                     // Add click event for modal popup
                     cell.addEventListener('click', function() {
                         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
                         const formattedDate = currentDate.toLocaleDateString('id-ID', options);
                         document.getElementById('modalDate').textContent = formattedDate;
-                        document.getElementById('modalSessionIndex').textContent = `Sesi ${scheduleInfo.sessionIndex} dari ${limitSesi}`;
+                        document.getElementById('modalSessionIndex').textContent = `Sesi ${scheduleInfo.sessionIndex} dari ${limitSesi} (${isCompleted ? 'Selesai' : 'Belum Mulai'})`;
                         $('#sessionDetailModal').modal('show');
                     });
 
@@ -637,8 +553,8 @@
                 grid.appendChild(cell);
             }
 
-            // Render agenda sidebar
-            renderAgendaList(agendaSesi, today);
+            // Render agenda sidebar using all precalculated scheduled dates
+            renderAgendaList(scheduledDates, today);
         }
 
         function renderAgendaList(sessions, today) {
@@ -646,34 +562,63 @@
             if (sessions.length === 0) {
                 agendaContainer.innerHTML = `
                     <div class="py-4 text-center text-muted text-xs">
-                        Tidak ada sesi belajar terjadwal di bulan ini.
+                        Tidak ada sesi belajar terjadwal.
                     </div>
                 `;
                 return;
             }
 
             // Sort by date ascending
-            sessions.sort((a, b) => a.date - b.date);
+            sessions.sort((a, b) => a.dateObj - b.dateObj);
+
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const endParts = jamSelesai.split(':');
+            const endMinutes = parseInt(endParts[0]) * 60 + (parseInt(endParts[1]) || 0);
 
             sessions.forEach(session => {
-                const isToday = session.date.getTime() === today.getTime();
-                const formattedDate = session.date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                const isToday = session.dateObj.getTime() === today.getTime();
+                const isPast = session.dateObj.getTime() < today.getTime();
+                const isFinishedToday = isToday && (currentMinutes > endMinutes);
+                const isCompleted = isPast || isFinishedToday;
+                const formattedDate = session.dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
                 
                 const agendaItem = document.createElement('div');
-                agendaItem.className = `agenda-item p-3 mb-2 bg-light rounded-xl d-flex justify-between align-items-center text-xs mx-3 ${isToday ? 'today-agenda bg-amber-50' : ''}`;
+                
+                let borderLeftColor = '#7c3aed';
+                let bgClass = 'bg-light';
+                let badgeClass = 'badge-purple';
+                let badgeText = `Sesi ${session.sessionIndex}`;
+                let opacityStyle = '';
+
+                if (isCompleted) {
+                    borderLeftColor = '#10b981';
+                    bgClass = 'bg-slate-50';
+                    badgeClass = 'bg-emerald-100 text-emerald-800';
+                    badgeText = 'Selesai';
+                    opacityStyle = 'opacity: 0.85;';
+                } else if (isToday) {
+                    borderLeftColor = '#f59e0b';
+                    bgClass = 'bg-amber-50';
+                    badgeClass = 'badge-warning text-purple-950';
+                    badgeText = 'Hari Ini';
+                }
+
+                agendaItem.className = `agenda-item p-3 mb-2 rounded-xl d-flex justify-between align-items-center text-xs mx-3 ${bgClass}`;
+                agendaItem.style = `border-left: 4px solid ${borderLeftColor}; cursor: pointer; transition: all 0.2s ease; ${opacityStyle}`;
                 
                 agendaItem.innerHTML = `
                     <div style="flex: 1;">
-                        <span class="d-block font-weight-bold text-purple-950">${session.dayName}, ${formattedDate}</span>
+                        <span class="d-block font-weight-bold text-purple-950 ${isCompleted ? 'text-slate-400' : ''}">${session.dayName}, ${formattedDate}</span>
                         <small class="text-slate-400">Mapel: ${mapels.join(', ') || 'Semua'}</small>
                         <small class="d-block text-purple-600 font-weight-bold mt-1">Sesi ${session.sessionIndex} dari ${limitSesi}</small>
                     </div>
-                    <span class="badge ${isToday ? 'badge-warning text-purple-950' : 'badge-purple'} font-weight-bold shrink-0">${isToday ? 'Hari Ini' : 'Sesi ' + session.sessionIndex}</span>
+                    <span class="badge ${badgeClass} font-weight-bold shrink-0" style="padding: 4px 8px; border-radius: 8px;">${badgeText}</span>
                 `;
 
                 agendaItem.addEventListener('click', function() {
                     document.getElementById('modalDate').textContent = `${session.dayName}, ${formattedDate}`;
-                    document.getElementById('modalSessionIndex').textContent = `Sesi ${session.sessionIndex} dari ${limitSesi}`;
+                    document.getElementById('modalSessionIndex').textContent = `Sesi ${session.sessionIndex} dari ${limitSesi} (${isCompleted ? 'Selesai' : 'Belum Mulai'})`;
                     $('#sessionDetailModal').modal('show');
                 });
 
