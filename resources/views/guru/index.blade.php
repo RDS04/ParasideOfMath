@@ -206,15 +206,25 @@
                         <div class="card-body">
                             <div class="text-center mb-4">
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=0f766e&color=fff&size=100&bold=true" class="rounded-circle img-thumbnail shadow-sm mb-3" alt="Avatar">
-                                <h5 class="font-weight-bold text-teal-950 mb-0">{{ Auth::user()->name }}</h5>
-                                <span class="text-xs text-muted uppercase tracking-wider font-semibold">Tutor Matematika</span>
+                                <h5 class="font-weight-bold text-teal-950 mb-0">
+                                    {{ Auth::user()->name }}{{ Auth::user()->guruProfile && Auth::user()->guruProfile->gelar ? ', ' . Auth::user()->guruProfile->gelar : '' }}
+                                </h5>
+                                <span class="text-xs text-muted uppercase tracking-wider font-semibold">
+                                    {{ Auth::user()->guruProfile && Auth::user()->guruProfile->spesialisasi ? Auth::user()->guruProfile->spesialisasi : 'Tutor Paradise of Math' }}
+                                </span>
                             </div>
                             <hr class="my-3">
                             <div class="space-y-3">
                                 <div>
-                                    <span class="text-xs text-muted d-block">Spesialisasi</span>
+                                    <span class="text-xs text-muted d-block">Pendidikan Terakhir</span>
                                     <strong class="text-sm text-teal-950">
-                                        {{ Auth::user()->guruProfile->spesialisasi ?? 'Matematika SMA / Wajib' }}
+                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->pendidikan_terakhir ? Auth::user()->guruProfile->pendidikan_terakhir : '-' }}
+                                    </strong>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-muted d-block">Pengalaman Mengajar</span>
+                                    <strong class="text-sm text-teal-950">
+                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->pengalaman_mengajar ? Auth::user()->guruProfile->pengalaman_mengajar : '-' }}
                                     </strong>
                                 </div>
                                 <div>
@@ -224,15 +234,23 @@
                                 <div>
                                     <span class="text-xs text-muted d-block">No. Telepon / WA</span>
                                     <strong class="text-sm text-teal-950">
-                                        {{ Auth::user()->guruProfile->no_telp ?? 'Belum dilengkapi' }}
+                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->no_telp ? Auth::user()->guruProfile->no_telp : '-' }}
                                     </strong>
                                 </div>
                                 <div>
-                                    <span class="text-xs text-muted d-block">Alamat</span>
+                                    <span class="text-xs text-muted d-block">Alamat Domisili</span>
                                     <strong class="text-sm text-teal-950">
-                                        {{ Auth::user()->guruProfile->alamat ?? 'Belum dilengkapi' }}
+                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->alamat ? Auth::user()->guruProfile->alamat : '-' }}
                                     </strong>
                                 </div>
+                                @if(Auth::user()->guruProfile && Auth::user()->guruProfile->bio_singkat)
+                                <div>
+                                    <span class="text-xs text-muted d-block">Bio Singkat</span>
+                                    <p class="text-xs text-teal-900 mt-1 mb-0 italic">
+                                        "{{ Auth::user()->guruProfile->bio_singkat }}"
+                                    </p>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>

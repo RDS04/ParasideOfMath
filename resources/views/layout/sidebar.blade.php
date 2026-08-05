@@ -7,7 +7,7 @@
         ? route('siswa.dashboard') 
         : ($currentUser && $currentUser->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
 @endphp
-<aside class="main-sidebar sidebar-dark-primary elevation-4 {{ auth()->guard('siswa')->check() ? 'hidden md:block' : '' }}">
+<aside class="main-sidebar sidebar-dark-primary elevation-4 {{ ($isSiswa || ($currentUser && $currentUser->isGuru())) ? 'hidden md:block' : '' }}">
     <a href="#" class="brand-link">
         <img src="https://placehold.co/32x32/fbbf24/4c1d95?text=PoM" alt="Paradise of Math"
             class="brand-image img-circle elevation-3" style="opacity:.9">
@@ -51,7 +51,7 @@
                     <li class="nav-header">KEUANGAN</li>
                     
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('siswa.invoice') }}" class="nav-link">
                             <i class="nav-icon fas fa-receipt text-rose-400"></i>
                             <p>Tagihan Belajar</p>
                         </a>

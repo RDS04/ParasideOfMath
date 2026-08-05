@@ -574,6 +574,20 @@
         const savedValue = localStorage.getItem(STORAGE_PREFIX + el.name);
         if (savedValue === null) return;
 
+        if (el.id === 'kelasSelect') {
+          const isStandardOption = Array.from(el.options).some(opt => opt.value === savedValue);
+          if (isStandardOption) {
+            el.value = savedValue;
+            toggleKelasLainnya();
+          } else if (savedValue) {
+            el.value = 'lainnya';
+            toggleKelasLainnya();
+            kelasLainnya.value = savedValue;
+            kelasLainnya.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          return;
+        }
+
         if (el.type === 'radio') {
           if (el.value === savedValue) {
             el.checked = true;
@@ -640,7 +654,7 @@
         } else if (checks.length) {
           filled = Array.from(checks).some(c => c.checked);
         } else {
-          const input = field.querySelector('input, select, textarea');
+          const input = field.querySelector('input[name], select[name], textarea[name]');
           filled = !!(input && input.value.trim());
         }
 
@@ -657,6 +671,34 @@
         if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       return valid;
+    }
+
+    function validateAllSteps() {
+      let allValid = true;
+      panels.forEach(panel => {
+        panel.querySelectorAll('.field[data-required="true"]').forEach(field => {
+          const radios = field.querySelectorAll('input[type=radio]');
+          const checks = field.querySelectorAll('input[type=checkbox]');
+          let filled = true;
+
+          if (radios.length) {
+            filled = Array.from(radios).some(r => r.checked);
+          } else if (checks.length) {
+            filled = Array.from(checks).some(c => c.checked);
+          } else {
+            const input = field.querySelector('input[name], select[name], textarea[name]');
+            filled = !!(input && input.value.trim());
+          }
+
+          if (!filled) {
+            field.classList.add('invalid');
+            allValid = false;
+          } else {
+            field.classList.remove('invalid');
+          }
+        });
+      });
+      return allValid;
     }
 
     // Modal & Loading Elements
@@ -691,6 +733,21 @@
 
     btnConfirmSubmit.addEventListener('click', () => {
       hideConfirmationModal();
+
+      if (!validateAllSteps()) {
+        let targetStepIndex = 0;
+        for (let i = 0; i < steps.length - 1; i++) {
+          const panel = document.querySelector(`.step-panel[data-step="${steps[i]}"]`);
+          if (panel.querySelector('.field.invalid')) {
+            targetStepIndex = i;
+            break;
+          }
+        }
+        current = targetStepIndex;
+        renderStep();
+        alert('Ada data wajib yang belum Anda isi di Bagian ' + steps[current] + '. Silakan lengkapi terlebih dahulu.');
+        return;
+      }
 
       // Show global loading overlay
       if (window.showLoading) {

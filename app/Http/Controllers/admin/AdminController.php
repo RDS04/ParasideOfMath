@@ -340,6 +340,28 @@ class AdminController extends Controller
         return view('admin.daftarGuru', compact('gurus'));
     }
 
+    /**
+     * Tampilkan Halaman Detail Guru/Tutor.
+     */
+    public function detailGuru($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $guru = \App\Models\Guru::with('user')->findOrFail($id);
+        
+        $gName = $guru->user->name ?? '';
+        $siswaBimbingan = [];
+        if ($gName) {
+            $siswaBimbingan = \App\Models\Siswa::where('tipe_paket', 'LIKE', '%' . $gName . '%')
+                ->orWhereJsonContains('biodata->tutor_names', $gName)
+                ->get();
+        }
+
+        return view('guru.detail', compact('guru', 'siswaBimbingan'));
+    }
+
 
     public function inputMapel()
     {

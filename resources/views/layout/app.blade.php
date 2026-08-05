@@ -72,14 +72,19 @@
     @include('layout.header')
     @include('layout.sidebar')
 
+    @php
+        $appUser = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
+        $isMobileLayout = $appUser && ($appUser->isSiswa() || $appUser->isGuru());
+    @endphp
+
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper {{ (auth()->guard('siswa')->check() || (auth()->check() && auth()->user()->isGuru())) ? 'pb-24 md:pb-0' : '' }}">
+    <div class="content-wrapper {{ $isMobileLayout ? 'pb-24 md:pb-0' : '' }}">
         @yield('content')
     </div>
 
     @include('layout.footer')
 
-    @if (auth()->guard('siswa')->check() || (auth()->check() && auth()->user()->isGuru()))
+    @if ($isMobileLayout)
         @include('layout.sideMobile')
     @endif
 

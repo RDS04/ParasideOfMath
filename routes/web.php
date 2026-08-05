@@ -85,6 +85,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
+    Route::get('/admin/guru/detail/{id}', 'detailGuru')->name('admin.guru.detail');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
     Route::post('/admin/save-token', 'saveFcmToken')->name('admin.save_token');
     Route::get('/admin/notifications', 'getNotifications')->name('admin.notifications.get');

@@ -704,11 +704,9 @@
                         if (targetRadio) {
                             targetRadio.checked = true;
                             highlightMeetingRadio(minMeetings);
-                            generateDayDropdowns(minMeetings);
                         }
-                    } else {
-                        generateDayDropdowns(parseInt(selectedRadio.value));
                     }
+                    generateDayDropdowns(minMeetings);
                     dateContainer.classList.remove('hidden');
                 } else {
                     if (selectedRadio) {
@@ -738,7 +736,6 @@
                 radio.addEventListener('change', function () {
                     const val = parseInt(this.value);
                     highlightMeetingRadio(val);
-                    generateDayDropdowns(val);
                     dateContainer.classList.remove('hidden');
                     pertemuanField.classList.remove('invalid');
                 });

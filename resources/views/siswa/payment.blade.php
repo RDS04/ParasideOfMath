@@ -305,7 +305,7 @@
                                 @if(request('hari_pertemuan'))
                                 <ul class="list-disc pl-4 text-xxs text-slate-500 mt-1 space-y-1">
                                     @foreach(request('hari_pertemuan') as $index => $hri)
-                                        <li>Pertemuan {{ $index + 1 }}: Hari {{ $hri }}</li>
+                                        <li>Hari Pertemuan Ke-{{ $index + 1 }}: {{ $hri }}</li>
                                     @endforeach
                                 </ul>
                                 @endif
