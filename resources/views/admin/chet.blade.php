@@ -104,12 +104,12 @@
     </section>
 
     <style>
-        .hidden { display: none !important; }
         .flex { display: flex !important; }
         .flex-col { flex-direction: column !important; }
         .flex-1 { flex: 1 1 0% !important; }
         .overflow-y-auto { overflow-y: auto !important; }
         .h-100 { height: 100% !important; }
+        .hidden { display: none !important; }
         .gap-2.5 { gap: 10px; }
         .gap-3 { gap: 12px; }
         .rounded-2xl { border-radius: 20px !important; }
@@ -221,6 +221,7 @@
             document.getElementById('chat-active-screen').classList.add('hidden');
             document.getElementById('chat-active-screen').classList.remove('flex');
             document.getElementById('chat-welcome-screen').classList.remove('hidden');
+            document.getElementById('chat-welcome-screen').classList.add('flex');
             
             updateResponsiveView();
             loadSessions();
@@ -275,7 +276,6 @@
                 })
                 .catch(err => console.error("Error loading sessions:", err));
         }
-
         // Select a session to load details
         function selectSession(sessionId, name) {
             currentSessionId = sessionId;
@@ -289,6 +289,7 @@
 
             // Hide welcome screen, show chat screen
             document.getElementById('chat-welcome-screen').classList.add('hidden');
+            document.getElementById('chat-welcome-screen').classList.remove('flex');
             const activeScreen = document.getElementById('chat-active-screen');
             activeScreen.classList.remove('hidden');
             activeScreen.classList.add('flex');
