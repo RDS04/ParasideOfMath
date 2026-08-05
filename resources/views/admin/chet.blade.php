@@ -28,7 +28,7 @@
             <div class="row mb-5" style="height: 600px; max-height: calc(100vh - 200px);">
                 
                 <!-- LEFT COLUMN: SESSIONS LIST (4 cols) -->
-                <div class="col-md-4 h-100 mb-3 mb-md-0">
+                <div class="col-md-4 h-100 mb-3 mb-md-0" id="sessions-column">
                     <div class="card border-0 shadow-sm rounded-2xl overflow-hidden h-100 flex flex-col bg-white">
                         <div class="card-header bg-purple-950 text-white py-3">
                             <h5 class="card-title font-weight-bold mb-0 text-sm">
@@ -47,7 +47,7 @@
                 </div>
 
                 <!-- RIGHT COLUMN: ACTIVE CHAT SCREEN (8 cols) -->
-                <div class="col-md-8 h-100">
+                <div class="col-md-8 h-100" id="chat-column">
                     <div class="card border-0 shadow-sm rounded-2xl overflow-hidden h-100 flex flex-col bg-white" id="active-chat-card">
                         <!-- Welcome Screen (Default before selecting a chat) -->
                         <div id="chat-welcome-screen" class="h-100 flex flex-col items-center justify-center text-center p-5">
@@ -61,10 +61,14 @@
                         </div>
 
                         <!-- Main Chat Screen (Hidden by default) -->
-                        <div id="chat-active-screen" class="h-100 flex-col hidden">
+                        <div id="chat-active-screen" class="h-100 flex flex-col hidden">
                             <!-- Active Chat Header -->
                             <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center gap-2.5">
+                                    <!-- Back button visible only on mobile -->
+                                    <button class="btn btn-sm btn-link d-md-none text-purple-600 mr-2 p-0 border-0" onclick="goBackToSessions()">
+                                        <i class="fas fa-arrow-left text-lg"></i>
+                                    </button>
                                     <div class="avatar bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center rounded-circle mr-3" style="width: 40px; height: 40px; font-size: 16px;">
                                         A
                                     </div>
@@ -101,10 +105,10 @@
 
     <!-- Custom CSS styles matching the layout -->
     <style>
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .flex-1 { flex: 1; }
-        .overflow-y-auto { overflow-y: auto; }
+        .flex { display: flex !important; }
+        .flex-col { flex-direction: column !important; }
+        .flex-1 { flex: 1 1 0% !important; }
+        .overflow-y-auto { overflow-y: auto !important; }
         .h-100 { height: 100% !important; }
         .gap-2.5 { gap: 10px; }
         .gap-3 { gap: 12px; }
@@ -133,6 +137,26 @@
         .btn-purple:hover {
             background-color: #3b0764 !important;
         }
+
+        /* Message scrolling layout configuration */
+        #admin-messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto !important;
+            max-height: calc(600px - 140px) !important;
+            min-height: 0;
+        }
+
+        /* Responsive UI rules */
+        @media (max-width: 767.98px) {
+            #chat-column {
+                display: none;
+            }
+            .content-header h1 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 
     <!-- Script logic for Admin Realtime Chat -->
@@ -143,6 +167,10 @@
         let messagePoll = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Initial responsive layouts check
+            updateResponsiveView();
+            window.addEventListener('resize', updateResponsiveView);
+
             // Start sessions list polling
             loadSessions();
             sessionPoll = setInterval(loadSessions, 3000);
@@ -162,6 +190,41 @@
                 });
             }
         });
+
+        // Responsive visibility handler
+        function updateResponsiveView() {
+            const leftCol = document.getElementById('sessions-column');
+            const rightCol = document.getElementById('chat-column');
+            
+            if (window.innerWidth < 768) {
+                if (currentSessionId === null) {
+                    leftCol.style.display = 'block';
+                    rightCol.style.display = 'none';
+                } else {
+                    leftCol.style.display = 'none';
+                    rightCol.style.display = 'block';
+                }
+            } else {
+                leftCol.style.display = 'block';
+                rightCol.style.display = 'block';
+            }
+        }
+
+        // Return back to session list on mobile view
+        function goBackToSessions() {
+            currentSessionId = null;
+            if (messagePoll) {
+                clearInterval(messagePoll);
+                messagePoll = null;
+            }
+            
+            document.getElementById('chat-active-screen').classList.add('hidden');
+            document.getElementById('chat-active-screen').classList.remove('flex');
+            document.getElementById('chat-welcome-screen').classList.remove('hidden');
+            
+            updateResponsiveView();
+            loadSessions();
+        }
 
         // Load sessions list from server
         function loadSessions() {
@@ -186,7 +249,7 @@
                         const isActive = sess.session_id === currentSessionId ? 'active' : '';
                         const dateFormatted = new Date(sess.last_activity).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
                         const unreadBadge = sess.unread_count > 0 
-                            ? `<span class="badge badge-danger rounded-circle p-1.5 text-[9px] font-bold d-flex justify-content-center align-items-center" style="width:18px; height:18px; background-color:#ef4444;">${sess.unread_count}</span>` 
+                            ? `<span class="badge badge-danger rounded-circle p-1.5 text-[9px] font-bold d-flex justify-content-center align-items-center" style="width:18px; height:18px; background-color:#ef4444; color: white;">${sess.unread_count}</span>` 
                             : '';
                         
                         html += `
@@ -220,7 +283,9 @@
 
             // Highlight in list
             document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            
+            // Adjust responsive views
+            updateResponsiveView();
 
             // Hide welcome screen, show chat screen
             document.getElementById('chat-welcome-screen').classList.add('hidden');
