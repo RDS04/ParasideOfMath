@@ -535,19 +535,7 @@ class AdminController extends Controller
                 elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
             }
             
-            $hargaPerSesi = 0;
-            if ($detailString) {
-                preg_match_all('/\d+/', str_replace('.', '', $detailString), $numbers);
-                if (!empty($numbers[0])) {
-                    $hargaPerSesi = (int) $numbers[0][0];
-                }
-            }
-            if ($hargaPerSesi === 0 && $paket) {
-                $hargaPerSesi = $paket->harga_max;
-            }
-            if ($hargaPerSesi === 0) {
-                $hargaPerSesi = 450000; // default
-            }
+            $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
             
             $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
             
@@ -570,5 +558,25 @@ class AdminController extends Controller
         });
 
         return view('admin.allRiwayatPayment', compact('payments'));
+    }
+
+    /**
+     * Helper untuk mengekstrak harga numerik dari deskripsi string.
+     */
+    private function extractPrice($str, $default)
+    {
+        if (empty($str)) {
+            return $default;
+        }
+        if (preg_match('/(\d+)\s*K/i', $str, $matches)) {
+            return (int) $matches[1] * 1000;
+        }
+        if (preg_match('/Rp\s*([\d\.]+)/i', $str, $matches)) {
+            return (int) str_replace('.', '', $matches[1]);
+        }
+        if (preg_match('/(\d[\d\.]*)/', $str, $matches)) {
+            return (int) str_replace('.', '', $matches[1]);
+        }
+        return $default;
     }
 }
