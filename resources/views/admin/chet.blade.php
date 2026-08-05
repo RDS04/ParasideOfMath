@@ -103,8 +103,8 @@
         </div>
     </section>
 
-    <!-- Custom CSS styles matching the layout -->
     <style>
+        .hidden { display: none !important; }
         .flex { display: flex !important; }
         .flex-col { flex-direction: column !important; }
         .flex-1 { flex: 1 1 0% !important; }
