@@ -8,13 +8,13 @@
         <div class="container-fluid">
             <div class="row mb-3 align-items-center">
                 <div class="col-sm-6">
-                    <h1 class="m-0 font-weight-bold text-teal-950">Dashboard Guru</h1>
-                    <p class="text-sm text-muted mb-0">Selamat datang di portal manajemen pengajar Paradise of Math.</p>
+                    <h1 class="m-0 font-weight-bold text-teal-950 text-2xl tracking-tight">Dashboard Guru</h1>
+                    <p class="text-xs text-muted mb-0">Selamat datang kembali di portal akademik Paradise of Math.</p>
                 </div>
                 <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right text-sm">
-                        <li class="breadcrumb-item"><a href="/" class="text-teal-600">Home</a></li>
-                        <li class="breadcrumb-item active">Guru Dashboard</li>
+                    <ol class="breadcrumb float-sm-right text-xs bg-transparent p-0 m-0">
+                        <li class="breadcrumb-item"><a href="/" class="text-teal-600 font-semibold"><i class="fas fa-home mr-1"></i> Home</a></li>
+                        <li class="breadcrumb-item active text-slate-500">Dashboard</li>
                     </ol>
                 </div>
             </div>
@@ -26,9 +26,10 @@
         <div class="container-fluid">
 
             @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show rounded-xl shadow-sm border-0 mb-4" role="alert">
-                    <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <div class="alert alert-success alert-dismissible fade show rounded-xl shadow-sm border-0 mb-4 p-3" role="alert" style="background-color: #f0fdf4; color: #15803d; border-left: 5px solid #22c55e !important;">
+                    <i class="fas fa-check-circle mr-2 text-lg align-middle"></i> 
+                    <span class="align-middle font-medium text-sm">{{ session('success') }}</span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="color: #15803d; opacity: 0.8;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -36,23 +37,23 @@
 
             @if(isset($isBiodataComplete) && !$isBiodataComplete)
                 <!-- ══════ INCOMPLETE BIODATA ALERT BANNER ══════ -->
-                <div class="card mb-4 border-0 shadow-sm overflow-hidden" style="background: linear-gradient(135deg, #fffbe6 0%, #fef3c7 100%); border-left: 5px solid #f59e0b !important;">
+                <div class="card mb-4 border-0 shadow-sm overflow-hidden rounded-2xl" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-left: 5px solid #f59e0b !important;">
                     <div class="card-body p-4">
                         <div class="row align-items-center">
                             <div class="col-md-9">
                                 <div class="d-flex align-items-center mb-2">
-                                    <span class="badge bg-amber-500 text-white px-2.5 py-1 text-xs font-bold uppercase rounded-md mr-2">
+                                    <span class="badge bg-amber-500 text-white px-2.5 py-1 text-xs font-bold uppercase rounded-md mr-2" style="background-color: #f59e0b !important;">
                                         <i class="fas fa-exclamation-triangle mr-1"></i> Perhatian
                                     </span>
-                                    <h5 class="mb-0 font-weight-bold text-amber-950">Biodata Pengajar Anda Belum Lengkap!</h5>
+                                    <h5 class="mb-0 font-weight-bold text-amber-950 text-sm sm:text-base">Biodata Pengajar Belum Lengkap!</h5>
                                 </div>
-                                <p class="text-amber-900 text-sm mb-0">
-                                    Silakan lengkapi informasi biodata Anda (seperti lulusan/pendidikan terakhir, nomor WhatsApp, spesialisasi mengajar, dan alamat domisili). Data kualifikasi yang lengkap membantu siswa mengenal latar belakang pengajar mereka secara detail.
+                                <p class="text-amber-900 text-xs sm:text-sm mb-0">
+                                    Silakan lengkapi informasi kualifikasi Anda (seperti gelar, pendidikan terakhir, nomor WA, spesialisasi, dan bio singkat) agar calon siswa dapat mengenal profil Anda secara detail.
                                 </p>
                             </div>
-                            <div class="col-md-3 text-right mt-3 mt-md-0">
-                                <a href="{{ route('guru.biodata') }}" class="btn btn-warning font-weight-bold text-amber-950 px-4 py-2.5 rounded-xl shadow-sm border-0">
-                                    <i class="fas fa-edit mr-1.5"></i> Lengkapi Biodata
+                            <div class="col-md-3 text-md-right mt-3 mt-md-0">
+                                <a href="{{ route('guru.biodata') }}" class="btn btn-warning font-weight-bold text-amber-950 px-4 py-2 rounded-xl shadow-sm border-0 text-xs sm:text-sm hover:scale-102 transition-all duration-200" style="background-color: #fbbf24;">
+                                    <i class="fas fa-user-edit mr-1.5"></i> Lengkapi Sekarang
                                 </a>
                             </div>
                         </div>
@@ -61,131 +62,201 @@
             @endif
 
             <!-- Welcome Banner -->
-            <div class="card mb-4 overflow-hidden border-0 shadow-sm" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 45%, #1e3a8a 100%);">
+            <div class="card mb-4 overflow-hidden border-0 shadow-sm rounded-2xl" style="background: linear-gradient(135deg, #0d9488 0%, #0f766e 45%, #0f172a 100%);">
                 <div class="card-body p-4 text-white relative">
                     <div class="row align-items-center">
-                        <div class="col-md-9 position-relative" style="z-index: 2;">
-                            <span class="px-3 py-1 bg-emerald-400 text-teal-950 text-xs font-bold uppercase tracking-wider rounded-full shadow-sm">
-                                Status: Pengajar Aktif
-                            </span>
-                            <h2 class="font-serif mt-3 text-3xl font-bold">Halo, {{ Auth::user()->name }}!</h2>
-                            <p class="text-teal-100 mt-2 mb-0 max-w-xl">
-                                Ruang pengajar Anda sudah siap. Di sini Anda dapat memantau jadwal bimbingan belajar, mengunggah modul/materi ajar, dan memantau perkembangan belajar siswa bimbingan Anda.
-                            </p>
+                        <div class="col-md-9 position-relative d-flex align-items-center flex-column flex-sm-row" style="z-index: 2; gap: 20px;">
+                            <!-- Profile Photo -->
+                            <div class="flex-shrink-0">
+                                @if($guruProfile->foto)
+                                    <img src="{{ asset($guruProfile->foto) }}" class="rounded-circle shadow-sm" style="width: 84px; height: 84px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.25) !important;" alt="Foto Profil">
+                                @else
+                                    <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=ffffff&color=0f766e&size=84&bold=true" class="rounded-circle shadow-sm" style="width: 84px; height: 84px; object-fit: cover; border: 3px solid rgba(255, 255, 255, 0.25) !important;" alt="Avatar">
+                                @endif
+                            </div>
+                            <div>
+                                <span class="px-3 py-1 text-xxs font-extrabold uppercase tracking-wider rounded-full shadow-sm" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.25); display: inline-block;">
+                                    <i class="fas fa-certificate text-amber-300 mr-1.5"></i> Status: Pengajar Aktif
+                                </span>
+                                <h2 class="mt-2 text-2xl sm:text-3xl font-bold tracking-tight mb-1">Halo, {{ Auth::user()->name }}!</h2>
+                                <p class="text-teal-100 mb-0 max-w-xl text-xs sm:text-sm leading-relaxed">
+                                    Ruang pengajar Anda sudah siap. Di sini Anda dapat memantau jadwal bimbingan belajar, mengunggah materi, dan berkoordinasi secara langsung dengan siswa bimbingan Anda.
+                                </p>
+                            </div>
                         </div>
                         <div class="col-md-3 text-right d-none d-md-block position-relative" style="z-index: 2;">
-                            <i class="fas fa-chalkboard-teacher fa-7x text-white-50 opacity-25"></i>
+                            <i class="fas fa-graduation-cap fa-7x text-white-50 opacity-20" style="color: rgba(255, 255, 255, 0.15);"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Guru Metrics -->
-            <div class="row">
+            <!-- Guru Metrics Grid -->
+            <div class="row mb-2">
                 <!-- Metric 1: Total Kelas -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-teal-950">12</h3>
-                            <p class="text-muted mb-1">Kelas Aktif</p>
+                <div class="col-lg-3 col-6 mb-3">
+                    <div class="metric-card bg-white p-3 shadow-xs h-100">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="inner-metric">
+                                <h3 class="font-weight-extrabold text-teal-950 mb-0">12</h3>
+                                <p class="text-muted text-xs mb-1">Kelas Mengajar</p>
+                            </div>
+                            <div class="metric-icon bg-teal-50 text-teal-600"><i class="fas fa-chalkboard"></i></div>
                         </div>
-                        <div class="icon text-teal"><i class="fas fa-school"></i></div>
-                        <span class="text-teal text-xs font-semibold pt-2 border-top d-block">
-                            Bimbingan bulan ini
-                        </span>
+                        <div class="pt-2 mt-2 border-top text-xxs text-teal-600 font-semibold">
+                            <i class="fas fa-calendar-alt mr-1"></i> Bimbingan bulan ini
+                        </div>
                     </div>
                 </div>
                 <!-- Metric 2: Jam Mengajar -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-teal-950">48 <span class="text-sm font-weight-normal text-muted">Jam</span></h3>
-                            <p class="text-muted mb-1">Total Durasi</p>
+                <div class="col-lg-3 col-6 mb-3">
+                    <div class="metric-card bg-white p-3 shadow-xs h-100">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="inner-metric">
+                                <h3 class="font-weight-extrabold text-teal-950 mb-0">48 <span class="text-xs font-weight-normal text-muted">Jam</span></h3>
+                                <p class="text-muted text-xs mb-1">Akumulasi Durasi</p>
+                            </div>
+                            <div class="metric-icon bg-blue-50 text-blue-600"><i class="fas fa-clock"></i></div>
                         </div>
-                        <div class="icon text-primary"><i class="fas fa-clock"></i></div>
-                        <span class="text-primary text-xs font-semibold pt-2 border-top d-block">
-                            Akumulasi mengajar
-                        </span>
+                        <div class="pt-2 mt-2 border-top text-xxs text-blue-600 font-semibold">
+                            <i class="fas fa-chart-line mr-1"></i> Total jam mengajar
+                        </div>
                     </div>
                 </div>
                 <!-- Metric 3: Siswa Bimbingan -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-teal-950">{{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} <span class="text-sm font-weight-normal text-muted">Orang</span></h3>
-                            <p class="text-muted mb-1">Siswa Bimbingan</p>
+                <div class="col-lg-3 col-6 mb-3">
+                    <div class="metric-card bg-white p-3 shadow-xs h-100">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="inner-metric">
+                                <h3 class="font-weight-extrabold text-teal-950 mb-0">{{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} <span class="text-xs font-weight-normal text-muted">Orang</span></h3>
+                                <p class="text-muted text-xs mb-1">Siswa Bimbingan</p>
+                            </div>
+                            <div class="metric-icon bg-purple-50 text-purple-600"><i class="fas fa-user-graduate"></i></div>
                         </div>
-                        <div class="icon text-purple"><i class="fas fa-user-graduate"></i></div>
-                        <span class="text-purple text-xs font-semibold pt-2 border-top d-block">
-                            Siswa aktif saat ini
-                        </span>
+                        <div class="pt-2 mt-2 border-top text-xxs text-purple-600 font-semibold">
+                            <i class="fas fa-check-double mr-1"></i> Siswa aktif Anda
+                        </div>
                     </div>
                 </div>
                 <!-- Metric 4: Jam Mengajar -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-teal-950">Aktif</h3>
-                            <p class="text-muted mb-1">Status Pengajar</p>
+                <div class="col-lg-3 col-6 mb-3">
+                    <div class="metric-card bg-white p-3 shadow-xs h-100">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="inner-metric">
+                                <h3 class="font-weight-extrabold text-teal-950 mb-0" style="font-size: 1.6rem; line-height: 1.8rem; margin-top: 2px;">Aktif</h3>
+                                <p class="text-muted text-xs mb-1">Status Tutor</p>
+                            </div>
+                            <div class="metric-icon bg-emerald-50 text-emerald-600"><i class="fas fa-user-check"></i></div>
                         </div>
-                        <div class="icon text-warning"><i class="fas fa-check-circle"></i></div>
-                        <span class="text-warning text-xs font-semibold pt-2 border-top d-block">
-                            Terverifikasi Admin
-                        </span>
+                        <div class="pt-2 mt-2 border-top text-xxs text-emerald-600 font-semibold">
+                            <i class="fas fa-shield-alt mr-1"></i> Terverifikasi Admin
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Detailed Section -->
             <div class="row">
-                <!-- Left Column: Assigned Students -->
-                <div class="col-md-8">
-                    <div class="card">
-                        <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
-                            <h3 class="card-title font-weight-bold text-teal-950 mb-0">Siswa Bimbingan Ditugaskan Admin</h3>
-                            <span class="badge bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1.5 rounded-lg text-xs">
-                                <i class="fas fa-user-graduate mr-1"></i> Total: {{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} Siswa
-                            </span>
+                <!-- Single Column: Full Width Assigned Students -->
+                <div class="col-12 mb-4">
+                    <div class="card border-0 shadow-sm rounded-2xl">
+                        <div class="card-header bg-white py-3 border-0 d-flex flex-column sm:flex-row align-items-start sm:align-items-center justify-content-between" style="gap: 12px;">
+                            <div class="d-flex align-items-center">
+                                <div class="p-2 rounded-xl bg-teal-50 text-teal-600 mr-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                    <i class="fas fa-users-cog"></i>
+                                </div>
+                                <div>
+                                    <h3 class="card-title font-weight-bold text-teal-950 mb-0 text-lg">Siswa Bimbingan Ditugaskan</h3>
+                                    <p class="text-xxs text-muted mb-0">Daftar seluruh siswa aktif yang berada di bawah bimbingan Anda.</p>
+                                </div>
+                            </div>
+                            <!-- Search & Badge Container -->
+                            <div class="d-flex align-items-center flex-wrap w-full sm:w-auto" style="gap: 10px;">
+                                <div class="input-group input-group-sm" style="width: 220px; max-width: 100%;">
+                                    <input type="text" id="siswaSearchInput" class="form-control rounded-xl border-light text-xs" placeholder="Cari nama atau sekolah..." style="border-radius: 10px 0 0 10px; font-family: 'Inter', sans-serif;">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-light border-light text-teal-600" style="border-radius: 0 10px 10px 0;"><i class="fas fa-search"></i></span>
+                                    </div>
+                                </div>
+                                <span class="badge bg-teal-50 text-teal-700 border border-teal-200 px-3 py-2 rounded-xl text-xs font-bold shadow-xs">
+                                    <i class="fas fa-user-graduate mr-1"></i> Total: {{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} Siswa
+                                </span>
+                            </div>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-hover mb-0">
+                                <table class="table table-hover align-middle mb-0">
                                     <thead>
-                                        <tr class="bg-light text-muted text-xs uppercase">
-                                            <th>Siswa</th>
-                                            <th>Kontak &amp; Sekolah</th>
-                                            <th>Paket Belajar</th>
-                                            <th>Status</th>
+                                        <tr class="bg-light/60 text-teal-950 text-xs font-bold uppercase tracking-wider">
+                                            <th class="px-4 py-3 border-0">Siswa</th>
+                                            <th class="px-4 py-3 border-0">Informasi Sekolah</th>
+                                            <th class="px-4 py-3 border-0">Paket Terdaftar</th>
+                                            <th class="px-4 py-3 border-0 text-center">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="siswaTableBody" class="text-slate-700 text-sm">
                                         @forelse($assignedStudents ?? [] as $s)
                                             <tr>
-                                                <td>
-                                                    <div class="font-weight-bold text-purple-950">{{ $s->name }}</div>
-                                                    <span class="text-xs text-muted">{{ $s->email }}</span>
+                                                <td class="px-4 py-3.5 align-middle">
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($s->name) }}&background=ccfbf1&color=0f766e&bold=true" class="rounded-full mr-3 border border-teal-100 shadow-xs" style="width: 40px; height: 40px;" alt="Avatar">
+                                                        <div>
+                                                            <div class="font-weight-bold text-teal-950 student-name-cell">{{ $s->name }}</div>
+                                                            <span class="text-xs text-muted student-email-cell">{{ $s->email }}</span>
+                                                        </div>
+                                                    </div>
                                                 </td>
-                                                <td>
-                                                    <div class="font-weight-semibold text-sm">{{ $s->whatsapp ?? '-' }}</div>
-                                                    <span class="text-xs text-muted">{{ $s->sekolah ?? 'Sekolah belum diisi' }}</span>
+                                                <td class="px-4 py-3.5 align-middle">
+                                                    <div class="d-flex align-items-center mb-1 text-slate-700 font-semibold student-school-cell">
+                                                        <i class="fas fa-school text-teal-500 mr-2 text-xs" style="width: 14px;"></i>
+                                                        <span>{{ $s->sekolah ?? '-' }}</span>
+                                                    </div>
+                                                    <div class="d-flex align-items-center text-xs text-muted student-phone-cell">
+                                                        <i class="fab fa-whatsapp text-emerald-500 mr-2 text-xs" style="width: 14px;"></i>
+                                                        <span>{{ $s->whatsapp ?? '-' }}</span>
+                                                    </div>
                                                 </td>
-                                                <td>
-                                                    <span class="badge bg-purple-100 text-purple-800 font-weight-semibold">
-                                                        {{ $s->paket ? $s->paket->nama_paket : 'Paket Privat' }}
+                                                <td class="px-4 py-3.5 align-middle">
+                                                    <span class="badge px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-xs" style="background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff;">
+                                                        <i class="fas fa-graduation-cap mr-1"></i> {{ $s->paket ? $s->paket->nama_paket : 'Paket Belajar' }}
                                                     </span>
-                                                    <div class="text-[11px] text-muted mt-1">{{ $s->tipe_paket ?? '-' }}</div>
+                                                    @php
+                                                        $sBio = $s->biodata ?? [];
+                                                        $sSesi = $sBio['jumlah_pertemuan'] ?? null;
+                                                        if (!$sSesi && $s->tipe_paket) {
+                                                            if (preg_match('/Sesi:\s*(\d+)x/i', $s->tipe_paket, $matches)) {
+                                                                $sSesi = $matches[1];
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @if($sSesi)
+                                                        <div class="text-[11px] text-muted mt-1 font-semibold pl-1">
+                                                            <i class="far fa-clock mr-1 text-purple-400"></i> {{ $sSesi }}x Pertemuan Sebulan
+                                                        </div>
+                                                    @endif
                                                 </td>
-                                                <td>
-                                                    <span class="badge bg-emerald-100 text-emerald-800 font-weight-bold px-2.5 py-1">
-                                                        <i class="fas fa-check-circle mr-1"></i> Ditugaskan oleh Admin
-                                                    </span>
+                                                <td class="px-4 py-3.5 align-middle text-center">
+                                                    <div class="d-flex justify-content-center align-items-center" style="gap: 6px;">
+                                                        @if($s->whatsapp)
+                                                            @php
+                                                                $waClean = preg_replace('/[^0-9]/', '', $s->whatsapp);
+                                                                $waFormatted = str_starts_with($waClean, '0') ? '62' . substr($waClean, 1) : $waClean;
+                                                            @endphp
+                                                            <a href="https://wa.me/{{ $waFormatted }}?text=Halo%20{{ urlencode($s->name) }},%20saya%20tutor%20Anda%20dari%20Paradise%20of%20Math..." target="_blank" class="btn btn-sm btn-outline-emerald px-3 py-1.5 rounded-xl font-bold text-xs" style="border-radius: 10px;">
+                                                                <i class="fab fa-whatsapp mr-1 text-sm align-middle"></i> <span class="align-middle">Hubungi</span>
+                                                            </a>
+                                                        @endif
+                                                        <a href="{{ route('admin.siswa.detail', $s->id) }}" class="btn btn-sm btn-brand px-3 py-1.5 rounded-xl text-xs" style="border-radius: 10px;">
+                                                            <i class="fas fa-user-info mr-1 align-middle"></i> <span class="align-middle">Profil</span>
+                                                        </a>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="text-center py-5 text-muted">
-                                                    <i class="fas fa-user-clock fa-2x mb-2 d-block opacity-50"></i>
-                                                    Belum ada siswa yang ditugaskan oleh Admin untuk Anda saat ini.
+                                                <td colspan="4" class="text-center py-5 text-muted text-sm">
+                                                    <i class="fas fa-users-slash fa-3x mb-3 d-block opacity-40 text-teal-300"></i>
+                                                    Belum ada data siswa bimbingan yang ditugaskan oleh Admin untuk Anda saat ini.
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -195,112 +266,89 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Right Column: Profile & Fast Actions -->
-                <div class="col-md-4">
-                    <!-- Profile Card -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-white py-3">
-                            <h3 class="card-title font-weight-bold text-teal-950 mb-0">Informasi Pengajar</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="text-center mb-4">
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=0f766e&color=fff&size=100&bold=true" class="rounded-circle img-thumbnail shadow-sm mb-3" alt="Avatar">
-                                <h5 class="font-weight-bold text-teal-950 mb-0">
-                                    {{ Auth::user()->name }}{{ Auth::user()->guruProfile && Auth::user()->guruProfile->gelar ? ', ' . Auth::user()->guruProfile->gelar : '' }}
-                                </h5>
-                                <span class="text-xs text-muted uppercase tracking-wider font-semibold">
-                                    {{ Auth::user()->guruProfile && Auth::user()->guruProfile->spesialisasi ? Auth::user()->guruProfile->spesialisasi : 'Tutor Paradise of Math' }}
-                                </span>
-                            </div>
-                            <hr class="my-3">
-                            <div class="space-y-3">
-                                <div>
-                                    <span class="text-xs text-muted d-block">Pendidikan Terakhir</span>
-                                    <strong class="text-sm text-teal-950">
-                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->pendidikan_terakhir ? Auth::user()->guruProfile->pendidikan_terakhir : '-' }}
-                                    </strong>
-                                </div>
-                                <div>
-                                    <span class="text-xs text-muted d-block">Pengalaman Mengajar</span>
-                                    <strong class="text-sm text-teal-950">
-                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->pengalaman_mengajar ? Auth::user()->guruProfile->pengalaman_mengajar : '-' }}
-                                    </strong>
-                                </div>
-                                <div>
-                                    <span class="text-xs text-muted d-block">Email Terdaftar</span>
-                                    <strong class="text-sm text-teal-950">{{ Auth::user()->email }}</strong>
-                                </div>
-                                <div>
-                                    <span class="text-xs text-muted d-block">No. Telepon / WA</span>
-                                    <strong class="text-sm text-teal-950">
-                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->no_telp ? Auth::user()->guruProfile->no_telp : '-' }}
-                                    </strong>
-                                </div>
-                                <div>
-                                    <span class="text-xs text-muted d-block">Alamat Domisili</span>
-                                    <strong class="text-sm text-teal-950">
-                                        {{ Auth::user()->guruProfile && Auth::user()->guruProfile->alamat ? Auth::user()->guruProfile->alamat : '-' }}
-                                    </strong>
-                                </div>
-                                @if(Auth::user()->guruProfile && Auth::user()->guruProfile->bio_singkat)
-                                <div>
-                                    <span class="text-xs text-muted d-block">Bio Singkat</span>
-                                    <p class="text-xs text-teal-900 mt-1 mb-0 italic">
-                                        "{{ Auth::user()->guruProfile->bio_singkat }}"
-                                    </p>
-                                </div>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Fast Actions -->
-                    <div class="card">
-                        <div class="card-header bg-white py-3">
-                            <h3 class="card-title font-weight-bold text-teal-950 mb-0">Pintasan Menu</h3>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="d-grid gap-2">
-                                <a href="#" class="btn btn-outline-teal text-left py-2 px-3 mb-2 rounded-xl text-sm font-medium d-flex align-items-center justify-content-between hover:bg-teal-50 hover:text-teal-800">
-                                    <span><i class="fas fa-book-open mr-2 text-teal-500"></i> Kelola Materi Ajar</span>
-                                    <i class="fas fa-chevron-right text-xs opacity-50"></i>
-                                </a>
-                                <a href="#" class="btn btn-outline-teal text-left py-2 px-3 mb-2 rounded-xl text-sm font-medium d-flex align-items-center justify-content-between hover:bg-teal-50 hover:text-teal-800">
-                                    <span><i class="fas fa-calendar-alt mr-2 text-primary-500"></i> Atur Jadwal Libur</span>
-                                    <i class="fas fa-chevron-right text-xs opacity-50"></i>
-                                </a>
-                                <form action="{{ route('logout') }}" method="POST" class="mt-2">
-                                    @csrf
-                                    <button type="submit" class="btn btn-danger w-full py-2.5 rounded-xl text-sm font-bold shadow-sm d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-sign-out-alt mr-2"></i> Keluar Aplikasi
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
         </div>
     </section>
 
-    <!-- Custom inline styles for bootstrap buttons inside card -->
+    <!-- Custom CSS styles for elegant metrics & table effects -->
     <style>
-        .btn-outline-teal {
-            border: 1px solid #e2e8f0;
-            color: #334155;
+        .metric-card {
+            border-radius: 20px;
+            border: 1px solid #ece7f7;
+            box-shadow: 0 1px 3px rgba(15, 118, 110, 0.02), 0 10px 24px -14px rgba(15, 118, 110, 0.12);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -8px rgba(15, 118, 110, 0.15);
+        }
+        .metric-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        .btn-outline-emerald {
+            border: 1px solid #10b981;
+            color: #10b981;
             background: #fff;
             transition: all 0.2s ease;
+        }
+        .btn-outline-emerald:hover {
+            background-color: #ecfdf5;
+            color: #047857;
+            border-color: #059669;
         }
         .btn-brand {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             border: none;
             color: #40206b;
             font-weight: 700;
+            transition: all 0.2s ease;
         }
-        .space-y-3 > * + * {
-            margin-top: 0.75rem;
+        .btn-brand:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            color: #40206b;
+        }
+        .rounded-2xl {
+            border-radius: 20px !important;
+        }
+        .rounded-xl {
+            border-radius: 12px !important;
+        }
+        .shadow-xs {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
     </style>
+
+    <!-- JS search filter -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('siswaSearchInput');
+            const rows = document.querySelectorAll('#siswaTableBody tr');
+
+            if (searchInput && rows.length > 0) {
+                searchInput.addEventListener('input', function() {
+                    const query = searchInput.value.toLowerCase().trim();
+                    rows.forEach(row => {
+                        const name = row.querySelector('.student-name-cell')?.textContent.toLowerCase() || '';
+                        const email = row.querySelector('.student-email-cell')?.textContent.toLowerCase() || '';
+                        const school = row.querySelector('.student-school-cell')?.textContent.toLowerCase() || '';
+                        const phone = row.querySelector('.student-phone-cell')?.textContent.toLowerCase() || '';
+
+                        if (name.includes(query) || email.includes(query) || school.includes(query) || phone.includes(query)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 @endsection

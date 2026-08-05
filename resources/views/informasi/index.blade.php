@@ -49,6 +49,7 @@
             .pricing-swiper .swiper-slide {
                 width: 300px !important;
             }
+
             .pricing-swiper .swiper-slide-active {
                 transform: translateX(12px) scale(1.06) !important;
                 z-index: 20 !important;
@@ -420,13 +421,6 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#matkul" class="relative py-1 hover:text-violet-800 transition-colors group">
-                            Mata Pelajaran
-                            <span
-                                class="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 rounded-full group-hover:w-full transition-all duration-300"></span>
-                        </a>
-                    </li>
-                    <li>
                         <a href="#kontak" class="relative py-1 hover:text-violet-800 transition-colors group">
                             Kontak
                             <span
@@ -445,7 +439,7 @@
                                 : ($user->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
                         @endphp
                         <!-- Profile Dropdown (Desktop) -->
-                        <div class="relative group">
+                        <div class="relative">
                             <button id="profile-dropdown-btn"
                                 class="flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-50 border border-violet-100 hover:bg-violet-100 hover:border-violet-200 transition duration-200">
                                 <!-- Icon -->
@@ -457,16 +451,17 @@
                                 <span
                                     class="text-sm font-bold text-violet-950 max-w-[120px] truncate">{{ $user->name }}</span>
                                 <!-- Arrow -->
-                                <svg class="w-4 h-4 text-violet-900 transition-transform group-hover:rotate-180 duration-200"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg id="profile-dropdown-arrow"
+                                    class="w-4 h-4 text-violet-900 transition-transform duration-200" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                         d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
 
                             <!-- Dropdown Menu -->
-                            <div
-                                class="absolute right-0 mt-2 w-48 bg-white border border-violet-100 rounded-2xl shadow-xl py-2 hidden group-hover:block transition duration-200 animate-fadeIn z-50">
+                            <div id="profile-dropdown-menu"
+                                class="absolute right-0 mt-2 w-48 bg-white border border-violet-100 rounded-2xl shadow-xl py-2 hidden transition duration-200 animate-fadeIn z-50">
                                 <div class="px-4 py-2 border-b border-violet-50">
                                     <p class="text-xs text-slate-400 font-medium">Masuk sebagai</p>
                                     <p class="text-xs font-bold text-violet-950 capitalize">
@@ -1952,6 +1947,32 @@
             if (dx > 40) setPage(page - 1);
             touchStartX = null;
         }, { passive: true });
+
+        // Toggle Profile Dropdown on Click
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropdownBtn = document.getElementById('profile-dropdown-btn');
+            const dropdownMenu = document.getElementById('profile-dropdown-menu');
+            const dropdownArrow = document.getElementById('profile-dropdown-arrow');
+
+            if (dropdownBtn && dropdownMenu) {
+                dropdownBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.toggle('rotate-180');
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!dropdownBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                        if (dropdownArrow) {
+                            dropdownArrow.classList.remove('rotate-180');
+                        }
+                    }
+                });
+            }
+        });
     </script>
 
 </body>

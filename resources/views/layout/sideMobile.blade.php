@@ -54,7 +54,7 @@
         </a>
 
         <!-- Jadwal Bimbingan -->
-        <a href="{{ route('guru.dashboard') }}"
+        <a href="{{ route('guru.jadwal') }}"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 72px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">

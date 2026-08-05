@@ -57,7 +57,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('siswa.riwayat') }}" class="nav-link {{ Route::is('siswa.riwayat') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-history text-emerald-400"></i>
                             <p>Riwayat Pembayaran</p>
                         </a>
@@ -248,7 +248,7 @@
                     <!-- ══════ GURU (TUTOR) NAVIGATION ══════ -->
                     <li class="nav-header">MENGAJAR</li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('guru.jadwal') }}" class="nav-link {{ Route::is('guru.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-check text-purple-400"></i>
                             <p>Jadwal Mengajar</p>
                         </a>
@@ -260,7 +260,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('guru.siswa') }}" class="nav-link {{ Route::is('guru.siswa') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users text-teal-400"></i>
                             <p>Daftar Siswa Anda</p>
                         </a>

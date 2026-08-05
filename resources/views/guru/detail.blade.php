@@ -54,9 +54,13 @@
                         </div>
                         <div class="card-body p-4 text-center">
                             <!-- Avatar -->
-                            <div class="avatar bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; font-size: 32px; border: 3px solid #ddd6fe;">
-                                {{ strtoupper(substr($guru->user->name ?? 'G', 0, 1)) }}
-                            </div>
+                            @if($guru->foto)
+                                <img src="{{ asset($guru->foto) }}" class="rounded-circle shadow-sm mx-auto mb-3" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #ddd6fe;" alt="Foto Profil">
+                            @else
+                                <div class="avatar bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; font-size: 32px; border: 3px solid #ddd6fe;">
+                                    {{ strtoupper(substr($guru->user->name ?? 'G', 0, 1)) }}
+                                </div>
+                            @endif
                             
                             <!-- Name and Gelar -->
                             <h4 class="font-weight-bold text-purple-950 mb-1">
@@ -140,21 +144,51 @@
                         <div class="card-body p-4">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
+                                    <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Nama Lengkap</label>
+                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
+                                        {{ $guru->user->name ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Gelar Akademik</label>
+                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
+                                        {{ $guru->gelar ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6 mb-3">
                                     <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Pendidikan Terakhir</label>
-                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100">
+                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
                                         {{ $guru->pendidikan_terakhir ?? '-' }}
                                     </p>
                                 </div>
                                 <div class="col-md-6 mb-3">
+                                    <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Spesialisasi Mengajar</label>
+                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
+                                        {{ $guru->spesialisasi ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6 mb-3">
                                     <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Pengalaman Mengajar</label>
-                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100">
+                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
                                         {{ $guru->pengalaman_mengajar ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">No. WhatsApp / HP</label>
+                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
+                                        {{ $guru->no_telp ?? '-' }}
+                                    </p>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Alamat Domisili</label>
+                                    <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
+                                        {{ $guru->alamat ?? '-' }}
                                     </p>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Bio Singkat & Kompetensi</label>
+                                <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">Bio Singkat &amp; Kompetensi</label>
                                 <div class="text-sm text-slate-700 bg-light p-3 rounded-xl border border-slate-100 leading-relaxed font-weight-medium">
                                     {!! nl2br(e($guru->bio_singkat ?? 'Belum ada deskripsi biodata singkat.')) !!}
                                 </div>
@@ -211,7 +245,6 @@
                                                     </td>
                                                     <td class="px-4 py-3 text-slate-700 text-xs font-weight-semibold leading-normal" style="max-width: 200px;">
                                                         <div class="font-weight-bold text-purple-900">{{ $s->paket->nama_paket ?? 'Paket' }}</div>
-                                                        <div class="text-[10px] text-slate-400 text-truncate" title="{{ $s->tipe_paket }}">{{ $s->tipe_paket }}</div>
                                                     </td>
                                                     <td class="px-4 py-3 text-slate-600 text-xs">
                                                         @if(!empty($sDays))

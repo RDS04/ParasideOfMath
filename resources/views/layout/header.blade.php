@@ -19,6 +19,11 @@
             ->where('is_read', false)
             ->count();
     }
+
+    $userAvatar = "https://ui-avatars.com/api/?name=" . urlencode($currentName) . "&background=4c1d95&color=fff&bold=true";
+    if ($currentUser && $currentUser->isGuru() && $currentUser->guruProfile && $currentUser->guruProfile->foto) {
+        $userAvatar = asset($currentUser->guruProfile->foto);
+    }
 @endphp
 <nav class="main-header navbar navbar-expand navbar-light">
 
@@ -111,7 +116,7 @@
         <!-- user menu -->
         <li class="nav-item dropdown">
             <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-toggle="dropdown" style="display: flex !important; align-items: center !important;">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($currentName) }}&background=4c1d95&color=fff&bold=true"
+                <img src="{{ $userAvatar }}"
                      class="user-image img-circle elevation-2" alt="User Avatar" style="width: 32px; height: 32px; margin-right: 8px; float: none !important; display: inline-block !important; object-fit: cover;">
                 <span class="d-none d-md-inline font-weight-bold" style="color: #4b4560;">{{ $currentName }}</span>
             </a>
@@ -123,7 +128,7 @@
                 </div>
                 
                 <!-- Links -->
-                <a href="#" class="dropdown-item py-2 text-dark font-weight-medium d-flex align-items-center" style="font-size: 0.85rem; color: #4b4560 !important;">
+                <a href="{{ $currentUser && $currentUser->isGuru() ? route('guru.biodata') : '#' }}" class="dropdown-item py-2 text-dark font-weight-medium d-flex align-items-center" style="font-size: 0.85rem; color: #4b4560 !important;">
                     <i class="fas fa-user-circle mr-2 text-purple" style="color: #7c3aed; width: 20px;"></i> Profil Saya
                 </a>
                 <div class="dropdown-divider" style="border-color: #f0edf9;"></div>

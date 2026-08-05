@@ -359,13 +359,13 @@
                                             <span class="academic-menu-label">Invoice Payment</span>
                                         </a>
                                         <!-- Menu 4 -->
-                                        <div class="academic-menu-item">
+                                        <a href="{{ route('siswa.riwayat') }}" class="academic-menu-item">
                                             <div class="academic-menu-icon-wrapper"
                                                 style="background-color: #d1fae5; color: #065f46;">
                                                 <i class="fas fa-book-reader"></i>
                                             </div>
-                                            <span class="academic-menu-label">Registered Course</span>
-                                        </div>
+                                            <span class="academic-menu-label">Riwayat Payment</span>
+                                        </a>
                                         <!-- Menu 5 -->
                                         <div class="academic-menu-item">
                                             <div class="academic-menu-icon-wrapper"

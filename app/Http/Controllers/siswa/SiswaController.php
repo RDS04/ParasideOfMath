@@ -448,4 +448,52 @@ class SiswaController extends Controller
 
         return view('siswa.invoice', compact('siswa', 'paket', 'hariPertemuan', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus'));
     }
+
+    /**
+     * Tampilkan Halaman Riwayat Pembayaran Siswa.
+     */
+    public function showRiwayat()
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+
+        $paket = $siswa->paket;
+        $biodata = $siswa->biodata ?? [];
+        
+        $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+        $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+        $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+
+        // Fallback parsing from tipe_paket
+        if (empty($hariPertemuan) && $siswa->tipe_paket) {
+            if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+            }
+        }
+
+        if (!$jumlahPertemuan && $siswa->tipe_paket) {
+            if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
+                $jumlahPertemuan = (int) $matches[1];
+            }
+        }
+
+        // Get single session price
+        $detailString = '';
+        if ($siswa->tipe_paket) {
+            if ($paket) {
+                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+            }
+        }
+        $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
+        
+        // Total price
+        $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+
+        return view('siswa.riwayat', compact('siswa', 'paket', 'hariPertemuan', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga'));
+    }
 }

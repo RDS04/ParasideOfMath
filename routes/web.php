@@ -54,6 +54,7 @@ Route::controller(SiswaController::class)->group(function () {
     Route::get('/siswa/jadwal', 'showJadwal')->middleware('auth:siswa')->name('siswa.jadwal');
     Route::get('/siswa/akademik', 'showAkademik')->middleware('auth:siswa')->name('siswa.akademik');
     Route::get('/siswa/invoice', 'showInvoice')->middleware('auth:siswa')->name('siswa.invoice');
+    Route::get('/siswa/riwayat', 'showRiwayat')->middleware('auth:siswa')->name('siswa.riwayat');
 });
 Route::controller(AuthController::class)->prefix('guru')->group(function () {
     Route::get('/register', 'showGuruRegisterForm')->name('guru.register');
@@ -63,7 +64,12 @@ Route::controller(AuthController::class)->prefix('guru')->group(function () {
 Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)->group(function () {
     Route::get('/', 'index')->name('guru.dashboard');
     Route::get('/biodata', 'showBiodata')->name('guru.biodata');
-    Route::post('/biodata', 'updateBiodata')->name('guru.biodata.update');
+    Route::get('/biodata/edit', 'editBiodata')->name('guru.biodata.edit');
+    Route::post('/biodata/edit', 'updateBiodata')->name('guru.biodata.update');
+    Route::get('/profil', 'editProfil')->name('guru.profil');
+    Route::post('/profil', 'updateProfil')->name('guru.profil.update');
+    Route::get('/jadwal', 'showJadwal')->name('guru.jadwal');
+    Route::get('/siswa', 'showSiswa')->name('guru.siswa');
 });
 Route::controller(AdminController::class)->group(function () {
     Route::get('/admin', 'index')->name('admin.dashboard');
