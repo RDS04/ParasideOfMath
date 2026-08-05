@@ -181,8 +181,7 @@
                                             <td class="px-4 py-3.5 text-center align-middle no-print">
                                                 <div class="d-flex justify-content-center align-items-center gap-1.5">
                                                     <button type="button" class="btn btn-xs btn-purple text-xs font-weight-bold rounded-lg px-2.5 py-1.5"
-                                                        data-toggle="modal" 
-                                                        data-target="#detailModal" 
+                                                        onclick="showPaymentDetail(this)"
                                                         data-id="POM-PAY-{{ str_pad($pay->id, 4, '0', STR_PAD_LEFT) }}"
                                                         data-nama="{{ $pay->name }}"
                                                         data-email="{{ $pay->email }}"
@@ -323,52 +322,51 @@
                     row.style.display = "none";
                 }
             });
-        }
-
-        // Modal Populate data
-        $('#detailModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            
-            // Extract values from data attributes
-            var transId = button.data('id');
-            var nama = button.data('nama');
-            var email = button.data('email');
-            var whatsapp = button.data('whatsapp');
-            var paket = button.data('paket');
-            var tipe = button.data('tipe');
-            var sesi = button.data('sesi');
-            var harga = button.data('harga');
-            var total = button.data('total');
-            var tanggal = button.data('tanggal');
-            var status = button.data('status');
-            var bukti = button.data('bukti');
+        }        // Modal Populate data
+        function showPaymentDetail(button) {
+            // Extract values using vanilla JS to be completely safe from script-loading timing
+            var transId = button.getAttribute('data-id');
+            var nama = button.getAttribute('data-nama');
+            var email = button.getAttribute('data-email');
+            var whatsapp = button.getAttribute('data-whatsapp');
+            var paket = button.getAttribute('data-paket');
+            var tipe = button.getAttribute('data-tipe');
+            var sesi = button.getAttribute('data-sesi');
+            var harga = button.getAttribute('data-harga');
+            var total = button.getAttribute('data-total');
+            var tanggal = button.getAttribute('data-tanggal');
+            var status = button.getAttribute('data-status');
+            var bukti = button.getAttribute('data-bukti');
 
             // Populate fields in modal
-            $('#mTransId').text(transId);
-            $('#mTanggal').text(tanggal);
-            $('#mNama').text(nama);
-            $('#mEmail').text(email);
-            $('#mWhatsapp').text(whatsapp ? whatsapp : '-');
-            $('#mPaket').text(paket);
-            $('#mTipe').text(tipe ? tipe : sesi + ' Sesi');
-            $('#mHarga').text(harga);
-            $('#mTotal').text(total);
-            $('#mBuktiImg').attr('src', bukti);
-            $('#mBuktiLink').attr('href', bukti);
+            document.getElementById('mTransId').textContent = transId;
+            document.getElementById('mTanggal').textContent = tanggal;
+            document.getElementById('mNama').textContent = nama;
+            document.getElementById('mEmail').textContent = email;
+            document.getElementById('mWhatsapp').textContent = whatsapp && whatsapp !== 'null' ? whatsapp : '-';
+            document.getElementById('mPaket').textContent = paket;
+            document.getElementById('mTipe').textContent = tipe ? tipe : sesi + ' Sesi';
+            document.getElementById('mHarga').textContent = harga;
+            document.getElementById('mTotal').textContent = total;
+            document.getElementById('mBuktiImg').setAttribute('src', bukti);
+            document.getElementById('mBuktiLink').setAttribute('href', bukti);
 
             // Render status badge inside modal
             var statusBadge = '';
             if (status === 'active') {
-                statusBadge = '<span class="badge badge-success px-2 py-1 rounded">Lunas (Aktif)</span>';
+                statusBadge = '<span class="badge badge-success px-2 py-1 rounded" style="background-color: #10b981;">Lunas (Aktif)</span>';
             } else if (status === 'under_review') {
-                statusBadge = '<span class="badge badge-warning px-2 py-1 rounded text-white">Peninjauan</span>';
+                statusBadge = '<span class="badge badge-warning px-2 py-1 rounded text-white" style="background-color: #f59e0b;">Peninjauan</span>';
             } else if (status === 'rejected') {
-                statusBadge = '<span class="badge badge-danger px-2 py-1 rounded">Ditolak</span>';
+                statusBadge = '<span class="badge badge-danger px-2 py-1 rounded" style="background-color: #ef4444;">Ditolak</span>';
             } else {
                 statusBadge = '<span class="badge badge-secondary px-2 py-1 rounded">Pending</span>';
             }
-            $('#mStatus').html(statusBadge);
-        });
+            document.getElementById('mStatus').innerHTML = statusBadge;
+
+            // Trigger modal display via jQuery (safe as jQuery is fully loaded by click time)
+            $('#detailModal').modal('show');
+        }
 
         // Excel Export
         function exportExcel() {

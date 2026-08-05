@@ -4,7 +4,11 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 
+use App\Models\Guru;
+use App\Models\Mapel;
 use App\Models\PaketBelajar;
+use App\Models\Rekening;
+use App\Models\Siswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -91,7 +95,7 @@ class AdminController extends Controller
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
-        $rekening = \App\Models\Rekening::all();
+        $rekening = Rekening::all();
         return view('admin.inputRekening', compact('rekening'));
     }
 
@@ -111,7 +115,7 @@ class AdminController extends Controller
             'atas_nama' => ['required', 'string', 'max:255'],
         ]);
 
-        \App\Models\Rekening::create([
+        Rekening::create([
             'tipe' => $request->tipe,
             'nama_bank' => $request->nama_bank,
             'nomor_rekening' => $request->nomor_rekening,
@@ -130,7 +134,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $rekening = \App\Models\Rekening::findOrFail($id);
+        $rekening = Rekening::findOrFail($id);
 
         $request->validate([
             'tipe' => ['required', 'in:bank,ewallet'],
@@ -158,7 +162,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $rekening = \App\Models\Rekening::findOrFail($id);
+        $rekening = Rekening::findOrFail($id);
         $rekening->delete();
 
         return back()->with('success', 'Rekening berhasil dihapus!');
@@ -174,7 +178,7 @@ class AdminController extends Controller
         }
 
         // Fetch students ordered so that 'under_review' comes first
-        $students = \App\Models\Siswa::orderByRaw("CASE WHEN status = 'under_review' THEN 0 ELSE 1 END")
+        $students = Siswa::orderByRaw("CASE WHEN status = 'under_review' THEN 0 ELSE 1 END")
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -190,7 +194,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $siswa = \App\Models\Siswa::findOrFail($id);
+        $siswa = Siswa::findOrFail($id);
         $siswa->update([
             'status' => 'active',
         ]);
@@ -207,7 +211,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $siswa = \App\Models\Siswa::findOrFail($id);
+        $siswa = Siswa::findOrFail($id);
         $siswa->update([
             'status' => 'rejected',
             'bukti_transfer' => null, // clear payment proof to allow re-upload
@@ -225,9 +229,9 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $student = \App\Models\Siswa::findOrFail($id);
-        $paket = \App\Models\PaketBelajar::find($student->paket_id);
-        $gurusList = \App\Models\Guru::with('user')->get();
+        $student = Siswa::findOrFail($id);
+        $paket = PaketBelajar::find($student->paket_id);
+        $gurusList = Guru::with('user')->get();
 
         return view('admin.detailData', compact('student', 'paket', 'gurusList'));
     }
@@ -246,7 +250,7 @@ class AdminController extends Controller
             'tutors.*' => ['string', 'max:255'],
         ]);
 
-        $siswa = \App\Models\Siswa::findOrFail($id);
+        $siswa = Siswa::findOrFail($id);
         
         $tutorsSelected = $request->tutors; // e.g. ["Budi", "Asep"]
         $tutorsStr = implode(', ', $tutorsSelected);
@@ -292,7 +296,7 @@ class AdminController extends Controller
             'hari_pertemuan.*' => ['string', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu'],
         ]);
 
-        $siswa = \App\Models\Siswa::findOrFail($id);
+        $siswa = Siswa::findOrFail($id);
         $biodata = $siswa->biodata ?? [];
         $biodata['hari_pertemuan'] = $request->hari_pertemuan;
 
@@ -320,7 +324,7 @@ class AdminController extends Controller
         }
 
         // Fetch all students (e.g. active status or all sorted by registration date)
-        $students = \App\Models\Siswa::orderBy('created_at', 'desc')->get();
+        $students = Siswa::orderBy('created_at', 'desc')->get();
 
         return view('admin.daftarSiswa', compact('students'));
     }
@@ -335,7 +339,7 @@ class AdminController extends Controller
         }
 
         // Fetch all tutors with their user details
-        $gurus = \App\Models\Guru::with('user')->orderBy('created_at', 'desc')->get();
+        $gurus = Guru::with('user')->orderBy('created_at', 'desc')->get();
 
         return view('admin.daftarGuru', compact('gurus'));
     }
@@ -349,12 +353,12 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $guru = \App\Models\Guru::with('user')->findOrFail($id);
+        $guru = Guru::with('user')->findOrFail($id);
         
         $gName = $guru->user->name ?? '';
         $siswaBimbingan = [];
         if ($gName) {
-            $siswaBimbingan = \App\Models\Siswa::where('tipe_paket', 'LIKE', '%' . $gName . '%')
+            $siswaBimbingan = Siswa::where('tipe_paket', 'LIKE', '%' . $gName . '%')
                 ->orWhereJsonContains('biodata->tutor_names', $gName)
                 ->get();
         }
@@ -368,7 +372,7 @@ class AdminController extends Controller
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
-        $mapels = \App\Models\Mapel::all();
+        $mapels = Mapel::all();
         return view('admin.inputMapel', compact('mapels'));
     }
 
@@ -383,7 +387,7 @@ class AdminController extends Controller
             'shift' => ['required', 'integer', 'min:1'],
         ]);
 
-        \App\Models\Mapel::create([
+        Mapel::create([
             'nama_mapel' => $request->nama_mapel,
             'shift' => $request->shift,
         ]);
@@ -397,7 +401,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $mapel = \App\Models\Mapel::findOrFail($id);
+        $mapel = Mapel::findOrFail($id);
 
         $request->validate([
             'nama_mapel' => ['required', 'string', 'max:255'],
@@ -418,7 +422,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $mapel = \App\Models\Mapel::findOrFail($id);
+        $mapel = Mapel::findOrFail($id);
         $mapel->delete();
 
         return back()->with('success', 'Mata Pelajaran berhasil dihapus!');
@@ -502,7 +506,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $siswas = \App\Models\Siswa::with('paket')
+        $siswas = Siswa::with('paket')
             ->whereNotNull('bukti_transfer')
             ->where('bukti_transfer', '!=', '')
             ->orderBy('updated_at', 'desc')
