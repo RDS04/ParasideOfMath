@@ -1843,7 +1843,7 @@
     <script src="{{ asset('js/informasi.js') }}"></script>
 
     <!-- ================= FLOATING REALTIME CHAT WIDGET ================= -->
-    <div class="fixed bottom-6 left-6 z-50 no-print">
+    <div class="fixed bottom-6 right-6 z-50 no-print">
         <!-- Chat Bubble Trigger -->
         <button id="chat-trigger-btn" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-violet-300 hover:scale-105 hover:shadow-violet-400 active:scale-95 transition-all duration-300 focus:outline-none">
             <!-- Pulsing ring effect -->
@@ -1856,7 +1856,7 @@
         </button>
 
         <!-- Chat Window Box -->
-        <div id="chat-window-box" class="absolute bottom-20 left-0 w-[320px] sm:w-[360px] h-[480px] bg-white rounded-2xl shadow-2xl border border-violet-100/80 flex flex-col overflow-hidden hidden transform scale-95 opacity-0 origin-bottom-left transition-all duration-300">
+        <div id="chat-window-box" class="absolute bottom-20 right-0 w-[320px] sm:w-[360px] h-[480px] bg-white rounded-2xl shadow-2xl border border-violet-100/80 flex flex-col overflow-hidden hidden transform scale-95 opacity-0 origin-bottom-right transition-all duration-300">
             <!-- Header -->
             <div class="bg-gradient-to-r from-violet-700 to-indigo-800 p-4 text-white flex items-center justify-between shadow-md">
                 <div class="flex items-center gap-3">
@@ -1914,5 +1914,4 @@
         </div>
     </div>
 </body>
-
 </html>
