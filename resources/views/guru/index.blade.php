@@ -25,6 +25,41 @@
     <section class="content">
         <div class="container-fluid">
 
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show rounded-xl shadow-sm border-0 mb-4" role="alert">
+                    <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
+
+            @if(isset($isBiodataComplete) && !$isBiodataComplete)
+                <!-- ══════ INCOMPLETE BIODATA ALERT BANNER ══════ -->
+                <div class="card mb-4 border-0 shadow-sm overflow-hidden" style="background: linear-gradient(135deg, #fffbe6 0%, #fef3c7 100%); border-left: 5px solid #f59e0b !important;">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-9">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-amber-500 text-white px-2.5 py-1 text-xs font-bold uppercase rounded-md mr-2">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> Perhatian
+                                    </span>
+                                    <h5 class="mb-0 font-weight-bold text-amber-950">Biodata Pengajar Anda Belum Lengkap!</h5>
+                                </div>
+                                <p class="text-amber-900 text-sm mb-0">
+                                    Silakan lengkapi informasi biodata Anda (seperti lulusan/pendidikan terakhir, nomor WhatsApp, spesialisasi mengajar, dan alamat domisili). Data kualifikasi yang lengkap membantu siswa mengenal latar belakang pengajar mereka secara detail.
+                                </p>
+                            </div>
+                            <div class="col-md-3 text-right mt-3 mt-md-0">
+                                <a href="{{ route('guru.biodata') }}" class="btn btn-warning font-weight-bold text-amber-950 px-4 py-2.5 rounded-xl shadow-sm border-0">
+                                    <i class="fas fa-edit mr-1.5"></i> Lengkapi Biodata
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Welcome Banner -->
             <div class="card mb-4 overflow-hidden border-0 shadow-sm" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 45%, #1e3a8a 100%);">
                 <div class="card-body p-4 text-white relative">
@@ -77,7 +112,7 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-white p-3">
                         <div class="inner">
-                            <h3 class="font-weight-bold text-teal-950">8 <span class="text-sm font-weight-normal text-muted">Orang</span></h3>
+                            <h3 class="font-weight-bold text-teal-950">{{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} <span class="text-sm font-weight-normal text-muted">Orang</span></h3>
                             <p class="text-muted mb-1">Siswa Bimbingan</p>
                         </div>
                         <div class="icon text-purple"><i class="fas fa-user-graduate"></i></div>
@@ -86,16 +121,16 @@
                         </span>
                     </div>
                 </div>
-                <!-- Metric 4: Jadwal Hari Ini -->
+                <!-- Metric 4: Jam Mengajar -->
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-white p-3">
                         <div class="inner">
-                            <h3 class="font-weight-bold text-teal-950">2 <span class="text-sm font-weight-normal text-muted">Sesi</span></h3>
-                            <p class="text-muted mb-1">Jadwal Hari Ini</p>
+                            <h3 class="font-weight-bold text-teal-950">Aktif</h3>
+                            <p class="text-muted mb-1">Status Pengajar</p>
                         </div>
-                        <div class="icon text-warning"><i class="fas fa-calendar-day"></i></div>
+                        <div class="icon text-warning"><i class="fas fa-check-circle"></i></div>
                         <span class="text-warning text-xs font-semibold pt-2 border-top d-block">
-                            Perlu persiapan mengajar
+                            Terverifikasi Admin
                         </span>
                     </div>
                 </div>
@@ -103,13 +138,13 @@
 
             <!-- Detailed Section -->
             <div class="row">
-                <!-- Left Column: Upcoming Classes -->
+                <!-- Left Column: Assigned Students -->
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
-                            <h3 class="card-title font-weight-bold text-teal-950 mb-0">Jadwal Mengajar Terdekat</h3>
+                            <h3 class="card-title font-weight-bold text-teal-950 mb-0">Siswa Bimbingan Ditugaskan Admin</h3>
                             <span class="badge bg-teal-50 text-teal-700 border border-teal-200 px-3 py-1.5 rounded-lg text-xs">
-                                <i class="fas fa-clock mr-1"></i> Waktu Server: {{ now()->format('H:i') }}
+                                <i class="fas fa-user-graduate mr-1"></i> Total: {{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} Siswa
                             </span>
                         </div>
                         <div class="card-body p-0">
@@ -117,56 +152,43 @@
                                 <table class="table table-hover mb-0">
                                     <thead>
                                         <tr class="bg-light text-muted text-xs uppercase">
-                                            <th>Tanggal &amp; Waktu</th>
                                             <th>Siswa</th>
-                                            <th>Mata Pelajaran</th>
-                                            <th>Metode</th>
-                                            <th>Aksi</th>
+                                            <th>Kontak &amp; Sekolah</th>
+                                            <th>Paket Belajar</th>
+                                            <th>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="font-weight-bold">Senin, {{ now()->addDays(1)->format('d M Y') }}</div>
-                                                <span class="text-xs text-muted">15:30 - 17:00 WIB</span>
-                                            </td>
-                                            <td>
-                                                <div class="font-weight-semibold"><strong>Rudi Hermawan</strong></div>
-                                                <span class="text-xs text-muted">Siswa SMA Kelas 12</span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-purple-100 text-purple-800">Matematika Lanjut</span>
-                                            </td>
-                                            <td>
-                                                <span class="text-sm font-medium"><i class="fas fa-laptop-house text-primary mr-1"></i> Online Zoom</span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-xs btn-brand px-3 py-1.5 rounded-lg shadow-sm" disabled>
-                                                    Mulai Kelas
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="font-weight-bold">Rabu, {{ now()->addDays(3)->format('d M Y') }}</div>
-                                                <span class="text-xs text-muted">16:00 - 17:30 WIB</span>
-                                            </td>
-                                            <td>
-                                                <div class="font-weight-semibold"><strong>Siti Aminah</strong></div>
-                                                <span class="text-xs text-muted">Siswa SMP Kelas 9</span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-teal-100 text-teal-800">Matematika Wajib</span>
-                                            </td>
-                                            <td>
-                                                <span class="text-sm font-medium"><i class="fas fa-map-marker-alt text-danger mr-1"></i> Offline Privat</span>
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-xs btn-outline-secondary px-3 py-1.5 rounded-lg" disabled>
-                                                    Detail Lokasi
-                                                </button>
-                                            </td>
-                                        </tr>
+                                        @forelse($assignedStudents ?? [] as $s)
+                                            <tr>
+                                                <td>
+                                                    <div class="font-weight-bold text-purple-950">{{ $s->name }}</div>
+                                                    <span class="text-xs text-muted">{{ $s->email }}</span>
+                                                </td>
+                                                <td>
+                                                    <div class="font-weight-semibold text-sm">{{ $s->whatsapp ?? '-' }}</div>
+                                                    <span class="text-xs text-muted">{{ $s->sekolah ?? 'Sekolah belum diisi' }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-purple-100 text-purple-800 font-weight-semibold">
+                                                        {{ $s->paket ? $s->paket->nama_paket : 'Paket Privat' }}
+                                                    </span>
+                                                    <div class="text-[11px] text-muted mt-1">{{ $s->tipe_paket ?? '-' }}</div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-emerald-100 text-emerald-800 font-weight-bold px-2.5 py-1">
+                                                        <i class="fas fa-check-circle mr-1"></i> Ditugaskan oleh Admin
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-center py-5 text-muted">
+                                                    <i class="fas fa-user-clock fa-2x mb-2 d-block opacity-50"></i>
+                                                    Belum ada siswa yang ditugaskan oleh Admin untuk Anda saat ini.
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>

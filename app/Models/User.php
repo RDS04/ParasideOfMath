@@ -79,4 +79,12 @@ class User extends Authenticatable
     {
         return $this->hasOne(Guru::class, 'user_id');
     }
+
+    /**
+     * Get or create Guru profile for this user.
+     */
+    public function getOrCreateGuruProfile(): Guru
+    {
+        return $this->guruProfile ?? Guru::create(['user_id' => $this->id]);
+    }
 }

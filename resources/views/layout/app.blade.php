@@ -73,14 +73,17 @@
     @include('layout.sidebar')
 
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper {{ auth()->guard('siswa')->check() ? 'pb-24 md:pb-0' : '' }}">
+    <div class="content-wrapper {{ (auth()->guard('siswa')->check() || (auth()->check() && auth()->user()->isGuru())) ? 'pb-24 md:pb-0' : '' }}">
         @yield('content')
     </div>
 
     @include('layout.footer')
 
-    @if (auth()->guard('siswa')->check())
+    @if (auth()->guard('siswa')->check() || (auth()->check() && auth()->user()->isGuru()))
         @include('layout.sideMobile')
+    @endif
+
+    @if (auth()->guard('siswa')->check())
 
         @php
             $globalSiswa = auth()->guard('siswa')->user();

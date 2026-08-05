@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Siswa\SiswaController;
+use App\Http\Controllers\Guru\GuruController;
+
 
 Route::get('/', function () {
     return view('/informasi/index');
@@ -14,6 +16,7 @@ Route::get('/', function () {
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLoginForm')->name('login');
     Route::post('/login', 'login')->name('login.post');
+    Route::get('/register', 'showLoginForm')->name('register');
     Route::post('/register', 'register')->name('register.post');
     Route::post('/logout', 'logout')->name('logout');
 });
@@ -55,15 +58,12 @@ Route::controller(SiswaController::class)->group(function () {
 Route::controller(AuthController::class)->prefix('guru')->group(function () {
     Route::get('/register', 'showGuruRegisterForm')->name('guru.register');
     Route::post('/register', 'registerGuru')->name('guru.register.post');
+});
 
-    Route::middleware('auth:web')->group(function () {
-        Route::get('/', function () {
-            if (!auth()->user()->isGuru()) {
-                return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
-            }
-            return view('guru.index');
-        })->name('guru.dashboard');
-    });
+Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)->group(function () {
+    Route::get('/', 'index')->name('guru.dashboard');
+    Route::get('/biodata', 'showBiodata')->name('guru.biodata');
+    Route::post('/biodata', 'updateBiodata')->name('guru.biodata.update');
 });
 Route::controller(AdminController::class)->group(function () {
     Route::get('/admin', 'index')->name('admin.dashboard');

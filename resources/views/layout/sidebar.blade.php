@@ -273,8 +273,14 @@
                     </li>
                     <li class="nav-header">LAINNYA</li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('guru.biodata') }}" class="nav-link {{ Route::is('guru.biodata') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-id-card text-info"></i>
+                            <p>Biodata Guru</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-user-circle text-teal-400"></i>
                             <p>Profil Pengajar</p>
                         </a>
                     </li>

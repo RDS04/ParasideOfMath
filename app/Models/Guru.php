@@ -16,11 +16,26 @@ class Guru extends Model
         'no_telp',
         'alamat',
         'spesialisasi',
+        'gelar',
+        'pendidikan_terakhir',
+        'pengalaman_mengajar',
+        'bio_singkat',
         'status',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Check if Guru's biodata is complete.
+     */
+    public function isComplete(): bool
+    {
+        return !empty($this->no_telp)
+            && !empty($this->alamat)
+            && !empty($this->spesialisasi)
+            && !empty($this->pendidikan_terakhir);
     }
 }
