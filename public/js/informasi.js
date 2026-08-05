@@ -1,7 +1,14 @@
 /**
  * Paradise of Math - Landing Page JavaScript
- * Handles Mobile Navigation, Scroll Reveals, Swiper Carousels, Book Flipping, Profile Dropdown, and Live Chat Bot.
+ * Handles Mobile Navigation, Scroll Reveals, Swiper Carousels, Book Flipping, Profile Dropdown, and Live Chat.
  */
+
+// Generate guest session ID if not exists
+let sessionId = localStorage.getItem('chat_session_id');
+if (!sessionId) {
+    sessionId = 'visitor_' + Math.random().toString(36).substring(2, 11);
+    localStorage.setItem('chat_session_id', sessionId);
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     // ── 1. MOBILE MENU TOGGLE ──
@@ -99,6 +106,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const chatClose = document.getElementById('chat-close-btn');
     const chatForm = document.getElementById('chat-input-form');
     const chatInput = document.getElementById('chat-input-text');
+    const chatContainer = document.getElementById('chat-messages-container');
+
+    let pollInterval = null;
 
     if (chatTrigger && chatWindow && chatClose) {
         // Toggle Open/Close
@@ -110,9 +120,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     chatWindow.style.transform = 'scale(1)';
                 }, 10);
                 
-                // Remove notification badge on first open
+                // Hide badge
                 const badge = chatTrigger.querySelector('span.bg-rose-500');
                 if (badge) badge.remove();
+
+                // Initial fetch and start polling
+                loadMessages();
+                startPolling();
             } else {
                 closeChat();
             }
@@ -129,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => {
                 chatWindow.classList.add('hidden');
             }, 300);
+            stopPolling();
         }
 
         // Handle Text Send Submit
@@ -138,16 +153,72 @@ document.addEventListener('DOMContentLoaded', function () {
                 const text = chatInput.value.trim();
                 if (!text) return;
 
-                appendMessage(text, 'user');
+                sendMessageToDb(text);
                 chatInput.value = '';
-
-                // Simulate bot typing indicator
-                showTypingIndicator();
-                setTimeout(() => {
-                    removeTypingIndicator();
-                    handleBotResponse(text);
-                }, 1200);
             });
+        }
+    }
+
+    // Load messages from database
+    function loadMessages() {
+        if (!chatContainer) return;
+        fetch(`/chat/messages?session_id=${sessionId}`)
+            .then(res => res.json())
+            .then(data => {
+                // To prevent jumping scrollbar, only rebuild if content count changes
+                const currentMsgCount = chatContainer.querySelectorAll('.chat-msg-row').length;
+                if (data.length === 0 && currentMsgCount === 0) {
+                    appendLocalMessage('Halo! Selamat datang di <strong>Paradise of Math</strong>. 🎓', 'bot');
+                    appendLocalMessage('Ada yang bisa kami bantu hari ini? Silakan ketik pesan Anda atau klik opsi di bawah:', 'bot');
+                    return;
+                }
+
+                if (data.length !== currentMsgCount) {
+                    chatContainer.innerHTML = '';
+                    data.forEach(msg => {
+                        appendLocalMessage(msg.message, msg.sender_role === 'visitor' ? 'user' : 'bot');
+                    });
+                }
+            })
+            .catch(err => console.error("Error loading chat messages:", err));
+    }
+
+    // Send a message to DB
+    function sendMessageToDb(messageText) {
+        appendLocalMessage(messageText, 'user');
+
+        const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+        const token = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
+
+        fetch('/chat/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({
+                session_id: sessionId,
+                sender_name: 'Anonymous',
+                message: messageText
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            loadMessages();
+        })
+        .catch(err => console.error("Error sending message:", err));
+    }
+
+    // Polling Control Functions
+    function startPolling() {
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(loadMessages, 2000);
+    }
+
+    function stopPolling() {
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
         }
     }
 });
@@ -203,15 +274,15 @@ if (book) {
 }
 
 // ── 7. CHAT MESSAGE HELPERS ──
-function appendMessage(text, sender) {
+function appendLocalMessage(text, sender) {
     const container = document.getElementById('chat-messages-container');
     if (!container) return;
     const msgDiv = document.createElement('div');
-    msgDiv.className = `flex items-start gap-2 ${sender === 'user' ? 'justify-end' : ''}`;
+    msgDiv.className = `flex items-start gap-2 chat-msg-row ${sender === 'user' ? 'justify-end' : ''}`;
 
     if (sender === 'user') {
         msgDiv.innerHTML = `
-            <div class="bg-violet-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[80%]">
+            <div class="bg-violet-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[80%] break-words">
                 ${text}
             </div>
         `;
@@ -220,7 +291,7 @@ function appendMessage(text, sender) {
             <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
                 <i class="fas fa-robot text-xs"></i>
             </div>
-            <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%]">
+            <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%] break-words">
                 ${text}
             </div>
         `;
@@ -230,53 +301,60 @@ function appendMessage(text, sender) {
     container.scrollTop = container.scrollHeight;
 }
 
-function showTypingIndicator() {
+function sendQuickOption(text) {
     const container = document.getElementById('chat-messages-container');
     if (!container) return;
-    const typingDiv = document.createElement('div');
-    typingDiv.id = 'typing-indicator';
-    typingDiv.className = 'flex items-start gap-2';
-    typingDiv.innerHTML = `
-        <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
-            <i class="fas fa-robot text-xs"></i>
-        </div>
-        <div class="bg-white px-3 py-2 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%] flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style="animation-delay: 0s"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style="animation-delay: 0.15s"></span>
-            <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style="animation-delay: 0.3s"></span>
-        </div>
-    `;
-    container.appendChild(typingDiv);
-    container.scrollTop = container.scrollHeight;
-}
 
-function removeTypingIndicator() {
-    const indicator = document.getElementById('typing-indicator');
-    if (indicator) indicator.remove();
-}
+    // Append visually
+    appendLocalMessage(text, 'user');
 
-function sendQuickOption(text) {
-    appendMessage(text, 'user');
-    showTypingIndicator();
-    setTimeout(() => {
-        removeTypingIndicator();
-        handleBotResponse(text);
-    }, 1000);
-}
+    const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+    const token = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
 
-function handleBotResponse(userInput) {
-    const inputLower = userInput.toLowerCase();
-    let response = '';
+    // Send to Database
+    fetch('/chat/send', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({
+            session_id: sessionId,
+            sender_name: 'Anonymous',
+            message: text
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        // Trigger automated bot replies for specific quick chips to maintain bot functionality!
+        setTimeout(() => {
+            let botReply = '';
+            if (text.includes('Paket')) {
+                botReply = `Kami menyediakan kelas SD (Matematika & IPA) dan SMP (Matematika, IPA, B. Inggris). <br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20tertarik%20tanya%20paket%20les" target="_blank" class="text-violet-600 font-bold underline">Tanya Admin di WhatsApp</a>`;
+            } else if (text.includes('Biaya')) {
+                botReply = `<strong>Promo Free Pendaftaran!</strong> 🥳<br>Biaya belajar les berkisar antara Rp 90K - Rp 150K per sesi.<br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20tertarik%20tanya%20biaya" target="_blank" class="text-violet-600 font-bold underline">Detail Biaya via WhatsApp</a>`;
+            } else {
+                botReply = `Tentu! Menghubungkan Anda ke chat WhatsApp Admin...<br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math..." target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold no-underline mt-2"><i class="fab fa-whatsapp"></i> Chat WhatsApp</a>`;
+            }
 
-    if (inputLower.includes('paket') || inputLower.includes('belajar')) {
-        response = `Kami menyediakan kelas bimbingan belajar Matematika, IPA, dan Bahasa Inggris untuk jenjang <strong>SD</strong> dan <strong>SMP</strong>.<br><br>Ingin tanya paket belajar WhatsApp Admin? <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20tertarik%20tanya%20paket%20belajar..." target="_blank" class="text-violet-600 font-bold underline">Klik disini untuk WhatsApp</a>`;
-    } else if (inputLower.includes('biaya') || inputLower.includes('daftar') || inputLower.includes('harga') || inputLower.includes('promo')) {
-        response = `<strong>Promo Khusus Bulan Ini!</strong> 🥳<br>✨ <strong>Gratis biaya pendaftaran!</strong><br>✨ Biaya belajar les bervariasi antara Rp 90K hingga Rp 150K per sesi, tergantung dari jenjang (SD/SMP) dan jumlah sesi pertemuan yang dipilih.<br><br><a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20tertarik%20tanya%20detail%20biaya..." target="_blank" class="text-violet-600 font-bold underline">Chat Admin WhatsApp</a>`;
-    } else if (inputLower.includes('whatsapp') || inputLower.includes('hubungi') || inputLower.includes('admin') || inputLower.includes('kontak')) {
-        response = `Tentu! Anda dapat langsung terhubung dengan Admin kami via WhatsApp untuk konsultasi lebih cepat.<br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math..." target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold no-underline mt-2"><i class="fab fa-whatsapp"></i> Chat WhatsApp</a>`;
-    } else {
-        response = `Terima kasih atas pesan Anda! Agen Customer Service kami akan segera menanggapi Anda.<br><br>Jika ingin tanggapan instan, silakan hubungi WhatsApp kami langsung:<br><a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math..." target="_blank" class="text-violet-600 font-bold underline">Hubungi Admin di WhatsApp</a>`;
-    }
-
-    appendMessage(response, 'bot');
+            // Save bot reply to DB so admin can see it too!
+            fetch('/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    sender_name: 'System Bot',
+                    message: botReply
+                })
+            })
+            .then(() => {
+                // Append message locally
+                appendLocalMessage(botReply, 'bot');
+            });
+        }, 1000);
+    })
+    .catch(err => console.error("Error sending quick option:", err));
 }

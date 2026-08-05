@@ -221,6 +221,12 @@
                             <p>Kelola Mata Pelajaran</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.chat') }}" class="nav-link {{ Route::is('admin.chat') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-comments text-rose-400"></i>
+                            <p>Chat Realtime</p>
+                        </a>
+                    </li>
 
                     <li class="nav-header">LAINNYA</li>
 

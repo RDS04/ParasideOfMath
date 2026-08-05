@@ -99,3 +99,14 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/notifications/read', 'markNotificationsRead')->name('admin.notifications.read');
 })->middleware('auth:web');
 
+// Realtime Chat API and Admin Panel
+Route::get('/chat/messages', [\App\Http\Controllers\Chat\ChatController::class, 'getMessages']);
+Route::post('/chat/send', [\App\Http\Controllers\Chat\ChatController::class, 'sendMessage']);
+
+Route::middleware('auth:web')->group(function () {
+    Route::get('/admin/chet', [\App\Http\Controllers\Chat\ChatController::class, 'adminChatPage'])->name('admin.chat');
+    Route::get('/admin/chat/sessions', [\App\Http\Controllers\Chat\ChatController::class, 'getChatSessions']);
+    Route::get('/admin/chat/messages/{session_id}', [\App\Http\Controllers\Chat\ChatController::class, 'getSessionMessages']);
+    Route::post('/admin/chat/send', [\App\Http\Controllers\Chat\ChatController::class, 'adminSendMessage']);
+});
+

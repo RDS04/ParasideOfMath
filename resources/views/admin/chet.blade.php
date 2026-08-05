@@ -1,0 +1,328 @@
+@extends('layout.app')
+
+@section('title', 'Admin Realtime Chat · Paradise of Math')
+
+@section('content')
+    <!-- Content Header -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-3 align-items-center">
+                <div class="col-sm-6">
+                    <h1 class="m-0 font-weight-bold text-purple-950">Chat Realtime Pengunjung</h1>
+                    <p class="text-sm text-muted mb-0">Hubungi langsung pengunjung landing page (Anonymous) secara real-time.</p>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right text-sm">
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}" class="text-purple-600">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Chat Realtime</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            
+            <div class="row mb-5" style="height: 600px; max-height: calc(100vh - 200px);">
+                
+                <!-- LEFT COLUMN: SESSIONS LIST (4 cols) -->
+                <div class="col-md-4 h-100 mb-3 mb-md-0">
+                    <div class="card border-0 shadow-sm rounded-2xl overflow-hidden h-100 flex flex-col bg-white">
+                        <div class="card-header bg-purple-950 text-white py-3">
+                            <h5 class="card-title font-weight-bold mb-0 text-sm">
+                                <i class="fas fa-comments mr-2"></i> Daftar Percakapan
+                            </h5>
+                        </div>
+                        
+                        <!-- Sessions scrollable list -->
+                        <div id="sessions-list-container" class="card-body p-0 overflow-y-auto flex-1">
+                            <div class="text-center py-5 text-muted text-xs">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-3 text-purple-400"></i>
+                                <p class="mb-0">Memuat percakapan...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: ACTIVE CHAT SCREEN (8 cols) -->
+                <div class="col-md-8 h-100">
+                    <div class="card border-0 shadow-sm rounded-2xl overflow-hidden h-100 flex flex-col bg-white" id="active-chat-card">
+                        <!-- Welcome Screen (Default before selecting a chat) -->
+                        <div id="chat-welcome-screen" class="h-100 flex flex-col items-center justify-center text-center p-5">
+                            <div class="w-20 h-20 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center mb-4 shadow-xs">
+                                <i class="fas fa-paper-plane text-3xl"></i>
+                            </div>
+                            <h4 class="font-weight-extrabold text-purple-950 mb-2">Konsultasi Live Chat</h4>
+                            <p class="text-xs text-muted max-w-sm">
+                                Silakan pilih salah satu percakapan di panel sebelah kiri untuk mulai mengirimkan pesan bantuan realtime kepada pengunjung.
+                            </p>
+                        </div>
+
+                        <!-- Main Chat Screen (Hidden by default) -->
+                        <div id="chat-active-screen" class="h-100 flex-col hidden">
+                            <!-- Active Chat Header -->
+                            <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2.5">
+                                    <div class="avatar bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center rounded-circle mr-3" style="width: 40px; height: 40px; font-size: 16px;">
+                                        A
+                                    </div>
+                                    <div>
+                                        <h6 class="font-weight-bold text-purple-950 mb-0" id="active-visitor-name">Anonymous</h6>
+                                        <small class="text-[10px] text-muted font-mono" id="active-visitor-id">visitor_xxxxx</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-emerald-100 text-emerald-800 border border-emerald-200 px-2.5 py-1 text-xxs font-bold uppercase rounded-pill">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 d-inline-block mr-1"></span> Terhubung
+                                </span>
+                            </div>
+
+                            <!-- Messages Area -->
+                            <div id="admin-messages-container" class="flex-1 p-4 overflow-y-auto bg-slate-50/50 space-y-3 text-xs">
+                                <!-- Loaded dynamically -->
+                            </div>
+
+                            <!-- Footer Send Form -->
+                            <form id="admin-send-form" class="card-footer bg-white border-top p-3 d-flex align-items-center gap-3">
+                                <input type="text" id="admin-input-text" placeholder="Ketik balasan Anda..." autocomplete="off" class="form-control rounded-xl px-4 py-3 text-sm flex-1 focus:ring-purple-600 border-light bg-light" required>
+                                <button type="submit" class="btn btn-purple rounded-xl px-4 py-2.5 font-weight-bold text-sm shadow-sm" style="background-color: #4c1d95; color: white;">
+                                    <i class="fas fa-paper-plane mr-1.5"></i> Kirim
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Custom CSS styles matching the layout -->
+    <style>
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-1 { flex: 1; }
+        .overflow-y-auto { overflow-y: auto; }
+        .h-100 { height: 100% !important; }
+        .gap-2.5 { gap: 10px; }
+        .gap-3 { gap: 12px; }
+        .rounded-2xl { border-radius: 20px !important; }
+        .rounded-xl { border-radius: 12px !important; }
+        .text-xxs { font-size: 0.65rem; }
+        .text-[10px] { font-size: 10px; }
+        .bg-light { background-color: #f8fafc !important; }
+        .border-light { border-color: #f1f5f9 !important; }
+        
+        .session-item {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+        .session-item:hover {
+            background-color: #f8fafc;
+        }
+        .session-item.active {
+            background-color: #f3e8ff !important;
+            border-left: 4px solid #7c3aed;
+        }
+        .btn-purple {
+            transition: all 0.2s ease;
+        }
+        .btn-purple:hover {
+            background-color: #3b0764 !important;
+        }
+    </style>
+
+    <!-- Script logic for Admin Realtime Chat -->
+    <script>
+        let currentSessionId = null;
+        let currentVisitorName = 'Anonymous';
+        let sessionPoll = null;
+        let messagePoll = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start sessions list polling
+            loadSessions();
+            sessionPoll = setInterval(loadSessions, 3000);
+
+            // Handle Send Form
+            const sendForm = document.getElementById('admin-send-form');
+            const inputText = document.getElementById('admin-input-text');
+
+            if (sendForm) {
+                sendForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const text = inputText.value.trim();
+                    if (!text || !currentSessionId) return;
+
+                    sendAdminMessage(text);
+                    inputText.value = '';
+                });
+            }
+        });
+
+        // Load sessions list from server
+        function loadSessions() {
+            fetch('/admin/chat/sessions')
+                .then(res => res.json())
+                .then(data => {
+                    const listContainer = document.getElementById('sessions-list-container');
+                    if (!listContainer) return;
+
+                    if (data.length === 0) {
+                        listContainer.innerHTML = `
+                            <div class="text-center py-5 text-muted text-xs">
+                                <i class="fas fa-comments text-slate-300 fa-2x mb-3"></i>
+                                <p class="mb-0">Belum ada percakapan masuk.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    let html = '';
+                    data.forEach(sess => {
+                        const isActive = sess.session_id === currentSessionId ? 'active' : '';
+                        const dateFormatted = new Date(sess.last_activity).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+                        const unreadBadge = sess.unread_count > 0 
+                            ? `<span class="badge badge-danger rounded-circle p-1.5 text-[9px] font-bold d-flex justify-content-center align-items-center" style="width:18px; height:18px; background-color:#ef4444;">${sess.unread_count}</span>` 
+                            : '';
+                        
+                        html += `
+                            <div onclick="selectSession('${sess.session_id}', '${sess.sender_name}')" class="session-item p-3 d-flex align-items-center justify-content-between ${isActive}">
+                                <div class="d-flex align-items-center gap-2.5 overflow-hidden">
+                                    <div class="avatar bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center rounded-circle flex-shrink-0" style="width: 38px; height: 38px; font-size: 14px;">
+                                        ${sess.sender_name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <div class="font-weight-bold text-purple-950 text-xs">${sess.sender_name}</div>
+                                        <small class="text-[9px] text-muted font-mono block text-truncate" style="max-width: 140px;">ID: ${sess.session_id}</small>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0 flex flex-col items-end gap-1">
+                                    <span class="text-[9px] text-slate-400 font-semibold">${dateFormatted}</span>
+                                    ${unreadBadge}
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    listContainer.innerHTML = html;
+                })
+                .catch(err => console.error("Error loading sessions:", err));
+        }
+
+        // Select a session to load details
+        function selectSession(sessionId, name) {
+            currentSessionId = sessionId;
+            currentVisitorName = name;
+
+            // Highlight in list
+            document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Hide welcome screen, show chat screen
+            document.getElementById('chat-welcome-screen').classList.add('hidden');
+            const activeScreen = document.getElementById('chat-active-screen');
+            activeScreen.classList.remove('hidden');
+            activeScreen.classList.add('flex');
+
+            // Update Header Name & Avatar
+            document.getElementById('active-visitor-name').textContent = name;
+            document.getElementById('active-visitor-id').textContent = 'ID: ' + sessionId;
+            const avatar = document.querySelector('#chat-active-screen .avatar');
+            if (avatar) avatar.textContent = name.charAt(0).toUpperCase();
+
+            // Load messages and restart polling
+            loadMessages();
+            if (messagePoll) clearInterval(messagePoll);
+            messagePoll = setInterval(loadMessages, 2000);
+            
+            // Immediately reload sessions to update unread badge
+            loadSessions();
+        }
+
+        // Fetch messages for active session
+        function loadMessages() {
+            if (!currentSessionId) return;
+
+            fetch(`/admin/chat/messages/${currentSessionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('admin-messages-container');
+                    if (!container) return;
+
+                    const currentCount = container.querySelectorAll('.chat-msg-row').length;
+                    
+                    // Only rebuild if count has changed to prevent scrolling jumps
+                    if (data.length !== currentCount) {
+                        let html = '';
+                        data.forEach(msg => {
+                            const isUser = msg.sender_role === 'admin';
+                            
+                            if (isUser) {
+                                html += `
+                                    <div class="flex items-start gap-2 justify-end chat-msg-row">
+                                        <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none shadow-xs max-w-[70%] break-words">
+                                            ${msg.message}
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                html += `
+                                    <div class="flex items-start gap-2 chat-msg-row">
+                                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center flex-shrink-0" style="font-size: 11px;">
+                                            ${msg.sender_name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-100 shadow-xs max-w-[70%] break-words">
+                                            ${msg.message}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        });
+                        
+                        container.innerHTML = html;
+                        container.scrollTop = container.scrollHeight;
+                    }
+                })
+                .catch(err => console.error("Error loading messages:", err));
+        }
+
+        // Send Admin Response
+        function sendAdminMessage(text) {
+            if (!currentSessionId) return;
+
+            // Optimistic rendering in UI
+            const container = document.getElementById('admin-messages-container');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'flex items-start gap-2 justify-end chat-msg-row';
+            msgDiv.innerHTML = `
+                <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none shadow-xs max-w-[70%] break-words">
+                    ${text}
+                </div>
+            `;
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+
+            fetch('/admin/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    session_id: currentSessionId,
+                    message: text
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                loadMessages();
+                loadSessions(); // update last message date
+            })
+            .catch(err => console.error("Error sending admin message:", err));
+        }
+    </script>
+@endsection
