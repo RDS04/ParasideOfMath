@@ -93,6 +93,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
     Route::get('/admin/guru/detail/{id}', 'detailGuru')->name('admin.guru.detail');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
+    Route::get('/admin/riwayat-pembayaran', 'allRiwayatPayment')->name('admin.riwayat-pembayaran');
     Route::post('/admin/save-token', 'saveFcmToken')->name('admin.save_token');
     Route::get('/admin/notifications', 'getNotifications')->name('admin.notifications.get');
     Route::post('/admin/notifications/read', 'markNotificationsRead')->name('admin.notifications.read');

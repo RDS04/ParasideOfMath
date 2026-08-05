@@ -166,7 +166,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('admin.riwayat-pembayaran') }}" class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
                                     <i class="fas fa-history nav-icon text-emerald-400"></i>
                                     <p>Riwayat Pembayaran</p>
                                 </a>

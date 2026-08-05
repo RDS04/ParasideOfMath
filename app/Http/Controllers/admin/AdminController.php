@@ -492,4 +492,83 @@ class AdminController extends Controller
 
         return response()->json(['message' => 'Notifikasi ditandai telah dibaca']);
     }
+
+    /**
+     * Tampilkan Semua Riwayat Transaksi Pembayaran Siswa.
+     */
+    public function allRiwayatPayment()
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswas = \App\Models\Siswa::with('paket')
+            ->whereNotNull('bukti_transfer')
+            ->where('bukti_transfer', '!=', '')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
+        $payments = $siswas->map(function ($siswa) {
+            $paket = $siswa->paket;
+            $biodata = $siswa->biodata ?? [];
+            
+            $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+            $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+            
+            if (empty($hariPertemuan) && $siswa->tipe_paket) {
+                if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                    $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+                }
+            }
+            if (!$jumlahPertemuan && $siswa->tipe_paket) {
+                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
+                    $jumlahPertemuan = (int) $matches[1];
+                }
+            }
+            
+            $detailString = '';
+            if ($siswa->tipe_paket && $paket) {
+                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+            }
+            
+            $hargaPerSesi = 0;
+            if ($detailString) {
+                preg_match_all('/\d+/', str_replace('.', '', $detailString), $numbers);
+                if (!empty($numbers[0])) {
+                    $hargaPerSesi = (int) $numbers[0][0];
+                }
+            }
+            if ($hargaPerSesi === 0 && $paket) {
+                $hargaPerSesi = $paket->harga_max;
+            }
+            if ($hargaPerSesi === 0) {
+                $hargaPerSesi = 450000; // default
+            }
+            
+            $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+            
+            return (object) [
+                'id' => $siswa->id,
+                'name' => $siswa->name,
+                'email' => $siswa->email,
+                'whatsapp' => $siswa->whatsapp,
+                'nama_paket' => $paket ? $paket->nama_paket : 'Pendaftaran Bimbel',
+                'tipe_paket' => $siswa->tipe_paket,
+                'total_bayar' => $totalHarga,
+                'harga_sesi' => $hargaPerSesi,
+                'jumlah_pertemuan' => $jumlahPertemuan ?: 1,
+                'hari_pertemuan' => implode(', ', (array) $hariPertemuan),
+                'tanggal_mulai' => $tanggalMulai ?: '-',
+                'bukti_transfer' => $siswa->bukti_transfer,
+                'status' => $siswa->status,
+                'tanggal' => $siswa->updated_at ? $siswa->updated_at->format('d M Y H:i') : ($siswa->created_at ? $siswa->created_at->format('d M Y H:i') : '-'),
+            ];
+        });
+
+        return view('admin.allRiwayatPayment', compact('payments'));
+    }
 }
