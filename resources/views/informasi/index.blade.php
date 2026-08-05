@@ -1975,6 +1975,215 @@
         });
     </script>
 
+    <!-- ================= FLOATING REALTIME CHAT WIDGET ================= -->
+    <div class="fixed bottom-6 left-6 z-50 no-print">
+        <!-- Chat Bubble Trigger -->
+        <button id="chat-trigger-btn" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-violet-300 hover:scale-105 hover:shadow-violet-400 active:scale-95 transition-all duration-300 focus:outline-none">
+            <!-- Pulsing ring effect -->
+            <span class="absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75 animate-ping"></span>
+            
+            <i class="fas fa-comments text-xl relative z-10"></i>
+            
+            <!-- Notification Badge -->
+            <span class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center border-2 border-white animate-bounce">1</span>
+        </button>
+
+        <!-- Chat Window Box -->
+        <div id="chat-window-box" class="absolute bottom-20 left-0 w-[320px] sm:w-[360px] h-[480px] bg-white rounded-2xl shadow-2xl border border-violet-100/80 flex flex-col overflow-hidden hidden transform scale-95 opacity-0 origin-bottom-left transition-all duration-300">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-violet-700 to-indigo-800 p-4 text-white flex items-center justify-between shadow-md">
+                <div class="flex items-center gap-3">
+                    <div class="relative w-10 h-10 rounded-full bg-white/20 p-0.5">
+                        <img src="{{ asset('images/logoPM.webp') }}" alt="logo" class="w-full h-full object-contain rounded-full bg-white">
+                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-sm">Customer Service PM</div>
+                        <div class="text-[10px] text-violet-200 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online (Siap Membantu)
+                        </div>
+                    </div>
+                </div>
+                <button id="chat-close-btn" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors focus:outline-none">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50 text-xs">
+                <!-- Welcome Messages -->
+                <div class="flex items-start gap-2">
+                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
+                        <i class="fas fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%]">
+                        Halo! Selamat datang di <strong>Paradise of Math</strong>. 🎓
+                    </div>
+                </div>
+                <div class="flex items-start gap-2">
+                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
+                        <i class="fas fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%]">
+                        Ada yang bisa kami bantu hari ini? Silakan klik opsi di bawah atau ketik pesan Anda:
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Option Chips -->
+            <div id="quick-options-container" class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
+                <button onclick="sendQuickOption('Tanya Paket Belajar')" class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">📦 Paket Belajar</button>
+                <button onclick="sendQuickOption('Biaya Pendaftaran')" class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">💰 Biaya & Promo</button>
+                <button onclick="sendQuickOption('Hubungi WhatsApp')" class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">💬 WhatsApp Admin</button>
+            </div>
+
+            <!-- Footer Input -->
+            <form id="chat-input-form" class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
+                <input type="text" id="chat-input-text" placeholder="Tulis pesan..." autocomplete="off" class="flex-1 bg-slate-100 text-xs px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-600 transition-all">
+                <button type="submit" class="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors focus:outline-none">
+                    <i class="fas fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chat Widget Javascript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatTrigger = document.getElementById('chat-trigger-btn');
+            const chatWindow = document.getElementById('chat-window-box');
+            const chatClose = document.getElementById('chat-close-btn');
+            const chatForm = document.getElementById('chat-input-form');
+            const chatInput = document.getElementById('chat-input-text');
+            const chatContainer = document.getElementById('chat-messages-container');
+
+            if (chatTrigger && chatWindow && chatClose) {
+                // Open / Close Toggle
+                chatTrigger.addEventListener('click', () => {
+                    if (chatWindow.classList.contains('hidden')) {
+                        chatWindow.classList.remove('hidden');
+                        setTimeout(() => {
+                            chatWindow.style.opacity = '1';
+                            chatWindow.style.transform = 'scale(1)';
+                        }, 10);
+                        // Hide badge
+                        const badge = chatTrigger.querySelector('span.bg-rose-500');
+                        if (badge) badge.remove();
+                    } else {
+                        closeChat();
+                    }
+                });
+
+                chatClose.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeChat();
+                });
+
+                function closeChat() {
+                    chatWindow.style.opacity = '0';
+                    chatWindow.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        chatWindow.classList.add('hidden');
+                    }, 300);
+                }
+
+                // Handle Form Submit
+                chatForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const text = chatInput.value.trim();
+                    if (!text) return;
+
+                    appendMessage(text, 'user');
+                    chatInput.value = '';
+
+                    // Simulate typing and respond
+                    showTypingIndicator();
+                    setTimeout(() => {
+                        removeTypingIndicator();
+                        handleBotResponse(text);
+                    }, 1200);
+                });
+            }
+        });
+
+        function appendMessage(text, sender) {
+            const container = document.getElementById('chat-messages-container');
+            if(!container) return;
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex items-start gap-2 ${sender === 'user' ? 'justify-end' : ''}`;
+
+            if (sender === 'user') {
+                msgDiv.innerHTML = `
+                    <div class="bg-violet-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[80%]">
+                        ${text}
+                    </div>
+                `;
+            } else {
+                msgDiv.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
+                        <i class="fas fa-robot text-xs"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%]">
+                        ${text}
+                    </div>
+                `;
+            }
+
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const container = document.getElementById('chat-messages-container');
+            if(!container) return;
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex items-start gap-2';
+            typingDiv.innerHTML = `
+                <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
+                    <i class="fas fa-robot text-xs"></i>
+                </div>
+                <div class="bg-white px-3 py-2 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%] flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style="animation-delay: 0s"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style="animation-delay: 0.15s"></span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style="animation-delay: 0.3s"></span>
+                </div>
+            `;
+            container.appendChild(typingDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        function sendQuickOption(text) {
+            appendMessage(text, 'user');
+            showTypingIndicator();
+            setTimeout(() => {
+                removeTypingIndicator();
+                handleBotResponse(text);
+            }, 1000);
+        }
+
+        function handleBotResponse(userInput) {
+            const inputLower = userInput.toLowerCase();
+            let response = '';
+
+            if (inputLower.includes('paket') || inputLower.includes('belajar')) {
+                response = `Kami menyediakan kelas bimbingan belajar Matematika, IPA, dan Bahasa Inggris untuk jenjang <strong>SD</strong> dan <strong>SMP</strong>.<br><br>Ingin tanya paket belajar WhatsApp Admin? <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20tertarik%20tanya%20paket%20belajar..." target="_blank" class="text-violet-600 font-bold underline">Klik disini untuk WhatsApp</a>`;
+            } else if (inputLower.includes('biaya') || inputLower.includes('daftar') || inputLower.includes('harga') || inputLower.includes('promo')) {
+                response = `<strong>Promo Khusus Bulan Ini!</strong> 🥳<br>✨ <strong>Gratis biaya pendaftaran!</strong><br>✨ Biaya belajar les bervariasi antara Rp 90K hingga Rp 150K per sesi, tergantung dari jenjang (SD/SMP) dan jumlah sesi pertemuan yang dipilih.<br><br><a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20tertarik%20tanya%20detail%20biaya..." target="_blank" class="text-violet-600 font-bold underline">Chat Admin WhatsApp</a>`;
+            } else if (inputLower.includes('whatsapp') || inputLower.includes('hubungi') || inputLower.includes('admin') || inputLower.includes('kontak')) {
+                response = `Tentu! Anda dapat langsung terhubung dengan Admin kami via WhatsApp untuk konsultasi lebih cepat.<br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math..." target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold no-underline mt-2"><i class="fab fa-whatsapp"></i> Chat WhatsApp</a>`;
+            } else {
+                response = `Terima kasih atas pesan Anda! Agen Customer Service kami akan segera menanggapi Anda.<br><br>Jika ingin tanggapan instan, silakan hubungi WhatsApp kami langsung:<br><a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math..." target="_blank" class="text-violet-600 font-bold underline">Hubungi Admin di WhatsApp</a>`;
+            }
+
+            appendMessage(response, 'bot');
+        }
+    </script>
 </body>
 
 </html>
