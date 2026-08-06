@@ -101,6 +101,45 @@
                 </div>
             </div>
 
+            <!-- Revenue Report -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <div>
+                                <h3 class="card-title font-weight-bold text-purple-950 mb-0">Laporan Pendapatan</h3>
+                                <p class="text-sm text-muted mb-0">Pendapatan siswa aktif berdasarkan filter bulanan atau tahunan.</p>
+                            </div>
+                            <form action="{{ route('admin.laporan-pendapatan') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label for="filterSelect" class="mb-0 small fw-semibold">Filter</label>
+                                    <select name="filter" id="filterSelect" class="form-select form-select-sm" onchange="this.form.submit()" style="width:auto;">
+                                        <option value="monthly" {{ ($filter ?? 'monthly') === 'monthly' ? 'selected' : '' }}>Bulanan</option>
+                                        <option value="yearly" {{ ($filter ?? 'monthly') === 'yearly' ? 'selected' : '' }}>Tahunan</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <label for="yearSelect" class="mb-0 small fw-semibold">Tahun</label>
+                                    <select name="year" id="yearSelect" class="form-select form-select-sm" onchange="this.form.submit()" style="width:auto;">
+                                        @foreach(($availableYears ?? collect([now()->year])) as $availableYear)
+                                            <option value="{{ $availableYear }}" {{ ($year ?? now()->year) === $availableYear ? 'selected' : '' }}>{{ $availableYear }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-brand px-3 py-2">
+                                    <i class="fas fa-check me-1"></i>Terapkan
+                                </button>
+                            </form>
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="chart-container" style="position:relative; height:320px; width:100%;">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Detailed Section -->
             <div class="row">
                 <!-- Left Column: Paket Belajar List -->
@@ -177,4 +216,68 @@
 
         </div>
     </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const labels = @json($chartLabels ?? []);
+            const data = @json($chartData ?? []);
+            const ctx = document.getElementById('revenueChart');
+
+            if (ctx && labels.length > 0) {
+                new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Pendapatan (Rp)',
+                            data: data,
+                            backgroundColor: 'rgba(106, 78, 255, 0.75)',
+                            borderColor: 'rgba(88, 62, 165, 0.9)',
+                            borderWidth: 1.5,
+                            borderRadius: 8,
+                            maxBarThickness: 45,
+                            hoverBackgroundColor: 'rgba(106, 78, 255, 0.95)',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#2d1b4e',
+                                titleColor: '#fff',
+                                bodyColor: '#e2d9f3',
+                                cornerRadius: 8,
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Rp ' + Number(context.parsed.y).toLocaleString('id-ID');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#5f4b8b', font: { size: 11, weight: '500' } },
+                                grid: { display: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#5f4b8b',
+                                    font: { size: 11 },
+                                    callback: function(value) {
+                                        return value >= 1000 ? 'Rp ' + (value / 1000).toFixed(0) + 'rb' : 'Rp ' + value;
+                                    }
+                                },
+                                grid: { color: 'rgba(108, 85, 210, 0.12)', drawBorder: false }
+                            }
+                        },
+                        layout: { padding: { top: 10, bottom: 5 } }
+                    }
+                });
+            }
+        });
+    </script>
 @endsection

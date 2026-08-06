@@ -9,6 +9,7 @@ use App\Models\Mapel;
 use App\Models\PaketBelajar;
 use App\Models\Rekening;
 use App\Models\Siswa;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,12 +18,120 @@ class AdminController extends Controller
     /**
      * Tampilkan Dashboard Admin.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
-        return view('admin.dashboard');
+
+        $filter = $request->input('filter', 'monthly');
+        $year = (int) $request->input('year', now()->year);
+        $year = $year > 0 ? $year : now()->year;
+
+        $revenueData = $this->getRevenueChartData($filter, $year);
+
+        return view('admin.dashboard', array_merge(
+            compact('filter', 'year'),
+            $revenueData
+        ));
+    }
+
+    /**
+     * Ambil data chart pendapatan yang dapat digunakan di dashboard dan laporan.
+     */
+    private function getRevenueChartData(string $filter, int $year): array
+    {
+        $paymentsQuery = Siswa::with('paket')
+            ->whereNotNull('bukti_transfer')
+            ->where('bukti_transfer', '!=', '')
+            ->where('status', 'active');
+
+        if ($filter === 'monthly') {
+            $paymentsQuery->whereYear('updated_at', $year);
+        }
+
+        $payments = $paymentsQuery->get();
+
+        $availableYears = Siswa::whereNotNull('bukti_transfer')
+            ->where('bukti_transfer', '!=', '')
+            ->where('status', 'active')
+            ->selectRaw('YEAR(updated_at) as year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year');
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([now()->year]);
+        }
+
+        $monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        $monthlyTotals = array_fill(0, 12, 0);
+        $yearlyData = [];
+
+        $totalRevenue = 0;
+        $paymentCount = 0;
+
+        foreach ($payments as $siswa) {
+            $paket = $siswa->paket;
+            $biodata = $siswa->biodata ?? [];
+            $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+            $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+
+            if (empty($hariPertemuan) && $siswa->tipe_paket) {
+                if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                    $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+                }
+            }
+            if (!$jumlahPertemuan && $siswa->tipe_paket) {
+                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
+                    $jumlahPertemuan = (int) $matches[1];
+                }
+            }
+
+            $detailString = '';
+            if ($siswa->tipe_paket && $paket) {
+                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+            }
+
+            $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
+            $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+
+            $paymentDate = $siswa->updated_at ?? $siswa->created_at;
+            $monthIndex = $paymentDate ? ((int) $paymentDate->format('n') - 1) : null;
+            $paymentYear = $paymentDate ? (int) $paymentDate->format('Y') : now()->year;
+
+            if ($filter === 'monthly' && $paymentYear === $year && $monthIndex !== null) {
+                $monthlyTotals[$monthIndex] += $totalHarga;
+            }
+
+            if ($filter === 'yearly') {
+                $yearlyData[$paymentYear] = ($yearlyData[$paymentYear] ?? 0) + $totalHarga;
+            }
+
+            $totalRevenue += $totalHarga;
+            $paymentCount++;
+        }
+
+        if ($filter === 'yearly') {
+            ksort($yearlyData);
+            $chartLabels = array_map('strval', array_keys($yearlyData));
+            $chartData = array_values($yearlyData);
+        } else {
+            $chartLabels = $monthlyLabels;
+            $chartData = $monthlyTotals;
+        }
+
+        return [
+            'availableYears' => $availableYears,
+            'chartLabels' => $chartLabels,
+            'chartData' => $chartData,
+            'totalRevenue' => $totalRevenue,
+            'paymentCount' => $paymentCount,
+        ];
     }
 
     /**
@@ -565,6 +674,176 @@ class AdminController extends Controller
     }
 
     /**
+     * Tampilkan Laporan Pendapatan Pembayaran Siswa.
+     */
+    public function laporanPendapatan(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+        $filter = $request->input('filter', 'monthly');
+        $year = (int) $request->input('year', now()->year);
+        $year = $year > 0 ? $year : now()->year;
+
+        $paymentsQuery = Siswa::with('paket')
+            ->whereNotNull('bukti_transfer')
+            ->where('bukti_transfer', '!=', '')
+            ->where('status', 'active');
+
+        if ($filter === 'monthly') {
+            $paymentsQuery->whereYear('updated_at', $year);
+        }
+
+        $payments = $paymentsQuery->get();
+
+        $availableYears = Siswa::whereNotNull('bukti_transfer')
+            ->where('bukti_transfer', '!=', '')
+            ->where('status', 'active')
+            ->selectRaw('YEAR(updated_at) as year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year');
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([now()->year]);
+        }
+
+        $monthlyLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        $monthlyTotals = array_fill(0, 12, 0);
+        $yearlyData = [];
+
+        $totalRevenue = 0;
+        $paymentCount = 0;
+
+        // Aggregates
+        $packageTotals = []; // name => ['revenue'=>int, 'count'=>int]
+        $tutorTotals = []; // tutor => ['sesi'=>int, 'siswa'=>int, 'revenue'=>int]
+
+        foreach ($payments as $siswa) {
+            $paket = $siswa->paket;
+            $biodata = $siswa->biodata ?? [];
+            $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+            $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+
+            if (empty($hariPertemuan) && $siswa->tipe_paket) {
+                if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                    $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+                }
+            }
+            if (!$jumlahPertemuan && $siswa->tipe_paket) {
+                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
+                    $jumlahPertemuan = (int) $matches[1];
+                }
+            }
+
+            $detailString = '';
+            if ($siswa->tipe_paket && $paket) {
+                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+            }
+
+            $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
+            $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+
+            $paymentDate = $siswa->updated_at ?? $siswa->created_at;
+            $monthIndex = $paymentDate ? ((int) $paymentDate->format('n') - 1) : null;
+            $paymentYear = $paymentDate ? (int) $paymentDate->format('Y') : now()->year;
+
+            if ($filter === 'monthly' && $paymentYear === $year && $monthIndex !== null) {
+                $monthlyTotals[$monthIndex] += $totalHarga;
+            }
+
+            if ($filter === 'yearly') {
+                $yearlyData[$paymentYear] = ($yearlyData[$paymentYear] ?? 0) + $totalHarga;
+            }
+
+            $totalRevenue += $totalHarga;
+            $paymentCount++;
+
+            // package aggregate
+            $pname = $paket ? $paket->nama_paket : 'Umum';
+            if (!isset($packageTotals[$pname])) {
+                $packageTotals[$pname] = ['revenue' => 0, 'count' => 0];
+            }
+            $packageTotals[$pname]['revenue'] += $totalHarga;
+            $packageTotals[$pname]['count'] += 1;
+
+            // tutor aggregate — try biodata->tutor_names or parse tipe_paket
+            $tutors = $biodata['tutor_names'] ?? [];
+            if (empty($tutors) && $siswa->tipe_paket) {
+                if (preg_match('/Guru:\s*([^|]+)/i', $siswa->tipe_paket, $m)) {
+                    $tutors = array_map('trim', explode(',', $m[1]));
+                }
+            }
+            if (empty($tutors)) {
+                $tutors = ['Belum Ditentukan'];
+            }
+
+            $tutorCount = count($tutors) ?: 1;
+            foreach ($tutors as $t) {
+                if (!isset($tutorTotals[$t])) {
+                    $tutorTotals[$t] = ['sesi' => 0, 'siswa' => 0, 'revenue' => 0, 'unique_siswa' => []];
+                }
+                $tutorTotals[$t]['sesi'] += ($jumlahPertemuan ?: 1) / $tutorCount;
+                // count unique siswa per tutor
+                if (!in_array($siswa->id, $tutorTotals[$t]['unique_siswa'])) {
+                    $tutorTotals[$t]['unique_siswa'][] = $siswa->id;
+                    $tutorTotals[$t]['siswa'] += 1;
+                }
+                // split revenue evenly among tutors
+                $tutorTotals[$t]['revenue'] += $totalHarga / $tutorCount;
+            }
+        }
+
+        if ($filter === 'yearly') {
+            ksort($yearlyData);
+            $chartLabels = array_map('strval', array_keys($yearlyData));
+            $chartData = array_values($yearlyData);
+        } else {
+            $chartLabels = $monthlyLabels;
+            $chartData = $monthlyTotals;
+        }
+
+        // prepare package list sorted by revenue desc
+        uasort($packageTotals, function ($a, $b) {
+            return $b['revenue'] <=> $a['revenue'];
+        });
+
+        // prepare tutor list sorted by revenue desc
+        foreach ($tutorTotals as $k => $v) {
+            // round numeric fields
+            $tutorTotals[$k]['sesi'] = (int) round($v['sesi']);
+            $tutorTotals[$k]['revenue'] = (int) round($v['revenue']);
+        }
+        uasort($tutorTotals, function ($a, $b) {
+            return $b['revenue'] <=> $a['revenue'];
+        });
+
+        $avgPerTransaction = $paymentCount ? (int) round($totalRevenue / $paymentCount) : 0;
+        $monthlyTarget = 15000000; // default target — can be made configurable
+        $targetPercent = $monthlyTarget > 0 ? min(100, (int) round($totalRevenue / $monthlyTarget * 100)) : 0;
+
+        return view('admin.laporanPendapatan', array_merge(
+            compact('filter', 'year'),
+            [
+                'availableYears' => $availableYears,
+                'chartLabels' => $chartLabels,
+                'chartData' => $chartData,
+                'totalRevenue' => $totalRevenue,
+                'paymentCount' => $paymentCount,
+                'avgPerTransaction' => $avgPerTransaction,
+                'monthlyTarget' => $monthlyTarget,
+                'targetPercent' => $targetPercent,
+                'packageTotals' => $packageTotals,
+                'tutorTotals' => $tutorTotals,
+            ]
+        ));
+    }
+
+    /**
      * Helper untuk mengekstrak harga numerik dari deskripsi string.
      */
     private function extractPrice($str, $default)
@@ -582,5 +861,167 @@ class AdminController extends Controller
             return (int) str_replace('.', '', $matches[1]);
         }
         return $default;
+    }
+
+    /**
+     * Export laporan pendapatan ke CSV (Excel compatible).
+     */
+    public function exportRevenueExcel(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $filter = $request->input('filter', 'monthly');
+        $year = (int) $request->input('year', now()->year);
+        $start = $request->input('start_date');
+        $end = $request->input('end_date');
+
+        $paymentsQuery = Siswa::with('paket')
+            ->whereNotNull('bukti_transfer')
+            ->where('bukti_transfer', '!=', '')
+            ->where('status', 'active');
+
+        if ($filter === 'monthly') {
+            $paymentsQuery->whereYear('updated_at', $year);
+        }
+        if ($start && $end) {
+            $paymentsQuery->whereBetween('updated_at', [$start . ' 00:00:00', $end . ' 23:59:59']);
+        }
+
+        $payments = $paymentsQuery->get();
+
+        $filename = 'laporan_pendapatan_' . now()->format('Ymd_His') . '.csv';
+
+        $columns = ['ID', 'Nama', 'Email', 'Paket', 'Jumlah Pertemuan', 'Total Bayar', 'Tanggal'];
+
+        $callback = function() use ($payments, $columns) {
+            $file = fopen('php://output', 'w');
+            // BOM for Excel UTF-8
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, $columns);
+
+            foreach ($payments as $siswa) {
+                $paket = $siswa->paket;
+                $biodata = $siswa->biodata ?? [];
+                $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+                if (!$jumlahPertemuan && $siswa->tipe_paket) {
+                    if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                        $jumlahPertemuan = (int) $m[1];
+                    }
+                }
+                $detailString = '';
+                if ($siswa->tipe_paket && $paket) {
+                    if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+                    elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+                    elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+                    elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+                }
+                $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 0);
+                $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+
+                $row = [
+                    $siswa->id,
+                    $siswa->name,
+                    $siswa->email,
+                    $paket ? $paket->nama_paket : '-',
+                    $jumlahPertemuan ?: 1,
+                    $totalHarga,
+                    $siswa->updated_at ? $siswa->updated_at->format('Y-m-d H:i:s') : ($siswa->created_at ? $siswa->created_at->format('Y-m-d H:i:s') : ''),
+                ];
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
+     * Export laporan pendapatan ke PDF (menggunakan barryvdh/laravel-dompdf jika tersedia),
+     * fallback: render HTML printable view for manual PDF export.
+     */
+    public function exportRevenuePdf(Request $request)
+    {
+        if (!Auth::check() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $filter = $request->input('filter', 'monthly');
+        $year = (int) $request->input('year', now()->year);
+        $start = $request->input('start_date');
+        $end = $request->input('end_date');
+
+        // reuse logic to gather aggregated data
+        $data = $this->getRevenueExportData($filter, $year, $start, $end);
+
+        // If dompdf available, generate PDF
+        if (class_exists('\Barryvdh\DomPDF\Facade\Pdf') || class_exists('\Barryvdh\DomPDF\PDF')) {
+            try {
+                $pdf = app()->make('\Barryvdh\DomPDF\Facade\Pdf')::loadView('admin.laporanPendapatanPdf', $data);
+                return $pdf->stream('laporan_pendapatan_' . now()->format('Ymd_His') . '.pdf');
+            } catch (\Throwable $e) {
+                // fallback to HTML view
+            }
+        }
+
+        // fallback: return printable HTML and let user save as PDF
+        return view('admin.laporanPendapatanPdf', $data);
+    }
+
+    /**
+     * Helper to collect data used by export PDF and other exporters.
+     */
+    private function getRevenueExportData(string $filter, int $year, $start = null, $end = null): array
+    {
+        $paymentsQuery = Siswa::with('paket')
+            ->whereNotNull('bukti_transfer')
+            ->where('bukti_transfer', '!=', '')
+            ->where('status', 'active');
+
+        if ($filter === 'monthly') {
+            $paymentsQuery->whereYear('updated_at', $year);
+        }
+        if ($start && $end) {
+            $paymentsQuery->whereBetween('updated_at', [$start . ' 00:00:00', $end . ' 23:59:59']);
+        }
+
+        $payments = $paymentsQuery->get();
+
+        $rows = [];
+        foreach ($payments as $siswa) {
+            $paket = $siswa->paket;
+            $biodata = $siswa->biodata ?? [];
+            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
+            if (!$jumlahPertemuan && $siswa->tipe_paket) {
+                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                    $jumlahPertemuan = (int) $m[1];
+                }
+            }
+            $detailString = '';
+            if ($siswa->tipe_paket && $paket) {
+                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+            }
+            $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 0);
+            $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+
+            $rows[] = [
+                'id' => $siswa->id,
+                'name' => $siswa->name,
+                'email' => $siswa->email,
+                'paket' => $paket ? $paket->nama_paket : '-',
+                'jumlah_pertemuan' => $jumlahPertemuan ?: 1,
+                'total' => $totalHarga,
+                'tanggal' => $siswa->updated_at ? $siswa->updated_at->format('Y-m-d H:i:s') : ($siswa->created_at ? $siswa->created_at->format('Y-m-d H:i:s') : ''),
+            ];
+        }
+
+        return ['rows' => $rows, 'filter' => $filter, 'year' => $year, 'start' => $start, 'end' => $end];
     }
 }

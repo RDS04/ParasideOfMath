@@ -187,7 +187,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('admin.laporan-pendapatan') }}" class="nav-link {{ Route::is('admin.laporan-pendapatan') ? 'active' : '' }}">
                                     <i class="fas fa-chart-bar nav-icon text-success"></i>
                                     <p>Laporan Pendapatan</p>
                                 </a>
