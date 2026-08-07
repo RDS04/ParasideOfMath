@@ -185,14 +185,28 @@
 
 			const ctx = document.getElementById('revenueChartBig');
 			if (ctx && labels.length > 0) {
-				new Chart(ctx.getContext('2d'), {
-					type: 'bar',
+				const chartCtx = ctx.getContext('2d');
+				const gradient = chartCtx.createLinearGradient(0, 0, 0, 300);
+				gradient.addColorStop(0, 'rgba(124, 58, 237, 0.35)');
+				gradient.addColorStop(1, 'rgba(124, 58, 237, 0.01)');
+
+				new Chart(chartCtx, {
+					type: 'line',
 					data: {
 						labels: labels,
 						datasets: [{
 							label: 'Pendapatan (Rp)',
 							data: data,
-							backgroundColor: 'rgba(99,102,241,0.8)'
+							borderColor: '#7c3aed',
+							borderWidth: 3,
+							backgroundColor: gradient,
+							fill: true,
+							tension: 0.35,
+							pointBackgroundColor: '#7c3aed',
+							pointBorderColor: '#ffffff',
+							pointBorderWidth: 2,
+							pointRadius: 5,
+							pointHoverRadius: 7
 						}]
 					},
 					options: {

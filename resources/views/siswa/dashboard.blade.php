@@ -4,55 +4,81 @@
 
 @section('content')
     @php
-        $siswa = Auth::guard('siswa')->user();
+        $siswa   = Auth::guard('siswa')->user();
         $biodata = $siswa->biodata ?? [];
-        $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
-        $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+
+        // ── Data per-mapel baru ──
+        $mapelJadwal     = $biodata['mapel_jadwal'] ?? [];
+        $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];
+        $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
+        $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
+
+        // ── Data flat (legacy / gabungan) ──
+        $hariPertemuan   = $biodata['hari_pertemuan'] ?? [];
+        $tanggalMulai    = $biodata['tanggal_mulai'] ?? null;
         $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
 
-        // Fallback parsing from tipe_paket
-        if (empty($hariPertemuan) && $siswa->tipe_paket) {
-            if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-                $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+        // Fallback parsing dari tipe_paket
+        if ($siswa->tipe_paket) {
+            if (empty($mapelJadwal) && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+                $mapelJadwal = array_map('trim', explode(',', $m[1]));
             }
-            if (preg_match('/Mulai:\s*([\d\-]+)/i', $siswa->tipe_paket, $matches)) {
-                $d = trim($matches[1]);
-                if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $d, $dMatches)) {
-                    $tanggalMulai = $dMatches[3] . '-' . $dMatches[2] . '-' . $dMatches[1];
+            if (empty($hariPertemuan) && preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+                $hariPertemuan = array_map('trim', explode(',', $m[1]));
+            }
+            if (!$tanggalMulai && preg_match('/Mulai:\s*([\d\-]+)/i', $siswa->tipe_paket, $m)) {
+                $d = trim($m[1]);
+                if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $d, $dM)) {
+                    $tanggalMulai = $dM[3] . '-' . $dM[2] . '-' . $dM[1];
+                } else {
+                    $tanggalMulai = $d;
                 }
             }
-        }
-
-        if (!$jumlahPertemuan && $siswa->tipe_paket) {
-            if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
-                $jumlahPertemuan = (int) $matches[1];
+            if (!$jumlahPertemuan && preg_match('/Total Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                $jumlahPertemuan = (int)$m[1];
+            }
+            if (!$jumlahPertemuan && preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                $jumlahPertemuan = (int)$m[1];
             }
         }
 
+        // Isi hariPertemuan dari per-mapel jika flat kosong
+        if (empty($hariPertemuan) && !empty($hariPerMapel)) {
+            foreach ($hariPerMapel as $h) {
+                if (is_array($h)) {
+                    foreach ($h as $hari) { if ($hari) $hariPertemuan[] = $hari; }
+                }
+            }
+            $hariPertemuan = array_unique($hariPertemuan);
+        }
+
+        if (!$tanggalMulai && !empty($tanggalPerMapel)) {
+            $tanggalMulai = min(array_filter($tanggalPerMapel));
+        }
         if (!$tanggalMulai) {
             $tanggalMulai = $siswa->created_at ? $siswa->created_at->format('Y-m-d') : date('Y-m-d');
         }
 
-        // Parse mapel
-        $mapels = [];
-        if ($siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-            $mapels = array_map('trim', explode(',', $matches[1]));
+        // Mapel list flat
+        $mapels = $mapelJadwal ?: [];
+        if (empty($mapels) && $siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+            $mapels = array_map('trim', explode(',', $m[1]));
         }
 
         // Jam Mulai & Selesai
-        $paket = $siswa->paket;
-        $jamMulai = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
+        $paket          = $siswa->paket;
+        $jamMulai       = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
         $durationMinutes = 90;
-        if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5, $durationMatches)) {
-            $durationMinutes = (int) $durationMatches[1];
+        if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5 ?? '', $dM)) {
+            $durationMinutes = (int) $dM[1];
         }
         $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
 
         // Parse Guru
-        $gurus = [];
+        $gurus   = [];
         $hasGuru = false;
-        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-            $gurus = array_map('trim', explode(',', $matches[1]));
+        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+            $gurus = array_map('trim', explode(',', $m[1]));
             foreach ($gurus as $g) {
                 if (!empty($g) && $g !== '-' && strtolower($g) !== 'belum ditentukan') {
                     $hasGuru = true;
@@ -60,22 +86,14 @@
             }
         }
 
-        // Dynamic greeting based on server time
+        // Dynamic greeting
         $hour = date('H');
-        if ($hour >= 5 && $hour < 11) {
-            $greeting = 'Selamat Pagi';
-            $greetingIcon = 'fa-sun text-amber-400';
-        } elseif ($hour >= 11 && $hour < 15) {
-            $greeting = 'Selamat Siang';
-            $greetingIcon = 'fa-cloud-sun text-yellow-300';
-        } elseif ($hour >= 15 && $hour < 18) {
-            $greeting = 'Selamat Sore';
-            $greetingIcon = 'fa-cloud-sun-rain text-orange-300';
-        } else {
-            $greeting = 'Selamat Malam';
-            $greetingIcon = 'fa-moon text-purple-200';
-        }
+        if ($hour >= 5 && $hour < 11)       { $greeting = 'Selamat Pagi';  $greetingIcon = 'fa-sun text-amber-400'; }
+        elseif ($hour >= 11 && $hour < 15)  { $greeting = 'Selamat Siang'; $greetingIcon = 'fa-cloud-sun text-yellow-300'; }
+        elseif ($hour >= 15 && $hour < 18)  { $greeting = 'Selamat Sore';  $greetingIcon = 'fa-cloud-sun-rain text-orange-300'; }
+        else                                { $greeting = 'Selamat Malam'; $greetingIcon = 'fa-moon text-purple-200'; }
     @endphp
+
 
     <!-- Content Header -->
     <div class="content-header">
@@ -745,13 +763,20 @@
     <!-- JavaScript calculations & updates -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const selectedDays = @json($hariPertemuan);
-            const startDateStr = "{{ $tanggalMulai }}";
-            const limitSesi = {{ $jumlahPertemuan ?? 0 }};
-            const jamMulai = "{{ $jamMulai }}";
+            // Data per-mapel & legacy fallback dari controller
+            const mapelJadwal     = @json($mapelJadwal ?? []);
+            const sesiPerMapel    = @json($sesiPerMapel ?? []);
+            const hariPerMapelRaw = @json($hariPerMapel ?? []);
+            const tanggalPerMapel = @json($tanggalPerMapel ?? []);
+
+            const legacyDays     = @json($hariPertemuan ?? []);
+            const legacyStart    = "{{ $tanggalMulai }}";
+            const legacyLimit    = {{ $jumlahPertemuan ?? 0 }};
+
+            const jamMulai   = "{{ $jamMulai }}";
             const jamSelesai = "{{ $jamSelesai }}";
-            const mapels = @json($mapels);
-            const gurus = @json($gurus);
+            const mapels     = @json($mapels ?? []);
+            const gurus      = @json($gurus ?? []);
 
             const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             const dayMap = {
@@ -761,72 +786,109 @@
                 'thursday': 4, 'friday': 5, 'saturday': 6
             };
 
-            const scheduledDayNums = selectedDays.map(d => {
-                if (!d) return null;
-                const normalized = d.trim().toLowerCase();
-                return dayMap[normalized] !== undefined ? dayMap[normalized] : null;
-            }).filter(d => d !== null);
-            const startLimitDate = new Date(startDateStr);
-            startLimitDate.setHours(0, 0, 0, 0);
+            // Calculate exact scheduled dates for all mapels
+            const scheduledDates = []; // { dateObj, mapelName, mapelIdx }
 
-            // Pre-calculate exact sessions
-            const scheduledDates = [];
-            if (limitSesi > 0 && scheduledDayNums.length > 0) {
-                let tempDate = new Date(startLimitDate);
-                for (let d = 0; d < 365; d++) {
-                    if (scheduledDates.length >= limitSesi) break;
-                    const dayOfWeek = tempDate.getDay();
-                    if (scheduledDayNums.includes(dayOfWeek)) {
-                        scheduledDates.push(new Date(tempDate));
+            function buildSchedule(days, startStr, limitSesi, mapelName, mapelIdx) {
+                if (!days || !Array.isArray(days)) return;
+                const scheduledDayNums = days.map(d => {
+                    if (!d) return null;
+                    const norm = String(d).trim().toLowerCase();
+                    return dayMap[norm] !== undefined ? dayMap[norm] : null;
+                }).filter(n => n !== null);
+
+                const startDate = new Date(startStr);
+                startDate.setHours(0, 0, 0, 0);
+                if (isNaN(startDate.getTime()) || scheduledDayNums.length === 0 || limitSesi <= 0) return;
+
+                let count = 0;
+                let tempDate = new Date(startDate);
+                for (let d = 0; d < 730 && count < limitSesi; d++) {
+                    if (scheduledDayNums.includes(tempDate.getDay())) {
+                        scheduledDates.push({
+                            dateObj: new Date(tempDate),
+                            mapelName: mapelName,
+                            mapelIdx: mapelIdx
+                        });
+                        count++;
                     }
                     tempDate.setDate(tempDate.getDate() + 1);
                 }
             }
 
+            if (mapelJadwal && mapelJadwal.length > 0) {
+                mapelJadwal.forEach((mapel, idx) => {
+                    const hariRaw  = hariPerMapelRaw[idx] ?? {};
+                    const days     = isArray(hariRaw) ? hariRaw : Object.values(hariRaw).filter(h => h);
+                    const startStr = tanggalPerMapel[idx] ?? legacyStart;
+                    const limit    = parseInt(sesiPerMapel[idx] ?? 0);
+                    buildSchedule(days, startStr, limit, mapel, idx);
+                });
+            } else {
+                buildSchedule(legacyDays, legacyStart, legacyLimit, 'Bimbingan', 0);
+            }
+
+            function isArray(val) {
+                return Array.isArray(val);
+            }
+
+            // Sort all sessions chronologically
+            scheduledDates.sort((a, b) => a.dateObj - b.dateObj);
+
+            const totalLimitSesi = scheduledDates.length > 0 ? scheduledDates.length : (legacyLimit || 0);
+
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Parse session hours to identify elapsed/completed sessions precisely
             const endParts = jamSelesai.split(':');
+            const startParts = jamMulai.split(':');
             const nowTime = new Date();
-            const endMinutesToday = parseInt(endParts[0]) * 60 + parseInt(endParts[1]);
+            const endMinutesToday = (parseInt(endParts[0]) || 17) * 60 + (parseInt(endParts[1]) || 0);
             const currentMinutesNow = nowTime.getHours() * 60 + nowTime.getMinutes();
 
             let completedCount = 0;
             let upcomingSessions = [];
-            let todaySession = null;
+            let todaySessions = [];
 
-            scheduledDates.forEach((sDate) => {
+            scheduledDates.forEach((sItem) => {
+                const sDate = sItem.dateObj;
                 const sTime = sDate.getTime();
                 const tTime = today.getTime();
+
                 if (sTime < tTime) {
                     completedCount++;
                 } else if (sTime === tTime) {
                     if (currentMinutesNow > endMinutesToday) {
                         completedCount++;
                     } else {
-                        todaySession = sDate;
-                        upcomingSessions.push(sDate);
+                        todaySessions.push(sItem);
+                        upcomingSessions.push(sItem);
                     }
                 } else {
-                    upcomingSessions.push(sDate);
+                    upcomingSessions.push(sItem);
                 }
             });
 
             // Update DOM completed sessions badge
-            document.getElementById('completed-sessions-badge').textContent = completedCount;
+            const completedBadge = document.getElementById('completed-sessions-badge');
+            if (completedBadge) completedBadge.textContent = completedCount;
 
             // Calculate sessions scheduled for this week (Mon - Sun)
             const curr = new Date();
-            const firstday = new Date(curr.setDate(curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1)));
+            const dayOfWeekNow = curr.getDay(); // 0 is Sun, 1 is Mon...
+            const distanceToMon = dayOfWeekNow === 0 ? -6 : 1 - dayOfWeekNow;
+            const firstday = new Date(curr);
+            firstday.setDate(curr.getDate() + distanceToMon);
             firstday.setHours(0, 0, 0, 0);
+
             const lastday = new Date(firstday);
-            lastday.setDate(lastday.getDate() + 6);
+            lastday.setDate(firstday.getDate() + 6);
             lastday.setHours(23, 59, 59, 999);
 
             let thisWeekCount = 0;
             let thisWeekCompletedCount = 0;
-            scheduledDates.forEach(date => {
+            scheduledDates.forEach(sItem => {
+                const date = sItem.dateObj;
                 if (date >= firstday && date <= lastday) {
                     thisWeekCount++;
                     const sTime = date.getTime();
@@ -840,186 +902,229 @@
                     }
                 }
             });
-            document.getElementById('weekly-sessions-badge').textContent = thisWeekCount;
-            document.getElementById('weekly-completed-badge').textContent = thisWeekCompletedCount;
+            
+            const weeklyBadge = document.getElementById('weekly-sessions-badge');
+            const weeklyCompBadge = document.getElementById('weekly-completed-badge');
+            if (weeklyBadge) weeklyBadge.textContent = thisWeekCount;
+            if (weeklyCompBadge) weeklyCompBadge.textContent = thisWeekCompletedCount;
 
             // Doughnut Chart Progress
-            const ctxDoughnut = document.getElementById('sessionDoughnutChart').getContext('2d');
-            const remainingCount = limitSesi - completedCount;
+            const canvasDoughnut = document.getElementById('sessionDoughnutChart');
+            if (canvasDoughnut) {
+                const ctxDoughnut = canvasDoughnut.getContext('2d');
+                const remainingCount = totalLimitSesi - completedCount;
 
-            new Chart(ctxDoughnut, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Selesai', 'Sisa Sesi'],
-                    datasets: [{
-                        data: [completedCount, remainingCount < 0 ? 0 : remainingCount],
-                        backgroundColor: ['#10b981', '#7c3aed'],
-                        borderColor: ['#fff', '#fff'],
-                        borderWidth: 2,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return ` ${context.label}: ${context.raw} Sesi`;
+                new Chart(ctxDoughnut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Selesai', 'Sisa Sesi'],
+                        datasets: [{
+                            data: [completedCount, remainingCount < 0 ? 0 : (totalLimitSesi === 0 ? 1 : remainingCount)],
+                            backgroundColor: ['#10b981', '#7c3aed'],
+                            borderColor: ['#fff', '#fff'],
+                            borderWidth: 2,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return ` ${context.label}: ${context.raw} Sesi`;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
-
-            const percentage = limitSesi > 0 ? Math.round((completedCount / limitSesi) * 100) : 0;
-            document.getElementById('doughnut-percentage').textContent = percentage + '%';
-
-            // Weekly study duration chart
-            const ctxBar = document.getElementById('weeklyRhythmChart').getContext('2d');
-            const weeklyDuration = [0, 0, 0, 0, 0, 0, 0]; // Sun, Mon, Tue, Wed, Thu, Fri, Sat
-
-            let durMin = 90;
-            const startParts = jamMulai.split(':');
-            if (endParts.length === 2 && startParts.length === 2) {
-                const diffMin = (parseInt(endParts[0]) * 60 + parseInt(endParts[1])) - (parseInt(startParts[0]) * 60 + parseInt(startParts[1]));
-                if (diffMin > 0) durMin = diffMin;
+                });
             }
 
-            scheduledDayNums.forEach(dayIndex => {
-                weeklyDuration[dayIndex] = durMin;
-            });
+            const percentage = totalLimitSesi > 0 ? Math.round((completedCount / totalLimitSesi) * 100) : 0;
+            const pctEl = document.getElementById('doughnut-percentage');
+            if (pctEl) pctEl.textContent = percentage + '%';
 
-            const sortedDurations = [
-                weeklyDuration[1], // Mon
-                weeklyDuration[2], // Tue
-                weeklyDuration[3], // Wed
-                weeklyDuration[4], // Thu
-                weeklyDuration[5], // Fri
-                weeklyDuration[6], // Sat
-                weeklyDuration[0]  // Sun
-            ];
+            // Weekly study duration chart
+            const canvasBar = document.getElementById('weeklyRhythmChart');
+            if (canvasBar) {
+                const ctxBar = canvasBar.getContext('2d');
+                const weeklyDuration = [0, 0, 0, 0, 0, 0, 0]; // Sun, Mon, Tue, Wed, Thu, Fri, Sat
 
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
-                    datasets: [{
-                        label: 'Durasi Belajar (Menit)',
-                        data: sortedDurations,
-                        backgroundColor: sortedDurations.map(dur => dur > 0 ? 'rgba(124, 58, 237, 0.85)' : 'rgba(226, 232, 240, 0.45)'),
-                        borderColor: sortedDurations.map(dur => dur > 0 ? '#7c3aed' : '#cbd5e1'),
-                        borderWidth: 1.5,
-                        borderRadius: 8,
-                        borderSkipped: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return ` Durasi: ${context.raw} Menit`;
+                let durMin = 90;
+                if (endParts.length === 2 && startParts.length === 2) {
+                    const diffMin = (parseInt(endParts[0]) * 60 + parseInt(endParts[1])) - (parseInt(startParts[0]) * 60 + parseInt(startParts[1]));
+                    if (diffMin > 0) durMin = diffMin;
+                }
+
+                // Populate duration for all active scheduled days in the week
+                scheduledDates.forEach(sItem => {
+                    const d = sItem.dateObj;
+                    if (d >= firstday && d <= lastday) {
+                        weeklyDuration[d.getDay()] += durMin;
+                    }
+                });
+
+                // Fallback: if no sessions this week yet, show pattern by active day numbers
+                if (weeklyDuration.every(v => v === 0)) {
+                    let activeDays = [];
+                    if (mapelJadwal && mapelJadwal.length > 0) {
+                        mapelJadwal.forEach((m, idx) => {
+                            const hRaw = hariPerMapelRaw[idx] ?? {};
+                            const list = isArray(hRaw) ? hRaw : Object.values(hRaw);
+                            list.forEach(dayStr => {
+                                if (dayStr) {
+                                    const n = dayMap[String(dayStr).trim().toLowerCase()];
+                                    if (n !== undefined) activeDays.push(n);
+                                }
+                            });
+                        });
+                    } else if (legacyDays) {
+                        legacyDays.forEach(dayStr => {
+                            if (dayStr) {
+                                const n = dayMap[String(dayStr).trim().toLowerCase()];
+                                if (n !== undefined) activeDays.push(n);
+                            }
+                        });
+                    }
+                    activeDays.forEach(dayIdx => {
+                        weeklyDuration[dayIdx] = durMin;
+                    });
+                }
+
+                const sortedDurations = [
+                    weeklyDuration[1], // Mon
+                    weeklyDuration[2], // Tue
+                    weeklyDuration[3], // Wed
+                    weeklyDuration[4], // Thu
+                    weeklyDuration[5], // Fri
+                    weeklyDuration[6], // Sat
+                    weeklyDuration[0]  // Sun
+                ];
+
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+                        datasets: [{
+                            label: 'Durasi Belajar (Menit)',
+                            data: sortedDurations,
+                            backgroundColor: sortedDurations.map(dur => dur > 0 ? 'rgba(124, 58, 237, 0.85)' : 'rgba(226, 232, 240, 0.45)'),
+                            borderColor: sortedDurations.map(dur => dur > 0 ? '#7c3aed' : '#cbd5e1'),
+                            borderWidth: 1.5,
+                            borderRadius: 8,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return ` Durasi: ${context.raw} Menit`;
+                                    }
                                 }
                             }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 180,
-                            grid: { color: 'rgba(241, 245, 249, 1)' },
-                            ticks: {
-                                stepSize: 30,
-                                callback: function (value) { return value + 'm'; }
-                            }
                         },
-                        x: { grid: { display: false } }
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: Math.max(180, ...sortedDurations) + 30,
+                                grid: { color: 'rgba(241, 245, 249, 1)' },
+                                ticks: {
+                                    stepSize: 30,
+                                    callback: function (value) { return value + 'm'; }
+                                }
+                            },
+                            x: { grid: { display: false } }
+                        }
                     }
-                }
-            });
+                });
+            }
 
             // Jadwal Hari Ini / Countdown
             const scheduleContent = document.getElementById('today-schedule-content');
 
-            if (todaySession) {
-                let statusBadge = '';
-                const startMins = parseInt(startParts[0]) * 60 + parseInt(startParts[1]);
+            if (scheduleContent) {
+                if (todaySessions.length > 0) {
+                    const mapelNamesToday = [...new Set(todaySessions.map(s => s.mapelName))].join(', ');
+                    const startMins = (parseInt(startParts[0]) || 15) * 60 + (parseInt(startParts[1]) || 30);
 
-                if (currentMinutesNow < startMins) {
-                    statusBadge = '<span class="badge badge-warning text-white pulse-badge"><i class="fas fa-clock mr-1"></i> Akan Datang</span>';
-                } else if (currentMinutesNow >= startMins && currentMinutesNow <= endMinutesToday) {
-                    statusBadge = '<span class="badge badge-danger pulse-badge-active"><i class="fas fa-video mr-1"></i> Berlangsung</span>';
-                } else {
-                    statusBadge = '<span class="badge badge-success"><i class="fas fa-check mr-1"></i> Selesai</span>';
-                }
+                    let statusBadge = '';
+                    if (currentMinutesNow < startMins) {
+                        statusBadge = '<span class="badge badge-warning text-white pulse-badge"><i class="fas fa-clock mr-1"></i> Akan Datang</span>';
+                    } else if (currentMinutesNow >= startMins && currentMinutesNow <= endMinutesToday) {
+                        statusBadge = '<span class="badge badge-danger pulse-badge-active"><i class="fas fa-video mr-1"></i> Berlangsung</span>';
+                    } else {
+                        statusBadge = '<span class="badge badge-success"><i class="fas fa-check mr-1"></i> Selesai</span>';
+                    }
 
-                scheduleContent.innerHTML = `
-                            <div class="p-3 bg-purple-50 rounded-2xl border border-purple-100 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-between gap-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="schedule-icon-circle mr-3">
-                                        <i class="fas fa-graduation-cap fa-lg text-purple-600"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="font-bold text-purple-950 mb-1">${mapels.join(', ') || 'Belajar Matematika'}</h6>
-                                        <p class="text-xs text-slate-500 mb-1"><i class="far fa-user mr-1"></i> Tutor: ${gurus.join(', ') || 'Paradise of Math Tutor'}</p>
-                                        <p class="text-xs text-purple-600 font-bold mb-0"><i class="far fa-clock mr-1"></i> ${jamMulai} - ${jamSelesai} WIB</p>
-                                    </div>
+                    scheduleContent.innerHTML = `
+                        <div class="p-3 bg-purple-50 rounded-2xl border border-purple-100 d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-between gap-3">
+                            <div class="d-flex align-items-center">
+                                <div class="schedule-icon-circle mr-3">
+                                    <i class="fas fa-graduation-cap fa-lg text-purple-600"></i>
                                 </div>
-                                <div class="mt-2 mt-sm-0 align-self-end align-self-sm-center">
-                                    ${statusBadge}
+                                <div>
+                                    <h6 class="font-bold text-purple-950 mb-1">${mapelNamesToday || mapels.join(', ') || 'Belajar Matematika'}</h6>
+                                    <p class="text-xs text-slate-500 mb-1"><i class="far fa-user mr-1"></i> Tutor: ${gurus.join(', ') || 'Paradise of Math Tutor'}</p>
+                                    <p class="text-xs text-purple-600 font-bold mb-0"><i class="far fa-clock mr-1"></i> ${jamMulai} - ${jamSelesai} WIB</p>
+                                </div>
+                            </div>
+                            <div class="mt-2 mt-sm-0 align-self-end align-self-sm-center">
+                                ${statusBadge}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    let nextSessionItem = null;
+                    let diffDays = 0;
+
+                    for (let i = 0; i < upcomingSessions.length; i++) {
+                        const sItem = upcomingSessions[i];
+                        if (sItem.dateObj > today) {
+                            nextSessionItem = sItem;
+                            const timeDiff = nextSessionItem.dateObj.getTime() - today.getTime();
+                            diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                            break;
+                        }
+                    }
+
+                    if (nextSessionItem) {
+                        const opt = { weekday: 'long', day: 'numeric', month: 'long' };
+                        const formattedNextDate = nextSessionItem.dateObj.toLocaleDateString('id-ID', opt);
+
+                        scheduleContent.innerHTML = `
+                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center py-4">
+                                <div class="mb-2">
+                                    <i class="far fa-calendar-alt text-purple-300 fa-2x"></i>
+                                </div>
+                                <h6 class="font-bold text-purple-950 mb-1">Hari Ini Tidak Ada Sesi Les</h6>
+                                <p class="text-xs text-slate-400 mb-3">Gunakan waktu luangmu untuk mengulang pelajaran atau mencoba latihan kuis.</p>
+                                <div class="inline-block px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                                    <span class="text-xs font-semibold text-amber-800">
+                                        <i class="fas fa-hourglass-start mr-1"></i> Sesi berikutnya (${nextSessionItem.mapelName}): <strong>${formattedNextDate}</strong> (${diffDays} hari lagi) pukul <strong>${jamMulai}</strong>
+                                    </span>
                                 </div>
                             </div>
                         `;
-            } else {
-                let nextSession = null;
-                let diffDays = 0;
-
-                for (let i = 0; i < upcomingSessions.length; i++) {
-                    const sDate = upcomingSessions[i];
-                    if (sDate > today) {
-                        nextSession = sDate;
-                        const timeDiff = nextSession.getTime() - today.getTime();
-                        diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                        break;
+                    } else {
+                        scheduleContent.innerHTML = `
+                            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center py-4">
+                                <div class="mb-2">
+                                    <i class="fas fa-check-double text-emerald-400 fa-2x"></i>
+                                </div>
+                                <h6 class="font-bold text-slate-800 mb-1">Semua Sesi Telah Selesai</h6>
+                                <p class="text-xs text-slate-500 mb-0">Luar biasa! Anda telah menyelesaikan semua sesi pada paket bimbingan belajar Anda.</p>
+                            </div>
+                        `;
                     }
-                }
-
-                if (nextSession) {
-                    const opt = { weekday: 'long', day: 'numeric', month: 'long' };
-                    const formattedNextDate = nextSession.toLocaleDateString('id-ID', opt);
-
-                    scheduleContent.innerHTML = `
-                                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center py-4">
-                                    <div class="mb-2">
-                                        <i class="far fa-calendar-alt text-purple-300 fa-2x"></i>
-                                    </div>
-                                    <h6 class="font-bold text-purple-950 mb-1">Hari Ini Tidak Ada Sesi Les</h6>
-                                    <p class="text-xs text-slate-400 mb-3">Gunakan waktu luangmu untuk mengulang pelajaran atau mencoba latihan kuis.</p>
-                                    <div class="inline-block px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                                        <span class="text-xs font-semibold text-amber-800">
-                                            <i class="fas fa-hourglass-start mr-1"></i> Sesi berikutnya: <strong>${formattedNextDate}</strong> (${diffDays} hari lagi) pukul <strong>${jamMulai}</strong>
-                                        </span>
-                                    </div>
-                                </div>
-                            `;
-                } else {
-                    scheduleContent.innerHTML = `
-                                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center py-4">
-                                    <div class="mb-2">
-                                        <i class="fas fa-check-double text-emerald-400 fa-2x"></i>
-                                    </div>
-                                    <h6 class="font-bold text-slate-800 mb-1">Semua Sesi Telah Selesai</h6>
-                                    <p class="text-xs text-slate-500 mb-0">Luar biasa! Anda telah menyelesaikan semua sesi pada paket bimbingan belajar Anda.</p>
-                                </div>
-                            `;
                 }
             }
 

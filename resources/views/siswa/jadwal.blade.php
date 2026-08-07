@@ -106,22 +106,59 @@
                                 Status Aktif
                             </span>
                             <h5 class="font-weight-bold mt-3 mb-1">Bimbel Anda</h5>
-                            <p class="text-purple-200 text-xs mb-3">Tipe Paket: {{ $siswa->tipe_paket }}</p>
-                            
+
                             <div class="border-top border-purple-800 my-3"></div>
 
                             <div class="space-y-2 text-xs">
-                                <div>
-                                    <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Hari Les Seminggu</span>
-                                    <span class="font-bold text-sm">{{ implode(', ', $hariPertemuan) }}</span>
-                                </div>
+                                {{-- Per-mapel display --}}
+                                @if(!empty($mapelJadwal))
+                                    @php
+                                        $mapelColors = ['#7c3aed','#2563eb','#059669','#d97706','#e11d48','#0891b2'];
+                                    @endphp
+                                    @foreach($mapelJadwal as $idx => $namaMapel)
+                                        @php
+                                            $hariRaw   = $hariPerMapel[$idx] ?? [];
+                                            $hariList  = is_array($hariRaw) ? array_values(array_filter($hariRaw)) : [];
+                                            $tgl       = $tanggalPerMapel[$idx] ?? null;
+                                            $sesiIdx   = $sesiPerMapel[$idx] ?? 0;
+                                            $colorIdx  = $idx % count($mapelColors);
+                                            $dotColor  = $mapelColors[$colorIdx];
+                                        @endphp
+                                        <div class="mb-2 p-2 rounded-xl" style="background:rgba(255,255,255,0.08);">
+                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                                <span style="width:8px;height:8px;border-radius:50%;background:{{ $dotColor }};display:inline-block;flex-shrink:0;"></span>
+                                                <span class="font-weight-bold text-sm">{{ $namaMapel }}</span>
+                                                <span class="ml-auto text-xxs" style="background:rgba(255,255,255,0.15);padding:2px 7px;border-radius:99px;">{{ $sesiIdx }}x</span>
+                                            </div>
+                                            @if(!empty($hariList))
+                                            <div style="font-size:11px;color:#c4b5fd;margin-left:16px;">
+                                                📅 {{ implode(' & ', $hariList) }}
+                                                @if($tgl)
+                                                · Mulai {{ \Carbon\Carbon::parse($tgl)->format('d M Y') }}
+                                                @endif
+                                            </div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                @else
+                                    {{-- Fallback: tampilan lama --}}
+                                    <div>
+                                        <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Hari Les Seminggu</span>
+                                        <span class="font-bold text-sm">{{ implode(', ', $hariPertemuan) }}</span>
+                                    </div>
+                                @endif
+
                                 <div class="mt-2">
                                     <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Tanggal Mulai Les</span>
-                                    <span class="font-bold text-sm">{{ date('d F Y', strtotime($tanggalMulai)) }}</span>
+                                    <span class="font-bold text-sm">{{ $tanggalMulai ? date('d F Y', strtotime($tanggalMulai)) : '-' }}</span>
                                 </div>
                                 <div class="mt-2">
                                     <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Jam Belajar</span>
                                     <span class="font-bold text-sm">{{ $jamMulai }} - {{ $jamSelesai }}</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Total Sesi</span>
+                                    <span class="font-bold text-sm">{{ $jumlahPertemuan ?? '-' }}x Pertemuan</span>
                                 </div>
                                 <div class="mt-2">
                                     <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Sesi Berakhir</span>
@@ -154,6 +191,7 @@
         
     </div>
 </section>
+
 
 <!-- Click Event Detail Modal -->
 <div class="modal fade" id="sessionDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -345,126 +383,121 @@
 @if(!empty($hariPertemuan) && $tanggalMulai)
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const selectedDays = @json($hariPertemuan);
-        const startDateStr = "{{ $tanggalMulai }}";
-        const mapels = @json($mapels);
-        const limitSesi = {{ $jumlahPertemuan ?? 0 }};
-        const jamMulai = "{{ $jamMulai }}";
+        // ── Data dari controller ──
+        const mapelJadwal     = @json($mapelJadwal ?? []);
+        const sesiPerMapel    = @json($sesiPerMapel ?? []);
+        const hariPerMapelRaw = @json($hariPerMapel ?? []);
+        const tanggalPerMapel = @json($tanggalPerMapel ?? []);
+
+        // Fallback ke data lama jika per-mapel kosong
+        const legacyDays     = @json($hariPertemuan);
+        const legacyStart    = "{{ $tanggalMulai }}";
+        const legacyLimit    = {{ $jumlahPertemuan ?? 0 }};
+
+        const jamMulai   = "{{ $jamMulai }}";
         const jamSelesai = "{{ $jamSelesai }}";
-        
-        const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        const monthNames = [
-            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+
+        const dayNames   = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const monthNames = ['Januari','Februari','Maret','April','Mei','Juni',
+                            'Juli','Agustus','September','Oktober','November','Desember'];
+        const dayMap     = {'Minggu':0,'Senin':1,'Selasa':2,'Rabu':3,'Kamis':4,'Jumat':5,'Sabtu':6};
+
+        // Warna per mapel (purple, blue, green, orange, rose, teal)
+        const mapelColors = [
+            {bg:'#7c3aed', light:'#ede9fe', text:'#4c1d95'},
+            {bg:'#2563eb', light:'#dbeafe', text:'#1e3a8a'},
+            {bg:'#059669', light:'#d1fae5', text:'#065f46'},
+            {bg:'#d97706', light:'#fef3c7', text:'#92400e'},
+            {bg:'#e11d48', light:'#ffe4e6', text:'#881337'},
+            {bg:'#0891b2', light:'#cffafe', text:'#164e63'},
         ];
-        
-        const dayMap = {
-            'Minggu': 0, 'Senin': 1, 'Selasa': 2, 'Rabu': 3,
-            'Kamis': 4, 'Jumat': 5, 'Sabtu': 6
-        };
 
-        const scheduledDayNums = selectedDays.map(d => dayMap[d]);
-        const startLimitDate = new Date(startDateStr);
-        startLimitDate.setHours(0,0,0,0);
+        // ── Build scheduledDates dari per-mapel atau fallback ──
+        const scheduledDates = []; // { dateStr, sessionIndex, dayName, dateObj, mapelName, mapelIdx, totalSesi }
 
-        // Pre-calculate exact scheduled sessions dates
-        const scheduledDates = [];
-        if (limitSesi > 0 && scheduledDayNums.length > 0) {
-            let tempDate = new Date(startLimitDate);
-            for (let d = 0; d < 365; d++) {
-                if (scheduledDates.length >= limitSesi) {
-                    break;
-                }
-                const dayOfWeek = tempDate.getDay();
-                if (scheduledDayNums.includes(dayOfWeek)) {
+        function buildSchedule(days, startStr, limitSesi, mapelName, mapelIdx) {
+            const scheduledDayNums = days.map(d => dayMap[d] ?? -1).filter(n => n >= 0);
+            const startDate = new Date(startStr);
+            startDate.setHours(0,0,0,0);
+            if (isNaN(startDate.getTime()) || scheduledDayNums.length === 0 || limitSesi === 0) return;
+
+            let count = 0;
+            let tempDate = new Date(startDate);
+            for (let d = 0; d < 730 && count < limitSesi; d++) {
+                if (scheduledDayNums.includes(tempDate.getDay())) {
                     const y = tempDate.getFullYear();
-                    const m = String(tempDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(tempDate.getDate()).padStart(2, '0');
-                    const dateStr = `${y}-${m}-${day}`;
+                    const m = String(tempDate.getMonth()+1).padStart(2,'0');
+                    const dd = String(tempDate.getDate()).padStart(2,'0');
                     scheduledDates.push({
-                        dateStr: dateStr,
-                        sessionIndex: scheduledDates.length + 1,
-                        dayName: dayNames[dayOfWeek],
-                        dateObj: new Date(tempDate)
+                        dateStr: `${y}-${m}-${dd}`,
+                        sessionIndex: ++count,
+                        dayName: dayNames[tempDate.getDay()],
+                        dateObj: new Date(tempDate),
+                        mapelName: mapelName,
+                        mapelIdx: mapelIdx,
+                        totalSesi: limitSesi
                     });
                 }
                 tempDate.setDate(tempDate.getDate() + 1);
             }
         }
 
-        // Set Sesi Berakhir date in info panel
+        if (mapelJadwal.length > 0) {
+            // Mode per-mapel baru
+            mapelJadwal.forEach((mapel, idx) => {
+                const hariRaw  = hariPerMapelRaw[idx] ?? {};
+                const days     = Object.values(hariRaw).filter(h => h);
+                const startStr = tanggalPerMapel[idx] ?? legacyStart;
+                const limit    = parseInt(sesiPerMapel[idx] ?? 0);
+                buildSchedule(days, startStr, limit, mapel, idx);
+            });
+        } else {
+            // Fallback: mode lama (satu jadwal flat)
+            buildSchedule(legacyDays, legacyStart, legacyLimit, 'Bimbingan', 0);
+        }
+
+        // Sort semua sesi berdasarkan tanggal
+        scheduledDates.sort((a,b) => a.dateObj - b.dateObj);
+
+        // Set Sesi Berakhir
         if (scheduledDates.length > 0) {
-            const lastSession = scheduledDates[scheduledDates.length - 1];
-            const lastDate = lastSession.dateObj;
-            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-            const endDateElement = document.getElementById('sessionEndDateVal');
-            if (endDateElement) {
-                endDateElement.textContent = lastDate.toLocaleDateString('id-ID', options);
-            }
+            const last = scheduledDates[scheduledDates.length - 1];
+            const endEl = document.getElementById('sessionEndDateVal');
+            if (endEl) endEl.textContent = last.dateObj.toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
-            // Notification Check for Session 1
-            const firstSession = scheduledDates[0];
-            const firstDateStr = firstSession.dateStr;
-            const today = new Date();
-            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-            if (firstDateStr === todayStr) {
-                // 1. Show in-app banner
+            // Notif sesi pertama
+            const first = scheduledDates[0];
+            const today = new Date(); today.setHours(0,0,0,0);
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            if (first.dateStr === todayStr) {
                 const banner = document.getElementById('sessionNotificationBanner');
                 const bannerText = document.getElementById('sessionNotificationText');
                 if (banner && bannerText) {
-                    bannerText.innerHTML = `Hari ini adalah <strong>Sesi 1</strong> Bimbingan Belajar Anda! Sesi dimulai pukul <strong>{{ $jamMulai }} - {{ $jamSelesai }}</strong>. Selamat belajar dan mari raih prestasi terbaik!`;
+                    bannerText.innerHTML = `Hari ini adalah <strong>Sesi 1</strong> Bimbingan Belajar Anda! Sesi dimulai pukul <strong>${jamMulai} - ${jamSelesai}</strong>. Selamat belajar!`;
                     banner.classList.remove('d-none');
                 }
-
-                // 2. Trigger native phone notification via HTML5 Web Notifications API
-                if ("Notification" in window) {
-                    if (Notification.permission === "granted") {
-                        showNativeNotification();
-                    } else if (Notification.permission !== "denied") {
-                        Notification.requestPermission().then(permission => {
-                            if (permission === "granted") {
-                                showNativeNotification();
-                            }
-                        });
-                    }
-                }
-            }
-
-            function showNativeNotification() {
-                const title = "Sesi 1 Mulai Hari Ini!";
-                const options = {
-                    body: `Jam: {{ $jamMulai }} - {{ $jamSelesai }}. Ayo persiapkan diri Anda untuk belajar di Paradise of Math!`,
-                    silent: false
-                };
-                new Notification(title, options);
             }
         }
 
-        // Initialize calendar view to the start date of tutoring
-        const startDateObj = new Date(startDateStr);
-        let currentMonth = !isNaN(startDateObj.getTime()) ? startDateObj.getMonth() : new Date().getMonth();
-        let currentYear = !isNaN(startDateObj.getTime()) ? startDateObj.getFullYear() : new Date().getFullYear();
+        // ── Render Kalender ──
+        const startDateObj = new Date(tanggalPerMapel[0] ?? legacyStart);
+        let currentMonth = !isNaN(startDateObj) ? startDateObj.getMonth() : new Date().getMonth();
+        let currentYear  = !isNaN(startDateObj) ? startDateObj.getFullYear() : new Date().getFullYear();
 
-        const grid = document.getElementById('calendarDaysGrid');
-        const monthYearLabel = document.getElementById('currentMonthYear');
+        const grid            = document.getElementById('calendarDaysGrid');
+        const monthYearLabel  = document.getElementById('currentMonthYear');
         const agendaContainer = document.getElementById('agendaListContainer');
 
         function renderCalendar(month, year) {
             grid.innerHTML = '';
             monthYearLabel.textContent = `${monthNames[month]} ${year}`;
 
-            // First day of the month
-            const firstDayIndex = new Date(year, month, 1).getDay();
-            // Total days in the month
-            const totalDays = new Date(year, month + 1, 0).getDate();
-            // Total days in the previous month
-            const prevTotalDays = new Date(year, month, 0).getDate();
+            const firstDayIndex  = new Date(year, month, 1).getDay();
+            const totalDays      = new Date(year, month+1, 0).getDate();
+            const prevTotalDays  = new Date(year, month, 0).getDate();
+            const today = new Date(); today.setHours(0,0,0,0);
 
-            const today = new Date();
-            today.setHours(0,0,0,0);
-
-            // 1. Previous Month's trailing days
+            // Previous month trailing
             for (let x = firstDayIndex; x > 0; x--) {
                 const cell = document.createElement('div');
                 cell.className = 'calendar-day-cell other-month';
@@ -472,183 +505,138 @@
                 grid.appendChild(cell);
             }
 
-            const agendaSesi = [];
+            const agendaThisMonth = [];
 
-            // 2. Current Month's days
+            // Current month days
             for (let i = 1; i <= totalDays; i++) {
                 const currentDate = new Date(year, month, i);
                 currentDate.setHours(0,0,0,0);
+                const y  = currentDate.getFullYear();
+                const m  = String(currentDate.getMonth()+1).padStart(2,'0');
+                const d  = String(currentDate.getDate()).padStart(2,'0');
+                const currentDateStr = `${y}-${m}-${d}`;
 
                 const cell = document.createElement('div');
                 cell.className = 'calendar-day-cell';
-                
-                const numberSpan = document.createElement('span');
-                numberSpan.textContent = i;
-                cell.appendChild(numberSpan);
+
+                const numSpan = document.createElement('span');
+                numSpan.textContent = i;
+                cell.appendChild(numSpan);
 
                 const isToday = currentDate.getTime() === today.getTime();
-                if (isToday) {
-                    cell.classList.add('today');
-                }
+                if (isToday) cell.classList.add('today');
 
-                // Check if this date is a scheduled date in our precalculated list
-                const y = currentDate.getFullYear();
-                const m = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const d = String(currentDate.getDate()).padStart(2, '0');
-                const currentDateStr = `${y}-${m}-${d}`;
+                // Cari semua sesi di tanggal ini (mungkin lebih dari 1 mapel)
+                const sessionsToday = scheduledDates.filter(s => s.dateStr === currentDateStr);
 
-                const scheduleInfo = scheduledDates.find(sd => sd.dateStr === currentDateStr);
-
-                if (scheduleInfo) {
+                if (sessionsToday.length > 0) {
                     cell.classList.add('scheduled');
-
-                    // Check if completed
                     const now = new Date();
-                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                    const curMin = now.getHours()*60 + now.getMinutes();
                     const endParts = jamSelesai.split(':');
-                    const endMinutes = parseInt(endParts[0]) * 60 + (parseInt(endParts[1]) || 0);
-                    
-                    const isPast = currentDate.getTime() < today.getTime();
-                    const isFinishedToday = isToday && (currentMinutes > endMinutes);
-                    const isCompleted = isPast || isFinishedToday;
+                    const endMin = parseInt(endParts[0])*60 + (parseInt(endParts[1])||0);
+                    const isPast = currentDate < today;
+                    const isDoneToday = isToday && curMin > endMin;
+                    const isCompleted = isPast || isDoneToday;
+                    if (isCompleted) cell.classList.add('completed');
 
-                    if (isCompleted) {
-                        cell.classList.add('completed');
-                    }
+                    // Dot container (satu per mapel)
+                    const dotRow = document.createElement('div');
+                    dotRow.style.cssText = 'position:absolute;bottom:5px;display:flex;gap:3px;justify-content:center;';
+                    const seenMapel = new Set();
+                    sessionsToday.forEach(s => {
+                        if (!seenMapel.has(s.mapelIdx)) {
+                            seenMapel.add(s.mapelIdx);
+                            const dot = document.createElement('span');
+                            const color = mapelColors[s.mapelIdx % mapelColors.length];
+                            dot.style.cssText = `width:5px;height:5px;border-radius:50%;background:${isCompleted?'#10b981':color.bg};display:inline-block;`;
+                            dotRow.appendChild(dot);
+                        }
+                    });
+                    cell.appendChild(dotRow);
 
-                    const dot = document.createElement('span');
-                    dot.className = 'schedule-dot';
-                    cell.appendChild(dot);
-                    
-                    cell.title = `Sesi ${scheduleInfo.sessionIndex} dari ${limitSesi} (${isCompleted ? 'Selesai' : 'Belum Mulai'})`;
+                    // Tooltip
+                    const labels = sessionsToday.map(s => `${s.mapelName} Sesi ${s.sessionIndex}/${s.totalSesi}`).join(', ');
+                    cell.title = labels;
 
-                    // Add click event for modal popup
+                    // Click modal
                     cell.addEventListener('click', function() {
-                        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                        const formattedDate = currentDate.toLocaleDateString('id-ID', options);
-                        document.getElementById('modalDate').textContent = formattedDate;
-                        document.getElementById('modalSessionIndex').textContent = `Sesi ${scheduleInfo.sessionIndex} dari ${limitSesi} (${isCompleted ? 'Selesai' : 'Belum Mulai'})`;
+                        const opts = {weekday:'long',year:'numeric',month:'long',day:'numeric'};
+                        document.getElementById('modalDate').textContent = currentDate.toLocaleDateString('id-ID', opts);
+                        const label = sessionsToday.map(s => `${s.mapelName}: Sesi ${s.sessionIndex}/${s.totalSesi}`).join(' | ');
+                        document.getElementById('modalSessionIndex').textContent = label + (isCompleted ? ' (Selesai)' : ' (Belum Mulai)');
                         $('#sessionDetailModal').modal('show');
                     });
 
-                    // Store in agenda list
-                    agendaSesi.push({
-                        date: currentDate,
-                        dayNum: i,
-                        dayName: dayNames[currentDate.getDay()],
-                        sessionIndex: scheduleInfo.sessionIndex
+                    sessionsToday.forEach(s => {
+                        agendaThisMonth.push({ date: currentDate, dayNum: i, dayName: dayNames[currentDate.getDay()], session: s });
                     });
                 }
 
                 grid.appendChild(cell);
             }
 
-            // 3. Next Month's leading days (pad to multiples of 7)
+            // Next month padding
             const totalCells = firstDayIndex + totalDays;
-            const remainingCells = (7 - (totalCells % 7)) % 7;
-            for (let y = 1; y <= remainingCells; y++) {
+            const remaining  = (7 - (totalCells % 7)) % 7;
+            for (let y = 1; y <= remaining; y++) {
                 const cell = document.createElement('div');
                 cell.className = 'calendar-day-cell other-month';
                 cell.textContent = y;
                 grid.appendChild(cell);
             }
 
-            // Render agenda sidebar using all precalculated scheduled dates
-            renderAgendaList(scheduledDates, today);
+            // Render agenda
+            renderAgenda(agendaThisMonth, today);
         }
 
-        function renderAgendaList(sessions, today) {
-            agendaContainer.innerHTML = '';
-            if (sessions.length === 0) {
-                agendaContainer.innerHTML = `
-                    <div class="py-4 text-center text-muted text-xs">
-                        Tidak ada sesi belajar terjadwal.
-                    </div>
-                `;
+        function renderAgenda(agendaItems, today) {
+            if (!agendaContainer) return;
+            if (agendaItems.length === 0) {
+                agendaContainer.innerHTML = `<div class="text-center text-muted py-4 px-3 text-xs">Tidak ada sesi di bulan ini.</div>`;
                 return;
             }
-
-            // Sort by date ascending
-            sessions.sort((a, b) => a.dateObj - b.dateObj);
-
-            const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
-            const endParts = jamSelesai.split(':');
-            const endMinutes = parseInt(endParts[0]) * 60 + (parseInt(endParts[1]) || 0);
-
-            sessions.forEach(session => {
-                const isToday = session.dateObj.getTime() === today.getTime();
-                const isPast = session.dateObj.getTime() < today.getTime();
-                const isFinishedToday = isToday && (currentMinutes > endMinutes);
-                const isCompleted = isPast || isFinishedToday;
-                const formattedDate = session.dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-                
-                const agendaItem = document.createElement('div');
-                
-                let borderLeftColor = '#7c3aed';
-                let bgClass = 'bg-light';
-                let badgeClass = 'badge-purple';
-                let badgeText = `Sesi ${session.sessionIndex}`;
-                let opacityStyle = '';
-
-                if (isCompleted) {
-                    borderLeftColor = '#10b981';
-                    bgClass = 'bg-slate-50';
-                    badgeClass = 'bg-emerald-100 text-emerald-800';
-                    badgeText = 'Selesai';
-                    opacityStyle = 'opacity: 0.85;';
-                } else if (isToday) {
-                    borderLeftColor = '#f59e0b';
-                    bgClass = 'bg-amber-50';
-                    badgeClass = 'badge-warning text-purple-950';
-                    badgeText = 'Hari Ini';
-                }
-
-                agendaItem.className = `agenda-item p-3 mb-2 rounded-xl d-flex justify-between align-items-center text-xs mx-3 ${bgClass}`;
-                agendaItem.style = `border-left: 4px solid ${borderLeftColor}; cursor: pointer; transition: all 0.2s ease; ${opacityStyle}`;
-                
-                agendaItem.innerHTML = `
-                    <div style="flex: 1;">
-                        <span class="d-block font-weight-bold text-purple-950 ${isCompleted ? 'text-slate-400' : ''}">${session.dayName}, ${formattedDate}</span>
-                        <small class="text-slate-400">Mapel: ${mapels.join(', ') || 'Semua'}</small>
-                        <small class="d-block text-purple-600 font-weight-bold mt-1">Sesi ${session.sessionIndex} dari ${limitSesi}</small>
+            const html = agendaItems.map(item => {
+                const s = item.session;
+                const isToday = item.date.getTime() === today.getTime();
+                const isPast  = item.date < today;
+                const color   = mapelColors[s.mapelIdx % mapelColors.length];
+                const statusBadge = isPast
+                    ? `<span class="badge badge-success text-xs font-weight-bold px-2 py-1 rounded-full" style="background-color:#d1fae5;color:#065f46;font-size:10px;">Selesai</span>`
+                    : (isToday
+                        ? `<span class="badge text-xs font-weight-bold px-2 py-1 rounded-full" style="background-color:#fef3c7;color:#92400e;font-size:10px;">Hari Ini</span>`
+                        : `<span class="badge text-xs font-weight-bold px-2 py-1 rounded-full" style="background-color:#f5f3ff;color:#6d28d9;font-size:10px;">Belum Mulai</span>`);
+                return `
+                <div class="agenda-item px-3 py-2.5 border-bottom border-light d-flex align-items-center gap-3 ${isToday ? 'today-agenda' : ''}"
+                     style="border-left: 4px solid ${color.bg}; background:${isPast ? '#fafafa' : '#fff'};">
+                    <div class="text-center shrink-0" style="min-width:36px;">
+                        <div class="font-weight-bold text-purple-950 text-sm">${item.dayNum}</div>
+                        <div class="text-muted text-xxs" style="font-size:10px;">${item.dayName.slice(0,3)}</div>
                     </div>
-                    <span class="badge ${badgeClass} font-weight-bold shrink-0" style="padding: 4px 8px; border-radius: 8px;">${badgeText}</span>
-                `;
-
-                agendaItem.addEventListener('click', function() {
-                    document.getElementById('modalDate').textContent = `${session.dayName}, ${formattedDate}`;
-                    document.getElementById('modalSessionIndex').textContent = `Sesi ${session.sessionIndex} dari ${limitSesi} (${isCompleted ? 'Selesai' : 'Belum Mulai'})`;
-                    $('#sessionDetailModal').modal('show');
-                });
-
-                agendaContainer.appendChild(agendaItem);
-            });
+                    <div class="flex-grow-1">
+                        <div class="font-weight-bold text-xs text-purple-950">${s.mapelName}</div>
+                        <div class="text-muted text-xxs" style="font-size:10px;">Sesi ${s.sessionIndex} dari ${s.totalSesi} • ${jamMulai}–${jamSelesai}</div>
+                    </div>
+                    <div>${statusBadge}</div>
+                </div>`;
+            }).join('');
+            agendaContainer.innerHTML = html;
         }
 
-        document.getElementById('btnPrevMonth').addEventListener('click', function() {
-            if (currentMonth === 0) {
-                currentMonth = 11;
-                currentYear--;
-            } else {
-                currentMonth--;
-            }
-            renderCalendar(currentMonth, currentYear);
-        });
-
-        document.getElementById('btnNextMonth').addEventListener('click', function() {
-            if (currentMonth === 11) {
-                currentMonth = 0;
-                currentYear++;
-            } else {
-                currentMonth++;
-            }
-            renderCalendar(currentMonth, currentYear);
-        });
-
-        // Initial calendar render
         renderCalendar(currentMonth, currentYear);
+
+        document.getElementById('btnPrevMonth').addEventListener('click', () => {
+            if (currentMonth === 0) { currentMonth = 11; currentYear--; }
+            else currentMonth--;
+            renderCalendar(currentMonth, currentYear);
+        });
+        document.getElementById('btnNextMonth').addEventListener('click', () => {
+            if (currentMonth === 11) { currentMonth = 0; currentYear++; }
+            else currentMonth++;
+            renderCalendar(currentMonth, currentYear);
+        });
     });
 </script>
 @endif
 @endsection
+

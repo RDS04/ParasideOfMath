@@ -48,9 +48,20 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $siswa = Auth::guard('siswa')->user();
-            if ($siswa->status === 'pending') {
+            if ($siswa->status === 'rejected') {
+                $siswa->status = 'pending';
+                $siswa->save();
                 return redirect()->route('siswa.biodata')
-                    ->with('success', 'Selamat datang kembali! Silakan lengkapi biodata Anda.');
+                    ->with('error', 'Pendaftaran Anda sebelumnya ditolak oleh Admin. Seluruh data registrasi telah dibersihkan. Silakan isi kembali biodata Anda dari awal.');
+            }
+            if ($siswa->status === 'pending') {
+                if (empty($siswa->biodata) || !is_array($siswa->biodata) || count($siswa->biodata) === 0) {
+                    return redirect()->route('siswa.biodata')
+                        ->with('info', 'Selesaikan pendaftaran Anda dan lanjutkan progres pendaftaran! Silakan isi biodata terlebih dahulu.');
+                } else {
+                    return redirect()->route('siswa.register-kategori')
+                        ->with('info', 'Selesaikan pendaftaran Anda dan lanjutkan progres pendaftaran! Silakan pilih paket belajar Anda.');
+                }
             }
             if ($siswa->status === 'under_review') {
                 return redirect()->route('siswa.pending');

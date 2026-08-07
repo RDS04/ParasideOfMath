@@ -9,7 +9,6 @@ use App\Models\Mapel;
 use App\Models\PaketBelajar;
 use App\Models\Rekening;
 use App\Models\Siswa;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -321,12 +320,24 @@ class AdminController extends Controller
         }
 
         $siswa = Siswa::findOrFail($id);
+
+        // Delete physical proof file if exists
+        if ($siswa->bukti_transfer && file_exists(public_path($siswa->bukti_transfer))) {
+            @unlink(public_path($siswa->bukti_transfer));
+        }
+
+        // Reset all registration data EXCEPT email & password
         $siswa->update([
+            'paket_id' => null,
+            'tipe_paket' => null,
+            'whatsapp' => null,
+            'sekolah' => null,
+            'bukti_transfer' => null,
+            'biodata' => null,
             'status' => 'rejected',
-            'bukti_transfer' => null, // clear payment proof to allow re-upload
         ]);
 
-        return back()->with('success', 'Pendaftaran ' . $siswa->name . ' telah ditolak. Bukti transfer telah dikosongkan agar siswa dapat mengunggah ulang pembayaran baru.');
+        return back()->with('success', 'Pendaftaran siswa ' . $siswa->name . ' berhasil ditolak! Semua data registrasi & biodata telah dihapus (kecuali akun email & password) sehingga siswa dapat mendaftar ulang dari awal.');
     }
 
     /**

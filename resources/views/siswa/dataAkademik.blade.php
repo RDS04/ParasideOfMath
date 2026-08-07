@@ -34,6 +34,7 @@
             $bio = $siswa->biodata ?? [];
             $namaPanggilan = $bio['nama_panggilan'] ?? '-';
             $noTelp = $bio['no_telp'] ?? '-';
+            $jenisKelamin = $bio['jenis_kelamin'] ?? '-';
             $tempatLahir = $bio['tempat_lahir'] ?? '-';
             $tanggalLahir = isset($bio['tanggal_lahir']) && $bio['tanggal_lahir'] ? date('d-m-Y', strtotime($bio['tanggal_lahir'])) : '-';
             $kelas = $bio['kelas'] ?? '-';
@@ -127,6 +128,10 @@
                             <div class="col-md-6 mb-3">
                                 <span class="text-xxs text-muted d-block">Tempat &amp; Tanggal Lahir</span>
                                 <span class="font-weight-semibold text-slate-800 text-xs">{{ $tempatLahir }}, {{ $tanggalLahir }}</span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <span class="text-xxs text-muted d-block">Jenis Kelamin</span>
+                                <span class="font-weight-semibold text-slate-800 text-xs">{{ $jenisKelamin }}</span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <span class="text-xxs text-muted d-block">Tingkat Kelas &amp; Jurusan</span>

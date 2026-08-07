@@ -34,8 +34,18 @@ Route::get('/siswa', function () {
         if ($siswa->status === 'active') {
             return view('siswa.dashboard');
         }
+        if ($siswa->status === 'rejected') {
+            $siswa->status = 'pending';
+            $siswa->save();
+            return redirect()->route('siswa.biodata')
+                ->with('error', 'Pendaftaran Anda sebelumnya ditolak oleh Admin. Seluruh data registrasi telah dibersihkan. Silakan isi kembali biodata Anda dari awal.');
+        }
         if ($siswa->status === 'pending') {
-            return redirect()->route('siswa.biodata');
+            if (empty($siswa->biodata) || !is_array($siswa->biodata) || count($siswa->biodata) === 0) {
+                return redirect()->route('siswa.biodata');
+            } else {
+                return redirect()->route('siswa.register-kategori');
+            }
         }
         if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
             return redirect()->route('siswa.pending');

@@ -15,7 +15,6 @@
             font-size: 11px;
             line-height: 1.4;
         }
-
         /* HEADER / KOP */
         .kop-container {
             width: 100%;
@@ -23,15 +22,18 @@
             padding-bottom: 12px;
             margin-bottom: 18px;
         }
+
         .kop-table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .kop-table td {
             vertical-align: middle;
             border: none;
             padding: 0;
         }
+
         .brand-title {
             font-size: 20px;
             font-weight: bold;
@@ -39,17 +41,20 @@
             letter-spacing: 0.5px;
             margin: 0;
         }
+
         .brand-subtitle {
             font-size: 13px;
             font-weight: bold;
             color: #7e22ce;
             margin-top: 2px;
         }
+
         .meta-box {
             text-align: right;
             font-size: 10px;
             color: #64748b;
         }
+
         .meta-badge {
             display: inline-block;
             background-color: #f3e8ff;
@@ -67,11 +72,13 @@
             border-collapse: collapse;
             margin-bottom: 20px;
         }
+
         .cards-table td {
             border: none;
             padding: 0;
             vertical-align: top;
         }
+
         .card {
             background-color: #faf5ff;
             border: 1px solid #e9d5ff;
@@ -79,6 +86,7 @@
             padding: 10px 12px;
             text-align: center;
         }
+
         .card-label {
             font-size: 9px;
             font-weight: bold;
@@ -87,6 +95,7 @@
             letter-spacing: 0.5px;
             margin-bottom: 4px;
         }
+
         .card-value {
             font-size: 15px;
             font-weight: bold;
@@ -102,11 +111,13 @@
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
+
         table.data-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 18px;
         }
+
         table.data-table th {
             background-color: #6b21a8;
             color: #ffffff;
@@ -116,14 +127,17 @@
             padding: 7px 8px;
             border: 1px solid #581c87;
         }
+
         table.data-table td {
             padding: 6px 8px;
             border: 1px solid #cbd5e1;
             font-size: 10px;
         }
+
         table.data-table tbody tr:nth-child(even) {
             background-color: #f8fafc;
         }
+
         table.data-table tfoot td {
             background-color: #f3e8ff;
             font-weight: bold;
@@ -131,9 +145,17 @@
             color: #4c1d95;
         }
 
-        .text-left { text-align: left; }
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
+        .text-left {
+            text-align: left;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-right {
+            text-align: right;
+        }
 
         /* FOOTER */
         .footer-line {
@@ -146,6 +168,7 @@
         }
     </style>
 </head>
+
 <body>
 
     {{-- HEADER --}}
@@ -159,7 +182,8 @@
                 <td class="meta-box">
                     <span class="meta-badge">Periode: {{ ucfirst($filter ?? 'Bulanan') }}</span>
                     @if(!empty($start) && !empty($end))
-                        <br><span>{{ \Carbon\Carbon::parse($start)->format('d M Y') }} - {{ \Carbon\Carbon::parse($end)->format('d M Y') }}</span>
+                        <br><span>{{ \Carbon\Carbon::parse($start)->format('d M Y') }} -
+                            {{ \Carbon\Carbon::parse($end)->format('d M Y') }}</span>
                     @elseif(!empty($year))
                         <br><span>Tahun {{ $year }}</span>
                     @endif
@@ -176,8 +200,8 @@
         $avg = $avgPerTransaction ?? ($count > 0 ? $total / $count : 0);
 
         $packageTotals = $packageTotals ?? [];
-        if(empty($packageTotals) && !empty($rows)) {
-            $packageTotals = collect($rows)->groupBy('paket')->map(function($group) {
+        if (empty($packageTotals) && !empty($rows)) {
+            $packageTotals = collect($rows)->groupBy('paket')->map(function ($group) {
                 return [
                     'revenue' => $group->sum('total'),
                     'count' => $group->count()
@@ -228,62 +252,63 @@
         </thead>
         <tbody>
             @forelse($rows as $index => $r)
-            <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ $r['name'] ?? '-' }}</td>
-                <td>{{ $r['email'] ?? '-' }}</td>
-                <td>{{ $r['paket'] ?? '-' }}</td>
-                <td class="text-center">{{ $r['jumlah_pertemuan'] ?? 0 }}</td>
-                <td class="text-right">Rp {{ number_format($r['total'] ?? 0, 0, ',', '.') }}</td>
-                <td class="text-center">{{ $r['tanggal'] ? \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y H:i') : '-' }}</td>
-            </tr>
+                <tr>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td>{{ $r['name'] ?? '-' }}</td>
+                    <td>{{ $r['email'] ?? '-' }}</td>
+                    <td>{{ $r['paket'] ?? '-' }}</td>
+                    <td class="text-center">{{ $r['jumlah_pertemuan'] ?? 0 }}</td>
+                    <td class="text-right">Rp {{ number_format($r['total'] ?? 0, 0, ',', '.') }}</td>
+                    <td class="text-center">
+                        {{ $r['tanggal'] ? \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y H:i') : '-' }}
+                    </td>
+                </tr>
             @empty
-            <tr>
-                <td colspan="7" class="text-center" style="padding: 15px; color: #64748b;">Tidak ada data pembayaran.</td>
-            </tr>
+                <tr>
+                    <td colspan="7" class="text-center" style="padding: 15px; color: #64748b;">Tidak ada data pembayaran.
+                    </td>
+                </tr>
             @endforelse
         </tbody>
         @if(count($rows) > 0)
-        <tfoot>
-            <tr>
-                <td colspan="5" class="text-right">TOTAL KESELURUHAN</td>
-                <td class="text-right">Rp {{ number_format($total, 0, ',', '.') }}</td>
-                <td></td>
-            </tr>
-        </tfoot>
+            <tfoot>
+                <tr>
+                    <td colspan="5" class="text-right">TOTAL KESELURUHAN</td>
+                    <td class="text-right">Rp {{ number_format($total, 0, ',', '.') }}</td>
+                    <td></td>
+                </tr>
+            </tfoot>
         @endif
     </table>
 
     {{-- RINGKASAN PER PAKET --}}
     @if(!empty($packageTotals))
-    <div style="margin-top: 15px;">
-        <div class="section-title">Ringkasan Pendapatan per Paket</div>
-        <table class="data-table" style="width: 55%;">
-            <thead>
-                <tr>
-                    <th class="text-left" style="width: 50%;">Nama Paket</th>
-                    <th class="text-center" style="width: 25%;">Jumlah</th>
-                    <th class="text-right" style="width: 25%;">Total Pendapatan</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($packageTotals as $pname => $pval)
-                <tr>
-                    <td>{{ $pname }}</td>
-                    <td class="text-center">{{ $pval['count'] }}</td>
-                    <td class="text-right">Rp {{ number_format($pval['revenue'], 0, ',', '.') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+        <div style="margin-top: 15px;">
+            <div class="section-title">Ringkasan Pendapatan per Paket</div>
+            <table class="data-table" style="width: 55%;">
+                <thead>
+                    <tr>
+                        <th class="text-left" style="width: 50%;">Nama Paket</th>
+                        <th class="text-center" style="width: 25%;">Jumlah</th>
+                        <th class="text-right" style="width: 25%;">Total Pendapatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($packageTotals as $pname => $pval)
+                        <tr>
+                            <td>{{ $pname }}</td>
+                            <td class="text-center">{{ $pval['count'] }}</td>
+                            <td class="text-right">Rp {{ number_format($pval['revenue'], 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @endif
-
     {{-- FOOTER --}}
     <div class="footer-line">
         Laporan ini secara otomatis di-generate oleh Sistem Informasi Paradise of Math.
     </div>
-
     {{-- DomPDF Script for Page Numbering --}}
     <script type="text/php">
         if (isset($pdf)) {
@@ -296,6 +321,6 @@
             $pdf->page_text($x, $y, $text, $font, $size, $color);
         }
     </script>
-
 </body>
+
 </html>

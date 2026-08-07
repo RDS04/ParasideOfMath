@@ -58,6 +58,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PaketBelajarSeeder::class,
             MapelSeeder::class,
+            BiodataSeeder::class,
         ]);
 
         if (\App\Models\Rekening::count() == 0) {

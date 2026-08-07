@@ -107,7 +107,7 @@
                     <div class="card shadow-sm border-0">
                         <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
                             <div>
-                                <h3 class="card-title font-weight-bold text-purple-950 mb-0">Laporan Pendapatan</h3>
+                                <h5 class="font-weight-bold text-purple-950 mb-1">Laporan Pendapatan</h5>
                                 <p class="text-sm text-muted mb-0">Pendapatan siswa aktif berdasarkan filter bulanan atau tahunan.</p>
                             </div>
                             <form action="{{ route('admin.laporan-pendapatan') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2">
@@ -225,19 +225,33 @@
             const ctx = document.getElementById('revenueChart');
 
             if (ctx && labels.length > 0) {
-                new Chart(ctx.getContext('2d'), {
-                    type: 'bar',
+                const chartCtx = ctx.getContext('2d');
+                
+                // Create a smooth gradient background for the line chart
+                const gradient = chartCtx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0, 'rgba(124, 58, 237, 0.35)');
+                gradient.addColorStop(1, 'rgba(124, 58, 237, 0.01)');
+
+                new Chart(chartCtx, {
+                    type: 'line',
                     data: {
                         labels: labels,
                         datasets: [{
                             label: 'Pendapatan (Rp)',
                             data: data,
-                            backgroundColor: 'rgba(106, 78, 255, 0.75)',
-                            borderColor: 'rgba(88, 62, 165, 0.9)',
-                            borderWidth: 1.5,
-                            borderRadius: 8,
-                            maxBarThickness: 45,
-                            hoverBackgroundColor: 'rgba(106, 78, 255, 0.95)',
+                            borderColor: '#7c3aed',
+                            borderWidth: 3,
+                            backgroundColor: gradient,
+                            fill: true,
+                            tension: 0.35,
+                            pointBackgroundColor: '#7c3aed',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            pointHoverBackgroundColor: '#6d28d9',
+                            pointHoverBorderColor: '#ffffff',
+                            pointHoverBorderWidth: 2
                         }]
                     },
                     options: {
@@ -250,9 +264,10 @@
                                 titleColor: '#fff',
                                 bodyColor: '#e2d9f3',
                                 cornerRadius: 8,
+                                padding: 10,
                                 callbacks: {
                                     label: function(context) {
-                                        return 'Rp ' + Number(context.parsed.y).toLocaleString('id-ID');
+                                        return 'Pendapatan: Rp ' + Number(context.parsed.y).toLocaleString('id-ID');
                                     }
                                 }
                             }

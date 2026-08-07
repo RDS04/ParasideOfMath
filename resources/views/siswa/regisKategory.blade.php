@@ -67,11 +67,56 @@
                 </div>
 
                 @if (session('success'))
-                    <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-emerald-50 border-emerald-200 text-emerald-800"
+                    <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-emerald-50 border-emerald-200 text-emerald-800 flex items-center gap-3"
                         role="alert">
-                        {{ session('success') }}
+                        <i class="fas fa-check-circle text-emerald-600 text-lg"></i>
+                        <div>{{ session('success') }}</div>
                     </div>
                 @endif
+
+                @if (session('info'))
+                    <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-amber-50 border-amber-200 text-amber-900 flex items-center gap-3"
+                        role="alert">
+                        <i class="fas fa-info-circle text-amber-600 text-lg"></i>
+                        <div>{{ session('info') }}</div>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-red-50 border-red-200 text-red-800 flex items-center gap-3"
+                        role="alert">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                        <div>{{ session('error') }}</div>
+                    </div>
+                @endif
+
+                <!-- PROMINENT RESPONSIVE PROGRESS REGISTRATION ALERT BANNER -->
+                <div
+                    class="mb-7 p-5 rounded-2xl bg-gradient-to-r from-amber-50/90 via-purple-50/40 to-amber-50/80 border border-amber-200/90 shadow-sm space-y-4">
+                    <!-- Header Row -->
+                    <div class="flex items-start sm:items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-white flex items-center justify-center font-bold shrink-0 shadow-md shadow-amber-500/20">
+                                <i class="fas fa-exclamation text-base"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-amber-950 text-base leading-snug">Selesaikan Pendaftaran Anda!
+                                </h4>
+                                <p class="text-xs text-amber-800/90 mt-0.5">
+                                    Biodata Anda <span
+                                        class="font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-md border border-emerald-200">✓
+                                        Sudah Tersimpan di Database</span>
+                                </p>
+                            </div>
+                        </div>
+                        <span
+                            class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100/80 text-amber-900 text-xs font-bold rounded-full border border-amber-300/60 shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                            Tahap 3 dari 4
+                        </span>
+                    </div>
+                </div>
 
                 <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950 mb-2">Formulir Pendaftaran</h1>
                 <p class="text-sm text-slate-500 mb-8">Pilih paket belajar yang ingin Anda ikuti.</p>
@@ -207,24 +252,13 @@
                         </div>
                     </div>
 
-                    <!-- STEP 3 — JADWAL & FREKUENSI BELAJAR -->
+                    <!-- STEP 3 — JADWAL & FREKUENSI BELAJAR per Mapel -->
                     <div class="step-panel space-y-5" data-step="3">
-                        <!-- Jumlah Pertemuan (Dinamis) -->
-                        <div class="field mt-4" data-required="true" id="pertemuanSemingguField">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumlah Pertemuan (Ditentukan Berdasarkan Total Shift Pelajaran)<span class="text-amber-600 ml-1">*</span></label>
-                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                                @for($i = 1; $i <= 10; $i++)
-                                    <label class="choice flex items-center justify-center p-3 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950 font-bold" id="label-pertemuan-{{ $i }}">
-                                        <input type="radio" name="jumlah_pertemuan" value="{{ $i }}" class="sr-only">
-                                        <span>{{ $i }}x</span>
-                                    </label>
-                                @endfor
-                            </div>
-                            <div class="error" id="pertemuanError">Pilih jumlah pertemuan.</div>
-                        </div>
+                        <!-- Ringkasan mapel yang dipilih -->
+                        <div class="p-3 rounded-xl bg-purple-50 border border-purple-100 text-xs text-purple-800 font-medium" id="step3MapelSummary"></div>
 
-                        <!-- Hari Pertemuan & Tanggal Mulai (Dinamis) -->
-                        <div class="hidden mt-4" id="datePickersContainer"></div>
+                        <!-- Schedule cards per mapel — diisi oleh JS -->
+                        <div id="mapelScheduleContainer" class="space-y-6"></div>
                     </div>
 
                     <!-- Navigation Action Buttons -->
@@ -395,11 +429,11 @@
                     if (det) {
                         const icon = index === 4 ? 'fa-clock text-violet-500' : 'fa-check-circle text-emerald-500';
                         listHtml += `
-                                        <li class="flex items-start gap-2.5 p-2 rounded-lg transition-all duration-200">
-                                            <span class="shrink-0 mt-0.5"><i class="fas ${icon}"></i></span>
-                                            <span>${det}</span>
-                                        </li>
-                                    `;
+                                            <li class="flex items-start gap-2.5 p-2 rounded-lg transition-all duration-200">
+                                                <span class="shrink-0 mt-0.5"><i class="fas ${icon}"></i></span>
+                                                <span>${det}</span>
+                                            </li>
+                                        `;
                     }
                 });
                 detailList.innerHTML = listHtml;
@@ -447,6 +481,8 @@
                     btnBack.classList.remove('hidden');
                     btnNext.classList.add('hidden');
                     btnSubmit.classList.remove('hidden');
+                    // Build per-mapel schedule cards
+                    generateMapelScheduleCards();
                 }
             }
 
@@ -522,14 +558,66 @@
                     e.preventDefault();
                     if (validateStep(2)) {
                         currentStep = 3;
-                        renderSteps();
+                        renderSteps(); // renderSteps calls generateMapelScheduleCards internally
                     }
                 } else if (currentStep === 3) {
-                    if (!validateStep(3)) {
+                    if (!validateStep3Dynamic()) {
                         e.preventDefault();
                     }
                 }
             });
+
+            // Validate the dynamically-generated Step 3 cards
+            function validateStep3Dynamic() {
+                if (!scheduleContainer) return true;
+                let valid = true;
+
+                // Check each mapel card has: sesi selected, hari 1, hari 2, tanggal_mulai
+                const cards = scheduleContainer.querySelectorAll('.bg-white.rounded-2xl');
+                if (cards.length === 0) {
+                    alert('Belum ada mapel yang dipilih. Silakan kembali dan pilih mata pelajaran terlebih dahulu.');
+                    return false;
+                }
+
+                cards.forEach(card => {
+                    // Check sesi radio
+                    const sesiRadios = card.querySelectorAll('input[type="radio"]');
+                    const sesiChecked = Array.from(sesiRadios).some(r => r.checked);
+                    const errorMsg = card.querySelector('.error-msg');
+                    if (!sesiChecked) {
+                        valid = false;
+                        if (errorMsg) { errorMsg.classList.remove('hidden'); }
+                    } else {
+                        if (errorMsg) { errorMsg.classList.add('hidden'); }
+                    }
+
+                    // Check hari selects
+                    card.querySelectorAll('select').forEach(sel => {
+                        if (!sel.value) {
+                            valid = false;
+                            sel.classList.add('border-red-400');
+                        } else {
+                            sel.classList.remove('border-red-400');
+                        }
+                    });
+
+                    // Check tanggal_mulai
+                    const dateInput = card.querySelector('input[type="date"]');
+                    if (dateInput && !dateInput.value) {
+                        valid = false;
+                        dateInput.classList.add('border-red-400');
+                    } else if (dateInput) {
+                        dateInput.classList.remove('border-red-400');
+                    }
+                });
+
+                if (!valid) {
+                    const firstInvalid = scheduleContainer.querySelector('.border-red-400, .error-msg:not(.hidden)');
+                    if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                return valid;
+            }
 
             // Generic function to check if a field is filled
             function isFieldFilled(field) {
@@ -608,144 +696,138 @@
 
             updateTeacherContainers();
 
-            // Dynamic schedule picker logic based on chosen mapel shift count
-            const pertemuanRadios = document.querySelectorAll('input[name="jumlah_pertemuan"]');
-            const pertemuanField = document.getElementById('pertemuanSemingguField');
-            const dateContainer = document.getElementById('datePickersContainer');
+            // ─── Per-Mapel Schedule Logic ──────────────────────────────────────
+            const scheduleContainer = document.getElementById('mapelScheduleContainer');
+            const step3Summary      = document.getElementById('step3MapelSummary');
 
-            function generateDayDropdowns(num) {
-                if (num > 0) {
-                    dateContainer.classList.remove('hidden');
-                    let html = `
-                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Hari Pertemuan Belajar (Senin s/d Sabtu)<span class="text-amber-600 ml-1">*</span></label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    `;
-                    for (let i = 1; i <= num; i++) {
-                        html += `
-                            <div class="field" data-required="true">
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hari Pertemuan Ke-${i}<span class="text-amber-600 ml-1">*</span></label>
-                                <select name="hari_pertemuan[]" class="form-input text-sm cursor-pointer" required>
-                                    <option value="">Pilih hari</option>
-                                    <option value="Senin">Senin</option>
-                                    <option value="Selasa">Selasa</option>
-                                    <option value="Rabu">Rabu</option>
-                                    <option value="Kamis">Kamis</option>
-                                    <option value="Jumat">Jumat</option>
-                                    <option value="Sabtu">Sabtu</option>
-                                </select>
-                                <div class="error">Hari pertemuan wajib dipilih.</div>
-                            </div>
-                        `;
-                    }
-                    const now = new Date();
-                    const year = now.getFullYear();
-                    const month = String(now.getMonth() + 1).padStart(2, '0');
-                    const day = String(now.getDate()).padStart(2, '0');
-                    const todayStr = `${year}-${month}-${day}`;
-
-                    html += `
-                        </div>
-                        <div class="field mt-4" data-required="true" id="startDateContainer">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Tanggal Mulai Les<span class="text-amber-600 ml-1">*</span></label>
-                            <input type="date" name="tanggal_mulai" class="form-input text-sm cursor-pointer" required min="${todayStr}">
-                            <div class="error">Tanggal mulai les wajib dipilih.</div>
-                        </div>
-                    `;
-                    dateContainer.innerHTML = html;
-                } else {
-                    dateContainer.innerHTML = '';
-                    dateContainer.classList.add('hidden');
-                }
-            }
-
-            function getSelectedShiftsCount() {
-                let totalShifts = 0;
+            // Get list of selected mapel names from checkboxes
+            function getSelectedMapelList() {
+                const list = [];
+                const seen = new Set();
                 checkboxes.forEach(cb => {
-                    if (cb.checked) {
-                        const val = cb.value;
-                        if (val) {
-                            const match = val.match(/(\d+)x/);
-                            if (match) {
-                                totalShifts += parseInt(match[1]);
-                            }
-                        }
+                    if (cb.checked && cb.value) {
+                        const match = cb.value.match(/^(.+?)\s+\d+x$/);
+                        const name  = match ? match[1].trim() : cb.value.trim();
+                        if (!seen.has(name)) { seen.add(name); list.push(name); }
                     }
                 });
-                return totalShifts;
+                return list;
             }
 
-            function updateMeetingOptions() {
-                const minMeetings = getSelectedShiftsCount();
-                
-                pertemuanRadios.forEach(radio => {
-                    const val = parseInt(radio.value);
-                    const label = document.getElementById(`label-pertemuan-${val}`);
-                    
-                    if (val < minMeetings) {
-                        radio.disabled = true;
-                        label.classList.add('opacity-40', 'cursor-not-allowed');
-                        label.classList.remove('hover:border-purple-500');
-                        if (radio.checked) {
-                            radio.checked = false;
-                            label.classList.remove('border-purple-600', 'bg-purple-50');
-                        }
-                    } else {
-                        radio.disabled = false;
-                        label.classList.remove('opacity-40', 'cursor-not-allowed');
-                        label.classList.add('hover:border-purple-500');
-                    }
-                });
+            // Build per-mapel schedule cards when entering Step 3
+            function generateMapelScheduleCards() {
+                const mapels = getSelectedMapelList();
+                const now    = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-                // Auto-select minimum option if none is selected or selected is less than minMeetings
-                let selectedRadio = document.querySelector('input[name="jumlah_pertemuan"]:checked');
-                if (minMeetings > 0) {
-                    if (!selectedRadio || parseInt(selectedRadio.value) < minMeetings) {
-                        const targetRadio = document.querySelector(`input[name="jumlah_pertemuan"][value="${minMeetings}"]`);
-                        if (targetRadio) {
-                            targetRadio.checked = true;
-                            highlightMeetingRadio(minMeetings);
-                        }
+                // Update summary banner
+                if (step3Summary) {
+                    if (mapels.length) {
+                        step3Summary.innerHTML = `<i class="fas fa-book-open mr-2 text-purple-500"></i>
+                            Jadwal untuk <strong>${mapels.length} mata pelajaran</strong>: ${mapels.join(', ')}`;
+                        step3Summary.classList.remove('hidden');
+                    } else {
+                        step3Summary.innerHTML = '<i class="fas fa-exclamation-circle mr-2 text-amber-500"></i> Belum ada mapel yang dipilih. Kembali ke langkah sebelumnya.';
                     }
-                    generateDayDropdowns(minMeetings);
-                    dateContainer.classList.remove('hidden');
-                } else {
-                    if (selectedRadio) {
-                        selectedRadio.checked = false;
-                    }
-                    highlightMeetingRadio(0);
-                    generateDayDropdowns(0);
-                    dateContainer.classList.add('hidden');
                 }
-            }
 
-            function highlightMeetingRadio(selectedValue) {
-                pertemuanRadios.forEach(radio => {
-                    const val = parseInt(radio.value);
-                    const label = document.getElementById(`label-pertemuan-${val}`);
-                    if (val === selectedValue) {
-                        label.classList.add('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
-                        label.classList.remove('bg-slate-50', 'border-purple-100');
-                    } else {
-                        label.classList.remove('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
-                        label.classList.add('bg-slate-50', 'border-purple-100');
-                    }
+                if (!scheduleContainer) return;
+                scheduleContainer.innerHTML = '';
+
+                mapels.forEach((mapel, idx) => {
+                    const slug = mapel.toLowerCase().replace(/\s+/g, '_');
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-2xl border border-purple-100 shadow-sm overflow-hidden';
+                    card.innerHTML = `
+                        <!-- Card Header -->
+                        <div class="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-purple-600 to-violet-600 text-white">
+                            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-xs font-black">${idx+1}</div>
+                            <div>
+                                <div class="text-[11px] font-semibold uppercase tracking-wider opacity-70">Jadwal Belajar</div>
+                                <div class="font-bold text-base leading-tight">${mapel}</div>
+                            </div>
+                        </div>
+
+                        <div class="p-5 space-y-4">
+                            <!-- Jumlah Pertemuan -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+                                    Jumlah Pertemuan / Sesi <span class="text-amber-600">*</span>
+                                </label>
+                                <div class="grid grid-cols-5 gap-2" id="pertemuan-grid-${slug}">
+                                    ${[1,2,3,4,5,6,7,8,9,10].map(n => `
+                                        <label class="pertemuan-label flex items-center justify-center p-2.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950 font-bold"
+                                               id="lbl-pt-${slug}-${n}"
+                                               onclick="selectPertemuan('${slug}', ${n}, this)">
+                                            <input type="radio" name="sesi[${idx}]" value="${n}" class="sr-only" data-mapel-idx="${idx}">
+                                            <span>${n}x</span>
+                                        </label>`).join('')}
+                                </div>
+                                <div class="error-msg hidden text-red-500 text-xs mt-1">Pilih jumlah pertemuan untuk ${mapel}.</div>
+                            </div>
+
+                            <!-- Pilih Hari: Pertemuan 1 & 2 -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                                        Hari — ${mapel} (Pertemuan 1) <span class="text-amber-600">*</span>
+                                    </label>
+                                    <select name="hari[${idx}][1]" class="form-input text-sm cursor-pointer" required>
+                                        <option value="">Pilih hari</option>
+                                        <option>Senin</option><option>Selasa</option><option>Rabu</option>
+                                        <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                                        Hari — ${mapel} (Pertemuan 2) <span class="text-amber-600">*</span>
+                                    </label>
+                                    <select name="hari[${idx}][2]" class="form-input text-sm cursor-pointer" required>
+                                        <option value="">Pilih hari</option>
+                                        <option>Senin</option><option>Selasa</option><option>Rabu</option>
+                                        <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Tanggal Mulai Les -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                                    Tanggal Mulai Les — ${mapel} <span class="text-amber-600">*</span>
+                                </label>
+                                <input type="date" name="tanggal_mulai[${idx}]" class="form-input text-sm cursor-pointer" required min="${todayStr}">
+                            </div>
+
+                            <!-- Hidden mapel name field for backend -->
+                            <input type="hidden" name="mapel_jadwal[${idx}]" value="${mapel}">
+                        </div>
+                    `;
+                    scheduleContainer.appendChild(card);
                 });
             }
 
-            pertemuanRadios.forEach(radio => {
-                radio.addEventListener('change', function () {
-                    const val = parseInt(this.value);
-                    highlightMeetingRadio(val);
-                    dateContainer.classList.remove('hidden');
-                    pertemuanField.classList.remove('invalid');
+            // Handle pertemuan radio highlight
+            window.selectPertemuan = function(slug, val, clickedLabel) {
+                const grid = document.getElementById(`pertemuan-grid-${slug}`);
+                if (!grid) return;
+                grid.querySelectorAll('.pertemuan-label').forEach(lbl => {
+                    lbl.classList.remove('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
+                    lbl.classList.add('bg-slate-50', 'border-purple-100');
                 });
-            });
+                clickedLabel.classList.add('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
+                clickedLabel.classList.remove('bg-slate-50', 'border-purple-100');
+                const radio = clickedLabel.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+            };
 
+            // Update Step 3 cards when step changes to 3
             checkboxes.forEach(cb => {
-                cb.addEventListener('change', updateMeetingOptions);
+                cb.addEventListener('change', () => {
+                    updateTeacherContainers();
+                });
             });
 
-            updateMeetingOptions();
+            updateTeacherContainers();
 
             // Initial step setup
             renderSteps();

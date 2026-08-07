@@ -76,7 +76,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div class="field" data-required="true">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tempat Lahir<span
                 class="text-amber-600 ml-1">*</span></label>
@@ -88,6 +88,16 @@
                 class="text-amber-600 ml-1">*</span></label>
             <input type="date" name="tanggal_lahir" class="form-input">
             <div class="error">Tanggal lahir wajib diisi.</div>
+          </div>
+          <div class="field" data-required="true">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jenis Kelamin<span
+                class="text-amber-600 ml-1">*</span></label>
+            <select name="jenis_kelamin" class="form-input cursor-pointer">
+              <option value="">Pilih jenis kelamin</option>
+              <option value="Laki-laki">Laki-laki</option>
+              <option value="Perempuan">Perempuan</option>
+            </select>
+            <div class="error">Jenis kelamin wajib dipilih.</div>
           </div>
         </div>
 
@@ -463,9 +473,6 @@
       </div>
     </div>
   </div>
-
-
-
   <style>
     .step-panel {
       display: none;
@@ -754,10 +761,13 @@
         window.showLoading('Menyimpan data dan mengalihkan ke menu pilih paket...');
       }
 
+      // Clear LocalStorage draft once successfully sent to database
+      clearFormData();
+
       // Submit the form
       setTimeout(() => {
         form.submit();
-      }, 1200);
+      }, 1000);
     });
 
     btnNext.addEventListener('click', () => {
@@ -807,7 +817,6 @@
         if (field) field.classList.remove('invalid');
       }
     });
-
     const kelasSelect = document.getElementById('kelasSelect');
     const kelasLainnya = document.getElementById('kelasLainnya');
 
