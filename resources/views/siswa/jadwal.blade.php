@@ -208,31 +208,16 @@
                     <i class="fas fa-graduation-cap fa-3x text-amber-500"></i>
                 </div>
                 <h5 class="font-weight-bold text-purple-950 mb-1" style="color: #2e1065;">Sesi Bimbingan Les</h5>
-                <div class="mb-2">
+                <div class="mb-2" id="modalBadgeContainer">
                     <span id="modalSessionIndex" class="badge badge-warning text-purple-950 font-weight-bold px-3 py-1.5 rounded-full text-xs">Sesi 1 dari 9</span>
                 </div>
                 <p id="modalDate" class="text-sm font-semibold text-purple-700 mb-4" style="color: #7c3aed;">Senin, 10 Agustus 2026</p>
-                <div class="p-3 bg-purple-50 rounded-2xl text-left border border-purple-100 mb-3 text-xs" style="background-color: #f5f3ff; border: 1px solid #ddd6fe;">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-slate-500">Jam Sesi:</span>
-                        <span class="font-weight-bold text-slate-800">{{ $jamMulai }} - {{ $jamSelesai }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-slate-500">Metode:</span>
-                        <span class="font-weight-bold text-slate-800">{{ str_contains(strtolower($siswa->tipe_paket), 'privat') ? 'Privat 1 on 1' : 'Kelompok' }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-slate-500">Lokasi:</span>
-                        <span class="font-weight-bold text-slate-800">Paradise of Math Center / Online</span>
-                    </div>
-                    @if(!empty($mapels))
-                    <div class="d-flex justify-content-between">
-                        <span class="text-slate-500">Mata Pelajaran:</span>
-                        <span class="font-weight-bold text-slate-800 text-right">{{ implode(', ', $mapels) }}</span>
-                    </div>
-                    @endif
+                
+                <div id="modalSessionsList">
+                    <!-- Dynamic session details per mapel inserted here -->
                 </div>
-                <p class="text-slate-400 text-xxs mb-0" style="font-size: 11px;">Hubungi Admin jika Anda ingin merubah atau menjadwalkan ulang sesi ini.</p>
+
+                <p class="text-slate-400 text-xxs mb-0 mt-3" style="font-size: 11px;">Hubungi Admin jika Anda ingin merubah atau menjadwalkan ulang sesi ini.</p>
             </div>
         </div>
     </div>
@@ -289,9 +274,10 @@
     }
 
     .calendar-day-cell.scheduled.completed {
-        background: linear-gradient(135deg, #a7f3d0 0%, #10b981 100%) !important;
-        color: #047857 !important;
-        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+        background: transparent !important;
+        color: #64748b !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
     }
     
     .schedule-dot {
@@ -303,7 +289,7 @@
         bottom: 6px;
     }
     .calendar-day-cell.scheduled.completed .schedule-dot {
-        background-color: #047857;
+        background-color: #94a3b8 !important;
     }
 
     .agenda-item {
@@ -394,8 +380,10 @@
         const legacyStart    = "{{ $tanggalMulai }}";
         const legacyLimit    = {{ $jumlahPertemuan ?? 0 }};
 
-        const jamMulai   = "{{ $jamMulai }}";
-        const jamSelesai = "{{ $jamSelesai }}";
+        const jamMulai      = "{{ $jamMulai }}";
+        const jamSelesai    = "{{ $jamSelesai }}";
+        const gurus         = @json($gurus ?? []);
+        const tipePaketStr  = "{{ str_contains(strtolower($siswa->tipe_paket), 'privat') ? 'Privat 1 on 1' : 'Kelompok' }}";
 
         const dayNames   = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const monthNames = ['Januari','Februari','Maret','April','Mei','Juni',
@@ -411,6 +399,18 @@
             {bg:'#e11d48', light:'#ffe4e6', text:'#881337'},
             {bg:'#0891b2', light:'#cffafe', text:'#164e63'},
         ];
+
+        // Helper untuk mencocokkan tutor/guru berdasarkan mata pelajaran
+        function getGuruForMapel(mapelName) {
+            if (!gurus || gurus.length === 0) return 'Belum ditentukan oleh Admin';
+            const normMapel = String(mapelName).toLowerCase().trim();
+            let matched = gurus.find(g => String(g).toLowerCase().includes(normMapel));
+            if (matched) {
+                return matched.replace(/^(math|english|ipa|ips|fisika|kimia|biologi|matematika):\s*/i, '');
+            }
+            const cleaned = gurus.map(g => g.replace(/^(math|english|ipa|ips|fisika|kimia|biologi|matematika):\s*/i, ''));
+            return cleaned.join(', ') || 'Belum ditentukan oleh Admin';
+        }
 
         // ── Build scheduledDates dari per-mapel atau fallback ──
         const scheduledDates = []; // { dateStr, sessionIndex, dayName, dateObj, mapelName, mapelIdx, totalSesi }
@@ -446,7 +446,7 @@
             // Mode per-mapel baru
             mapelJadwal.forEach((mapel, idx) => {
                 const hariRaw  = hariPerMapelRaw[idx] ?? {};
-                const days     = Object.values(hariRaw).filter(h => h);
+                const days     = Array.isArray(hariRaw) ? hariRaw : Object.values(hariRaw).filter(h => h);
                 const startStr = tanggalPerMapel[idx] ?? legacyStart;
                 const limit    = parseInt(sesiPerMapel[idx] ?? 0);
                 buildSchedule(days, startStr, limit, mapel, idx);
@@ -473,7 +473,7 @@
                 const banner = document.getElementById('sessionNotificationBanner');
                 const bannerText = document.getElementById('sessionNotificationText');
                 if (banner && bannerText) {
-                    bannerText.innerHTML = `Hari ini adalah <strong>Sesi 1</strong> Bimbingan Belajar Anda! Sesi dimulai pukul <strong>${jamMulai} - ${jamSelesai}</strong>. Selamat belajar!`;
+                    bannerText.innerHTML = `Hari ini adalah <strong>Sesi 1 (${first.mapelName})</strong> Bimbingan Belajar Anda! Sesi dimulai pukul <strong>${jamMulai} - ${jamSelesai}</strong>. Selamat belajar!`;
                     banner.classList.remove('d-none');
                 }
             }
@@ -487,6 +487,64 @@
         const grid            = document.getElementById('calendarDaysGrid');
         const monthYearLabel  = document.getElementById('currentMonthYear');
         const agendaContainer = document.getElementById('agendaListContainer');
+
+        function openModalForSessions(currentDate, sessionsToday) {
+            const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = currentDate.toLocaleDateString('id-ID', opts);
+            document.getElementById('modalDate').textContent = formattedDate;
+
+            const now = new Date();
+            const curMin = now.getHours()*60 + now.getMinutes();
+            const endParts = jamSelesai.split(':');
+            const endMin = parseInt(endParts[0])*60 + (parseInt(endParts[1])||0);
+            const today = new Date(); today.setHours(0,0,0,0);
+            const isPast = currentDate < today;
+            const isDoneToday = (currentDate.getTime() === today.getTime()) && curMin > endMin;
+            const isCompleted = isPast || isDoneToday;
+
+            // Badges atas modal
+            const badgeLabel = sessionsToday.map(s => `${s.mapelName}: Sesi ${s.sessionIndex}/${s.totalSesi}`).join(' | ');
+            document.getElementById('modalSessionIndex').textContent = badgeLabel + (isCompleted ? ' (Selesai)' : ' (Belum Mulai)');
+
+            // Build dynamic details box per mapel session
+            const sessionsListEl = document.getElementById('modalSessionsList');
+            if (sessionsListEl) {
+                sessionsListEl.innerHTML = sessionsToday.map(s => {
+                    const guruName = getGuruForMapel(s.mapelName);
+                    const color = mapelColors[s.mapelIdx % mapelColors.length];
+                    return `
+                    <div class="p-3.5 rounded-2xl text-left border mb-3 text-xs shadow-xs" 
+                         style="background-color: ${color.light}; border-color: ${color.bg}40;">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom" style="border-color: ${color.bg}30;">
+                            <span class="font-weight-bold text-sm" style="color: ${color.text};">
+                                <i class="fas fa-book-open mr-1.5"></i> ${s.mapelName}
+                            </span>
+                            <span class="badge px-2.5 py-1 rounded-full text-xxs font-weight-bold" style="background-color: ${color.bg}; color: #fff;">
+                                Sesi ${s.sessionIndex} dari ${s.totalSesi}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1.5">
+                            <span class="text-slate-500"><i class="fas fa-chalkboard-teacher mr-1 text-slate-400"></i>Tutor Pendamping:</span>
+                            <span class="font-weight-bold text-slate-800">${guruName}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1.5">
+                            <span class="text-slate-500"><i class="far fa-clock mr-1 text-slate-400"></i>Jam Sesi:</span>
+                            <span class="font-weight-bold text-slate-800">${jamMulai} - ${jamSelesai} WIB</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1.5">
+                            <span class="text-slate-500"><i class="fas fa-users mr-1 text-slate-400"></i>Metode:</span>
+                            <span class="font-weight-bold text-slate-800">${tipePaketStr}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-slate-500"><i class="fas fa-map-marker-alt mr-1 text-slate-400"></i>Lokasi:</span>
+                            <span class="font-weight-bold text-slate-800">Paradise of Math Center / Online</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            $('#sessionDetailModal').modal('show');
+        }
 
         function renderCalendar(month, year) {
             grid.innerHTML = '';
@@ -526,7 +584,7 @@
                 const isToday = currentDate.getTime() === today.getTime();
                 if (isToday) cell.classList.add('today');
 
-                // Cari semua sesi di tanggal ini (mungkin lebih dari 1 mapel)
+                // Cari semua sesi di tanggal ini
                 const sessionsToday = scheduledDates.filter(s => s.dateStr === currentDateStr);
 
                 if (sessionsToday.length > 0) {
@@ -559,13 +617,9 @@
                     const labels = sessionsToday.map(s => `${s.mapelName} Sesi ${s.sessionIndex}/${s.totalSesi}`).join(', ');
                     cell.title = labels;
 
-                    // Click modal
+                    // Click modal popup
                     cell.addEventListener('click', function() {
-                        const opts = {weekday:'long',year:'numeric',month:'long',day:'numeric'};
-                        document.getElementById('modalDate').textContent = currentDate.toLocaleDateString('id-ID', opts);
-                        const label = sessionsToday.map(s => `${s.mapelName}: Sesi ${s.sessionIndex}/${s.totalSesi}`).join(' | ');
-                        document.getElementById('modalSessionIndex').textContent = label + (isCompleted ? ' (Selesai)' : ' (Belum Mulai)');
-                        $('#sessionDetailModal').modal('show');
+                        openModalForSessions(currentDate, sessionsToday);
                     });
 
                     sessionsToday.forEach(s => {
@@ -601,6 +655,7 @@
                 const isToday = item.date.getTime() === today.getTime();
                 const isPast  = item.date < today;
                 const color   = mapelColors[s.mapelIdx % mapelColors.length];
+                const guruName = getGuruForMapel(s.mapelName);
                 const statusBadge = isPast
                     ? `<span class="badge badge-success text-xs font-weight-bold px-2 py-1 rounded-full" style="background-color:#d1fae5;color:#065f46;font-size:10px;">Selesai</span>`
                     : (isToday
@@ -608,19 +663,27 @@
                         : `<span class="badge text-xs font-weight-bold px-2 py-1 rounded-full" style="background-color:#f5f3ff;color:#6d28d9;font-size:10px;">Belum Mulai</span>`);
                 return `
                 <div class="agenda-item px-3 py-2.5 border-bottom border-light d-flex align-items-center gap-3 ${isToday ? 'today-agenda' : ''}"
-                     style="border-left: 4px solid ${color.bg}; background:${isPast ? '#fafafa' : '#fff'};">
+                     style="border-left: 4px solid ${color.bg}; background:${isPast ? '#fafafa' : '#fff'};"
+                     onclick="openModalForAgenda('${s.dateStr}', ${s.mapelIdx})">
                     <div class="text-center shrink-0" style="min-width:36px;">
                         <div class="font-weight-bold text-purple-950 text-sm">${item.dayNum}</div>
                         <div class="text-muted text-xxs" style="font-size:10px;">${item.dayName.slice(0,3)}</div>
                     </div>
                     <div class="flex-grow-1">
                         <div class="font-weight-bold text-xs text-purple-950">${s.mapelName}</div>
-                        <div class="text-muted text-xxs" style="font-size:10px;">Sesi ${s.sessionIndex} dari ${s.totalSesi} • ${jamMulai}–${jamSelesai}</div>
+                        <div class="text-muted text-xxs" style="font-size:10px;">Tutor: <strong>${guruName}</strong> • Sesi ${s.sessionIndex} dari ${s.totalSesi}</div>
                     </div>
                     <div>${statusBadge}</div>
                 </div>`;
             }).join('');
             agendaContainer.innerHTML = html;
+
+            // Make openModalForAgenda globally available for agenda item clicks
+            window.openModalForAgenda = function(dateStr, mapelIdx) {
+                const targetDate = new Date(dateStr + 'T00:00:00');
+                const sessions = scheduledDates.filter(s => s.dateStr === dateStr);
+                openModalForSessions(targetDate, sessions);
+            };
         }
 
         renderCalendar(currentMonth, currentYear);

@@ -217,22 +217,94 @@
                                                     </div>
                                                 </td>
                                                 <td class="px-4 py-3.5 align-middle">
-                                                    <span class="badge px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-xs" style="background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff;">
+                                                    <span class="badge px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-xs mb-1.5 d-inline-block" style="background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff;">
                                                         <i class="fas fa-graduation-cap mr-1"></i> {{ $s->paket ? $s->paket->nama_paket : 'Paket Belajar' }}
                                                     </span>
                                                     @php
                                                         $sBio = $s->biodata ?? [];
-                                                        $sSesi = $sBio['jumlah_pertemuan'] ?? null;
-                                                        if (!$sSesi && $s->tipe_paket) {
-                                                            if (preg_match('/Sesi:\s*(\d+)x/i', $s->tipe_paket, $matches)) {
-                                                                $sSesi = $matches[1];
+                                                        $mapelJadwal = $sBio['mapel_jadwal'] ?? [];
+                                                        $sesiPerMapel = $sBio['sesi_per_mapel'] ?? [];
+                                                        $tutorPerMapel = $sBio['tutor_per_mapel'] ?? [];
+                                                        
+                                                        if (empty($mapelJadwal) && $s->tipe_paket) {
+                                                            if (preg_match('/Mapel:\s*([^)|]+)/i', $s->tipe_paket, $matches)) {
+                                                                $mapelJadwal = array_map('trim', explode(',', $matches[1]));
+                                                            }
+                                                        }
+
+                                                        $loggedGuruNameNorm = strtolower(trim(Auth::user()->name ?? ''));
+                                                        $guruMapelDetails = [];
+
+                                                        if (!empty($mapelJadwal)) {
+                                                            foreach ($mapelJadwal as $idx => $mName) {
+                                                                $mSesi = $sesiPerMapel[$idx] ?? ($sBio['jumlah_pertemuan'] ?? null);
+                                                                $assignedGuru = $tutorPerMapel[$mName] ?? null;
+
+                                                                if ($assignedGuru) {
+                                                                    if (strtolower(trim($assignedGuru)) === $loggedGuruNameNorm) {
+                                                                        $guruMapelDetails[] = [
+                                                                            'name' => $mName,
+                                                                            'sesi' => $mSesi,
+                                                                        ];
+                                                                    }
+                                                                } else {
+                                                                    $isMatch = false;
+                                                                    if ($s->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $s->tipe_paket, $m)) {
+                                                                        $guruParts = array_map('trim', explode(',', $m[1]));
+                                                                        foreach ($guruParts as $part) {
+                                                                            if (str_contains(strtolower($part), $loggedGuruNameNorm)) {
+                                                                                if (str_contains($part, ':')) {
+                                                                                    $p = explode(':', $part);
+                                                                                    if (strtolower(trim($p[0])) === strtolower(trim($mName))) {
+                                                                                        $isMatch = true;
+                                                                                    }
+                                                                                } else {
+                                                                                    $isMatch = true;
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    } else {
+                                                                        $isMatch = true;
+                                                                    }
+
+                                                                    if ($isMatch) {
+                                                                        $guruMapelDetails[] = [
+                                                                            'name' => $mName,
+                                                                            'sesi' => $mSesi,
+                                                                        ];
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     @endphp
-                                                    @if($sSesi)
-                                                        <div class="text-[11px] text-muted mt-1 font-semibold pl-1">
-                                                            <i class="far fa-clock mr-1 text-purple-400"></i> {{ $sSesi }}x Pertemuan Sebulan
+
+                                                    @if(!empty($guruMapelDetails))
+                                                        <div class="space-y-1 mt-1">
+                                                            @foreach($guruMapelDetails as $md)
+                                                                <div class="text-[11px] font-bold text-purple-900 d-flex align-items-center gap-1.5">
+                                                                    <span class="badge bg-purple-100 text-purple-800 text-[10px] px-1.5 py-0.5 rounded font-bold">
+                                                                        {{ $md['name'] }}
+                                                                    </span>
+                                                                    @if($md['sesi'])
+                                                                        <span><i class="far fa-clock mr-1 text-purple-400"></i>{{ $md['sesi'] }}x Pertemuan</span>
+                                                                    @endif
+                                                                </div>
+                                                            @endforeach
                                                         </div>
+                                                    @else
+                                                        @php
+                                                            $sSesi = $sBio['jumlah_pertemuan'] ?? null;
+                                                            if (!$sSesi && $s->tipe_paket) {
+                                                                if (preg_match('/Sesi:\s*(\d+)x/i', $s->tipe_paket, $matches)) {
+                                                                    $sSesi = $matches[1];
+                                                                }
+                                                            }
+                                                        @endphp
+                                                        @if($sSesi)
+                                                            <div class="text-[11px] text-muted mt-1 font-semibold pl-1">
+                                                                <i class="far fa-clock mr-1 text-purple-400"></i> {{ $sSesi }}x Pertemuan
+                                                            </div>
+                                                        @endif
                                                     @endif
                                                 </td>
                                                 <td class="px-4 py-3.5 align-middle text-center">

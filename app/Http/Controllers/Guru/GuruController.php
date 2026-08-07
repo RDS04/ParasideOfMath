@@ -185,102 +185,182 @@ class GuruController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
         }
 
+        $guruNameNorm = strtolower(trim($user->name));
+
         // Fetch students assigned to this Guru
-        $assignedStudents = \App\Models\Siswa::all()->filter(function ($siswa) use ($user) {
+        $assignedStudents = \App\Models\Siswa::all()->filter(function ($siswa) use ($guruNameNorm) {
             $biodata = $siswa->biodata ?? [];
+
+            // 1. Check tutor_per_mapel (e.g. ['Fisika' => 'Guru Test', 'Kimia' => 'Guru Budi'])
+            $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+            if (is_array($tutorPerMapel)) {
+                foreach ($tutorPerMapel as $mapel => $tName) {
+                    if (strtolower(trim($tName)) === $guruNameNorm) {
+                        return true;
+                    }
+                }
+            }
+
+            // 2. Check tutor_names (flat array)
             $tutorNames = $biodata['tutor_names'] ?? [];
             if (is_array($tutorNames)) {
-                return in_array($user->name, $tutorNames);
+                foreach ($tutorNames as $tName) {
+                    if (strtolower(trim($tName)) === $guruNameNorm) {
+                        return true;
+                    }
+                }
             }
+
+            // 3. Check tipe_paket string descriptor
+            if ($siswa->tipe_paket && str_contains(strtolower($siswa->tipe_paket), $guruNameNorm)) {
+                return true;
+            }
+
             return false;
         });
 
         $sessions = [];
         $dayMap = [
-            'Minggu' => 0, 'Senin' => 1, 'Selasa' => 2, 'Rabu' => 3,
-            'Kamis' => 4, 'Jumat' => 5, 'Sabtu' => 6
+            'minggu' => 0, 'senin' => 1, 'selasa' => 2, 'rabu' => 3,
+            'kamis' => 4, 'jumat' => 5, 'sabtu' => 6,
+            'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
+            'thursday' => 4, 'friday' => 5, 'saturday' => 6
         ];
 
         foreach ($assignedStudents as $siswa) {
             $biodata = $siswa->biodata ?? [];
-            $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
-            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? 0;
-            $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
-            $paket = $siswa->paket;
 
-            // Fallback parsing from tipe_paket if empty
-            if (empty($hariPertemuan) && $siswa->tipe_paket) {
-                if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-                    $hariPertemuan = array_map('trim', explode(',', $matches[1]));
+            // Extract mapels for this student
+            $mapelJadwal     = $biodata['mapel_jadwal'] ?? [];
+            $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];
+            $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
+            $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
+
+            if (empty($mapelJadwal) && $siswa->tipe_paket) {
+                if (preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                    $mapelJadwal = array_map('trim', explode(',', $matches[1]));
                 }
             }
-            if (!$jumlahPertemuan && $siswa->tipe_paket) {
-                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
-                    $jumlahPertemuan = (int) $matches[1];
-                }
-            }
-            if (!$tanggalMulai && $siswa->tipe_paket) {
-                if (preg_match('/Mulai:\s*([\d\-]+)/i', $siswa->tipe_paket, $matches)) {
-                    $d = trim($matches[1]);
-                    if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $d, $dMatches)) {
-                        $tanggalMulai = $dMatches[3] . '-' . $dMatches[2] . '-' . $dMatches[1];
+
+            // Determine which specific mapels are assigned to this Guru
+            $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+            $assignedMapelsForThisGuru = [];
+
+            if (is_array($tutorPerMapel) && !empty($tutorPerMapel)) {
+                foreach ($tutorPerMapel as $mapelName => $tName) {
+                    if (strtolower(trim($tName)) === $guruNameNorm) {
+                        $assignedMapelsForThisGuru[] = $mapelName;
                     }
                 }
             }
-            if (!$tanggalMulai && $siswa->created_at) {
-                $tanggalMulai = $siswa->created_at->format('Y-m-d');
+
+            if (empty($assignedMapelsForThisGuru) && $siswa->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket, $m)) {
+                $guruParts = array_map('trim', explode(',', $m[1]));
+                foreach ($guruParts as $part) {
+                    if (str_contains(strtolower($part), $guruNameNorm)) {
+                        if (str_contains($part, ':')) {
+                            $p = explode(':', $part);
+                            $assignedMapelsForThisGuru[] = trim($p[0]);
+                        }
+                    }
+                }
             }
 
+            // Fallback: if no specific per-mapel assignment found, assign all mapels
+            if (empty($assignedMapelsForThisGuru)) {
+                $assignedMapelsForThisGuru = !empty($mapelJadwal) ? $mapelJadwal : ['Bimbingan Belajar'];
+            }
+
+            // Jam Mulai & Selesai
+            $paket = $siswa->paket;
             $jamMulai = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
             $durationMinutes = 90;
-            if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5, $dMatches)) {
+            if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5 ?? '', $dMatches)) {
                 $durationMinutes = (int) $dMatches[1];
             }
             $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
 
-            // Find the subject taught by this teacher for this student
-            $tutorNames = $biodata['tutor_names'] ?? [];
-            $tutorSubjects = $biodata['tutor_subjects'] ?? [];
-            $tIndex = is_array($tutorNames) ? array_search($user->name, $tutorNames) : false;
-            $assignedMapel = ($tIndex !== false && isset($tutorSubjects[$tIndex])) ? $tutorSubjects[$tIndex] : 'Matapelajaran';
+            // Process sessions per mapel
+            foreach ($assignedMapelsForThisGuru as $mapelName) {
+                $mIdx = array_search($mapelName, $mapelJadwal);
+                
+                $hariList = [];
+                $tglMulai = null;
+                $limitSesi = 0;
 
-            // Generate dates for sessions
-            $scheduledDayNums = [];
-            foreach ($hariPertemuan as $h) {
-                if (isset($dayMap[$h])) {
-                    $scheduledDayNums[] = $dayMap[$h];
+                if ($mIdx !== false && isset($hariPerMapel[$mIdx])) {
+                    $rawH = $hariPerMapel[$mIdx];
+                    $hariList = is_array($rawH) ? array_values(array_filter($rawH)) : [];
+                    $tglMulai = $tanggalPerMapel[$mIdx] ?? ($biodata['tanggal_mulai'] ?? null);
+                    $limitSesi = (int)($sesiPerMapel[$mIdx] ?? ($biodata['jumlah_pertemuan'] ?? 0));
+                } else {
+                    $hariList = $biodata['hari_pertemuan'] ?? [];
+                    $tglMulai = $biodata['tanggal_mulai'] ?? null;
+                    $limitSesi = (int)($biodata['jumlah_pertemuan'] ?? 0);
                 }
-            }
 
-            if ($jumlahPertemuan > 0 && !empty($scheduledDayNums) && $tanggalMulai) {
-                try {
-                    $startDate = \Carbon\Carbon::parse($tanggalMulai);
-                    $tempDate = $startDate->copy();
-                    $studentSessionCount = 0;
-                    
-                    for ($d = 0; $d < 365; $d++) {
-                        if ($studentSessionCount >= $jumlahPertemuan) {
-                            break;
-                        }
-                        $dayOfWeek = $tempDate->dayOfWeek; // 0 (Sunday) to 6 (Saturday)
-                        if (in_array($dayOfWeek, $scheduledDayNums)) {
-                            $studentSessionCount++;
-                            $dateStr = $tempDate->format('Y-m-d');
-                            $sessions[] = [
-                                'dateStr' => $dateStr,
-                                'student_name' => $siswa->name,
-                                'subject' => $assignedMapel,
-                                'time' => $jamMulai . ' - ' . $jamSelesai,
-                                'whatsapp' => $siswa->whatsapp,
-                                'sekolah' => $siswa->sekolah,
-                                'session_index' => $studentSessionCount,
-                                'total_sessions' => $jumlahPertemuan,
-                            ];
-                        }
-                        $tempDate->addDay();
+                // Fallback tipe_paket parsing
+                if (empty($hariList) && $siswa->tipe_paket && preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+                    $hariList = array_map('trim', explode(',', $m[1]));
+                }
+                if ($limitSesi === 0 && $siswa->tipe_paket) {
+                    if (preg_match('/Total Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                        $limitSesi = (int)$m[1];
+                    } elseif (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                        $limitSesi = (int)$m[1];
                     }
-                } catch (\Exception $e) {
-                    // Ignore errors
+                }
+                if (!$tglMulai && $siswa->tipe_paket && preg_match('/Mulai:\s*([\d\-]+)/i', $siswa->tipe_paket, $m)) {
+                    $d = trim($m[1]);
+                    if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $d, $dM)) {
+                        $tglMulai = $dM[3] . '-' . $dM[2] . '-' . $dM[1];
+                    } else {
+                        $tglMulai = $d;
+                    }
+                }
+                if (!$tglMulai && $siswa->created_at) {
+                    $tglMulai = $siswa->created_at->format('Y-m-d');
+                }
+
+                // Convert day names to day numbers
+                $scheduledDayNums = [];
+                foreach ($hariList as $h) {
+                    $normH = strtolower(trim($h));
+                    if (isset($dayMap[$normH])) {
+                        $scheduledDayNums[] = $dayMap[$normH];
+                    }
+                }
+
+                if ($limitSesi > 0 && !empty($scheduledDayNums) && $tglMulai) {
+                    try {
+                        $startDate = \Carbon\Carbon::parse($tglMulai);
+                        $tempDate = $startDate->copy();
+                        $studentSessionCount = 0;
+
+                        for ($d = 0; $d < 730; $d++) {
+                            if ($studentSessionCount >= $limitSesi) {
+                                break;
+                            }
+                            $dayOfWeek = $tempDate->dayOfWeek;
+                            if (in_array($dayOfWeek, $scheduledDayNums)) {
+                                $studentSessionCount++;
+                                $dateStr = $tempDate->format('Y-m-d');
+                                $sessions[] = [
+                                    'dateStr' => $dateStr,
+                                    'student_name' => $siswa->name,
+                                    'subject' => $mapelName,
+                                    'time' => $jamMulai . ' - ' . $jamSelesai,
+                                    'whatsapp' => $siswa->whatsapp,
+                                    'sekolah' => $siswa->sekolah,
+                                    'session_index' => $studentSessionCount,
+                                    'total_sessions' => $limitSesi,
+                                ];
+                            }
+                            $tempDate->addDay();
+                        }
+                    } catch (\Exception $e) {
+                        // Ignore errors
+                    }
                 }
             }
         }
@@ -298,13 +378,37 @@ class GuruController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
         }
 
+        $guruNameNorm = strtolower(trim($user->name));
+
         // Fetch students assigned to this Guru
-        $assignedStudents = \App\Models\Siswa::all()->filter(function ($siswa) use ($user) {
+        $assignedStudents = \App\Models\Siswa::all()->filter(function ($siswa) use ($guruNameNorm) {
             $biodata = $siswa->biodata ?? [];
+
+            // 1. Check tutor_per_mapel
+            $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+            if (is_array($tutorPerMapel)) {
+                foreach ($tutorPerMapel as $mapel => $tName) {
+                    if (strtolower(trim($tName)) === $guruNameNorm) {
+                        return true;
+                    }
+                }
+            }
+
+            // 2. Check tutor_names
             $tutorNames = $biodata['tutor_names'] ?? [];
             if (is_array($tutorNames)) {
-                return in_array($user->name, $tutorNames);
+                foreach ($tutorNames as $tName) {
+                    if (strtolower(trim($tName)) === $guruNameNorm) {
+                        return true;
+                    }
+                }
             }
+
+            // 3. Check tipe_paket
+            if ($siswa->tipe_paket && str_contains(strtolower($siswa->tipe_paket), $guruNameNorm)) {
+                return true;
+            }
+
             return false;
         });
 

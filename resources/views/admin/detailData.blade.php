@@ -150,17 +150,40 @@
                                             <td class="text-muted py-2">Guru Pendamping</td>
                                             <td class="py-2">
                                                 <div class="d-flex align-items-center justify-content-between">
-                                                    <span class="font-weight-bold text-slate-800 text-xs text-truncate mr-1" style="max-width: 180px;">
+                                                    <div class="font-weight-bold text-slate-800 text-xs mr-1">
                                                         @php
+                                                            $tutorPerMapel = $bio['tutor_per_mapel'] ?? [];
                                                             $currentGurus = [];
                                                             if ($student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
                                                                 $currentGurus = array_map('trim', explode(',', $matches[1]));
                                                             }
-                                                            $displayGuru = !empty($currentGurus) ? implode(', ', $currentGurus) : 'Belum ditentukan';
+                                                            $mapelJadwal = $bio['mapel_jadwal'] ?? [];
+                                                            if (empty($mapelJadwal) && $student->tipe_paket) {
+                                                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                                                    $mapelJadwal = array_map('trim', explode(',', $matches[1]));
+                                                                }
+                                                            }
                                                         @endphp
-                                                        <i class="fas fa-chalkboard-teacher mr-1 text-purple-600"></i>{{ $displayGuru }}
-                                                    </span>
-                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px]" data-toggle="modal" data-target="#editTutorModal" style="border-color: #cbd5e1; color: #475569;">
+
+                                                        @if(!empty($tutorPerMapel))
+                                                            @foreach($tutorPerMapel as $mName => $gName)
+                                                                <div class="mb-1 d-flex align-items-center gap-1">
+                                                                    <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $mName }}:</span>
+                                                                    <span class="text-purple-950 font-weight-bold text-xs">{{ $gName }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                        @elseif(!empty($currentGurus))
+                                                            @foreach($currentGurus as $cg)
+                                                                <div class="mb-1 d-flex align-items-center gap-1">
+                                                                    <i class="fas fa-chalkboard-teacher mr-1 text-purple-600"></i>
+                                                                    <span class="text-purple-950 font-weight-bold text-xs">{{ $cg }}</span>
+                                                                </div>
+                                                            @endforeach
+                                                        @else
+                                                            <span class="text-muted font-italic text-xs">Belum ditentukan</span>
+                                                        @endif
+                                                    </div>
+                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editTutorModal" style="border-color: #cbd5e1; color: #475569;">
                                                         <i class="fas fa-edit mr-0.5 text-purple-600"></i> Atur
                                                     </button>
                                                 </div>
@@ -518,42 +541,90 @@
                         </button>
                     </div>
                     <div class="modal-body p-4 text-left">
-                        <p class="text-xs text-muted mb-3">Pilih guru-guru pendamping yang ditugaskan untuk mengajar siswa ini. Anda dapat memilih lebih dari satu guru.</p>
-                        
-                        <!-- Search Box -->
-                        <div class="input-group mb-3 shadow-sm" style="border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-white border-right-0 text-muted" style="border: 0;"><i class="fas fa-search"></i></span>
+                        @if(!empty($mapelJadwal))
+                            <div class="p-3 bg-purple-50 rounded-2xl border border-purple-100 mb-4">
+                                <h6 class="font-weight-bold text-purple-950 text-xs mb-1">
+                                    <i class="fas fa-layer-group text-purple-600 mr-1.5"></i> Penugasan Guru per Mata Pelajaran
+                                </h6>
+                                <p class="text-xs text-muted mb-0">Siswa ini mendaftar <strong>{{ count($mapelJadwal) }} Mata Pelajaran</strong> ({{ implode(', ', $mapelJadwal) }}). Silakan pilih guru pendamping untuk masing-masing mata pelajaran:</p>
                             </div>
-                            <input type="text" id="searchTutorInput" class="form-control border-left-0 text-xs" placeholder="Cari nama atau spesialisasi guru..." style="height: 38px; border: 0; outline: none; font-size: 0.8rem;">
-                        </div>
 
-                        <div class="form-group mb-0">
-                            <label class="font-weight-bold text-purple-950 text-xs d-block mb-2">Pilih Guru / Tutor:</label>
                             <div class="row">
-                                @if(isset($gurusList) && !$gurusList->isEmpty())
-                                    @foreach($gurusList as $g)
-                                        @php
-                                            $isChecked = in_array($g->user->name ?? '', $currentGurus);
-                                        @endphp
-                                        <div class="col-md-6 mb-3 tutor-item-row" data-name="{{ strtolower($g->user->name ?? '') }}" data-spesialisasi="{{ strtolower($g->spesialisasi ?? 'matematika') }}">
-                                            <div class="custom-control custom-checkbox p-2 rounded border" style="background-color: #f8fafc; border-color: #e2e8f0; height: 100%;">
-                                                <input type="checkbox" name="tutors[]" value="{{ $g->user->name ?? '' }}" class="custom-control-input" id="checkGuru{{ $g->id }}" {{ $isChecked ? 'checked' : '' }}>
-                                                <label class="custom-control-label text-xs text-slate-700 font-weight-semibold d-flex flex-column" style="cursor: pointer; padding-left: 8px;" for="checkGuru{{ $g->id }}">
-                                                    <span class="font-weight-bold text-purple-950">{{ $g->user->name ?? '' }}</span>
-                                                    <span class="text-[10px] text-muted">{{ $g->user->email ?? '' }}</span>
-                                                    <span class="text-[10px] text-purple-600 mt-1 font-weight-bold">Spesialisasi: {{ $g->spesialisasi ?? 'Matematika' }}</span>
-                                                </label>
-                                            </div>
+                                @foreach($mapelJadwal as $idx => $namaMapel)
+                                    @php
+                                        $selectedGuruForThisMapel = $tutorPerMapel[$namaMapel] ?? '';
+                                        // Fallback match by mapel name if tutorPerMapel is empty
+                                        if (!$selectedGuruForThisMapel && !empty($currentGurus)) {
+                                            foreach($currentGurus as $cg) {
+                                                if (str_contains(strtolower($cg), strtolower($namaMapel))) {
+                                                    $selectedGuruForThisMapel = preg_replace('/^(math|english|ipa|ips|fisika|kimia|biologi|matematika):\s*/i', '', $cg);
+                                                }
+                                            }
+                                        }
+                                    @endphp
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card border p-3 rounded-xl shadow-xs" style="background-color: #faf9fd; border-color: #ddd6fe !important;">
+                                            <label class="font-weight-bold text-purple-950 text-xs d-flex align-items-center justify-content-between mb-2">
+                                                <span><i class="fas fa-book-open text-purple-600 mr-1.5"></i> Mapel:</span>
+                                                <span class="badge bg-purple-600 text-white font-bold px-2.5 py-1 text-xs rounded-full">{{ $namaMapel }}</span>
+                                            </label>
+                                            <select name="tutor_per_mapel[{{ $namaMapel }}]" class="form-control text-xs font-weight-semibold rounded-lg" style="height: 40px; border-color: #c4b5fd;">
+                                                <option value="">-- Belum Ditentukan --</option>
+                                                @if(isset($gurusList) && !$gurusList->isEmpty())
+                                                    @foreach($gurusList as $g)
+                                                        @php
+                                                            $gName = $g->user->name ?? '';
+                                                            $spec  = $g->spesialisasi ?? 'Matematika';
+                                                            $isSel = (strtolower(trim($selectedGuruForThisMapel)) === strtolower(trim($gName)));
+                                                        @endphp
+                                                        <option value="{{ $gName }}" {{ $isSel ? 'selected' : '' }}>
+                                                            {{ $gName }} (Spesialisasi: {{ $spec }})
+                                                        </option>
+                                                    @endforeach
+                                                @endif
+                                            </select>
                                         </div>
-                                    @endforeach
-                                @else
-                                    <div class="col-12 text-center py-3">
-                                        <span class="text-xs text-muted font-italic">Belum ada guru/tutor terdaftar.</span>
                                     </div>
-                                @endif
+                                @endforeach
                             </div>
-                        </div>
+                        @else
+                            <p class="text-xs text-muted mb-3">Pilih guru-guru pendamping yang ditugaskan untuk mengajar siswa ini. Anda dapat memilih lebih dari satu guru.</p>
+                            
+                            <!-- Search Box -->
+                            <div class="input-group mb-3 shadow-sm" style="border-radius: 10px; overflow: hidden; border: 1px solid #e2e8f0;">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-white border-right-0 text-muted" style="border: 0;"><i class="fas fa-search"></i></span>
+                                </div>
+                                <input type="text" id="searchTutorInput" class="form-control border-left-0 text-xs" placeholder="Cari nama atau spesialisasi guru..." style="height: 38px; border: 0; outline: none; font-size: 0.8rem;">
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold text-purple-950 text-xs d-block mb-2">Pilih Guru / Tutor:</label>
+                                <div class="row">
+                                    @if(isset($gurusList) && !$gurusList->isEmpty())
+                                        @foreach($gurusList as $g)
+                                            @php
+                                                $isChecked = in_array($g->user->name ?? '', $currentGurus);
+                                            @endphp
+                                            <div class="col-md-6 mb-3 tutor-item-row" data-name="{{ strtolower($g->user->name ?? '') }}" data-spesialisasi="{{ strtolower($g->spesialisasi ?? 'matematika') }}">
+                                                <div class="custom-control custom-checkbox p-2 rounded border" style="background-color: #f8fafc; border-color: #e2e8f0; height: 100%;">
+                                                    <input type="checkbox" name="tutors[]" value="{{ $g->user->name ?? '' }}" class="custom-control-input" id="checkGuru{{ $g->id }}" {{ $isChecked ? 'checked' : '' }}>
+                                                    <label class="custom-control-label text-xs text-slate-700 font-weight-semibold d-flex flex-column" style="cursor: pointer; padding-left: 8px;" for="checkGuru{{ $g->id }}">
+                                                        <span class="font-weight-bold text-purple-950">{{ $g->user->name ?? '' }}</span>
+                                                        <span class="text-[10px] text-muted">{{ $g->user->email ?? '' }}</span>
+                                                        <span class="text-[10px] text-purple-600 mt-1 font-weight-bold">Spesialisasi: {{ $g->spesialisasi ?? 'Matematika' }}</span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="col-12 text-center py-3">
+                                            <span class="text-xs text-muted font-italic">Belum ada guru/tutor terdaftar.</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
                     </div>
                     <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>

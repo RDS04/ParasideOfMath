@@ -357,7 +357,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Atur / assign guru pendamping untuk siswa.
+     * Atur / assign guru pendamping untuk siswa (dapat diatur per mata pelajaran).
      */
     public function assignTutor(Request $request, $id)
     {
@@ -365,28 +365,46 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $request->validate([
-            'tutors' => ['required', 'array'],
-            'tutors.*' => ['string', 'max:255'],
-        ]);
-
         $siswa = Siswa::findOrFail($id);
-        
-        $tutorsSelected = $request->tutors; // e.g. ["Budi", "Asep"]
-        $tutorsStr = implode(', ', $tutorsSelected);
-
-        // Update biodata
         $biodata = $siswa->biodata ?? [];
-        $biodata['tutor_names'] = $tutorsSelected;
 
-        // Update tipe_paket descriptor (e.g. "Guru: Belum ditentukan" -> "Guru: Budi, Asep")
+        $tutorFormattedParts = [];
+        $tutorNamesFlat = [];
+
+        // Case 1: Assign per-mapel (e.g. ['Fisika' => 'Guru A', 'Kimia' => 'Guru B'])
+        if ($request->has('tutor_per_mapel') && is_array($request->tutor_per_mapel)) {
+            $tutorPerMapel = [];
+            foreach ($request->tutor_per_mapel as $mapel => $guru) {
+                $guruClean = trim($guru);
+                if (!empty($guruClean)) {
+                    $tutorPerMapel[$mapel] = $guruClean;
+                    $tutorFormattedParts[] = $mapel . ': ' . $guruClean;
+                    $tutorNamesFlat[] = $guruClean;
+                }
+            }
+            $biodata['tutor_per_mapel'] = $tutorPerMapel;
+        }
+
+        // Case 2: Assign general tutors[] checkboxes (legacy/fallback)
+        if ($request->has('tutors') && is_array($request->tutors)) {
+            $tutorsSelected = array_filter(array_map('trim', $request->tutors));
+            $biodata['tutor_names'] = $tutorsSelected;
+            if (empty($tutorNamesFlat)) {
+                $tutorNamesFlat = $tutorsSelected;
+            }
+        }
+
+        // Build tutors string for tipe_paket descriptor
+        $tutorsStr = !empty($tutorFormattedParts) ? implode(', ', $tutorFormattedParts) : implode(', ', array_unique($tutorNamesFlat));
+        if (empty($tutorsStr)) {
+            $tutorsStr = 'Belum ditentukan';
+        }
+
+        // Update tipe_paket descriptor (e.g. "Guru: Fisika: Guru A, Kimia: Guru B")
         if ($siswa->tipe_paket) {
-            // Check if "Guru: " already exists in tipe_paket
             if (preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket)) {
                 $newTipePaket = preg_replace('/Guru:\s*([^|)]+)/i', 'Guru: ' . $tutorsStr, $siswa->tipe_paket);
             } else {
-                // If it doesn't exist, append it
-                // e.g. "Hari: Senin | Sesi: 8x" -> "Hari: Senin | Sesi: 8x | Guru: Budi, Asep"
                 $newTipePaket = $siswa->tipe_paket . ' | Guru: ' . $tutorsStr;
             }
             $siswa->tipe_paket = trim($newTipePaket);
@@ -399,7 +417,7 @@ class AdminController extends Controller
             'tipe_paket' => $siswa->tipe_paket,
         ]);
 
-        return back()->with('success', 'Guru pendamping untuk ' . $siswa->name . ' berhasil diatur menjadi: ' . $tutorsStr);
+        return back()->with('success', 'Guru pendamping untuk ' . $siswa->name . ' berhasil diatur: ' . $tutorsStr);
     }
 
     /**

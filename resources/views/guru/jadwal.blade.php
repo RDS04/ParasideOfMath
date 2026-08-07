@@ -90,6 +90,37 @@
     </div>
 </section>
 
+<!-- Modal Detail Jadwal Mengajar Guru -->
+<div class="modal fade" id="guruSessionDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content border-0 shadow" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white border-0 py-3" style="background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);">
+                <div class="d-flex align-items-center">
+                    <div class="avatar-icon bg-white-20 text-white rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.15);">
+                        <i class="fas fa-calendar-check fa-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title font-weight-bold text-md text-white mb-0" id="guruModalDateTitle">Detail Sesi Mengajar</h5>
+                        <p class="text-xxs text-teal-100 mb-0" id="guruModalSubtitle">Rincian jam mengajar &amp; murid bimbingan</p>
+                    </div>
+                </div>
+                <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4 bg-slate-50/50">
+                <div id="guruModalContent">
+                    <!-- Dynamic session list rendered here -->
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-between align-items-center">
+                <span class="text-xs text-muted" id="guruModalTotalInfo">Total: 0 Sesi</span>
+                <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-4" data-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- CSS Styling & Grid Layout Helper -->
 <style>
     .calendar-day-cell {
@@ -128,6 +159,12 @@
         border-color: transparent;
         box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
     }
+    .calendar-day-cell.session-completed {
+        background: #f8fafc !important;
+        color: #64748b !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: none !important;
+    }
     .calendar-day-cell.active-selected {
         box-shadow: 0 0 0 3px #fdba74;
     }
@@ -136,6 +173,14 @@
         height: 5px;
         border-radius: 50%;
         background-color: #ffffff;
+        position: absolute;
+        bottom: 6px;
+    }
+    .schedule-dot-completed {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: #94a3b8;
         position: absolute;
         bottom: 6px;
     }
@@ -148,6 +193,7 @@
     .agenda-card-item {
         border-left: 4px solid #0f766e;
         transition: all 0.2s ease;
+        cursor: pointer;
     }
     .agenda-card-item:hover {
         background-color: #f0fdfa !important;
@@ -215,12 +261,45 @@
                 // Check if there are scheduled sessions on this date
                 const dateSessions = sessions.filter(s => s.dateStr === dateStr);
                 if (dateSessions.length > 0) {
-                    cell.classList.add('scheduled');
-                    
-                    // Add dot
-                    const dot = document.createElement('span');
-                    dot.className = 'schedule-dot';
-                    cell.appendChild(dot);
+                    const now = new Date();
+                    const curMin = now.getHours() * 60 + now.getMinutes();
+
+                    let latestEndMin = 17 * 60; // 17:00
+                    dateSessions.forEach(s => {
+                        if (s.time) {
+                            const parts = s.time.split('-');
+                            if (parts.length === 2) {
+                                const endStr = parts[1].trim();
+                                const timeParts = endStr.split(':');
+                                if (timeParts.length >= 2) {
+                                    const h = parseInt(timeParts[0]);
+                                    const m = parseInt(timeParts[1]);
+                                    if (!isNaN(h) && !isNaN(m)) {
+                                        const mins = h * 60 + m;
+                                        if (mins > latestEndMin) latestEndMin = mins;
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    const isPastDate = cellDate.getTime() < todayObj.getTime();
+                    const isTodayEnded = (cellDate.getTime() === todayObj.getTime()) && (curMin > latestEndMin);
+                    const isSessionEnded = isPastDate || isTodayEnded;
+
+                    if (!isSessionEnded) {
+                        // Jadwal belum habis: Beri warna background highlight teal
+                        cell.classList.add('scheduled');
+                        const dot = document.createElement('span');
+                        dot.className = 'schedule-dot';
+                        cell.appendChild(dot);
+                    } else {
+                        // Jadwal sudah habis: HILANGKAN WARNA background highlight!
+                        cell.classList.add('session-completed');
+                        const dot = document.createElement('span');
+                        dot.className = 'schedule-dot-completed';
+                        cell.appendChild(dot);
+                    }
                 }
 
                 // Restore active-selected class
@@ -233,10 +312,98 @@
                     cell.classList.add('active-selected');
                     selectedDateStr = dateStr;
                     showAgenda(dateStr, cellDate);
+                    openGuruModal(dateStr, cellDate);
                 });
 
                 grid.appendChild(cell);
             }
+        }
+
+        function openGuruModal(dateStr, dateObj) {
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const formattedDate = dateObj.toLocaleDateString('id-ID', options);
+            
+            const titleEl = document.getElementById('guruModalDateTitle');
+            if (titleEl) titleEl.textContent = `Jadwal Mengajar: ${formattedDate}`;
+            
+            const daySessions = sessions.filter(s => s.dateStr === dateStr);
+            const contentEl = document.getElementById('guruModalContent');
+            const totalInfoEl = document.getElementById('guruModalTotalInfo');
+
+            if (totalInfoEl) {
+                totalInfoEl.textContent = `Total: ${daySessions.length} Sesi Mengajar Hari Ini`;
+            }
+
+            if (!contentEl) return;
+
+            if (daySessions.length === 0) {
+                contentEl.innerHTML = `
+                    <div class="text-center py-5">
+                        <div class="mx-auto mb-3 text-slate-300">
+                            <i class="far fa-calendar-check fa-4x text-teal-200"></i>
+                        </div>
+                        <h6 class="font-weight-bold text-slate-700 mb-1">Tidak Ada Jadwal Mengajar</h6>
+                        <p class="text-xs text-muted mb-0">Tidak ada sesi bimbingan belajar yang dijadwalkan pada tanggal ${formattedDate}. Selamat beristirahat!</p>
+                    </div>
+                `;
+            } else {
+                contentEl.innerHTML = `
+                    <div class="mb-3 px-1">
+                        <span class="text-xs text-muted">Berikut adalah rincian jam mengajar &amp; murid bimbingan Anda pada <strong>${formattedDate}</strong>:</span>
+                    </div>
+                    <div class="row">
+                        ${daySessions.map(s => {
+                            let waButton = '';
+                            if (s.whatsapp) {
+                                const waClean = s.whatsapp.replace(/[^0-9]/g, '');
+                                const waFormatted = waClean.startsWith('0') ? '62' + waClean.substring(1) : waClean;
+                                waButton = `
+                                    <a href="https://wa.me/${waFormatted}?text=Halo%20${encodeURIComponent(s.student_name)},%20hari%20ini%20sesi%20bimbel%20${encodeURIComponent(s.subject)}%20kita%20mulai%20jam%20${encodeURIComponent(s.time)}.%20Sampai%20jumpa%20nanti!" target="_blank" class="btn btn-sm btn-success rounded-lg font-weight-bold px-3 text-xs shadow-xs" style="background-color: #10b981; border: 0;">
+                                        <i class="fab fa-whatsapp mr-1.5"></i> Hubungi Siswa (WA)
+                                    </a>
+                                `;
+                            }
+                            return `
+                                <div class="col-12 mb-3">
+                                    <div class="card border-0 rounded-2xl p-3.5 shadow-sm bg-white" style="border-left: 5px solid #0f766e !important; border-radius: 16px;">
+                                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 mb-3 pb-2 border-bottom">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar bg-teal-100 text-teal-800 font-bold d-flex justify-content-center align-items-center rounded-circle mr-3" style="width: 44px; height: 44px; font-size: 18px; min-width: 44px;">
+                                                    ${s.student_name.charAt(0).toUpperCase()}
+                                                </div>
+                                                <div>
+                                                    <h6 class="font-weight-bold text-teal-950 mb-0.5 text-base" style="color: #0f766e;">${s.student_name}</h6>
+                                                    <span class="text-xs text-slate-500"><i class="fas fa-school mr-1 text-slate-400"></i>${s.sekolah || 'Siswa Paradise of Math'}</span>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-teal-50 text-teal-700 font-weight-bold px-3 py-1.5 rounded-full text-xs border border-teal-200">
+                                                Sesi ${s.session_index} dari ${s.total_sessions}
+                                            </span>
+                                        </div>
+                                        <div class="row align-items-center">
+                                            <div class="col-sm-7 mb-2 mb-sm-0">
+                                                <div class="d-flex align-items-center text-xs font-weight-semibold text-slate-700 mb-1.5">
+                                                    <i class="fas fa-book-open text-teal-600 mr-2" style="width: 16px;"></i>
+                                                    <span>Mata Pelajaran: <strong class="text-purple-900">${s.subject}</strong></span>
+                                                </div>
+                                                <div class="d-flex align-items-center text-xs font-weight-semibold text-slate-700">
+                                                    <i class="far fa-clock text-amber-500 mr-2" style="width: 16px;"></i>
+                                                    <span>Jam Mengajar: <strong class="text-amber-700">${s.time} WIB</strong></span>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-5 text-sm-right mt-2 mt-sm-0">
+                                                ${waButton}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+            }
+
+            $('#guruSessionDetailModal').modal('show');
         }
 
         function showAgenda(dateStr, dateObj) {
@@ -268,7 +435,7 @@
                     const waClean = s.whatsapp.replace(/[^0-9]/g, '');
                     const waFormatted = waClean.startsWith('0') ? '62' + waClean.substring(1) : waClean;
                     waButton = `
-                        <a href="https://wa.me/${waFormatted}?text=Halo%20${encodeURIComponent(s.student_name)},%20hari%20ini%20sesi%20bimbel%20kita%20mulai%20jam%20${s.time}.%20Sampai%20jumpa%20nanti!" target="_blank" class="btn btn-xs btn-success rounded-lg py-1 px-2 font-weight-bold text-xs" style="background-color: #10b981; border: 0;">
+                        <a href="https://wa.me/${waFormatted}?text=Halo%20${encodeURIComponent(s.student_name)},%20hari%20ini%20sesi%20bimbel%20${encodeURIComponent(s.subject)}%20kita%20mulai%20jam%20${encodeURIComponent(s.time)}.%20Sampai%20jumpa%20nanti!" target="_blank" class="btn btn-xs btn-success rounded-lg py-1 px-2 font-weight-bold text-xs" style="background-color: #10b981; border: 0;">
                             <i class="fab fa-whatsapp mr-1"></i> Chat WA
                         </a>
                     `;
@@ -287,7 +454,7 @@
                     <div class="space-y-1 mt-2 pt-2 border-top border-white">
                         <div class="d-flex align-items-center text-xs text-slate-600 mb-1">
                             <i class="fas fa-book-open mr-2 text-teal-600" style="width: 14px;"></i>
-                            <span>${s.subject}</span>
+                            <span class="font-weight-bold text-teal-900">${s.subject}</span>
                         </div>
                         <div class="d-flex align-items-center text-xs text-slate-600 mb-2">
                             <i class="far fa-clock mr-2 text-teal-600" style="width: 14px;"></i>
@@ -298,6 +465,11 @@
                         </div>
                     </div>
                 `;
+
+                item.addEventListener('click', function() {
+                    openGuruModal(dateStr, dateObj);
+                });
+
                 agendaContainer.appendChild(item);
             });
         }
