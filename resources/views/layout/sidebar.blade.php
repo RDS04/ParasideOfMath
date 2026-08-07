@@ -122,7 +122,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('admin.kalender') }}" class="nav-link {{ Route::is('admin.kalender') ? 'active' : '' }}">
                                     <i class="fas fa-calendar-week nav-icon text-teal-400"></i>
                                     <p>Kalender Jadwal</p>
                                 </a>

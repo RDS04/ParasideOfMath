@@ -453,6 +453,161 @@ class AdminController extends Controller
     }
 
     /**
+     * Tampilkan Halaman Kalender Master Admin untuk seluruh jadwal siswa.
+     */
+    public function showKalender()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $allStudents = Siswa::whereIn('status', ['active', 'pending', 'under_review'])->get();
+        $gurusList   = Guru::with('user')->get();
+
+        $allSessions = [];
+        $dayMap = [
+            'minggu' => 0, 'senin' => 1, 'selasa' => 2, 'rabu' => 3,
+            'kamis' => 4, 'jumat' => 5, 'sabtu' => 6,
+            'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
+            'thursday' => 4, 'friday' => 5, 'saturday' => 6
+        ];
+
+        foreach ($allStudents as $siswa) {
+            $biodata = $siswa->biodata ?? [];
+
+            $mapelJadwal     = $biodata['mapel_jadwal'] ?? [];
+            $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];
+            $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
+            $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
+            $tutorPerMapel   = $biodata['tutor_per_mapel'] ?? [];
+
+            if (empty($mapelJadwal) && $siswa->tipe_paket) {
+                if (preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                    $mapelJadwal = array_map('trim', explode(',', $matches[1]));
+                }
+            }
+
+            if (empty($mapelJadwal)) {
+                $mapelJadwal = ['Bimbingan Belajar'];
+            }
+
+            $paket = $siswa->paket;
+            $jamMulai = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
+            $durationMinutes = 90;
+            if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5 ?? '', $dMatches)) {
+                $durationMinutes = (int) $dMatches[1];
+            }
+            $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+
+            // Parsed current tutors
+            $currentGurus = [];
+            if ($siswa->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket, $m)) {
+                $currentGurus = array_map('trim', explode(',', $m[1]));
+            }
+
+            foreach ($mapelJadwal as $mIdx => $mapelName) {
+                $hariList = [];
+                $tglMulai = null;
+                $limitSesi = 0;
+
+                if (isset($hariPerMapel[$mIdx])) {
+                    $rawH = $hariPerMapel[$mIdx];
+                    $hariList = is_array($rawH) ? array_values(array_filter($rawH)) : [];
+                    $tglMulai = $tanggalPerMapel[$mIdx] ?? ($biodata['tanggal_mulai'] ?? null);
+                    $limitSesi = (int)($sesiPerMapel[$mIdx] ?? ($biodata['jumlah_pertemuan'] ?? 0));
+                } else {
+                    $hariList = $biodata['hari_pertemuan'] ?? [];
+                    $tglMulai = $biodata['tanggal_mulai'] ?? null;
+                    $limitSesi = (int)($biodata['jumlah_pertemuan'] ?? 0);
+                }
+
+                // Fallbacks
+                if (empty($hariList) && $siswa->tipe_paket && preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+                    $hariList = array_map('trim', explode(',', $m[1]));
+                }
+                if ($limitSesi === 0 && $siswa->tipe_paket) {
+                    if (preg_match('/Total Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                        $limitSesi = (int)$m[1];
+                    } elseif (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
+                        $limitSesi = (int)$m[1];
+                    }
+                }
+                if (!$tglMulai && $siswa->tipe_paket && preg_match('/Mulai:\s*([\d\-]+)/i', $siswa->tipe_paket, $m)) {
+                    $d = trim($m[1]);
+                    if (preg_match('/(\d{2})-(\d{2})-(\d{4})/', $d, $dM)) {
+                        $tglMulai = $dM[3] . '-' . $dM[2] . '-' . $dM[1];
+                    } else {
+                        $tglMulai = $d;
+                    }
+                }
+                if (!$tglMulai && $siswa->created_at) {
+                    $tglMulai = $siswa->created_at->format('Y-m-d');
+                }
+
+                // Tutor assigned for this mapel
+                $tutorName = $tutorPerMapel[$mapelName] ?? null;
+                if (!$tutorName && !empty($currentGurus)) {
+                    foreach ($currentGurus as $cg) {
+                        if (str_contains(strtolower($cg), strtolower($mapelName))) {
+                            $tutorName = preg_replace('/^(math|english|ipa|ips|fisika|kimia|biologi|matematika):\s*/i', '', $cg);
+                        }
+                    }
+                    if (!$tutorName) {
+                        $tutorName = implode(', ', $currentGurus);
+                    }
+                }
+                if (!$tutorName) {
+                    $tutorName = 'Belum ditentukan';
+                }
+
+                $scheduledDayNums = [];
+                foreach ($hariList as $h) {
+                    $normH = strtolower(trim($h));
+                    if (isset($dayMap[$normH])) {
+                        $scheduledDayNums[] = $dayMap[$normH];
+                    }
+                }
+
+                if ($limitSesi > 0 && !empty($scheduledDayNums) && $tglMulai) {
+                    try {
+                        $startDate = \Carbon\Carbon::parse($tglMulai);
+                        $tempDate = $startDate->copy();
+                        $studentSessionCount = 0;
+
+                        for ($d = 0; $d < 730; $d++) {
+                            if ($studentSessionCount >= $limitSesi) {
+                                break;
+                            }
+                            $dayOfWeek = $tempDate->dayOfWeek;
+                            if (in_array($dayOfWeek, $scheduledDayNums)) {
+                                $studentSessionCount++;
+                                $dateStr = $tempDate->format('Y-m-d');
+                                $allSessions[] = [
+                                    'dateStr' => $dateStr,
+                                    'student_id' => $siswa->id,
+                                    'student_name' => $siswa->name,
+                                    'sekolah' => $siswa->sekolah ?? 'Sekolah',
+                                    'whatsapp' => $siswa->whatsapp ?? '',
+                                    'subject' => $mapelName,
+                                    'tutor' => $tutorName,
+                                    'time' => $jamMulai . ' - ' . $jamSelesai,
+                                    'session_index' => $studentSessionCount,
+                                    'total_sessions' => $limitSesi,
+                                ];
+                            }
+                            $tempDate->addDay();
+                        }
+                    } catch (\Exception $e) {
+                        // Ignore errors
+                    }
+                }
+            }
+        }
+
+        return view('admin.kalender', compact('allSessions', 'gurusList', 'allStudents'));
+    }
+
+    /**
      * Tampilkan Halaman Daftar Siswa Keseluruhan.
      */
     public function daftarSiswa()

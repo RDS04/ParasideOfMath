@@ -99,6 +99,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
     Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
+    Route::get('/admin/kalender', 'showKalender')->name('admin.kalender');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
     Route::get('/admin/guru/detail/{id}', 'detailGuru')->name('admin.guru.detail');
