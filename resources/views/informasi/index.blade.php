@@ -2096,23 +2096,6 @@
 
             <!-- Messages Area -->
             <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50/50 text-xs">
-                <!-- Welcome Messages -->
-                <div class="flex items-start gap-2">
-                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
-                        <i class="fas fa-robot text-xs"></i>
-                    </div>
-                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%]">
-                        Halo! Selamat datang di <strong>Paradise of Math</strong>. 🎓
-                    </div>
-                </div>
-                <div class="flex items-start gap-2">
-                    <div class="w-7 h-7 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
-                        <i class="fas fa-robot text-xs"></i>
-                    </div>
-                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-violet-100/50 shadow-sm max-w-[80%]">
-                        Ada yang bisa kami bantu hari ini? Silakan klik opsi di bawah atau ketik pesan Anda:
-                    </div>
-                </div>
             </div>
 
             <!-- Quick Option Chips -->
@@ -2132,6 +2115,10 @@
         </div>
     </div>
 
+    <script>
+        window.currentUserName = "{{ Auth::check() ? Auth::user()->name : 'Anonymous' }}";
+        window.currentUserRole = "{{ Auth::check() ? Auth::user()->role : 'visitor' }}";
+    </script>
     <!-- Script Auto-Rotator Hero Slider -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {

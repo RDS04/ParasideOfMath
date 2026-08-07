@@ -159,12 +159,12 @@
         }
     </style>
 
-    <!-- Script logic for Admin Realtime Chat -->
     <script>
         let currentSessionId = null;
         let currentVisitorName = 'Anonymous';
         let sessionPoll = null;
         let messagePoll = null;
+        let renderedMsgIds = new Set();
 
         document.addEventListener('DOMContentLoaded', () => {
             // Initial responsive layouts check
@@ -252,16 +252,24 @@
                         const unreadBadge = sess.unread_count > 0 
                             ? `<span class="badge badge-danger rounded-circle p-1.5 text-[9px] font-bold d-flex justify-content-center align-items-center" style="width:18px; height:18px; background-color:#ef4444; color: white;">${sess.unread_count}</span>` 
                             : '';
+                        const displayId = sess.session_id.startsWith('visitor_') 
+                            ? 'Pengunjung #' + sess.session_id.replace('visitor_', '') 
+                            : 'Pengunjung #' + sess.session_id;
                         
+                        const roleBadge = sess.user_role 
+                            ? `<span class="badge ${sess.user_role.toLowerCase() === 'siswa' ? 'bg-purple-600 text-white' : 'bg-emerald-600 text-white'} text-[9px] px-1.5 py-0.5 rounded ml-1 font-extrabold">${sess.user_role}</span>` 
+                            : '';
+                        const avatarBg = sess.user_role ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-700';
+
                         html += `
-                            <div onclick="selectSession('${sess.session_id}', '${sess.sender_name}')" class="session-item p-3 d-flex align-items-center justify-content-between ${isActive}">
+                            <div onclick="selectSession('${sess.session_id}', '${sess.sender_name.replace(/'/g, "\\'")}')" class="session-item p-3 d-flex align-items-center justify-content-between ${isActive}">
                                 <div class="d-flex align-items-center gap-2.5 overflow-hidden">
-                                    <div class="avatar bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center rounded-circle flex-shrink-0" style="width: 38px; height: 38px; font-size: 14px;">
+                                    <div class="avatar ${avatarBg} font-bold d-flex justify-content-center align-items-center rounded-circle flex-shrink-0" style="width: 38px; height: 38px; font-size: 14px;">
                                         ${sess.sender_name.charAt(0).toUpperCase()}
                                     </div>
                                     <div class="overflow-hidden">
-                                        <div class="font-weight-bold text-purple-950 text-xs">${sess.sender_name}</div>
-                                        <small class="text-[9px] text-muted font-mono block text-truncate" style="max-width: 140px;">ID: ${sess.session_id}</small>
+                                        <div class="font-weight-bold text-purple-950 text-xs d-flex align-items-center flex-wrap">${sess.sender_name} ${roleBadge}</div>
+                                        <small class="text-[11px] text-slate-500 font-medium block text-truncate mt-0.5" style="max-width: 170px;">${sess.last_message || displayId}</small>
                                     </div>
                                 </div>
                                 <div class="text-right flex-shrink-0 flex flex-col items-end gap-1">
@@ -276,10 +284,15 @@
                 })
                 .catch(err => console.error("Error loading sessions:", err));
         }
+        
         // Select a session to load details
         function selectSession(sessionId, name) {
             currentSessionId = sessionId;
             currentVisitorName = name;
+            renderedMsgIds.clear();
+
+            const container = document.getElementById('admin-messages-container');
+            if (container) container.innerHTML = '';
 
             // Highlight in list
             document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
@@ -296,20 +309,23 @@
 
             // Update Header Name & Avatar
             document.getElementById('active-visitor-name').textContent = name;
-            document.getElementById('active-visitor-id').textContent = 'ID: ' + sessionId;
+            const headerDisplayId = sessionId.startsWith('visitor_') 
+                ? 'Pengunjung #' + sessionId.replace('visitor_', '') 
+                : 'Pengunjung #' + sessionId;
+            document.getElementById('active-visitor-id').textContent = headerDisplayId;
             const avatar = document.querySelector('#chat-active-screen .avatar');
             if (avatar) avatar.textContent = name.charAt(0).toUpperCase();
 
             // Load messages and restart polling
             loadMessages();
             if (messagePoll) clearInterval(messagePoll);
-            messagePoll = setInterval(loadMessages, 2000);
+            messagePoll = setInterval(loadMessages, 1500);
             
             // Immediately reload sessions to update unread badge
             loadSessions();
         }
 
-        // Fetch messages for active session
+        // Fetch messages for active session (Incremental Append)
         function loadMessages() {
             if (!currentSessionId) return;
 
@@ -319,37 +335,40 @@
                     const container = document.getElementById('admin-messages-container');
                     if (!container) return;
 
-                    const currentCount = container.querySelectorAll('.chat-msg-row').length;
-                    
-                    // Only rebuild if count has changed to prevent scrolling jumps
-                    if (data.length !== currentCount) {
-                        let html = '';
-                        data.forEach(msg => {
+                    let hasNewMessages = false;
+
+                    data.forEach(msg => {
+                        const msgId = msg.id || (msg.created_at + '_' + msg.message);
+                        if (!renderedMsgIds.has(msgId)) {
+                            renderedMsgIds.add(msgId);
+                            hasNewMessages = true;
+
                             const isUser = msg.sender_role === 'admin';
+                            const msgDiv = document.createElement('div');
                             
                             if (isUser) {
-                                html += `
-                                    <div class="flex items-start gap-2 justify-end chat-msg-row">
-                                        <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none shadow-xs max-w-[70%] break-words">
-                                            ${msg.message}
-                                        </div>
+                                msgDiv.className = 'flex items-start gap-2 justify-end chat-msg-row';
+                                msgDiv.innerHTML = `
+                                    <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none shadow-xs max-w-[70%] break-words">
+                                        ${msg.message}
                                     </div>
                                 `;
                             } else {
-                                html += `
-                                    <div class="flex items-start gap-2 chat-msg-row">
-                                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center flex-shrink-0" style="font-size: 11px;">
-                                            ${msg.sender_name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-100 shadow-xs max-w-[70%] break-words">
-                                            ${msg.message}
-                                        </div>
+                                msgDiv.className = 'flex items-start gap-2 chat-msg-row';
+                                msgDiv.innerHTML = `
+                                    <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-700 font-bold d-flex justify-content-center align-items-center flex-shrink-0" style="font-size: 11px;">
+                                        ${(msg.sender_name || 'A').charAt(0).toUpperCase()}
+                                    </div>
+                                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-slate-100 shadow-xs max-w-[70%] break-words">
+                                        ${msg.message}
                                     </div>
                                 `;
                             }
-                        });
-                        
-                        container.innerHTML = html;
+                            container.appendChild(msgDiv);
+                        }
+                    });
+
+                    if (hasNewMessages) {
                         container.scrollTop = container.scrollHeight;
                     }
                 })
@@ -359,18 +378,6 @@
         // Send Admin Response
         function sendAdminMessage(text) {
             if (!currentSessionId) return;
-
-            // Optimistic rendering in UI
-            const container = document.getElementById('admin-messages-container');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'flex items-start gap-2 justify-end chat-msg-row';
-            msgDiv.innerHTML = `
-                <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none shadow-xs max-w-[70%] break-words">
-                    ${text}
-                </div>
-            `;
-            container.appendChild(msgDiv);
-            container.scrollTop = container.scrollHeight;
 
             fetch('/admin/chat/send', {
                 method: 'POST',
@@ -386,7 +393,7 @@
             .then(res => res.json())
             .then(data => {
                 loadMessages();
-                loadSessions(); // update last message date
+                loadSessions();
             })
             .catch(err => console.error("Error sending admin message:", err));
         }

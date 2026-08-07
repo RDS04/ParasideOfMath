@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     chatWindow.style.opacity = '1';
                     chatWindow.style.transform = 'scale(1)';
                 }, 10);
-                
+
                 // Hide badge
                 const badge = chatTrigger.querySelector('span.bg-rose-500');
                 if (badge) badge.remove();
@@ -159,25 +159,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Load messages from database
+    let visitorRenderedMsgIds = new Set();
+
+    // Load messages from database (Incremental Append - High Performance)
     function loadMessages() {
         if (!chatContainer) return;
         fetch(`/chat/messages?session_id=${sessionId}`)
             .then(res => res.json())
             .then(data => {
-                // To prevent jumping scrollbar, only rebuild if content count changes
-                const currentMsgCount = chatContainer.querySelectorAll('.chat-msg-row').length;
-                if (data.length === 0 && currentMsgCount === 0) {
+                if (data.length === 0 && visitorRenderedMsgIds.size === 0) {
                     appendLocalMessage('Halo! Selamat datang di <strong>Paradise of Math</strong>. 🎓', 'bot');
                     appendLocalMessage('Ada yang bisa kami bantu hari ini? Silakan ketik pesan Anda atau klik opsi di bawah:', 'bot');
                     return;
                 }
 
-                if (data.length !== currentMsgCount) {
-                    chatContainer.innerHTML = '';
-                    data.forEach(msg => {
+                let hasNewMessages = false;
+                data.forEach(msg => {
+                    const msgId = msg.id || (msg.created_at + '_' + msg.message);
+                    if (!visitorRenderedMsgIds.has(msgId)) {
+                        visitorRenderedMsgIds.add(msgId);
+                        hasNewMessages = true;
                         appendLocalMessage(msg.message, msg.sender_role === 'visitor' ? 'user' : 'bot');
-                    });
+                    }
+                });
+
+                if (hasNewMessages) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
             })
             .catch(err => console.error("Error loading chat messages:", err));
@@ -198,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             body: JSON.stringify({
                 session_id: sessionId,
-                sender_name: 'Anonymous',
+                sender_name: window.currentUserName || 'Anonymous',
                 message: messageText
             })
         })
@@ -212,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Polling Control Functions
     function startPolling() {
         if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(loadMessages, 2000);
+        pollInterval = setInterval(loadMessages, 1500);
     }
 
     function stopPolling() {
@@ -247,7 +254,7 @@ if (book) {
 
     if (nextBtn) nextBtn.addEventListener('click', () => setPage(page + 1));
     if (prevBtn) prevBtn.addEventListener('click', () => setPage(page - 1));
-    
+
     dots.forEach(d => d.addEventListener('click', () => setPage(Number(d.dataset.p))));
 
     book.addEventListener('click', (e) => {
@@ -305,13 +312,87 @@ function sendQuickOption(text) {
     const container = document.getElementById('chat-messages-container');
     if (!container) return;
 
-    // Append visually
+    const waNumber = '62811-6612-050';
+    const waDisplay = '62811-6612-050';
+    const defaultWaUrl = `https://wa.me/${waNumber}?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20ingin%20bertanya%20mengenai%20bimbingan%20belajar`;
+
+    // 1. Append user message bubble to chat UI
     appendLocalMessage(text, 'user');
 
+    // 2. Prepare target WhatsApp URL based on chip clicked
+    let waUrl = defaultWaUrl;
+    if (text.includes('WhatsApp') || text.includes('WA') || text.includes('Hubungi')) {
+        waUrl = `https://wa.me/${waNumber}?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20ingin%20bertanya%20mengenai%20bimbingan%20belajar`;
+    } else if (text.includes('Paket')) {
+        waUrl = `https://wa.me/${waNumber}?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20tertarik%20tanya%20informasi%20paket%20belajar`;
+    } else if (text.includes('Biaya')) {
+        waUrl = `https://wa.me/${waNumber}?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20tertarik%20tanya%20rincian%20biaya%20pendaftaran`;
+    } else {
+        waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent('Halo Admin, ' + text)}`;
+    }
+
+    // 3. Build Bot Reply Card with Admin WA Number & Button
+    let botReply = '';
+    if (text.includes('WhatsApp') || text.includes('WA') || text.includes('Hubungi')) {
+        botReply = `
+            <div class="space-y-2">
+                <p class="font-bold text-slate-800">📱 Nomor WhatsApp Admin:</p>
+                <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                    <span class="text-base font-black text-emerald-700 tracking-wider"><i class="fab fa-whatsapp text-emerald-600 mr-1"></i> ${waDisplay}</span>
+                    <p class="text-[10px] text-slate-500 font-medium mt-0.5">(Kak Kiki - Pimpinan & Admin PM)</p>
+                </div>
+                <p class="text-slate-600 text-xs mt-1">Silakan klik tombol di bawah untuk terhubung langsung ke WhatsApp:</p>
+                <a href="${waUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs no-underline shadow-md shadow-emerald-600/20 transition-all mt-1">
+                    <i class="fab fa-whatsapp text-sm"></i> Buka Chat WhatsApp Langsung
+                </a>
+            </div>
+        `;
+    } else if (text.includes('Paket')) {
+        botReply = `
+            <div class="space-y-2">
+                <p class="font-bold text-slate-800">📦 Paket Belajar Paradise of Math:</p>
+                <p class="text-slate-600">Menyediakan Privat 1-on-1 & Kelompok Kecil untuk SD, SMP, & SMA (Matematika, IPA, Fisika, Kimia, B. Inggris).</p>
+                <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-center my-1">
+                    <span class="text-xs font-bold text-emerald-800">📱 WA Admin: ${waDisplay}</span>
+                </div>
+                <a href="${waUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs no-underline shadow-sm transition-all mt-1">
+                    <i class="fab fa-whatsapp text-sm"></i> Tanya Paket di WhatsApp
+                </a>
+            </div>
+        `;
+    } else if (text.includes('Biaya')) {
+        botReply = `
+            <div class="space-y-2">
+                <p class="font-bold text-slate-800">💰 Biaya & Promo Belajar:</p>
+                <p class="text-slate-600">🎉 <strong>Promo Pendaftaran GRATIS!</strong> Pembayaran per sesi fleksibel sesuai jenjang.</p>
+                <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-center my-1">
+                    <span class="text-xs font-bold text-emerald-800">📱 WA Admin: ${waDisplay}</span>
+                </div>
+                <a href="${waUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs no-underline shadow-sm transition-all mt-1">
+                    <i class="fab fa-whatsapp text-sm"></i> Detail Biaya via WhatsApp
+                </a>
+            </div>
+        `;
+    } else {
+        botReply = `
+            <div class="space-y-2">
+                <p class="text-slate-700">Terima kasih atas pesan Anda! Klik di bawah untuk terhubung ke WhatsApp Admin:</p>
+                <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-center my-1">
+                    <span class="text-xs font-bold text-emerald-800">📱 WA Admin: ${waDisplay}</span>
+                </div>
+                <a href="${waUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs no-underline shadow-sm transition-all mt-1">
+                    <i class="fab fa-whatsapp text-sm"></i> Chat WhatsApp
+                </a>
+            </div>
+        `;
+    }
+
+    appendLocalMessage(botReply, 'bot');
+
+    // 4. Save User Message & Bot Reply to Database
     const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
     const token = csrfTokenElement ? csrfTokenElement.getAttribute('content') : '';
 
-    // Send to Database
     fetch('/chat/send', {
         method: 'POST',
         headers: {
@@ -320,41 +401,25 @@ function sendQuickOption(text) {
         },
         body: JSON.stringify({
             session_id: sessionId,
-            sender_name: 'Anonymous',
+            sender_name: window.currentUserName || 'Anonymous',
             message: text
         })
     })
     .then(res => res.json())
     .then(data => {
-        // Trigger automated bot replies for specific quick chips to maintain bot functionality!
-        setTimeout(() => {
-            let botReply = '';
-            if (text.includes('Paket')) {
-                botReply = `Kami menyediakan kelas SD (Matematika & IPA) dan SMP (Matematika, IPA, B. Inggris). <br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20tertarik%20tanya%20paket%20les" target="_blank" class="text-violet-600 font-bold underline">Tanya Admin di WhatsApp</a>`;
-            } else if (text.includes('Biaya')) {
-                botReply = `<strong>Promo Free Pendaftaran!</strong> 🥳<br>Biaya belajar les berkisar antara Rp 90K - Rp 150K per sesi.<br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20tertarik%20tanya%20biaya" target="_blank" class="text-violet-600 font-bold underline">Detail Biaya via WhatsApp</a>`;
-            } else {
-                botReply = `Tentu! Menghubungkan Anda ke chat WhatsApp Admin...<br><br>👉 <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Paradise%20of%20Math..." target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold no-underline mt-2"><i class="fab fa-whatsapp"></i> Chat WhatsApp</a>`;
-            }
-
-            // Save bot reply to DB so admin can see it too!
-            fetch('/chat/send', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({
-                    session_id: sessionId,
-                    sender_name: 'System Bot',
-                    message: botReply
-                })
+        fetch('/chat/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token
+            },
+            body: JSON.stringify({
+                session_id: sessionId,
+                sender_name: 'Customer Service PM',
+                sender_role: 'admin',
+                message: botReply
             })
-            .then(() => {
-                // Append message locally
-                appendLocalMessage(botReply, 'bot');
-            });
-        }, 1000);
+        });
     })
     .catch(err => console.error("Error sending quick option:", err));
 }
