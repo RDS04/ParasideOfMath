@@ -88,6 +88,42 @@ Sistem **Chat Realtime** menggunakan metode **Database AJAX Polling** secara ber
 * **Kebutuhan**: Fitur ini bekerja secara *out-of-the-box* menggunakan server web standar Anda (Nginx/Apache + MySQL).
 * **Keuntungan**: **Tidak perlu** menjalankan daemon Websocket terpisah (seperti Laravel Reverb, Pusher, atau Socket.io) yang memakan RAM tinggi.
 
+#### C. Alur Kerja Sistem Chat
+Sistem chat pada aplikasi ini bekerja dengan pola **visitor -> database -> admin -> database -> visitor**.
+
+1. **Visitor membuka landing page**
+    - Widget chat tampil di halaman publik melalui komponen Blade pada landing page.
+    - Pengunjung dapat membuka jendela chat, membaca pesan sambutan, memilih opsi cepat, atau mengetik pesan manual.
+
+2. **Pesan pengunjung dikirim ke server**
+    - Saat pesan dikirim, frontend mengirim request ke endpoint backend.
+    - Pesan disimpan ke database sehingga percakapan tidak hilang saat halaman dimuat ulang.
+    - Setiap percakapan biasanya punya identitas sesi agar admin bisa membedakan satu pengunjung dengan pengunjung lain.
+
+3. **Admin memantau percakapan**
+    - Panel admin menampilkan daftar sesi chat masuk.
+    - Daftar sesi dan isi pesan dimuat ulang secara berkala menggunakan polling AJAX.
+    - Admin dapat memilih sesi tertentu untuk melihat seluruh riwayat percakapan.
+
+4. **Admin membalas pesan**
+    - Saat admin mengirim balasan, pesan juga disimpan ke database.
+    - Balasan akan muncul pada panel admin dan kemudian terbaca oleh widget chat pengunjung saat polling berikutnya berjalan.
+
+5. **Pesan sinkron tanpa websocket**
+    - Karena sistem memakai polling database, sinkronisasi terjadi pada interval tertentu, bukan secara push real-time penuh.
+    - Ini membuat setup lebih sederhana dan cocok untuk hosting biasa, selama database dan server web stabil.
+
+#### D. Komponen Yang Terlibat
+- **Frontend publik**: widget chat di landing page.
+- **Frontend admin**: halaman daftar percakapan dan panel balasan.
+- **Backend Laravel**: menerima pesan, menyimpan sesi, dan menyediakan data percakapan.
+- **Database MySQL/MariaDB**: menyimpan sesi chat, pesan, dan status baca/belum dibaca.
+
+#### E. Catatan Operasional
+- Pastikan koneksi database stabil karena chat bergantung pada pembacaan data berkala.
+- Jika pesan terasa lambat muncul, cek interval polling, beban database, dan apakah endpoint chat merespons dengan benar.
+- Jika widget chat tidak muncul di browser, cek pemuatan aset icon, JavaScript, dan tidak ada error pada konsol browser.
+
 ---
 
 ### 5. Konfigurasi Web Server

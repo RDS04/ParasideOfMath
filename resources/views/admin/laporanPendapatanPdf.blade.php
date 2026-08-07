@@ -4,95 +4,144 @@
     <meta charset="UTF-8">
     <title>Laporan Pendapatan · Paradise of Math</title>
     <style>
+        @page {
+            margin: 25px 30px 35px 30px;
+        }
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            color: #333;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #6a1b9a;
-            padding-bottom: 10px;
-        }
-        .header h1 {
+            font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
             margin: 0;
-            color: #4a148c;
-            font-size: 24px;
+            padding: 0;
+            color: #1e293b;
+            font-size: 11px;
+            line-height: 1.4;
         }
-        .header h2 {
-            margin: 5px 0 0;
-            color: #6a1b9a;
-            font-size: 18px;
-            font-weight: normal;
+
+        /* HEADER / KOP */
+        .kop-container {
+            width: 100%;
+            border-bottom: 2px solid #6b21a8;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
         }
-        .header .periode {
-            font-size: 13px;
-            color: #777;
-            margin-top: 3px;
-        }
-        .ringkasan {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            gap: 10px;
-        }
-        .ringkasan .card {
-            flex: 1;
-            background: #f5f5f5;
-            padding: 12px 10px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .ringkasan .card .label {
-            font-size: 12px;
-            color: #777;
-            text-transform: uppercase;
-        }
-        .ringkasan .card .value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 2px;
-        }
-        table {
+        .kop-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+        }
+        .kop-table td {
+            vertical-align: middle;
+            border: none;
+            padding: 0;
+        }
+        .brand-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #581c87;
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+        .brand-subtitle {
+            font-size: 13px;
+            font-weight: bold;
+            color: #7e22ce;
+            margin-top: 2px;
+        }
+        .meta-box {
+            text-align: right;
+            font-size: 10px;
+            color: #64748b;
+        }
+        .meta-badge {
+            display: inline-block;
+            background-color: #f3e8ff;
+            color: #6b21a8;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 10px;
+            margin-bottom: 3px;
+        }
+
+        /* CARDS / RINGKASAN (Table-based for DomPDF compatibility) */
+        .cards-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-bottom: 20px;
         }
-        table th {
-            background: #6a1b9a;
-            color: white;
-            padding: 8px 5px;
-            border: 1px solid #ddd;
-            text-align: left;
+        .cards-table td {
+            border: none;
+            padding: 0;
+            vertical-align: top;
         }
-        table td {
-            padding: 6px 5px;
-            border: 1px solid #ddd;
+        .card {
+            background-color: #faf5ff;
+            border: 1px solid #e9d5ff;
+            border-radius: 6px;
+            padding: 10px 12px;
+            text-align: center;
         }
-        table tbody tr:nth-child(even) {
-            background: #f9f9f9;
-        }
-        table tfoot td {
-            background: #e8e8e8;
+        .card-label {
+            font-size: 9px;
             font-weight: bold;
+            color: #6b21a8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
         }
-        .text-right { text-align: right; }
+        .card-value {
+            font-size: 15px;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        /* TABLES */
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #581c87;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+        }
+        table.data-table th {
+            background-color: #6b21a8;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 7px 8px;
+            border: 1px solid #581c87;
+        }
+        table.data-table td {
+            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 10px;
+        }
+        table.data-table tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        table.data-table tfoot td {
+            background-color: #f3e8ff;
+            font-weight: bold;
+            border-top: 2px solid #6b21a8;
+            color: #4c1d95;
+        }
+
+        .text-left { text-align: left; }
         .text-center { text-align: center; }
-        .sub-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #4a148c;
-            margin: 20px 0 10px;
-        }
-        .footer {
-            margin-top: 30px;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            font-size: 11px;
-            color: #888;
+        .text-right { text-align: right; }
+
+        /* FOOTER */
+        .footer-line {
+            margin-top: 25px;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 8px;
+            font-size: 9px;
+            color: #94a3b8;
             text-align: center;
         }
     </style>
@@ -100,26 +149,32 @@
 <body>
 
     {{-- HEADER --}}
-    <div class="header">
-        <h1>Paradise of Math</h1>
-        <h2>Laporan Pendapatan</h2>
-        <div class="periode">
-            Periode: {{ ucfirst($filter ?? 'bulanan') }}
-            @if(!empty($start) && !empty($end))
-                | {{ \Carbon\Carbon::parse($start)->format('d M Y') }} - {{ \Carbon\Carbon::parse($end)->format('d M Y') }}
-            @endif
-            <br>
-            Dicetak: {{ \Carbon\Carbon::now()->format('d M Y H:i') }}
-        </div>
+    <div class="kop-container">
+        <table class="kop-table">
+            <tr>
+                <td>
+                    <div class="brand-title">PARADISE OF MATH</div>
+                    <div class="brand-subtitle">Laporan Pendapatan</div>
+                </td>
+                <td class="meta-box">
+                    <span class="meta-badge">Periode: {{ ucfirst($filter ?? 'Bulanan') }}</span>
+                    @if(!empty($start) && !empty($end))
+                        <br><span>{{ \Carbon\Carbon::parse($start)->format('d M Y') }} - {{ \Carbon\Carbon::parse($end)->format('d M Y') }}</span>
+                    @elseif(!empty($year))
+                        <br><span>Tahun {{ $year }}</span>
+                    @endif
+                    <br><span>Dicetak: {{ \Carbon\Carbon::now()->format('d M Y, H:i') }}</span>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    {{-- RINGKASAN --}}
+    {{-- DATA CALCULATION --}}
     @php
-        // Hitung dari data jika tidak diberikan
         $total = $totalRevenue ?? collect($rows)->sum('total');
         $count = $paymentCount ?? count($rows);
         $avg = $avgPerTransaction ?? ($count > 0 ? $total / $count : 0);
-        // Paket totals
+
         $packageTotals = $packageTotals ?? [];
         if(empty($packageTotals) && !empty($rows)) {
             $packageTotals = collect($rows)->groupBy('paket')->map(function($group) {
@@ -131,70 +186,84 @@
         }
     @endphp
 
-    <div class="ringkasan">
-        <div class="card">
-            <div class="label">Total Pendapatan</div>
-            <div class="value">Rp {{ number_format($total,0,',','.') }}</div>
-        </div>
-        <div class="card">
-            <div class="label">Transaksi Lunas</div>
-            <div class="value">{{ $count }}</div>
-        </div>
-        <div class="card">
-            <div class="label">Rata-rata / Transaksi</div>
-            <div class="value">Rp {{ number_format($avg,0,',','.') }}</div>
-        </div>
-    </div>
+    {{-- STAT CARDS (Table-based horizontal layout) --}}
+    <table class="cards-table">
+        <tr>
+            <td width="32%">
+                <div class="card">
+                    <div class="card-label">Total Pendapatan</div>
+                    <div class="card-value">Rp {{ number_format($total, 0, ',', '.') }}</div>
+                </div>
+            </td>
+            <td width="2%"></td>
+            <td width="32%">
+                <div class="card">
+                    <div class="card-label">Transaksi Lunas</div>
+                    <div class="card-value">{{ $count }} Transaksi</div>
+                </div>
+            </td>
+            <td width="2%"></td>
+            <td width="32%">
+                <div class="card">
+                    <div class="card-label">Rata-rata / Transaksi</div>
+                    <div class="card-value">Rp {{ number_format($avg, 0, ',', '.') }}</div>
+                </div>
+            </td>
+        </tr>
+    </table>
 
-    {{-- TABEL DETAIL --}}
-    <table>
+    {{-- MAIN TABLE --}}
+    <div class="section-title">Detail Pendapatan Siswa</div>
+    <table class="data-table">
         <thead>
             <tr>
-                <th style="width:5%;">#</th>
-                <th style="width:20%;">Nama Siswa</th>
-                <th style="width:20%;">Email</th>
-                <th style="width:15%;">Paket</th>
-                <th style="width:10%; text-align:center;">Pertemuan</th>
-                <th style="width:15%; text-align:right;">Total</th>
-                <th style="width:15%; text-align:center;">Tanggal</th>
+                <th style="width: 4%;" class="text-center">#</th>
+                <th style="width: 22%;">Nama Siswa</th>
+                <th style="width: 24%;">Email</th>
+                <th style="width: 15%;">Paket</th>
+                <th style="width: 10%;" class="text-center">Pertemuan</th>
+                <th style="width: 13%;" class="text-right">Total</th>
+                <th style="width: 12%;" class="text-center">Tanggal</th>
             </tr>
         </thead>
         <tbody>
             @forelse($rows as $index => $r)
             <tr>
-                <td>{{ $index + 1 }}</td>
+                <td class="text-center">{{ $index + 1 }}</td>
                 <td>{{ $r['name'] ?? '-' }}</td>
                 <td>{{ $r['email'] ?? '-' }}</td>
                 <td>{{ $r['paket'] ?? '-' }}</td>
                 <td class="text-center">{{ $r['jumlah_pertemuan'] ?? 0 }}</td>
-                <td class="text-right">Rp {{ number_format($r['total'] ?? 0,0,',','.') }}</td>
-                <td class="text-center">{{ $r['tanggal'] ?? '-' }}</td>
+                <td class="text-right">Rp {{ number_format($r['total'] ?? 0, 0, ',', '.') }}</td>
+                <td class="text-center">{{ $r['tanggal'] ? \Carbon\Carbon::parse($r['tanggal'])->format('d/m/Y H:i') : '-' }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="text-center">Tidak ada data.</td>
+                <td colspan="7" class="text-center" style="padding: 15px; color: #64748b;">Tidak ada data pembayaran.</td>
             </tr>
             @endforelse
         </tbody>
+        @if(count($rows) > 0)
         <tfoot>
             <tr>
-                <td colspan="5" class="text-right">Total Keseluruhan</td>
-                <td class="text-right">Rp {{ number_format($total,0,',','.') }}</td>
+                <td colspan="5" class="text-right">TOTAL KESELURUHAN</td>
+                <td class="text-right">Rp {{ number_format($total, 0, ',', '.') }}</td>
                 <td></td>
             </tr>
         </tfoot>
+        @endif
     </table>
 
     {{-- RINGKASAN PER PAKET --}}
     @if(!empty($packageTotals))
-    <div>
-        <div class="sub-title">Ringkasan per Paket</div>
-        <table style="width:50%;">
+    <div style="margin-top: 15px;">
+        <div class="section-title">Ringkasan Pendapatan per Paket</div>
+        <table class="data-table" style="width: 55%;">
             <thead>
                 <tr>
-                    <th style="text-align:left;">Paket</th>
-                    <th style="text-align:center;">Jumlah</th>
-                    <th style="text-align:right;">Pendapatan</th>
+                    <th class="text-left" style="width: 50%;">Nama Paket</th>
+                    <th class="text-center" style="width: 25%;">Jumlah</th>
+                    <th class="text-right" style="width: 25%;">Total Pendapatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -202,7 +271,7 @@
                 <tr>
                     <td>{{ $pname }}</td>
                     <td class="text-center">{{ $pval['count'] }}</td>
-                    <td class="text-right">Rp {{ number_format($pval['revenue'],0,',','.') }}</td>
+                    <td class="text-right">Rp {{ number_format($pval['revenue'], 0, ',', '.') }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -211,9 +280,22 @@
     @endif
 
     {{-- FOOTER --}}
-    <div class="footer">
-        Laporan ini dibuat secara otomatis oleh sistem Paradise of Math.
+    <div class="footer-line">
+        Laporan ini secara otomatis di-generate oleh Sistem Informasi Paradise of Math.
     </div>
+
+    {{-- DomPDF Script for Page Numbering --}}
+    <script type="text/php">
+        if (isset($pdf)) {
+            $text = "Halaman {PAGE_NUM} dari {PAGE_COUNT}";
+            $font = $fontMetrics->get_font("DejaVu Sans", "normal");
+            $size = 8;
+            $color = array(0.5, 0.5, 0.5);
+            $y = $pdf->get_height() - 20;
+            $x = $pdf->get_width() - 110;
+            $pdf->page_text($x, $y, $text, $font, $size, $color);
+        }
+    </script>
 
 </body>
 </html>
