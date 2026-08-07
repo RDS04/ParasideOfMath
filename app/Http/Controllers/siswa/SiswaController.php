@@ -517,10 +517,20 @@ class SiswaController extends Controller
         
         // Parse details for invoice
         $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+        $hariPerMapel  = $biodata['hari_per_mapel'] ?? [];
         $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
         $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
 
-        // Fallback parsing from tipe_paket
+        // Fallback parsing from tipe_paket if hariPerMapel is empty
+        if (empty($hariPerMapel) && $siswa->tipe_paket) {
+            if (preg_match_all('/Hari:\s*([^|)]+)/i', $siswa->tipe_paket, $matchesAll)) {
+                foreach ($matchesAll[1] as $mIdx => $hariStr) {
+                    $cleanDays = array_map('trim', explode('&', $hariStr));
+                    $hariPerMapel[$mIdx] = $cleanDays;
+                }
+            }
+        }
+
         if (empty($hariPertemuan) && $siswa->tipe_paket) {
             if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
                 $hariPertemuan = array_map('trim', explode(',', $matches[1]));
@@ -551,7 +561,9 @@ class SiswaController extends Controller
 
         // Get mapel
         $mapels = [];
-        if ($siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+        if (!empty($biodata['mapel_jadwal'])) {
+            $mapels = $biodata['mapel_jadwal'];
+        } elseif ($siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
             $mapels = array_map('trim', explode(',', $matches[1]));
         }
 
@@ -561,7 +573,7 @@ class SiswaController extends Controller
             $gurus = array_map('trim', explode(',', $matches[1]));
         }
 
-        return view('siswa.invoice', compact('siswa', 'paket', 'hariPertemuan', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus'));
+        return view('siswa.invoice', compact('siswa', 'paket', 'hariPertemuan', 'hariPerMapel', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus'));
     }
 
     /**
