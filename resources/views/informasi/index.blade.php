@@ -361,6 +361,70 @@
             transform: translate(-50%, -50%) rotate(-45deg);
         }
     </style>
+
+    @php
+        $resolveFacilityImage = function (string $baseName, string $fallbackPath, string $title, string $alt, string $sourceLabel) {
+            $possibleExts = ['jpg', 'jpeg', 'png', 'webp'];
+
+            foreach ($possibleExts as $ext) {
+                $path = public_path("uploads/landing/{$baseName}.{$ext}");
+                if (file_exists($path)) {
+                    return [
+                        'title' => $title,
+                        'alt' => $alt,
+                        'url' => asset("uploads/landing/{$baseName}.{$ext}") . '?v=' . filemtime($path),
+                        'source' => $sourceLabel,
+                    ];
+                }
+            }
+
+            $fallbackFullPath = public_path($fallbackPath);
+            if (file_exists($fallbackFullPath)) {
+                return [
+                    'title' => $title,
+                    'alt' => $alt,
+                    'url' => asset($fallbackPath),
+                    'source' => 'Default image',
+                ];
+            }
+
+            return null;
+        };
+
+        $galleryItems = [];
+
+        foreach (
+            [
+                ['base' => 'fasilitas_kelas', 'fallback' => 'images/fasilitas-kelas.jpg', 'title' => 'Ruang Kelas Ber-AC & WiFi', 'alt' => 'Ruang Kelas Paradise of Math', 'source' => 'Fasilitas utama'],
+                ['base' => 'fasilitas_toilet', 'fallback' => 'images/fasilitas-toilet.jpg', 'title' => 'Toilet Bersih & Higienis', 'alt' => 'Toilet Bersih Paradise of Math', 'source' => 'Fasilitas utama'],
+                ['base' => 'fasilitas_mushala', 'fallback' => 'images/fasilitas-mushala.jpg', 'title' => 'Mushala Luas & Suci', 'alt' => 'Mushala Paradise of Math', 'source' => 'Fasilitas utama'],
+                ['base' => 'fasilitas_gedung', 'fallback' => 'images/fasilitas-gedung.jpg', 'title' => 'Gedung & Lingkungan Belajar', 'alt' => 'Gedung Bimbel Paradise of Math', 'source' => 'Fasilitas utama'],
+            ] as $item
+        ) {
+            $resolved = $resolveFacilityImage($item['base'], $item['fallback'], $item['title'], $item['alt'], $item['source']);
+            if ($resolved) {
+                $galleryItems[] = $resolved;
+            }
+        }
+
+        $galleryExtraDir = public_path('uploads/landing/galeri');
+        if (file_exists($galleryExtraDir)) {
+            $galleryExtraFiles = glob($galleryExtraDir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE) ?: [];
+            usort($galleryExtraFiles, function ($a, $b) {
+                return filemtime($b) <=> filemtime($a);
+            });
+
+            foreach ($galleryExtraFiles as $file) {
+                $basename = basename($file);
+                $galleryItems[] = [
+                    'title' => pathinfo($basename, PATHINFO_FILENAME),
+                    'alt' => 'Foto galeri tambahan Paradise of Math',
+                    'url' => asset("uploads/landing/galeri/{$basename}") . '?v=' . filemtime($file),
+                    'source' => 'Upload admin',
+                ];
+            }
+        }
+    @endphp
 </head>
 
 <body class="bg-slate-50 text-slate-800 antialiased selection:bg-amber-400 selection:text-violet-950">
@@ -686,25 +750,70 @@
                         class="absolute -inset-2 rounded-3xl bg-gradient-to-r from-amber-400 to-violet-500 opacity-40 blur-xl animate-pulse-glow">
                     </div>
 
-                    <!-- Main Hero Image Frame -->
+                    <!-- Main Hero Image Frame (Auto-rotating slider) -->
                     <div
-                        class="relative aspect-[4/5] rounded-3xl bg-gradient-to-b from-violet-800/90 to-violet-950/90 border-2 border-white/20 shadow-2xl p-4 flex flex-col items-center justify-center text-center overflow-hidden animate-float">
-                        <div
-                            class="w-20 h-20 rounded-full bg-violet-600/50 flex items-center justify-center mb-4 border border-violet-400/40 text-amber-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M12 14l9-5-9-5-9 5 9 5z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                            </svg>
-                        </div>
-                        <span class="text-violet-100 font-bold text-sm px-4">
-                            [ foto siswa/tutor ]
-                        </span>
-                        <span class="text-violet-300/70 text-xs font-mono mt-2">
-                            public/images/hero-student.jpg
-                        </span>
+                        class="relative aspect-[4/5] rounded-3xl bg-gradient-to-b from-violet-800/90 to-violet-950/90 border-2 border-white/20 shadow-2xl p-2 flex flex-col items-center justify-center text-center overflow-hidden animate-float">
+                        @php
+                            $heroDir = public_path('uploads/landing/hero');
+                            $heroFiles = glob($heroDir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE) ?: [];
+                            
+                            usort($heroFiles, function($a, $b) {
+                                return filemtime($b) - filemtime($a);
+                            });
+
+                            $heroImagesList = [];
+                            foreach($heroFiles as $hf) {
+                                $bn = basename($hf);
+                                $heroImagesList[] = asset("uploads/landing/hero/{$bn}") . '?v=' . filemtime($hf);
+                            }
+
+                            // Fallback single file check if list empty
+                            if(empty($heroImagesList)) {
+                                foreach(['jpg','jpeg','png','webp'] as $ext) {
+                                    $fp = public_path("uploads/landing/hero_image.{$ext}");
+                                    if(file_exists($fp)) {
+                                        $heroImagesList[] = asset("uploads/landing/hero_image.{$ext}") . '?v=' . filemtime($fp);
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
+
+                        @if(count($heroImagesList) > 0)
+                            <div class="relative w-full h-full overflow-hidden rounded-[22px]" id="landingHeroSlider">
+                                @foreach($heroImagesList as $idx => $imgUrl)
+                                    <img src="{{ $imgUrl }}" alt="Paradise of Math Hero Image {{ $idx+1 }}" 
+                                         class="landing-hero-item absolute top-0 left-0 w-full h-full object-cover rounded-[22px] shadow-md transition-opacity duration-700 ease-in-out" 
+                                         style="opacity: {{ $idx === 0 ? '1' : '0' }}; z-index: {{ $idx === 0 ? '10' : '1' }};" />
+                                @endforeach
+                            </div>
+                            @if(count($heroImagesList) > 1)
+                                <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20" id="landingHeroDots">
+                                    @foreach($heroImagesList as $idx => $imgUrl)
+                                        <span class="landing-hero-dot w-2 h-2 rounded-full bg-white shadow-sm transition-all duration-300" style="opacity: {{ $idx === 0 ? '1' : '0.4' }};"></span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        @elseif(file_exists(public_path('images/hero-student.jpg')))
+                            <img src="{{ asset('images/hero-student.jpg') }}" alt="Paradise of Math Hero Student" class="w-full h-full object-cover rounded-[22px] shadow-md" />
+                        @else
+                            <div
+                                class="w-20 h-20 rounded-full bg-violet-600/50 flex items-center justify-center mb-4 border border-violet-400/40 text-amber-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M12 14l9-5-9-5-9 5 9 5z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                        d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                                </svg>
+                            </div>
+                            <span class="text-violet-100 font-bold text-sm px-4">
+                                [ foto siswa/tutor ]
+                            </span>
+                            <span class="text-violet-300/70 text-xs font-mono mt-2">
+                                public/images/hero-student.jpg
+                            </span>
+                        @endif
                     </div>
 
                     <!-- Floating Badge 1 (Top Right) -->
@@ -973,141 +1082,206 @@
                     Fasilitas modern dan lingkungan belajar yang kondusif disiapkan khusus untuk mendukung kenyamanan
                     maksimal siswa.
                 </p>
+
+                <div class="mt-6">
+                    <button type="button" id="gallery-view-all-btn"
+                        class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-violet-950 text-white font-extrabold text-sm shadow-lg shadow-violet-950/20 hover:bg-violet-900 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300">
+                        <i class="fas fa-images"></i>
+                        Lihat Semua Foto ({{ count($galleryItems) }})
+                    </button>
+                </div>
             </div>
 
-            <!-- Facilities Cards Grid (Asymmetrical / Staggered / Bento "Acak" Layout) -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-16 items-stretch">
+            <!-- Facilities Cards Grid (Asymmetrical / Staggered / Bento Layout - Mobile Responsive) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-5 sm:gap-6 md:gap-8 mb-16 items-stretch">
 
-                <!-- Card 1: Kelas Yang Nyaman (+ AC & + WiFi) - Featured Large Card (7 Columns, Tilted Left) -->
+                <!-- Card 1: Kelas Yang Nyaman (+ AC & + WiFi) -->
                 <div
-                    class="md:col-span-7 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-1 hover:rotate-0 transition-all duration-300 reveal-element">
+                    class="sm:col-span-2 md:col-span-7 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 sm:p-4 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-1 hover:rotate-0 transition-all duration-300 reveal-element flex flex-col justify-between">
                     <div
-                        class="relative aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
-                        <span class="text-violet-200 font-bold text-sm sm:text-base">
-                            [ foto kelas ber-AC & WiFi ]
-                        </span>
-                        <span class="text-violet-400 text-xs font-mono mt-1">
-                            public/images/fasilitas-kelas.jpg
-                        </span>
+                        class="relative aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
+                        @php
+                            $imgKelas = null;
+                            foreach(['jpg','jpeg','png','webp'] as $ext) {
+                                $fp = public_path("uploads/landing/fasilitas_kelas.{$ext}");
+                                if(file_exists($fp)) {
+                                    $imgKelas = asset("uploads/landing/fasilitas_kelas.{$ext}") . '?v=' . filemtime($fp);
+                                    break;
+                                }
+                            }
+                        @endphp
+
+                        @if($imgKelas)
+                            <img src="{{ $imgKelas }}" alt="Ruang Kelas Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                        @elseif(file_exists(public_path('images/fasilitas-kelas.jpg')))
+                            <img src="{{ asset('images/fasilitas-kelas.jpg') }}" alt="Ruang Kelas Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                        @else
+                            <span class="text-violet-200 font-bold text-xs sm:text-base px-2">
+                                [ foto kelas ber-AC & WiFi ]
+                            </span>
+                            <span class="text-violet-400 text-[10px] sm:text-xs font-mono mt-1">
+                                public/images/fasilitas-kelas.jpg
+                            </span>
+                        @endif
 
                         <!-- Badge Top Left (+ AC) -->
                         <div
-                            class="absolute top-3 left-3 bg-violet-950/90 text-amber-300 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md animate-pulse-glow">
+                            class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-violet-950/90 text-amber-300 font-black text-[10px] sm:text-xs px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md animate-pulse-glow">
                             + AC
                         </div>
 
                         <!-- Badge Bottom Right (+ WiFi) -->
                         <div
-                            class="absolute bottom-3 right-3 bg-violet-950/90 text-amber-300 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md">
+                            class="absolute bottom-2.5 right-2.5 sm:bottom-3 sm:right-3 bg-violet-950/90 text-amber-300 font-black text-[10px] sm:text-xs px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md">
                             + WiFi
                         </div>
 
                         <!-- Badge Bottom Left Tag (Kelas yang nyaman) -->
                         <div
-                            class="absolute bottom-3 left-3 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl shadow-md transform -rotate-1">
+                            class="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 bg-amber-400 text-violet-950 font-black text-[10px] sm:text-xs px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl shadow-md transform -rotate-1">
                             Kelas yang nyaman
                         </div>
                     </div>
-                    <div class="p-4 sm:p-5 flex items-center justify-between flex-wrap gap-2">
+                    <div class="p-3 sm:p-5 flex items-center justify-between flex-wrap gap-2 mt-2">
                         <div>
-                            <h3 class="font-extrabold text-violet-950 text-base sm:text-lg">Ruang Kelas Ber-AC &
-                                High-Speed WiFi</h3>
-                            <p class="text-slate-500 text-xs sm:text-sm">Ruangan sejuk, pencahayaan optimal, dan
-                                meja-kursi nyaman untuk fokus belajar.</p>
+                            <h3 class="font-extrabold text-violet-950 text-sm sm:text-base md:text-lg">Ruang Kelas Ber-AC &amp; High-Speed WiFi</h3>
+                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Ruangan sejuk, pencahayaan optimal, dan meja-kursi nyaman untuk fokus belajar.</p>
                         </div>
-                        <span class="px-3 py-1 bg-violet-100 text-violet-900 font-extrabold text-xs rounded-full">★
-                            Utama</span>
+                        <span class="px-2.5 py-1 bg-violet-100 text-violet-900 font-extrabold text-[10px] sm:text-xs rounded-full">★ Utama</span>
                     </div>
                 </div>
 
-                <!-- Card 2: Toilet Bersih (5 Columns, Tilted Right & Offset Down) -->
+                <!-- Card 2: Toilet Bersih -->
                 <div
-                    class="md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:rotate-2 md:translate-y-6 hover:rotate-0 transition-all duration-300 reveal-element delay-100">
+                    class="sm:col-span-1 md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 sm:p-4 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:rotate-2 md:translate-y-6 hover:rotate-0 transition-all duration-300 reveal-element delay-100 flex flex-col justify-between">
                     <div
-                        class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
-                        <span class="text-violet-200 font-bold text-sm">
-                            [ foto toilet ]
-                        </span>
-                        <span class="text-violet-400 text-xs font-mono mt-1">
-                            public/images/fasilitas-toilet.jpg
-                        </span>
+                        class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
+                        @php
+                            $imgToilet = null;
+                            foreach(['jpg','jpeg','png','webp'] as $ext) {
+                                $fp = public_path("uploads/landing/fasilitas_toilet.{$ext}");
+                                if(file_exists($fp)) {
+                                    $imgToilet = asset("uploads/landing/fasilitas_toilet.{$ext}") . '?v=' . filemtime($fp);
+                                    break;
+                                }
+                            }
+                        @endphp
+
+                        @if($imgToilet)
+                            <img src="{{ $imgToilet }}" alt="Toilet Bersih Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                        @elseif(file_exists(public_path('images/fasilitas-toilet.jpg')))
+                            <img src="{{ asset('images/fasilitas-toilet.jpg') }}" alt="Toilet Bersih Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                        @else
+                            <span class="text-violet-200 font-bold text-xs sm:text-sm px-2">
+                                [ foto toilet ]
+                            </span>
+                            <span class="text-violet-400 text-[10px] font-mono mt-1">
+                                public/images/fasilitas-toilet.jpg
+                            </span>
+                        @endif
 
                         <!-- Badge Top Center Tag (Toilet Bersih) -->
                         <div
-                            class="absolute top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-4 py-1.5 rounded-xl shadow-md transform rotate-1">
+                            class="absolute top-2.5 left-1/2 -translate-x-1/2 bg-amber-400 text-violet-950 font-black text-[10px] sm:text-xs px-3 py-1 sm:px-4 sm:py-1.5 rounded-xl shadow-md transform rotate-1 whitespace-nowrap">
                             Toilet Bersih
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-extrabold text-violet-950 text-base mb-1">Toilet Bersih & Higienis</h3>
-                        <p class="text-slate-500 text-xs sm:text-sm">Fasilitas sanitasi yang selalu terawat dan bersih
-                            demi kenyamanan setiap hari.</p>
+                    <div class="p-3 sm:p-4 mt-2">
+                        <h3 class="font-extrabold text-violet-950 text-sm sm:text-base mb-1">Toilet Bersih &amp; Higienis</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm">Fasilitas sanitasi yang selalu terawat dan bersih demi kenyamanan setiap hari.</p>
                     </div>
                 </div>
 
-                <!-- Card 3: Mushala Luas (5 Columns, Tilted Left & Offset Up) -->
+                <!-- Card 3: Mushala Luas -->
                 <div
-                    class="md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-2 md:-translate-y-2 hover:rotate-0 transition-all duration-300 reveal-element delay-200">
+                    class="sm:col-span-1 md:col-span-5 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 sm:p-4 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:-rotate-2 md:-translate-y-2 hover:rotate-0 transition-all duration-300 reveal-element delay-200 flex flex-col justify-between">
                     <div
-                        class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-4">
-                        <span class="text-violet-200 font-bold text-sm">
-                            [ foto mushala ]
-                        </span>
-                        <span class="text-violet-400 text-xs font-mono mt-1">
-                            public/images/fasilitas-mushala.jpg
-                        </span>
+                        class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
+                        @php
+                            $imgMushala = null;
+                            foreach(['jpg','jpeg','png','webp'] as $ext) {
+                                $fp = public_path("uploads/landing/fasilitas_mushala.{$ext}");
+                                if(file_exists($fp)) {
+                                    $imgMushala = asset("uploads/landing/fasilitas_mushala.{$ext}") . '?v=' . filemtime($fp);
+                                    break;
+                                }
+                            }
+                        @endphp
+
+                        @if($imgMushala)
+                            <img src="{{ $imgMushala }}" alt="Mushala Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                        @elseif(file_exists(public_path('images/fasilitas-mushala.jpg')))
+                            <img src="{{ asset('images/fasilitas-mushala.jpg') }}" alt="Mushala Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                        @else
+                            <span class="text-violet-200 font-bold text-xs sm:text-sm px-2">
+                                [ foto mushala ]
+                            </span>
+                            <span class="text-violet-400 text-[10px] font-mono mt-1">
+                                public/images/fasilitas-mushala.jpg
+                            </span>
+                        @endif
 
                         <!-- Badge Bottom Left Tag (Mushala Luas) -->
                         <div
-                            class="absolute bottom-3 left-3 bg-amber-400 text-violet-950 font-black text-xs sm:text-sm px-3.5 py-1.5 rounded-xl shadow-md transform -rotate-2">
+                            class="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 bg-amber-400 text-violet-950 font-black text-[10px] sm:text-xs px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl shadow-md transform -rotate-2">
                             Mushala Luas
                         </div>
                     </div>
-                    <div class="p-4">
-                        <h3 class="font-extrabold text-violet-950 text-base mb-1">Mushala Luas & Suci</h3>
-                        <p class="text-slate-500 text-xs sm:text-sm">Tempat ibadah yang tenang, harum, dan luas agar
-                            siswa beribadah tepat waktu.</p>
+                    <div class="p-3 sm:p-4 mt-2">
+                        <h3 class="font-extrabold text-violet-950 text-sm sm:text-base mb-1">Mushala Luas &amp; Suci</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm">Tempat ibadah yang tenang, harum, dan luas agar siswa beribadah tepat waktu.</p>
                     </div>
                 </div>
 
-                <!-- Card 4: Extra Feature Highlights (7 Columns, Tilted Right) -->
+                <!-- Card 4: Pigura Foto Gedung / Rumah Bimbel -->
+                @php
+                    $imgGedung = null;
+                    foreach(['jpg','jpeg','png','webp'] as $ext) {
+                        $fp = public_path("uploads/landing/fasilitas_gedung.{$ext}");
+                        if(file_exists($fp)) {
+                            $imgGedung = asset("uploads/landing/fasilitas_gedung.{$ext}") . '?v=' . filemtime($fp);
+                            break;
+                        }
+                    }
+                    if(!$imgGedung && file_exists(public_path('images/fasilitas-gedung.jpg'))) {
+                        $imgGedung = asset('images/fasilitas-gedung.jpg');
+                    }
+                @endphp
                 <div
-                    class="md:col-span-7 group relative rounded-3xl bg-gradient-to-br from-violet-950 via-violet-900 to-violet-950 text-white border-2 border-amber-400/50 p-6 sm:p-7 shadow-xl hover:shadow-2xl transform md:rotate-1 hover:rotate-0 transition-all duration-300 flex flex-col justify-between reveal-element delay-300">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="px-3 py-1 rounded-full bg-amber-400 text-violet-950 font-black text-xs">
-                            💡 Kenyamanan 100%
-                        </span>
-                        <span class="text-xs text-amber-300 font-bold">Paradise of Math</span>
+                    class="sm:col-span-2 md:col-span-7 group relative rounded-3xl bg-white border-2 border-violet-800 p-3 sm:p-4 shadow-xl hover:shadow-2xl hover:-translate-y-2 transform md:rotate-1 hover:rotate-0 transition-all duration-300 reveal-element delay-300 flex flex-col justify-between">
+                    <div
+                        class="relative aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
+                        @if($imgGedung)
+                            <img src="{{ $imgGedung }}" alt="Gedung Bimbel Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                        @else
+                            <span class="text-violet-200 font-bold text-xs sm:text-base px-2">
+                                [ foto gedung/rumah bimbel ]
+                            </span>
+                            <span class="text-violet-400 text-[10px] sm:text-xs font-mono mt-1">
+                                public/images/fasilitas-gedung.jpg
+                            </span>
+                        @endif
+
+                        <!-- Badge Top Right Tag (Gedung Bimbel) -->
+                        <div
+                            class="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 bg-amber-400 text-violet-950 font-black text-[10px] sm:text-xs px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl shadow-md transform rotate-1">
+                            Gedung Bimbel
+                        </div>
+
+                        <!-- Badge Bottom Left Tag (Lingkungan Kondusif) -->
+                        <div
+                            class="absolute bottom-2.5 left-2.5 sm:bottom-3 sm:left-3 bg-violet-950/90 text-amber-300 font-black text-[10px] sm:text-xs px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-amber-300/40 shadow-lg backdrop-blur-md">
+                            Lingkungan Kondusif
+                        </div>
                     </div>
-
-                    <h3 class="font-extrabold text-lg sm:text-xl text-amber-300 mb-3">
-                        Lingkungan Belajar Bebas Bising & Kondusif
-                    </h3>
-                    <p class="text-violet-100 text-xs sm:text-sm mb-6 leading-relaxed">
-                        Dirancang khusus dengan standar kenyamanan tinggi untuk memastikan siswa fokus dalam memahami
-                        setiap rumus dan konsep materi.
-                    </p>
-
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-violet-800">
-                        <div class="bg-white/10 rounded-xl p-2.5 text-center backdrop-blur-sm">
-                            <div class="text-lg mb-0.5">❄️</div>
-                            <div class="text-xs font-bold text-amber-300">Full AC</div>
+                    <div class="p-3 sm:p-5 flex items-center justify-between flex-wrap gap-2 mt-2">
+                        <div>
+                            <h3 class="font-extrabold text-violet-950 text-sm sm:text-base md:text-lg">Gedung &amp; Lingkungan Belajar</h3>
+                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Lokasi bimbingan belajar yang sejuk, tenang, dan bebas bising untuk kenyamanan belajar.</p>
                         </div>
-                        <div class="bg-white/10 rounded-xl p-2.5 text-center backdrop-blur-sm">
-                            <div class="text-lg mb-0.5">📶</div>
-                            <div class="text-xs font-bold text-amber-300">Free WiFi</div>
-                        </div>
-                        <div class="bg-white/10 rounded-xl p-2.5 text-center backdrop-blur-sm">
-                            <div class="text-lg mb-0.5">🕌</div>
-                            <div class="text-xs font-bold text-amber-300">Mushala</div>
-                        </div>
-                        <div class="bg-white/10 rounded-xl p-2.5 text-center backdrop-blur-sm">
-                            <div class="text-lg mb-0.5">🚽</div>
-                            <div class="text-xs font-bold text-amber-300">Toilet</div>
-                        </div>
+                        <span class="px-2.5 py-1 bg-amber-100 text-amber-900 font-extrabold text-[10px] sm:text-xs rounded-full">🏠 Lokasi</span>
                     </div>
                 </div>
-
             </div>
 
 
@@ -1142,6 +1316,46 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+
+            <div id="facility-gallery-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6">
+                <div class="absolute inset-0 bg-violet-950/80 backdrop-blur-md" data-facility-gallery-close></div>
+
+                <div class="relative w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl border border-violet-200">
+                    <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 sm:px-6 py-4">
+                        <div>
+                            <p class="text-[11px] sm:text-xs font-black tracking-[0.2em] text-amber-500 uppercase mb-1">Galeri Lengkap</p>
+                            <h3 class="text-lg sm:text-2xl font-black text-violet-950">Semua Foto Fasilitas & Upload Admin</h3>
+                        </div>
+
+                        <button type="button" class="shrink-0 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors" data-facility-gallery-close>
+                            Tutup
+                        </button>
+                    </div>
+
+                    <div class="max-h-[calc(90vh-84px)] overflow-y-auto bg-slate-50 p-4 sm:p-6">
+                        @if(count($galleryItems) > 0)
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                                @foreach($galleryItems as $photo)
+                                    <figure class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                        <div class="aspect-square overflow-hidden bg-violet-950">
+                                            <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                                        </div>
+                                        <figcaption class="p-3">
+                                            <p class="text-sm font-bold text-violet-950 truncate">{{ $photo['title'] }}</p>
+                                            <p class="text-[11px] text-slate-500 truncate">{{ $photo['source'] }}</p>
+                                        </figcaption>
+                                    </figure>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="py-14 text-center">
+                                <i class="fas fa-images text-slate-300 text-4xl mb-3"></i>
+                                <p class="text-slate-500 font-semibold">Belum ada foto yang diupload admin.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -1917,5 +2131,58 @@
             </form>
         </div>
     </div>
+
+    <!-- Script Auto-Rotator Hero Slider -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const galleryModal = document.getElementById('facility-gallery-modal');
+            const galleryOpenButton = document.getElementById('gallery-view-all-btn');
+
+            function hideGalleryModal() {
+                if (!galleryModal) {
+                    return;
+                }
+
+                galleryModal.classList.add('hidden');
+                galleryModal.classList.remove('flex');
+                document.body.classList.remove('overflow-hidden');
+            }
+
+            if (galleryOpenButton && galleryModal) {
+                galleryOpenButton.addEventListener('click', function() {
+                    galleryModal.classList.remove('hidden');
+                    galleryModal.classList.add('flex');
+                    document.body.classList.add('overflow-hidden');
+                });
+
+                galleryModal.querySelectorAll('[data-facility-gallery-close]').forEach(function(button) {
+                    button.addEventListener('click', hideGalleryModal);
+                });
+
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        hideGalleryModal();
+                    }
+                });
+            }
+
+            const heroItems = document.querySelectorAll('.landing-hero-item');
+            const heroDots = document.querySelectorAll('.landing-hero-dot');
+            if (heroItems.length > 1) {
+                let currentHeroIndex = 0;
+                setInterval(function() {
+                    heroItems[currentHeroIndex].style.opacity = '0';
+                    heroItems[currentHeroIndex].style.zIndex = '1';
+                    if (heroDots[currentHeroIndex]) heroDots[currentHeroIndex].style.opacity = '0.4';
+
+                    currentHeroIndex = (currentHeroIndex + 1) % heroItems.length;
+
+                    heroItems[currentHeroIndex].style.opacity = '1';
+                    heroItems[currentHeroIndex].style.zIndex = '10';
+                    if (heroDots[currentHeroIndex]) heroDots[currentHeroIndex].style.opacity = '1';
+                }, 3500);
+            }
+        });
+    </script>
 </body>
 </html>

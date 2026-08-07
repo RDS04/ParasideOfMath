@@ -11,9 +11,10 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    /**
-     * Tampilkan form login & register.
-     */
+    public function information()
+    {
+        return view('informasi.index');
+    }
     public function showLoginForm()
     {
         if (Auth::guard('siswa')->check()) {

@@ -8,12 +8,11 @@ use App\Http\Controllers\Siswa\SiswaController;
 use App\Http\Controllers\Guru\GuruController;
 
 
-Route::get('/', function () {
-    return view('/informasi/index');
-});
+
 
 // Authentication Routes (Siswa & General)
 Route::controller(AuthController::class)->group(function () {
+    Route::get('/', 'information')->name('dashboard');
     Route::get('/login', 'showLoginForm')->name('login');
     Route::post('/login', 'login')->name('login.post');
     Route::get('/register', 'showLoginForm')->name('register');
@@ -100,6 +99,13 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
     Route::get('/admin/kalender', 'showKalender')->name('admin.kalender');
+    Route::get('/admin/foto', 'showFotoMenu')->name('admin.foto.index');
+    Route::post('/admin/foto/hero', 'updateHeroFoto')->name('admin.foto.hero.update');
+    Route::delete('/admin/foto/hero/{filename}', 'deleteHeroFotoSingle')->name('admin.foto.hero.delete.single');
+    Route::get('/admin/galeri', 'showGaleri')->name('admin.galeri.index');
+    Route::post('/admin/galeri/update', 'updateGaleriFoto')->name('admin.galeri.update');
+    Route::post('/admin/galeri/store-extra', 'storeGaleriTambahan')->name('admin.galeri.extra.store');
+    Route::post('/admin/galeri/delete', 'deleteGaleriFoto')->name('admin.galeri.delete');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
     Route::get('/admin/guru/detail/{id}', 'detailGuru')->name('admin.guru.detail');

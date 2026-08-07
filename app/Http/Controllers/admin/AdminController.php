@@ -1208,4 +1208,302 @@ class AdminController extends Controller
 
         return ['rows' => $rows, 'filter' => $filter, 'year' => $year, 'start' => $start, 'end' => $end];
     }
+
+    /**
+     * Tampilkan Halaman Kelola Foto Landing Page.
+     */
+    public function showFotoMenu()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $heroDir = public_path('uploads/landing/hero');
+        if (!file_exists($heroDir)) {
+            mkdir($heroDir, 0777, true);
+        }
+
+        // Migrate legacy single hero_image if exists into the folder
+        $possibleExts = ['jpg', 'jpeg', 'png', 'webp'];
+        foreach ($possibleExts as $ext) {
+            $legacyPath = public_path("uploads/landing/hero_image.{$ext}");
+            if (file_exists($legacyPath)) {
+                $newName = 'hero_' . time() . '_' . rand(100, 999) . '.' . $ext;
+                @rename($legacyPath, $heroDir . '/' . $newName);
+            }
+        }
+
+        // Scan hero images in heroDir
+        $files = glob($heroDir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE) ?: [];
+        
+        // Sort files newest first
+        usort($files, function($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+
+        $heroImages = [];
+        foreach ($files as $file) {
+            $basename = basename($file);
+            $heroImages[] = [
+                'filename' => $basename,
+                'url' => asset("uploads/landing/hero/{$basename}") . '?v=' . filemtime($file),
+                'mtime' => filemtime($file),
+                'size' => round(filesize($file) / 1024, 1) . ' KB'
+            ];
+        }
+
+        return view('admin.fotoMenu', compact('heroImages'));
+    }
+
+    /**
+     * Update / Tambah Foto Hero (Mendukung Multi-Upload).
+     */
+    public function updateHeroFoto(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'hero_images' => ['required'],
+            'hero_images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ], [
+            'hero_images.required' => 'File foto wajib dipilih.',
+            'hero_images.*.image' => 'File harus berupa foto/gambar.',
+            'hero_images.*.mimes' => 'Format gambar harus jpeg, png, jpg, atau webp.',
+            'hero_images.*.max' => 'Ukuran gambar maksimal adalah 5MB per file.',
+        ]);
+
+        $heroDir = public_path('uploads/landing/hero');
+        if (!file_exists($heroDir)) {
+            mkdir($heroDir, 0777, true);
+        }
+
+        $files = $request->file('hero_images');
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
+        $count = 0;
+        foreach ($files as $file) {
+            if ($file && $file->isValid()) {
+                $ext = strtolower($file->getClientOriginalExtension());
+                $fileName = 'hero_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+                $file->move($heroDir, $fileName);
+                $count++;
+            }
+        }
+
+        return back()->with('success', "{$count} foto Hero baru berhasil ditambahkan! Foto akan berganti-ganti secara otomatis di Landing Page.");
+    }
+
+    /**
+     * Hapus Spesifik Foto Hero dari List.
+     */
+    public function deleteHeroFotoSingle(Request $request, $filename)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        // Prevent directory traversal
+        $filename = basename($filename);
+        $filePath = public_path("uploads/landing/hero/{$filename}");
+
+        if (file_exists($filePath)) {
+            @unlink($filePath);
+            return back()->with('success', 'Foto Hero berhasil dihapus dari daftar slider.');
+        }
+
+        return back()->with('error', 'Foto tidak ditemukan.');
+    }
+
+    /**
+     * Tampilkan Halaman Kelola Foto Fasilitas & Galeri Landing Page.
+     */
+    public function showGaleri()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $possibleExts = ['jpg', 'jpeg', 'png', 'webp'];
+
+        $galeri = [
+            'kelas' => null,
+            'toilet' => null,
+            'mushala' => null,
+            'gedung' => null,
+        ];
+
+        foreach (['kelas', 'toilet', 'mushala', 'gedung'] as $key) {
+            foreach ($possibleExts as $ext) {
+                $path = public_path("uploads/landing/fasilitas_{$key}.{$ext}");
+                if (file_exists($path)) {
+                    $galeri[$key] = asset("uploads/landing/fasilitas_{$key}.{$ext}") . '?v=' . filemtime($path);
+                    break;
+                }
+            }
+        }
+
+        $galleryDir = public_path('uploads/landing/galeri');
+        if (!file_exists($galleryDir)) {
+            mkdir($galleryDir, 0777, true);
+        }
+
+        $galleryExtras = [];
+        $extraFiles = glob($galleryDir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE) ?: [];
+        usort($extraFiles, function ($a, $b) {
+            return filemtime($b) <=> filemtime($a);
+        });
+
+        foreach ($extraFiles as $file) {
+            $basename = basename($file);
+            $galleryExtras[] = [
+                'filename' => $basename,
+                'url' => asset("uploads/landing/galeri/{$basename}") . '?v=' . filemtime($file),
+                'mtime' => filemtime($file),
+                'size' => round(filesize($file) / 1024, 1) . ' KB',
+            ];
+        }
+
+        return view('admin.galeri', compact('galeri', 'galleryExtras'));
+    }
+
+    /**
+     * Update Foto Fasilitas Landing Page.
+     */
+    public function updateGaleriFoto(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'key' => ['required', 'in:kelas,toilet,mushala,gedung'],
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ], [
+            'image.required' => 'File foto wajib dipilih.',
+            'image.image' => 'File harus berupa gambar/foto.',
+            'image.mimes' => 'Format gambar harus jpeg, png, jpg, atau webp.',
+            'image.max' => 'Ukuran gambar maksimal adalah 5MB.',
+        ]);
+
+        $key = $request->key;
+        $uploadDir = public_path('uploads/landing');
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        // Clean old file
+        $possibleExts = ['jpg', 'jpeg', 'png', 'webp'];
+        foreach ($possibleExts as $ext) {
+            $existing = public_path("uploads/landing/fasilitas_{$key}.{$ext}");
+            if (file_exists($existing)) {
+                @unlink($existing);
+            }
+        }
+
+        $file = $request->file('image');
+        $ext = strtolower($file->getClientOriginalExtension());
+        $fileName = "fasilitas_{$key}.{$ext}";
+
+        $file->move($uploadDir, $fileName);
+
+        $labelMap = [
+            'kelas' => 'Ruang Kelas', 
+            'toilet' => 'Toilet', 
+            'mushala' => 'Mushala', 
+            'gedung' => 'Gedung / Rumah Bimbel'
+        ];
+        $label = $labelMap[$key] ?? $key;
+
+        return back()->with('success', 'Foto Fasilitas (' . $label . ') berhasil diperbarui! Gambar kini tampil di Halaman Depan.');
+    }
+
+    /**
+     * Tambah foto galeri ekstra untuk tombol "Lihat Semua".
+     */
+    public function storeGaleriTambahan(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'gallery_images' => ['required'],
+            'gallery_images.*' => ['image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ], [
+            'gallery_images.required' => 'Minimal satu foto harus dipilih.',
+            'gallery_images.*.image' => 'File harus berupa gambar/foto.',
+            'gallery_images.*.mimes' => 'Format gambar harus jpeg, png, jpg, atau webp.',
+            'gallery_images.*.max' => 'Ukuran gambar maksimal adalah 5MB per file.',
+        ]);
+
+        $galleryDir = public_path('uploads/landing/galeri');
+        if (!file_exists($galleryDir)) {
+            mkdir($galleryDir, 0777, true);
+        }
+
+        $files = $request->file('gallery_images');
+        if (!is_array($files)) {
+            $files = [$files];
+        }
+
+        $count = 0;
+        foreach ($files as $file) {
+            if ($file && $file->isValid()) {
+                $ext = strtolower($file->getClientOriginalExtension());
+                $fileName = 'galeri_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
+                $file->move($galleryDir, $fileName);
+                $count++;
+            }
+        }
+
+        return back()->with('success', "{$count} foto galeri tambahan berhasil diupload dan siap muncul di tombol Lihat Semua.");
+    }
+
+    /**
+     * Hapus / Reset Foto Fasilitas Landing Page.
+     */
+    public function deleteGaleriFoto(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $key = $request->input('key');
+        $deleted = false;
+
+        if (in_array($key, ['kelas', 'toilet', 'mushala', 'gedung'])) {
+            $possibleExts = ['jpg', 'jpeg', 'png', 'webp'];
+            foreach ($possibleExts as $ext) {
+                $existing = public_path("uploads/landing/fasilitas_{$key}.{$ext}");
+                if (file_exists($existing)) {
+                    @unlink($existing);
+                    $deleted = true;
+                }
+            }
+
+            if ($deleted) {
+                return back()->with('success', 'Foto fasilitas berhasil direset ke tampilan default.');
+            }
+
+            return back()->with('error', 'Foto fasilitas default tidak ditemukan.');
+        }
+
+        if ($key === 'galeri_extra') {
+            $filename = basename((string) $request->input('filename'));
+            $filePath = public_path("uploads/landing/galeri/{$filename}");
+
+            if ($filename && file_exists($filePath)) {
+                @unlink($filePath);
+                return back()->with('success', 'Foto galeri tambahan berhasil dihapus.');
+            }
+
+            return back()->with('error', 'Foto galeri tambahan tidak ditemukan.');
+        }
+
+        return back()->with('error', 'Permintaan hapus tidak valid.');
+    }
 }

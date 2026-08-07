@@ -3,12 +3,13 @@
     $currentUser = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
     $currentName = $currentUser ? $currentUser->name : 'Guest';
     $isSiswa = auth()->guard('siswa')->check();
-    $dashboardRoute = $isSiswa 
-        ? route('siswa.dashboard') 
+    $dashboardRoute = $isSiswa
+        ? route('siswa.dashboard')
         : ($currentUser && $currentUser->isAdmin() ? route('admin.dashboard') : route('guru.dashboard'));
 @endphp
-<aside class="main-sidebar sidebar-dark-primary elevation-4 {{ ($isSiswa || ($currentUser && $currentUser->isGuru())) ? 'hidden md:block' : '' }}">
-    <a href="#" class="brand-link">
+<aside
+    class="main-sidebar sidebar-dark-primary elevation-4 {{ ($isSiswa || ($currentUser && $currentUser->isGuru())) ? 'hidden md:block' : '' }}">
+    <a href="{{route('dashboard')}}" class="brand-link">
         <img src="https://placehold.co/32x32/fbbf24/4c1d95?text=PoM" alt="Paradise of Math"
             class="brand-image img-circle elevation-3" style="opacity:.9">
         <span class="brand-text">Paradise <span style="color:#fbbf24">of Math</span></span>
@@ -26,7 +27,8 @@
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                 <li class="nav-item">
-                    <a href="{{ $dashboardRoute }}" class="nav-link {{ Route::is('siswa.dashboard') || Route::is('admin.dashboard') || Route::is('guru.dashboard') ? 'active' : '' }}">
+                    <a href="{{ $dashboardRoute }}"
+                        class="nav-link {{ Route::is('siswa.dashboard') || Route::is('admin.dashboard') || Route::is('guru.dashboard') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt text-purple-400"></i>
                         <p>Dashboard</p>
                     </a>
@@ -36,7 +38,8 @@
                     <!-- ══════ STUDENT NAVIGATION ══════ -->
                     <li class="nav-header">BELAJAR</li>
                     <li class="nav-item">
-                        <a href="{{ route('siswa.jadwal') }}" class="nav-link {{ Route::is('siswa.jadwal') ? 'active' : '' }}">
+                        <a href="{{ route('siswa.jadwal') }}"
+                            class="nav-link {{ Route::is('siswa.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-alt text-amber-400"></i>
                             <p>Jadwal Belajar</p>
                         </a>
@@ -49,7 +52,7 @@
                     </li>
 
                     <li class="nav-header">KEUANGAN</li>
-                    
+
                     <li class="nav-item">
                         <a href="{{ route('siswa.invoice') }}" class="nav-link">
                             <i class="nav-icon fas fa-receipt text-rose-400"></i>
@@ -57,7 +60,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('siswa.riwayat') }}" class="nav-link {{ Route::is('siswa.riwayat') ? 'active' : '' }}">
+                        <a href="{{ route('siswa.riwayat') }}"
+                            class="nav-link {{ Route::is('siswa.riwayat') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-history text-emerald-400"></i>
                             <p>Riwayat Pembayaran</p>
                         </a>
@@ -74,19 +78,22 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.siswa.daftar.index') }}" class="nav-link {{ Route::is('admin.siswa.daftar.index') ? 'active' : '' }}">
+                                <a href="{{ route('admin.siswa.daftar.index') }}"
+                                    class="nav-link {{ Route::is('admin.siswa.daftar.index') ? 'active' : '' }}">
                                     <i class="fas fa-users nav-icon text-purple-400"></i>
                                     <p>Daftar Siswa</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.siswa.tambah.index') }}" class="nav-link {{ Route::is('admin.siswa.tambah.index') ? 'active' : '' }}">
+                                <a href="{{ route('admin.siswa.tambah.index') }}"
+                                    class="nav-link {{ Route::is('admin.siswa.tambah.index') ? 'active' : '' }}">
                                     <i class="fas fa-user-plus nav-icon text-success"></i>
                                     <p>Tambah Siswa</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.siswa.approve.index') }}" class="nav-link {{ Route::is('admin.siswa.approve.index') ? 'active' : '' }}">
+                                <a href="{{ route('admin.siswa.approve.index') }}"
+                                    class="nav-link {{ Route::is('admin.siswa.approve.index') ? 'active' : '' }}">
                                     <i class="fas fa-user-check nav-icon text-warning"></i>
                                     <p>Approve Siswa</p>
                                 </a>
@@ -101,7 +108,8 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.guru.daftar.index') }}" class="nav-link {{ Route::is('admin.guru.daftar.index') ? 'active' : '' }}">
+                                <a href="{{ route('admin.guru.daftar.index') }}"
+                                    class="nav-link {{ Route::is('admin.guru.daftar.index') ? 'active' : '' }}">
                                     <i class="fas fa-id-card nav-icon text-amber-400"></i>
                                     <p>Daftar Tutor</p>
                                 </a>
@@ -122,7 +130,8 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.kalender') }}" class="nav-link {{ Route::is('admin.kalender') ? 'active' : '' }}">
+                                <a href="{{ route('admin.kalender') }}"
+                                    class="nav-link {{ Route::is('admin.kalender') ? 'active' : '' }}">
                                     <i class="fas fa-calendar-week nav-icon text-teal-400"></i>
                                     <p>Kalender Jadwal</p>
                                 </a>
@@ -166,7 +175,8 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.riwayat-pembayaran') }}" class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
+                                <a href="{{ route('admin.riwayat-pembayaran') }}"
+                                    class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
                                     <i class="fas fa-history nav-icon text-emerald-400"></i>
                                     <p>Riwayat Pembayaran</p>
                                 </a>
@@ -187,7 +197,8 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('admin.laporan-pendapatan') }}" class="nav-link {{ Route::is('admin.laporan-pendapatan') ? 'active' : '' }}">
+                                <a href="{{ route('admin.laporan-pendapatan') }}"
+                                    class="nav-link {{ Route::is('admin.laporan-pendapatan') ? 'active' : '' }}">
                                     <i class="fas fa-chart-bar nav-icon text-success"></i>
                                     <p>Laporan Pendapatan</p>
                                 </a>
@@ -201,29 +212,56 @@
                         </ul>
                     </li>
 
-                    <li class="nav-header">PENGELOLAAN HARGA</li>
+                    <li class="nav-header">PENGELOLAAN HARGA & KONTEN</li>
+                    <li class="nav-item {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-images text-rose-400"></i>
+                            <p>Kelola Foto <i class="right fas fa-angle-left"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{{ route('admin.foto.index') }}"
+                                    class="nav-link {{ Route::is('admin.foto.index') ? 'active' : '' }}">
+                                    <i class="fas fa-camera nav-icon text-rose-400"></i>
+                                    <p>Foto Utama (Hero)</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.galeri.index') }}"
+                                    class="nav-link {{ Route::is('admin.galeri.index') ? 'active' : '' }}">
+                                    <i class="fas fa-building nav-icon text-amber-400"></i>
+                                    <p>Foto Fasilitas &amp; Galeri</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.paket') }}" class="nav-link {{ Route::is('admin.paket') ? 'active' : '' }}">
+                        <a href="{{ route('admin.paket') }}"
+                            class="nav-link {{ Route::is('admin.paket') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-box-open text-amber-400"></i>
                             <p>Kelola Paket Belajar</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('admin.rekening') }}" class="nav-link {{ Route::is('admin.rekening') ? 'active' : '' }}">
+                        <a href="{{ route('admin.rekening') }}"
+                            class="nav-link {{ Route::is('admin.rekening') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-credit-card text-teal-400"></i>
                             <p>Kelola Rekening</p>
                         </a>
                     </li>
-                    
+
                     <li class="nav-item">
-                        <a href="{{ route('admin.mapel') }}" class="nav-link {{ Route::is('admin.mapel') ? 'active' : '' }}">
+                        <a href="{{ route('admin.mapel') }}"
+                            class="nav-link {{ Route::is('admin.mapel') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book text-info"></i>
                             <p>Kelola Mata Pelajaran</p>
                         </a>
                     </li>
+
                     <li class="nav-item">
                         <a href="{{ route('admin.chat') }}" class="nav-link {{ Route::is('admin.chat') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-comments text-rose-400"></i>
+                            <i class="nav-icon fas fa-comments text-emerald-400"></i>
                             <p>Chat Realtime</p>
                         </a>
                     </li>
@@ -254,7 +292,8 @@
                     <!-- ══════ GURU (TUTOR) NAVIGATION ══════ -->
                     <li class="nav-header">MENGAJAR</li>
                     <li class="nav-item">
-                        <a href="{{ route('guru.jadwal') }}" class="nav-link {{ Route::is('guru.jadwal') ? 'active' : '' }}">
+                        <a href="{{ route('guru.jadwal') }}"
+                            class="nav-link {{ Route::is('guru.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-check text-purple-400"></i>
                             <p>Jadwal Mengajar</p>
                         </a>
@@ -279,7 +318,8 @@
                     </li>
                     <li class="nav-header">LAINNYA</li>
                     <li class="nav-item">
-                        <a href="{{ route('guru.biodata') }}" class="nav-link {{ Route::is('guru.biodata') ? 'active' : '' }}">
+                        <a href="{{ route('guru.biodata') }}"
+                            class="nav-link {{ Route::is('guru.biodata') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-id-card text-info"></i>
                             <p>Biodata Guru</p>
                         </a>
