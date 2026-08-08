@@ -303,11 +303,107 @@ class AdminController extends Controller
         }
 
         $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
+        $pendingSesi = $biodata['pending_sesi_per_mapel'] ?? [];
+
+        if (!empty($pendingMapels)) {
+            $activeMapels = $biodata['mapel_jadwal'] ?? [];
+            $activeSesi = $biodata['sesi_per_mapel'] ?? [];
+
+            foreach ($pendingMapels as $idx => $mapelName) {
+                if (!in_array($mapelName, $activeMapels)) {
+                    $activeMapels[] = $mapelName;
+                    $activeSesi[] = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 8;
+                }
+            }
+
+            $biodata['mapel_jadwal'] = array_values($activeMapels);
+            $biodata['sesi_per_mapel'] = array_values($activeSesi);
+            $biodata['jumlah_pertemuan'] = array_sum($activeSesi);
+            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+        }
+
         $siswa->update([
             'status' => 'active',
+            'biodata' => $biodata,
         ]);
 
         return back()->with('success', 'Akun pendaftaran ' . $siswa->name . ' berhasil disetujui dan diaktifkan!');
+    }
+
+    /**
+     * Tampilkan daftar request tambah mapel untuk siswa aktif.
+     */
+    public function requestTambahMapel()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $students = Siswa::where('status', 'active')
+            ->whereNotNull('biodata')
+            ->get()
+            ->filter(function ($student) {
+                $biodata = $student->biodata ?? [];
+                return !empty($biodata['pending_mapel_jadwal']);
+            });
+
+        return view('admin.requestTambahMapel', compact('students'));
+    }
+
+    /**
+     * Approve request tambah mapel tanpa mereset status akun.
+     */
+    public function approveRequestTambahMapel($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
+        $pendingSesi = $biodata['pending_sesi_per_mapel'] ?? [];
+
+        if (!empty($pendingMapels)) {
+            $activeMapels = $biodata['mapel_jadwal'] ?? [];
+            $activeSesi = $biodata['sesi_per_mapel'] ?? [];
+
+            foreach ($pendingMapels as $idx => $mapelName) {
+                if (!in_array($mapelName, $activeMapels)) {
+                    $activeMapels[] = $mapelName;
+                    $activeSesi[] = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 8;
+                }
+            }
+
+            $biodata['mapel_jadwal'] = array_values($activeMapels);
+            $biodata['sesi_per_mapel'] = array_values($activeSesi);
+            $biodata['jumlah_pertemuan'] = array_sum($activeSesi);
+            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+
+            $siswa->update(['biodata' => $biodata]);
+        }
+
+        return back()->with('success', 'Request tambah mapel siswa ' . $siswa->name . ' berhasil disetujui.');
+    }
+
+    /**
+     * Reject request tambah mapel untuk siswa aktif.
+     */
+    public function rejectRequestTambahMapel($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+
+        unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+        $siswa->update(['biodata' => $biodata]);
+
+        return back()->with('success', 'Request tambah mapel siswa ' . $siswa->name . ' berhasil ditolak.');
     }
 
     /**

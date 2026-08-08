@@ -38,6 +38,13 @@
                     <!-- ══════ STUDENT NAVIGATION ══════ -->
                     <li class="nav-header">BELAJAR</li>
                     <li class="nav-item">
+                        <a href="{{ route('siswa.tambah-pelajaran') }}"
+                            class="nav-link {{ Route::is('siswa.tambah-pelajaran') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-book-medical text-purple-400"></i>
+                            <p>Tambah Pelajaran</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a href="{{ route('siswa.jadwal') }}"
                             class="nav-link {{ Route::is('siswa.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-alt text-amber-400"></i>
@@ -96,6 +103,13 @@
                                     class="nav-link {{ Route::is('admin.siswa.approve.index') ? 'active' : '' }}">
                                     <i class="fas fa-user-check nav-icon text-warning"></i>
                                     <p>Approve Siswa</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.siswa.requests.index') }}"
+                                    class="nav-link {{ Route::is('admin.siswa.requests.index') ? 'active' : '' }}">
+                                    <i class="fas fa-book-medical nav-icon text-info"></i>
+                                    <p>Approve Request Mapel</p>
                                 </a>
                             </li>
                         </ul>

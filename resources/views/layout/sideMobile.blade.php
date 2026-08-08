@@ -129,18 +129,18 @@
             Room</span>
         </a>
 
-        <!-- Explore -->
-        <a href="#"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isExploreActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+        <!-- Explore / Tambah Pelajaran -->
+        <a href="{{ route('siswa.tambah-pelajaran') }}"
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ Request::is('siswa/tambah-mapel') ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isExploreActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ Request::is('siswa/tambah-mapel') ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              style="width: 20px; height: 20px; transition: transform 0.25s ease; transform: {{ $isExploreActive ? 'scale(1.08)' : 'scale(1)' }};">
+              style="width: 20px; height: 20px; transition: transform 0.25s ease; transform: {{ Request::is('siswa/tambah-mapel') ? 'scale(1.08)' : 'scale(1)' }};">
               <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
             </svg>
           </div>
           <span
-            style="font-size: 10px; font-weight: {{ $isExploreActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">ADD</span>
+            style="font-size: 10px; font-weight: {{ Request::is('siswa/tambah-mapel') ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Mapel</span>
         </a>
 
         <!-- Chat -->

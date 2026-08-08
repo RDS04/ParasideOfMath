@@ -57,6 +57,10 @@ Route::controller(SiswaController::class)->group(function () {
     Route::get('/siswa/biodata', 'showBiodata')->middleware('auth:siswa')->name('siswa.biodata');
     Route::post('/siswa/biodata', 'submitBiodata')->middleware('auth:siswa')->name('siswa.biodata.submit');
     Route::get('/siswa/register-kategori', 'showRegisterKategori')->middleware('auth:siswa')->name('siswa.register-kategori');
+    Route::get('/siswa/tambah-mapel', 'showTambahPelajaran')->middleware('auth:siswa')->name('siswa.tambah-pelajaran');
+    Route::post('/siswa/tambah-mapel', 'simpanMapel')->middleware('auth:siswa')->name('siswa.tambah-mapel');
+    Route::put('/siswa/tambah-mapel', 'editMapel')->middleware('auth:siswa')->name('siswa.edit-mapel');
+    Route::delete('/siswa/tambah-mapel', 'hapusMapel')->middleware('auth:siswa')->name('siswa.hapus-mapel');
     Route::get('/siswa/payment', 'showPayment')->middleware('auth:siswa')->name('siswa.payment');
     Route::post('/siswa/payment', 'submitPayment')->middleware('auth:siswa')->name('siswa.payment.submit');
     Route::get('/siswa/pending', 'showPending')->middleware('auth:siswa')->name('siswa.pending');
@@ -95,6 +99,9 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/admin/siswa/approve', 'approvSiswa')->name('admin.siswa.approve.index');
     Route::post('/admin/siswa/approve/{id}', 'submitApprovSiswa')->name('admin.siswa.approve.submit');
     Route::post('/admin/siswa/reject/{id}', 'rejectSiswa')->name('admin.siswa.reject.submit');
+    Route::get('/admin/siswa/requests', 'requestTambahMapel')->name('admin.siswa.requests.index');
+    Route::post('/admin/siswa/request/{id}', 'approveRequestTambahMapel')->name('admin.siswa.requests.approve');
+    Route::post('/admin/siswa/request/{id}/reject', 'rejectRequestTambahMapel')->name('admin.siswa.requests.reject');
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
     Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');

@@ -13,6 +13,21 @@
         $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
         $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
 
+        // ── Data database untuk Modal Tambah & Bayar ──
+        $availableMapels = \App\Models\Mapel::all();
+        if ($availableMapels->isEmpty()) {
+            $availableMapels = collect([
+                (object)['id' => 1, 'nama_mapel' => 'Matematika', 'shift' => 'Reguler'],
+                (object)['id' => 2, 'nama_mapel' => 'Fisika', 'shift' => 'Reguler'],
+                (object)['id' => 3, 'nama_mapel' => 'Kimia', 'shift' => 'Reguler'],
+                (object)['id' => 4, 'nama_mapel' => 'Biologi', 'shift' => 'Reguler'],
+                (object)['id' => 5, 'nama_mapel' => 'Bahasa Inggris', 'shift' => 'Reguler'],
+                (object)['id' => 6, 'nama_mapel' => 'Bahasa Indonesia', 'shift' => 'Reguler'],
+            ]);
+        }
+        $rekeningBanks    = \App\Models\Rekening::where('tipe', 'bank')->get();
+        $rekeningEwallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
+
         // ── Data flat (legacy / gabungan) ──
         $hariPertemuan   = $biodata['hari_pertemuan'] ?? [];
         $tanggalMulai    = $biodata['tanggal_mulai'] ?? null;
@@ -267,9 +282,9 @@
                                 {{ count($mapels) > 0 ? implode(', ', $mapels) : 'Bimbingan Belajar Matematika' }}
                             </p>
                         </div>
-                        <a href="{{ route('siswa.jadwal') }}"
+                        <a href="{{ route('siswa.tambah-pelajaran') }}"
                             class="small-box-footer text-amber-600 mt-3 pt-2 border-top text-left text-xs font-semibold d-flex items-center justify-between">
-                            <span>Lihat Detail Mapel</span> <i class="fas fa-chevron-right text-xxs"></i>
+                            <span>Lihat & Tambah Mapel</span> <i class="fas fa-chevron-right text-xxs"></i>
                         </a>
                     </div>
                 </div>
@@ -1211,4 +1226,5 @@
             </div>
         </div>
     </div>
+
 @endsection
