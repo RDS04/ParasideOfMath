@@ -81,6 +81,12 @@
 </head>
 
 <body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
+    @php
+        $siswaAuthHeader = auth()->guard('siswa')->user();
+        $isTambahPelajaranFlow = $siswaAuthHeader && $siswaAuthHeader->status === 'active';
+    @endphp
+
+    @unless($isTambahPelajaranFlow)
 
     <!-- ══════ STEP INDICATOR ══════ -->
     <div class="w-full max-w-7xl mb-8">
@@ -199,6 +205,7 @@
             </div>
         </div>
     </div>
+    @endunless
     <div class="content-wrapper w-full flex justify-center">
         @yield('content')
     </div>

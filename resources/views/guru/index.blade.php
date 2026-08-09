@@ -98,7 +98,7 @@
                     <div class="metric-card bg-white p-3 shadow-xs h-100">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="inner-metric">
-                                <h3 class="font-weight-extrabold text-teal-950 mb-0">12</h3>
+                                <h3 class="font-weight-extrabold text-teal-950 mb-0">{{ $totalKelasMengajar }}</h3>
                                 <p class="text-muted text-xs mb-1">Kelas Mengajar</p>
                             </div>
                             <div class="metric-icon bg-teal-50 text-teal-600"><i class="fas fa-chalkboard"></i></div>
@@ -113,7 +113,7 @@
                     <div class="metric-card bg-white p-3 shadow-xs h-100">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="inner-metric">
-                                <h3 class="font-weight-extrabold text-teal-950 mb-0">48 <span class="text-xs font-weight-normal text-muted">Jam</span></h3>
+                                <h3 class="font-weight-extrabold text-teal-950 mb-0">{{ $totalJamMengajar }}<span class="text-xs font-weight-normal text-muted">Jam</span></h3>
                                 <p class="text-muted text-xs mb-1">Akumulasi Durasi</p>
                             </div>
                             <div class="metric-icon bg-blue-50 text-blue-600"><i class="fas fa-clock"></i></div>

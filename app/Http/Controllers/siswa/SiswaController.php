@@ -133,13 +133,19 @@ class SiswaController extends Controller
             if ($siswa->status === 'rejected') {
                 return redirect()->route('siswa.biodata');
             }
-            if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
+            if ($siswa->status === 'under_review') {
+                return redirect()->route('siswa.pending');
+            }
+            // Bukti transfer lama cuma relevan kalau siswa BELUM aktif.
+            // Siswa aktif yang lagi nambah mapel tidak boleh ke-redirect ke halaman pending.
+            if ($siswa->status !== 'active' && !empty($siswa->bukti_transfer)) {
                 return redirect()->route('siswa.pending');
             }
         }
 
         $paketId   = $request->input('paket_id');
         $tipePaket = $request->input('tipe_paket', '1');
+
 
         $paket = PaketBelajar::find($paketId) ?? PaketBelajar::first();
 
@@ -188,6 +194,33 @@ class SiswaController extends Controller
 
         $hariPerMapel = $request->input('hari', []);            // [0 => [1=>'Senin', 2=>'Rabu'], …]
         $tanggalArr   = $request->input('tanggal_mulai', []);   // [0 => '2026-08-10', …]
+
+        if ($siswa) {
+            $biodata = $siswa->biodata ?? [];
+            $existingPendingMapels = is_array($biodata['pending_mapel_jadwal'] ?? null) ? $biodata['pending_mapel_jadwal'] : [];
+            $existingPendingSesi   = is_array($biodata['pending_sesi_per_mapel'] ?? null) ? $biodata['pending_sesi_per_mapel'] : [];
+
+            $mergedPendingMapels = [];
+            $mergedPendingSesi   = [];
+
+            foreach ($existingPendingMapels as $index => $name) {
+                $mergedPendingMapels[] = $name;
+                $mergedPendingSesi[]   = isset($existingPendingSesi[$index]) ? (int) $existingPendingSesi[$index] : 8;
+            }
+
+            foreach ((array) $mapelJadwal as $index => $name) {
+                if (!in_array($name, $mergedPendingMapels, true)) {
+                    $mergedPendingMapels[] = $name;
+                    $mergedPendingSesi[]   = isset($sesiPerMapel[$index]) ? (int) $sesiPerMapel[$index] : 8;
+                }
+            }
+
+            $biodata['pending_mapel_jadwal'] = array_values($mergedPendingMapels);
+            $biodata['pending_sesi_per_mapel'] = array_values($mergedPendingSesi);
+            $biodata['pending_jumlah_pertemuan'] = array_sum($mergedPendingSesi);
+            $siswa->biodata = $biodata;
+            $siswa->save();
+        }
 
         // Normalisasi: pastikan tanggalArr adalah array string
         if (!is_array($tanggalArr)) {

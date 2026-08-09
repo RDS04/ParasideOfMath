@@ -20,18 +20,49 @@ class GuruController extends Controller
 
         $guruProfile = $user->getOrCreateGuruProfile();
         $isBiodataComplete = $guruProfile->isComplete();
+        $guruNameNorm = strtolower(trim($user->name));
 
-        // Fetch students assigned to this Guru by Admin
-        $assignedStudents = \App\Models\Siswa::all()->filter(function ($siswa) use ($user) {
+        $assignedStudents = \App\Models\Siswa::where('status', 'active')
+            ->get()
+            ->filter(fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm))
+            ->values();
+
+        // Hitung Metric 1 (mapel unik yang diajar) & Metric 2 (akumulasi jam)
+        $uniqueMapelsTaught = [];
+        $totalMinutesTaught = 0;
+
+        foreach ($assignedStudents as $siswa) {
             $biodata = $siswa->biodata ?? [];
-            $tutorNames = $biodata['tutor_names'] ?? [];
-            if (is_array($tutorNames)) {
-                return in_array($user->name, $tutorNames);
-            }
-            return str_contains($siswa->tipe_paket ?? '', $user->name);
-        });
+            $mapelJadwal  = $biodata['mapel_jadwal'] ?? [];
+            $sesiPerMapel = $biodata['sesi_per_mapel'] ?? [];
 
-        return view('guru.index', compact('user', 'guruProfile', 'isBiodataComplete', 'assignedStudents'));
+            $paket = $siswa->paket;
+            $durationMinutes = 90;
+            if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5 ?? '', $dM)) {
+                $durationMinutes = (int) $dM[1];
+            }
+
+            $mapelForThisGuru = $this->getMapelAssignedToGuru($siswa, $guruNameNorm);
+
+            foreach ($mapelForThisGuru as $mapelName) {
+                $uniqueMapelsTaught[$mapelName] = true;
+
+                $mIdx = array_search($mapelName, $mapelJadwal);
+                $sesi = ($mIdx !== false)
+                    ? (int) ($sesiPerMapel[$mIdx] ?? ($biodata['jumlah_pertemuan'] ?? 0))
+                    : (int) ($biodata['jumlah_pertemuan'] ?? 0);
+
+                $totalMinutesTaught += $sesi * $durationMinutes;
+            }
+        }
+
+        $totalKelasMengajar = count($uniqueMapelsTaught);
+        $totalJamMengajar = round($totalMinutesTaught / 60, 1);
+
+        return view('guru.index', compact(
+            'user', 'guruProfile', 'isBiodataComplete', 'assignedStudents',
+            'totalKelasMengajar', 'totalJamMengajar'
+        ));
     }
 
     /**
@@ -188,36 +219,9 @@ class GuruController extends Controller
         $guruNameNorm = strtolower(trim($user->name));
 
         // Fetch students assigned to this Guru
-        $assignedStudents = \App\Models\Siswa::all()->filter(function ($siswa) use ($guruNameNorm) {
-            $biodata = $siswa->biodata ?? [];
-
-            // 1. Check tutor_per_mapel (e.g. ['Fisika' => 'Guru Test', 'Kimia' => 'Guru Budi'])
-            $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
-            if (is_array($tutorPerMapel)) {
-                foreach ($tutorPerMapel as $mapel => $tName) {
-                    if (strtolower(trim($tName)) === $guruNameNorm) {
-                        return true;
-                    }
-                }
-            }
-
-            // 2. Check tutor_names (flat array)
-            $tutorNames = $biodata['tutor_names'] ?? [];
-            if (is_array($tutorNames)) {
-                foreach ($tutorNames as $tName) {
-                    if (strtolower(trim($tName)) === $guruNameNorm) {
-                        return true;
-                    }
-                }
-            }
-
-            // 3. Check tipe_paket string descriptor
-            if ($siswa->tipe_paket && str_contains(strtolower($siswa->tipe_paket), $guruNameNorm)) {
-                return true;
-            }
-
-            return false;
-        });
+        $assignedStudents = \App\Models\Siswa::all()->filter(
+            fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm)
+        );
 
         $sessions = [];
         $dayMap = [
@@ -240,6 +244,13 @@ class GuruController extends Controller
                 if (preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
                     $mapelJadwal = array_map('trim', explode(',', $matches[1]));
                 }
+            }
+
+            $paket = $siswa->paket;
+            $jamMulai = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
+            $durationMinutes = 90;
+            if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5 ?? '', $dMatches)) {
+                $durationMinutes = (int) $dMatches[1];
             }
 
             // Determine which specific mapels are assigned to this Guru
@@ -381,37 +392,87 @@ class GuruController extends Controller
         $guruNameNorm = strtolower(trim($user->name));
 
         // Fetch students assigned to this Guru
-        $assignedStudents = \App\Models\Siswa::all()->filter(function ($siswa) use ($guruNameNorm) {
-            $biodata = $siswa->biodata ?? [];
-
-            // 1. Check tutor_per_mapel
-            $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
-            if (is_array($tutorPerMapel)) {
-                foreach ($tutorPerMapel as $mapel => $tName) {
-                    if (strtolower(trim($tName)) === $guruNameNorm) {
-                        return true;
-                    }
-                }
-            }
-
-            // 2. Check tutor_names
-            $tutorNames = $biodata['tutor_names'] ?? [];
-            if (is_array($tutorNames)) {
-                foreach ($tutorNames as $tName) {
-                    if (strtolower(trim($tName)) === $guruNameNorm) {
-                        return true;
-                    }
-                }
-            }
-
-            // 3. Check tipe_paket
-            if ($siswa->tipe_paket && str_contains(strtolower($siswa->tipe_paket), $guruNameNorm)) {
-                return true;
-            }
-
-            return false;
-        });
+        $assignedStudents = \App\Models\Siswa::all()->filter(
+            fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm)
+        );
 
         return view('guru.dataSiswa', compact('assignedStudents'));
+    }
+
+    /**
+     * Cek apakah siswa ini dibimbing oleh guru tertentu (normalized name).
+     * Prioritas: tutor_per_mapel > tutor_names > tipe_paket string.
+     */
+    private function isSiswaAssignedToGuru($siswa, string $guruNameNorm): bool
+    {
+        $biodata = $siswa->biodata ?? [];
+
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+        if (is_array($tutorPerMapel) && !empty($tutorPerMapel)) {
+            foreach ($tutorPerMapel as $tName) {
+                if (strtolower(trim($tName)) === $guruNameNorm) {
+                    return true;
+                }
+            }
+        }
+
+        $tutorNames = $biodata['tutor_names'] ?? [];
+        if (is_array($tutorNames) && !empty($tutorNames)) {
+            foreach ($tutorNames as $tName) {
+                if (strtolower(trim($tName)) === $guruNameNorm) {
+                    return true;
+                }
+            }
+        }
+
+        if ($siswa->tipe_paket && str_contains(strtolower($siswa->tipe_paket), $guruNameNorm)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Ambil daftar nama mapel yang secara spesifik ditugaskan ke guru ini
+     * untuk siswa tertentu. Fallback: semua mapel siswa jika tidak ada
+     * penugasan per-mapel yang eksplisit.
+     */
+    private function getMapelAssignedToGuru($siswa, string $guruNameNorm): array
+    {
+        $biodata = $siswa->biodata ?? [];
+        $mapelJadwal = $biodata['mapel_jadwal'] ?? [];
+
+        if (empty($mapelJadwal) && $siswa->tipe_paket) {
+            if (preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+                $mapelJadwal = array_map('trim', explode(',', $matches[1]));
+            }
+        }
+
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+        $assigned = [];
+
+        if (is_array($tutorPerMapel) && !empty($tutorPerMapel)) {
+            foreach ($tutorPerMapel as $mapelName => $tName) {
+                if (strtolower(trim($tName)) === $guruNameNorm) {
+                    $assigned[] = $mapelName;
+                }
+            }
+        }
+
+        if (empty($assigned) && $siswa->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket, $m)) {
+            $guruParts = array_map('trim', explode(',', $m[1]));
+            foreach ($guruParts as $part) {
+                if (str_contains(strtolower($part), $guruNameNorm) && str_contains($part, ':')) {
+                    $p = explode(':', $part);
+                    $assigned[] = trim($p[0]);
+                }
+            }
+        }
+
+        if (empty($assigned)) {
+            $assigned = !empty($mapelJadwal) ? $mapelJadwal : ['Bimbingan Belajar'];
+        }
+
+        return $assigned;
     }
 }
