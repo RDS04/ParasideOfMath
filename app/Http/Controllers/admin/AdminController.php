@@ -526,26 +526,20 @@ class AdminController extends Controller
         }
 
         $request->validate([
-            'hari_pertemuan' => ['required', 'array'],
-            'hari_pertemuan.*' => ['string', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu'],
+            'hari_per_mapel' => ['nullable', 'array'],
+            'hari_per_mapel.*' => ['array'],
+            'hari_per_mapel.*.*' => ['string', 'in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu'],
         ]);
 
         $siswa = Siswa::findOrFail($id);
         $biodata = $siswa->biodata ?? [];
-        $biodata['hari_pertemuan'] = $request->hari_pertemuan;
-
-        // Sync with tipe_paket string descriptor (e.g. "Hari: Senin, Rabu | ...")
-        if ($siswa->tipe_paket) {
-            $daysStr = implode(', ', $request->hari_pertemuan);
-            $newTipePaket = preg_replace('/Hari:\s*([^|]+)/i', 'Hari: ' . $daysStr . ' ', $siswa->tipe_paket);
-            $siswa->tipe_paket = trim($newTipePaket);
-        }
+        $biodata['hari_per_mapel'] = $request->input('hari_per_mapel', []);
 
         $siswa->update([
             'biodata' => $biodata,
         ]);
 
-        return back()->with('success', 'Jadwal hari bimbingan bimbel untuk ' . $siswa->name . ' berhasil diperbarui!');
+        return back()->with('success', 'Jadwal hari bimbingan per mata pelajaran untuk ' . $siswa->name . ' berhasil diperbarui!');
     }
 
     /**

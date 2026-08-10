@@ -706,9 +706,10 @@
                 const seen = new Set();
                 checkboxes.forEach(cb => {
                     if (cb.checked && cb.value) {
-                        const match = cb.value.match(/^(.+?)\s+\d+x$/);
+                        const match = cb.value.match(/^(.+?)\s+(\d+)x$/);
                         const name  = match ? match[1].trim() : cb.value.trim();
-                        if (!seen.has(name)) { seen.add(name); list.push(name); }
+                        const shift = match ? parseInt(match[2], 10) : 2;
+                        if (!seen.has(name)) { seen.add(name); list.push({ name, shift }); }
                     }
                 });
                 return list;
@@ -720,11 +721,11 @@
                 const now    = new Date();
                 const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
 
-                // Update summary banner
                 if (step3Summary) {
                     if (mapels.length) {
+                        const names = mapels.map(m => m.name).join(', ');
                         step3Summary.innerHTML = `<i class="fas fa-book-open mr-2 text-purple-500"></i>
-                            Jadwal untuk <strong>${mapels.length} mata pelajaran</strong>: ${mapels.join(', ')}`;
+                            Jadwal untuk <strong>${mapels.length} mata pelajaran</strong>: ${names}`;
                         step3Summary.classList.remove('hidden');
                     } else {
                         step3Summary.innerHTML = '<i class="fas fa-exclamation-circle mr-2 text-amber-500"></i> Belum ada mapel yang dipilih. Kembali ke langkah sebelumnya.';
@@ -734,22 +735,40 @@
                 if (!scheduleContainer) return;
                 scheduleContainer.innerHTML = '';
 
-                mapels.forEach((mapel, idx) => {
-                    const slug = mapel.toLowerCase().replace(/\s+/g, '_');
+                mapels.forEach((item, idx) => {
+                    const mapel = item.name;
+                    const shift = item.shift || 2;
+                    const slug  = mapel.toLowerCase().replace(/\s+/g, '_');
+
+                    // Bangun dropdown hari sebanyak jumlah shift
+                    let hariSelectsHtml = '';
+                    for (let p = 1; p <= shift; p++) {
+                        hariSelectsHtml += `
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                                    Hari — ${mapel} (Pertemuan ${p}) <span class="text-amber-600">*</span>
+                                </label>
+                                <select name="hari[${idx}][${p}]" class="form-input text-sm cursor-pointer" required>
+                                    <option value="">Pilih hari</option>
+                                    <option>Senin</option><option>Selasa</option><option>Rabu</option>
+                                    <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+                                </select>
+                            </div>`;
+                    }
+                    const hariGridClass = shift > 1 ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3';
+
                     const card = document.createElement('div');
                     card.className = 'bg-white rounded-2xl border border-purple-100 shadow-sm overflow-hidden';
                     card.innerHTML = `
-                        <!-- Card Header -->
                         <div class="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-purple-600 to-violet-600 text-white">
                             <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-xs font-black">${idx+1}</div>
                             <div>
-                                <div class="text-[11px] font-semibold uppercase tracking-wider opacity-70">Jadwal Belajar</div>
+                                <div class="text-[11px] font-semibold uppercase tracking-wider opacity-70">Jadwal Belajar (${shift}x / minggu)</div>
                                 <div class="font-bold text-base leading-tight">${mapel}</div>
                             </div>
                         </div>
 
                         <div class="p-5 space-y-4">
-                            <!-- Jumlah Pertemuan -->
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
                                     Jumlah Pertemuan / Sesi <span class="text-amber-600">*</span>
@@ -757,8 +776,8 @@
                                 <div class="grid grid-cols-5 gap-2" id="pertemuan-grid-${slug}">
                                     ${[1,2,3,4,5,6,7,8,9,10].map(n => `
                                         <label class="pertemuan-label flex items-center justify-center p-2.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950 font-bold"
-                                               id="lbl-pt-${slug}-${n}"
-                                               onclick="selectPertemuan('${slug}', ${n}, this)">
+                                            id="lbl-pt-${slug}-${n}"
+                                            onclick="selectPertemuan('${slug}', ${n}, this)">
                                             <input type="radio" name="sesi[${idx}]" value="${n}" class="sr-only" data-mapel-idx="${idx}">
                                             <span>${n}x</span>
                                         </label>`).join('')}
@@ -766,31 +785,10 @@
                                 <div class="error-msg hidden text-red-500 text-xs mt-1">Pilih jumlah pertemuan untuk ${mapel}.</div>
                             </div>
 
-                            <!-- Pilih Hari: Pertemuan 1 & 2 -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                                        Hari — ${mapel} (Pertemuan 1) <span class="text-amber-600">*</span>
-                                    </label>
-                                    <select name="hari[${idx}][1]" class="form-input text-sm cursor-pointer" required>
-                                        <option value="">Pilih hari</option>
-                                        <option>Senin</option><option>Selasa</option><option>Rabu</option>
-                                        <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                                        Hari — ${mapel} (Pertemuan 2) <span class="text-amber-600">*</span>
-                                    </label>
-                                    <select name="hari[${idx}][2]" class="form-input text-sm cursor-pointer" required>
-                                        <option value="">Pilih hari</option>
-                                        <option>Senin</option><option>Selasa</option><option>Rabu</option>
-                                        <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
-                                    </select>
-                                </div>
+                            <div class="${hariGridClass}">
+                                ${hariSelectsHtml}
                             </div>
 
-                            <!-- Tanggal Mulai Les -->
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                                     Tanggal Mulai Les — ${mapel} <span class="text-amber-600">*</span>
@@ -798,7 +796,6 @@
                                 <input type="date" name="tanggal_mulai[${idx}]" class="form-input text-sm cursor-pointer" required min="${todayStr}">
                             </div>
 
-                            <!-- Hidden mapel name field for backend -->
                             <input type="hidden" name="mapel_jadwal[${idx}]" value="${mapel}">
                         </div>
                     `;

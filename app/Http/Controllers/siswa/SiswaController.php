@@ -252,6 +252,9 @@ class SiswaController extends Controller
             return redirect()->route('siswa.biodata')
                 ->with('error', 'Pendaftaran Anda sebelumnya ditolak oleh Admin. Silakan isi kembali biodata Anda dan lanjutkan pendaftaran seperti biasa.');
         }
+        if ($siswa->status === 'under_review' || $siswa->status !== 'active') {
+            return redirect()->route('siswa.pending');
+        }
 
         $biodata = $siswa->biodata ?? [];
 
@@ -497,7 +500,14 @@ class SiswaController extends Controller
         }
 
         $mapelJadwal  = $request->input('mapel_jadwal', []);
+        
+        $pilihanGuru        = $request->input('pilihan_guru');
+        $pilihanGuruInggris = $request->input('pilihan_guru_inggris');
+        $stripLabel = fn ($v) => trim(preg_replace('/\s*\(.*?\)\s*$/', '', $v ?? ''));
+
         $sesiPerMapel = $request->input('sesi', []);
+        $hariPerMapel = $request->input('hari', []);           // ← tambahkan
+        $tanggalPerMapel = $request->input('tanggal_mulai', []); // ← tambahkan
 
         if (empty($mapelJadwal) && isset($siswa->biodata['pending_mapel_jadwal'])) {
             $mapelJadwal = $siswa->biodata['pending_mapel_jadwal'];
@@ -537,10 +547,42 @@ class SiswaController extends Controller
             $biodata['pending_mapel_jadwal'] = array_values($mapelJadwal);
             $biodata['pending_sesi_per_mapel'] = array_map('intval', $sesiPerMapel);
             $biodata['pending_jumlah_pertemuan'] = $totalSesi;
+            $biodata['pending_hari_per_mapel'] = $hariPerMapel;             // ← tambahkan
+            $biodata['pending_tanggal_mulai_per_mapel'] = $tanggalPerMapel; // ← tambahkan
         } else {
             $biodata['mapel_jadwal'] = array_values($mapelJadwal);
             $biodata['sesi_per_mapel'] = array_map('intval', $sesiPerMapel);
             $biodata['jumlah_pertemuan'] = $totalSesi;
+            $biodata['hari_per_mapel'] = $hariPerMapel;             // ← tambahkan
+            $biodata['tanggal_mulai_per_mapel'] = $tanggalPerMapel; // ← tambahkan
+        }
+
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+
+        $mapelNamesToCheck = !empty($mapelJadwal) ? $mapelJadwal : [];
+
+        foreach ($mapelNamesToCheck as $mName) {
+            $mNameLower = strtolower($mName);
+
+            if ($pilihanGuru && $pilihanGuru !== 'Karyawan' && str_contains($mNameLower, 'matematika')) {
+                $cleanName = $stripLabel($pilihanGuru);
+                $guruExists = \App\Models\User::where('name', $cleanName)->where('role', 'guru')->exists();
+                if ($guruExists) {
+                    $tutorPerMapel[$mName] = $cleanName;
+                }
+            }
+
+            if ($pilihanGuruInggris && $pilihanGuruInggris !== 'Karyawan' && str_contains($mNameLower, 'inggris')) {
+                $cleanName = $stripLabel($pilihanGuruInggris);
+                $guruExists = \App\Models\User::where('name', $cleanName)->where('role', 'guru')->exists();
+                if ($guruExists) {
+                    $tutorPerMapel[$mName] = $cleanName;
+                }
+            }
+        }
+
+        if (!empty($tutorPerMapel)) {
+            $biodata['tutor_per_mapel'] = $tutorPerMapel;
         }
 
         $biodata['payment_method']   = $paymentMethod;
@@ -575,7 +617,12 @@ class SiswaController extends Controller
             \Illuminate\Support\Facades\Log::error("Gagal mengirim FCM: " . $e->getMessage());
         }
 
-        return redirect()->route('siswa.tambah-pelajaran')
+        if ($siswa->status === 'active') {
+            return redirect()->route('siswa.tambah-pelajaran')
+                ->with('success', 'Pembayaran (' . strtoupper($paymentMethod) . ') telah berhasil dikirim! Verifikasi admin akan dilakukan dalam 1x24 jam.');
+        }
+
+        return redirect()->route('siswa.pending')
             ->with('success', 'Pembayaran (' . strtoupper($paymentMethod) . ') telah berhasil dikirim! Verifikasi admin akan dilakukan dalam 1x24 jam.');
     }
 
@@ -632,7 +679,29 @@ class SiswaController extends Controller
             return $redirect;
         }
 
+        // Guru
         $biodata = $siswa->biodata ?? [];
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+
+        $gurus   = [];
+        $hasGuru = false;
+
+        if (!empty($tutorPerMapel) && is_array($tutorPerMapel)) {
+            foreach ($tutorPerMapel as $mapelName => $guruName) {
+                if (!empty($guruName)) {
+                    $gurus[] = $mapelName . ': ' . $guruName;
+                    $hasGuru = true;
+                }
+            }
+        } elseif ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+            // Fallback untuk data lama yang masih pakai format tipe_paket string
+            $gurus = array_map('trim', explode(',', $m[1]));
+            foreach ($gurus as $g) {
+                if (!empty($g) && $g !== '-' && strtolower($g) !== 'belum ditentukan') {
+                    $hasGuru = true;
+                }
+            }
+        }
 
         // ── Data per-mapel baru ──
         $mapelJadwal     = $biodata['mapel_jadwal'] ?? [];
@@ -708,18 +777,6 @@ class SiswaController extends Controller
             $durationMinutes = (int) $dM[1];
         }
         $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
-
-        // Guru
-        $gurus   = [];
-        $hasGuru = false;
-        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
-            $gurus = array_map('trim', explode(',', $m[1]));
-            foreach ($gurus as $g) {
-                if (!empty($g) && $g !== '-' && strtolower($g) !== 'belum ditentukan') {
-                    $hasGuru = true;
-                }
-            }
-        }
 
         return view('siswa.jadwal', compact(
             'siswa', 'hariPertemuan', 'tanggalMulai', 'mapels',

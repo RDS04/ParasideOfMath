@@ -284,8 +284,8 @@
                                 @foreach($mapelJadwal as $idx => $namaMapel)
                                     @php
                                         $sesiIdx  = $sesiPerMapel[$idx] ?? 0;
-                                        $hari1    = $hariPerMapel[$idx][1] ?? '-';
-                                        $hari2    = $hariPerMapel[$idx][2] ?? '-';
+                                        $hariListMapel = $hariPerMapel[$idx] ?? [];
+                                        $hariDisplay = !empty($hariListMapel) ? implode(' & ', array_filter($hariListMapel)) : '-';
                                         $tgl      = $tanggalArr[$idx] ?? null;
                                         $tglStr   = $tgl ? \Carbon\Carbon::parse($tgl)->format('d M Y') : '-';
                                         $hargaMapel = $harga * $sesiIdx;
@@ -296,7 +296,7 @@
                                             <span class="text-[11px] font-semibold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200">{{ $sesiIdx }}x sesi</span>
                                         </div>
                                         <div class="text-[11px] text-slate-500 space-y-0.5">
-                                            <div><i class="fas fa-calendar-week mr-1 text-purple-400"></i>Hari: <strong class="text-slate-700">{{ $hari1 }} & {{ $hari2 }}</strong></div>
+                                            <div><i class="fas fa-calendar-week mr-1 text-purple-400"></i>Hari: <strong class="text-slate-700">{{ $hariDisplay }}</strong></div>
                                             <div><i class="fas fa-calendar-alt mr-1 text-purple-400"></i>Mulai: <strong class="text-slate-700">{{ $tglStr }}</strong></div>
                                             <div class="text-right font-semibold text-purple-700 mt-1">
                                                 Rp {{ number_format($harga, 0, ',', '.') }} × {{ $sesiIdx }} = Rp {{ number_format($hargaMapel, 0, ',', '.') }}

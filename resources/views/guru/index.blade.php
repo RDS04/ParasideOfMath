@@ -286,7 +286,7 @@
                                                                         {{ $md['name'] }}
                                                                     </span>
                                                                     @if($md['sesi'])
-                                                                        <span><i class="far fa-clock mr-1 text-purple-400"></i>{{ $md['sesi'] }}x Pertemuan</span>
+                                                                        <span><i class="far fa-clock mr-1 text-purple-400"></i>{{ $md['sesi'] }}x Sesi</span>
                                                                     @endif
                                                                 </div>
                                                             @endforeach

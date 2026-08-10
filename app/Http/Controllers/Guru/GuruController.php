@@ -219,7 +219,7 @@ class GuruController extends Controller
         $guruNameNorm = strtolower(trim($user->name));
 
         // Fetch students assigned to this Guru
-        $assignedStudents = \App\Models\Siswa::all()->filter(
+        $assignedStudents = \App\Models\Siswa::with('paket')->get()->filter(
             fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm)
         );
 
@@ -392,7 +392,7 @@ class GuruController extends Controller
         $guruNameNorm = strtolower(trim($user->name));
 
         // Fetch students assigned to this Guru
-        $assignedStudents = \App\Models\Siswa::all()->filter(
+        $assignedStudents = \App\Models\Siswa::with('paket')->get()->filter(
             fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm)
         );
 

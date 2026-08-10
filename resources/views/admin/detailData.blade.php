@@ -85,6 +85,19 @@
                 $ayahInstagram = $bio['ayah_instagram'] ?? '-';
 
                 $hariPilihan = $bio['hari_pertemuan'] ?? [];
+
+                // Fallback baru: gabungkan hari dari semua mapel (hari_per_mapel)
+                if (empty($hariPilihan) && !empty($bio['hari_per_mapel']) && is_array($bio['hari_per_mapel'])) {
+                    foreach ($bio['hari_per_mapel'] as $hariArr) {
+                        if (is_array($hariArr)) {
+                            foreach ($hariArr as $hari) {
+                                if ($hari) $hariPilihan[] = $hari;
+                            }
+                        }
+                    }
+                    $hariPilihan = array_values(array_unique($hariPilihan));
+                }
+
                 if (empty($hariPilihan) && $student->tipe_paket) {
                     if (preg_match('/Hari:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
                         $hariPilihan = array_map('trim', explode(',', $matches[1]));
@@ -484,40 +497,48 @@
         </div>
     </section>
 
-    <!-- Modal Edit Hari Bimbel -->
+    <!-- Modal Edit Hari Bimbel Per Mapel -->
     <div class="modal fade" id="editBimbelDaysModal" tabindex="-1" role="dialog" aria-labelledby="editBimbelDaysModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
                 <form action="{{ route('admin.siswa.update-bimbel-days', $student->id) }}" method="POST">
                     @csrf
                     <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
-                        <h5 class="modal-title font-weight-bold text-md text-white" id="editBimbelDaysModalLabel" style="color: #fff;">Edit Hari Bimbel</h5>
+                        <h5 class="modal-title font-weight-bold text-md text-white" id="editBimbelDaysModalLabel" style="color: #fff;">Edit Hari Bimbel Per Mata Pelajaran</h5>
                         <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body p-4 text-left">
-                        <p class="text-xs text-muted mb-3">Pilih hari-hari pelaksanaan bimbingan belajar untuk siswa ini. Anda dapat memilih lebih dari satu hari.</p>
-                        
-                        <div class="form-group mb-0">
-                            <label class="font-weight-bold text-purple-950 text-xs d-block mb-2">Hari Bimbel:</label>
-                            <div class="row">
+                        @if(!empty($mapelJadwal))
+                            <p class="text-xs text-muted mb-3">Atur hari bimbingan untuk masing-masing mata pelajaran siswa ini.</p>
+                            @php $daftarHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']; @endphp
+                            @foreach($mapelJadwal as $idx => $namaMapel)
                                 @php
-                                    $daftarHari = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                                    $hariMapelIni = $bio['hari_per_mapel'][$idx] ?? [];
+                                    if (!is_array($hariMapelIni)) $hariMapelIni = [];
+                                    $hariMapelIniLower = array_map('strtolower', array_filter($hariMapelIni));
                                 @endphp
-                                @foreach($daftarHari as $hari)
-                                    @php
-                                        $isChecked = in_array(strtolower($hari), $hariPilihanLower);
-                                    @endphp
-                                    <div class="col-6 mb-2">
-                                        <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" name="hari_pertemuan[]" value="{{ $hari }}" class="custom-control-input" id="checkHari{{ $hari }}" {{ $isChecked ? 'checked' : '' }}>
-                                            <label class="custom-control-label text-sm text-slate-700 font-weight-semibold" style="cursor: pointer;" for="checkHari{{ $hari }}">{{ $hari }}</label>
-                                        </div>
+                                <div class="p-3 mb-3 rounded-xl border" style="border-color: #e2e8f0; background-color: #faf9fd;">
+                                    <label class="font-weight-bold text-purple-950 text-xs d-block mb-2">
+                                        <i class="fas fa-book-open text-purple-600 mr-1.5"></i> {{ $namaMapel }}
+                                    </label>
+                                    <div class="row">
+                                        @foreach($daftarHari as $hari)
+                                            @php $isChecked = in_array(strtolower($hari), $hariMapelIniLower); @endphp
+                                            <div class="col-4 mb-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input type="checkbox" name="hari_per_mapel[{{ $idx }}][]" value="{{ $hari }}" class="custom-control-input" id="checkHari{{ $idx }}_{{ $hari }}" {{ $isChecked ? 'checked' : '' }}>
+                                                    <label class="custom-control-label text-xs text-slate-700 font-weight-semibold" style="cursor: pointer;" for="checkHari{{ $idx }}_{{ $hari }}">{{ $hari }}</label>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                @endforeach
-                            </div>
-                        </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <p class="text-xs text-muted mb-0">Siswa ini belum memiliki data mata pelajaran terdaftar, sehingga jadwal per mapel belum bisa diatur.</p>
+                        @endif
                     </div>
                     <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>

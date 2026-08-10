@@ -28,6 +28,44 @@ class DatabaseSeeder extends Seeder
         }
 
         // 2. Seed Guru / Tutor (users & gurus table)
+        $guruSeeds = [
+            [
+                'name' => 'Kak Ika',
+                'email' => 'ika@example.com',
+                'spesialisasi' => 'Matematika (Master)',
+            ],
+            [
+                'name' => 'Kak Angel',
+                'email' => 'angel@example.com',
+                'spesialisasi' => 'Matematika & Bahasa Inggris (Co Master)',
+            ],
+            [
+                'name' => 'Kak Sofia',
+                'email' => 'sofia@example.com',
+                'spesialisasi' => 'Matematika & Bahasa Inggris (Co Master)',
+            ],
+        ];
+
+        foreach ($guruSeeds as $g) {
+            if (User::where('email', $g['email'])->doesntExist()) {
+                $guruUser = User::create([
+                    'name' => $g['name'],
+                    'email' => $g['email'],
+                    'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                    'role' => 'guru',
+                ]);
+
+                \App\Models\Guru::create([
+                    'user_id' => $guruUser->id,
+                    'no_telp' => '08123456789',
+                    'alamat' => 'Jl. Pendidikan No. 45',
+                    'spesialisasi' => $g['spesialisasi'],
+                    'status' => 'aktif',
+                ]);
+            }
+        }
+
+        // Tetap pertahankan 1 akun guru generik buat testing lama
         if (User::where('email', 'guru@example.com')->doesntExist()) {
             $guruUser = User::create([
                 'name' => 'Guru Test',
