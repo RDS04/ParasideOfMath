@@ -89,10 +89,19 @@
         }
         $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
 
-        // Parse Guru
+        // Parse Guru — prioritaskan biodata->tutor_per_mapel (sama seperti showJadwal())
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
         $gurus   = [];
         $hasGuru = false;
-        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+
+        if (!empty($tutorPerMapel) && is_array($tutorPerMapel)) {
+            foreach ($tutorPerMapel as $mapelName => $guruName) {
+                if (!empty($guruName) && strtolower($guruName) !== 'belum ditentukan') {
+                    $gurus[] = $mapelName . ': ' . $guruName;
+                    $hasGuru = true;
+                }
+            }
+        } elseif ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
             $gurus = array_map('trim', explode(',', $m[1]));
             foreach ($gurus as $g) {
                 if (!empty($g) && $g !== '-' && strtolower($g) !== 'belum ditentukan') {

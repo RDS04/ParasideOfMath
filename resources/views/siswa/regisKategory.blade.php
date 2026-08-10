@@ -91,8 +91,8 @@
                 @endif
 
                 <!-- PROMINENT RESPONSIVE PROGRESS REGISTRATION ALERT BANNER -->
-                <div
-                    class="mb-7 p-5 rounded-2xl bg-gradient-to-r from-amber-50/90 via-purple-50/40 to-amber-50/80 border border-amber-200/90 shadow-sm space-y-4">
+                @if(!$isTambahMode)
+                <div class="mb-7 p-5 rounded-2xl bg-gradient-to-r from-amber-50/90 via-purple-50/40 to-amber-50/80 border border-amber-200/90 shadow-sm space-y-4">
                     <!-- Header Row -->
                     <div class="flex items-start sm:items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
                         <div class="flex items-center gap-3">
@@ -117,62 +117,72 @@
                         </span>
                     </div>
                 </div>
+                @endif
 
-                <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950 mb-2">Formulir Pendaftaran</h1>
-                <p class="text-sm text-slate-500 mb-8">Pilih paket belajar yang ingin Anda ikuti.</p>
-
+                <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950 mb-2">
+                    {{ $isTambahMode ? 'Tambah Mata Pelajaran' : 'Formulir Pendaftaran' }}
+                </h1>
+                <p class="text-sm text-slate-500 mb-8">
+                    {{ $isTambahMode ? 'Pilih mata pelajaran tambahan dan atur jadwalnya.' : 'Pilih paket belajar yang ingin Anda ikuti.' }}
+                </p>
                 <!-- FORM -->
                 <form id="regisForm" action="{{ route('siswa.payment') }}" method="GET" class="space-y-5" novalidate>
 
                     <!-- STEP 1 — DATA PENDAFTARAN -->
-                    <div class="step-panel active space-y-5" data-step="1">
-                        <!-- Name (Prefilled or editable) -->
-                        <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama
-                                Lengkap<span class="text-amber-600 ml-1">*</span></label>
-                            <input type="text" name="name"
-                                value="{{ auth()->guard('siswa')->check() ? auth()->guard('siswa')->user()->name : '' }}"
-                                placeholder="Contoh: Budi Santoso" class="form-input" required />
-                            <div class="error">Nama lengkap wajib diisi.</div>
-                        </div>
+                    @if(!$isTambahMode)
+                        <div class="step-panel active space-y-5" data-step="1">
+                            <!-- Name (Prefilled or editable) -->
+                            <div class="field" data-required="true">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama
+                                    Lengkap<span class="text-amber-600 ml-1">*</span></label>
+                                <input type="text" name="name"
+                                    value="{{ auth()->guard('siswa')->check() ? auth()->guard('siswa')->user()->name : '' }}"
+                                    placeholder="Contoh: Budi Santoso" class="form-input" required />
+                                <div class="error">Nama lengkap wajib diisi.</div>
+                            </div>
 
-                        <!-- Email (Prefilled or editable) -->
-                        <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat
-                                Email<span class="text-amber-600 ml-1">*</span></label>
-                            <input type="email" name="email"
-                                value="{{ auth()->guard('siswa')->check() ? auth()->guard('siswa')->user()->email : '' }}"
-                                placeholder="budi@example.com" class="form-input" required />
-                            <div class="error">Alamat email wajib diisi.</div>
-                        </div>
+                            <!-- Email (Prefilled or editable) -->
+                            <div class="field" data-required="true">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Alamat
+                                    Email<span class="text-amber-600 ml-1">*</span></label>
+                                <input type="email" name="email"
+                                    value="{{ auth()->guard('siswa')->check() ? auth()->guard('siswa')->user()->email : '' }}"
+                                    placeholder="budi@example.com" class="form-input" required />
+                                <div class="error">Alamat email wajib diisi.</div>
+                            </div>
 
-                        <!-- Dropdown Package Selector -->
-                        <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Paket
-                                Belajar<span class="text-amber-600 ml-1">*</span></label>
-                            <select id="paketSelect" name="paket_id" class="form-input cursor-pointer" required>
-                                @foreach(\App\Models\PaketBelajar::all() as $paket)
-                                    <option value="{{ $paket->id }}" {{ $loop->first ? 'selected' : '' }}>
-                                        {{ $paket->nama_paket }} ({{ $paket->kategori }})
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="error">Paket belajar wajib dipilih.</div>
-                        </div>
+                            <!-- Dropdown Package Selector -->
+                            <div class="field" data-required="true">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Paket
+                                    Belajar<span class="text-amber-600 ml-1">*</span></label>
+                                <select id="paketSelect" name="paket_id" class="form-input cursor-pointer" required>
+                                    @foreach(\App\Models\PaketBelajar::all() as $paket)
+                                        <option value="{{ $paket->id }}" {{ $loop->first ? 'selected' : '' }}>
+                                            {{ $paket->nama_paket }} ({{ $paket->kategori }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <div class="error">Paket belajar wajib dipilih.</div>
+                            </div>
 
-                        <!-- Dropdown Tipe Paket Selector (Privat / Kelompok) -->
-                        <div class="field" data-required="true">
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Tipe
-                                Pertemuan (Jumlah Peserta)<span class="text-amber-600 ml-1">*</span></label>
-                            <select id="tipeSelect" name="tipe_paket" class="form-input cursor-pointer" required>
-                                <!-- Dynamically populated via JS based on selected package -->
-                            </select>
-                            <div class="error">Tipe pertemuan wajib dipilih.</div>
+                            <!-- Dropdown Tipe Paket Selector (Privat / Kelompok) -->
+                            <div class="field" data-required="true">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Tipe
+                                    Pertemuan (Jumlah Peserta)<span class="text-amber-600 ml-1">*</span></label>
+                                <select id="tipeSelect" name="tipe_paket" class="form-input cursor-pointer" required>
+                                    <!-- Dynamically populated via JS based on selected package -->
+                                </select>
+                                <div class="error">Tipe pertemuan wajib dipilih.</div>
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <input type="hidden" name="paket_id" value="{{ $siswa->paket_id ?? ($paket->id ?? 1) }}">
+                        <input type="hidden" name="tipe_paket" value="1">
+                    @endif
+
 
                     <!-- STEP 2 — PILIH MATA PELAJARAN -->
-                    <div class="step-panel space-y-5" data-step="2">
+                    <div class="step-panel {{ $isTambahMode ? 'active' : '' }} space-y-5" data-step="2">
                         <div class="field" data-required="true">
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mata
                                 Pelajaran
@@ -180,9 +190,8 @@
                             <div class="text-xs text-slate-400 mb-3">Pilih semua pelajaran yang ingin di les kan di PM.
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                @foreach(\App\Models\Mapel::all() as $mapel)
-                                    <label
-                                        class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
+                                @foreach($availableMapels as $mapel)
+                                    <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
                                         <input type="checkbox" name="mapel[]"
                                             value="{{ $mapel->nama_mapel }} {{ $mapel->shift }}x"
                                             class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
@@ -362,6 +371,7 @@
             }
 
             function populateTipe(paketId) {
+                if (!selectTipe) return;
                 const p = packages.find(item => item.id == paketId);
                 if (!p) return;
 
@@ -376,6 +386,7 @@
             }
 
             function updateTipeHighlight() {
+                if (!selectTipe) return;
                 const selectedTipe = selectTipe.value; // '1', '2', '3', or '4'
                 const items = detailList.querySelectorAll('li');
                 items.forEach((item, index) => {
@@ -443,21 +454,28 @@
             }
 
             // Listen to dropdown changes
-            select.addEventListener('change', function () {
-                updatePreview(this.value);
-            });
-
-            selectTipe.addEventListener('change', function () {
-                updateTipeHighlight();
-            });
-
-            // Initial render
-            if (select.value) {
-                updatePreview(select.value);
+            if (select) {
+                select.addEventListener('change', function () {
+                    updatePreview(this.value);
+                });
+            }
+            if (selectTipe) {
+                selectTipe.addEventListener('change', function () {
+                    updateTipeHighlight();
+                });
             }
 
+            // Initial render
+            @if($isTambahMode)
+                updatePreview({{ $siswa->paket_id ?? ($paket->id ?? 1) }});
+            @else
+                if (select && select.value) {
+                    updatePreview(select.value);
+                }
+            @endif
+
             // Wizard Step Navigation
-            let currentStep = 1;
+            let currentStep = {{ $isTambahMode ? '2' : '1' }};
             const stepPanels = document.querySelectorAll('.step-panel');
             const btnBack = document.getElementById('btnBack');
             const btnNext = document.getElementById('btnNext');

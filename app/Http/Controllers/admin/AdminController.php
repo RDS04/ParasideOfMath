@@ -304,6 +304,7 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
+
         $siswa = Siswa::findOrFail($id);
         $biodata = $siswa->biodata ?? [];
         $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
@@ -313,17 +314,25 @@ class AdminController extends Controller
             $activeMapels = $biodata['mapel_jadwal'] ?? [];
             $activeSesi = $biodata['sesi_per_mapel'] ?? [];
 
+            $activeHari = $biodata['hari_per_mapel'] ?? [];
+            $activeTanggal = $biodata['tanggal_mulai_per_mapel'] ?? [];
+
             foreach ($pendingMapels as $idx => $mapelName) {
                 if (!in_array($mapelName, $activeMapels)) {
                     $activeMapels[] = $mapelName;
                     $activeSesi[] = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 8;
+
+                    $activeHari[] = $pendingHari[$idx] ?? [];
+                    $activeTanggal[] = $pendingTanggal[$idx] ?? null;
                 }
             }
 
             $biodata['mapel_jadwal'] = array_values($activeMapels);
             $biodata['sesi_per_mapel'] = array_values($activeSesi);
+             $biodata['hari_per_mapel'] = array_values($activeHari);
+            $biodata['tanggal_mulai_per_mapel'] = array_values($activeTanggal);
             $biodata['jumlah_pertemuan'] = array_sum($activeSesi);
-            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'],$biodata['pending_hari_per_mapel'], $biodata['pending_tanggal_mulai_per_mapel'], $biodata['pending_jumlah_pertemuan']);
         }
 
         $siswa->update([
@@ -367,22 +376,30 @@ class AdminController extends Controller
         $biodata = $siswa->biodata ?? [];
         $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
         $pendingSesi = $biodata['pending_sesi_per_mapel'] ?? [];
+        $pendingHari = $biodata['pending_hari_per_mapel'] ?? [];
+        $pendingTanggal = $biodata['pending_tanggal_mulai_per_mapel'] ?? [];
 
         if (!empty($pendingMapels)) {
             $activeMapels = $biodata['mapel_jadwal'] ?? [];
             $activeSesi = $biodata['sesi_per_mapel'] ?? [];
+            $activeHari = $biodata['hari_per_mapel'] ?? [];
+            $activeTanggal = $biodata['tanggal_mulai_per_mapel'] ?? [];
 
             foreach ($pendingMapels as $idx => $mapelName) {
                 if (!in_array($mapelName, $activeMapels)) {
                     $activeMapels[] = $mapelName;
                     $activeSesi[] = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 8;
+                    $activeHari[] = $pendingHari[$idx] ?? [];
+                    $activeTanggal[] = $pendingTanggal[$idx] ?? null;
                 }
             }
 
             $biodata['mapel_jadwal'] = array_values($activeMapels);
             $biodata['sesi_per_mapel'] = array_values($activeSesi);
+            $biodata['hari_per_mapel'] = array_values($activeHari);
+            $biodata['tanggal_mulai_per_mapel'] = array_values($activeTanggal);
             $biodata['jumlah_pertemuan'] = array_sum($activeSesi);
-            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_hari_per_mapel'], $biodata['pending_tanggal_mulai_per_mapel'], $biodata['pending_jumlah_pertemuan']);
 
             $siswa->update(['biodata' => $biodata]);
         }
@@ -402,7 +419,7 @@ class AdminController extends Controller
         $siswa = Siswa::findOrFail($id);
         $biodata = $siswa->biodata ?? [];
 
-        unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+        unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'],$biodata['pending_hari_per_mapel'], $biodata['pending_tanggal_mulai_per_mapel'], $biodata['pending_jumlah_pertemuan']);
         $siswa->update(['biodata' => $biodata]);
 
         return back()->with('success', 'Request tambah mapel siswa ' . $siswa->name . ' berhasil ditolak.');

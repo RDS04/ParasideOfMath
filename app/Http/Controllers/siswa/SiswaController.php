@@ -69,20 +69,44 @@ class SiswaController extends Controller
     public function showRegisterKategori()
     {
         $siswa = auth()->guard('siswa')->user();
+        $isTambahMode = false;
+        $activeMapels = [];
+        $pendingMapels = [];
+
         if ($siswa) {
             if ($siswa->status === 'active') {
-                return redirect()->route('siswa.dashboard');
-            }
-            if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
-                return redirect()->route('siswa.pending');
-            }
-            // Continuous DB check: If biodata is not filled in DB yet, direct to biodata form
-            if (empty($siswa->biodata) || !is_array($siswa->biodata) || count($siswa->biodata) === 0) {
-                return redirect()->route('siswa.biodata')
-                    ->with('error', 'Silakan isi biodata Anda terlebih dahulu sebelum memilih paket bimbel.');
+                // ── Mode "Tambah Pelajaran" untuk siswa yang sudah aktif ──
+                $isTambahMode = true;
+
+                $biodata       = $siswa->biodata ?? [];
+                $activeMapels  = is_array($biodata['mapel_jadwal'] ?? null) ? $biodata['mapel_jadwal'] : [];
+                $pendingMapels = is_array($biodata['pending_mapel_jadwal'] ?? null) ? $biodata['pending_mapel_jadwal'] : [];
+
+                if (empty($activeMapels) && $siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+                    $activeMapels = array_map('trim', explode(',', $m[1]));
+                }
+            } else {
+                // ── Mode pendaftaran siswa baru (logika lama tetap) ──
+                if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
+                    return redirect()->route('siswa.pending');
+                }
+                if (empty($siswa->biodata) || !is_array($siswa->biodata) || count($siswa->biodata) === 0) {
+                    return redirect()->route('siswa.biodata')
+                        ->with('error', 'Silakan isi biodata Anda terlebih dahulu sebelum memilih paket bimbel.');
+                }
             }
         }
-        return view('siswa.regisKategory', compact('siswa'));
+
+        // Mapel yang bisa dipilih: exclude yang sudah aktif/pending (khusus mode tambah)
+        $availableMapels = \App\Models\Mapel::all()->filter(function ($m) use ($activeMapels, $pendingMapels) {
+            return !in_array($m->nama_mapel, $activeMapels) && !in_array($m->nama_mapel, $pendingMapels);
+        })->values();
+
+        $paket = $isTambahMode ? ($siswa->paket ?: \App\Models\PaketBelajar::first()) : null;
+
+        return view('siswa.regisKategory', compact(
+            'siswa', 'isTambahMode', 'availableMapels', 'activeMapels', 'paket'
+        ));
     }
 
     /**
