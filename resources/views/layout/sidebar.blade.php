@@ -52,9 +52,10 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-file-alt text-teal-400"></i>
-                            <p>Materi & Tugas</p>
+                        <a href="{{ route('siswa.ujian') }}"
+                            class="nav-link {{ Route::is('siswa.ujian') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-pencil-alt text-teal-400"></i>
+                            <p>Latihan Soal &amp; Ujian</p>
                         </a>
                     </li>
 
@@ -159,14 +160,15 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                    <li class="nav-item {{ Route::is('guru.bank-soal.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ Route::is('guru.bank-soal.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-open text-info"></i>
                             <p>Materi &amp; Soal <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('guru.bank-soal.index') }}"
+                                    class="nav-link {{ Route::is('guru.bank-soal.*') ? 'active' : '' }}">
                                     <i class="fas fa-folder-open nav-icon text-warning"></i>
                                     <p>Bank Soal</p>
                                 </a>

@@ -9,6 +9,8 @@ use App\Models\Mapel;
 use App\Models\PaketBelajar;
 use App\Models\Rekening;
 use App\Models\Siswa;
+use App\Models\KategoriSoal;
+use App\Models\BankSoal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -1602,4 +1604,7 @@ class AdminController extends Controller
 
         return back()->with('error', 'Permintaan hapus tidak valid.');
     }
+
+
 }
+
