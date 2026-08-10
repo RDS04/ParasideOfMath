@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Guru;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankSoal;
+use App\Models\KategoriSoal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,7 +26,7 @@ class GuruController extends Controller
 
         $assignedStudents = \App\Models\Siswa::where('status', 'active')
             ->get()
-            ->filter(fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm))
+            ->filter(fn($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm))
             ->values();
 
         // Hitung Metric 1 (mapel unik yang diajar) & Metric 2 (akumulasi jam)
@@ -33,7 +35,7 @@ class GuruController extends Controller
 
         foreach ($assignedStudents as $siswa) {
             $biodata = $siswa->biodata ?? [];
-            $mapelJadwal  = $biodata['mapel_jadwal'] ?? [];
+            $mapelJadwal = $biodata['mapel_jadwal'] ?? [];
             $sesiPerMapel = $biodata['sesi_per_mapel'] ?? [];
 
             $paket = $siswa->paket;
@@ -60,8 +62,12 @@ class GuruController extends Controller
         $totalJamMengajar = round($totalMinutesTaught / 60, 1);
 
         return view('guru.index', compact(
-            'user', 'guruProfile', 'isBiodataComplete', 'assignedStudents',
-            'totalKelasMengajar', 'totalJamMengajar'
+            'user',
+            'guruProfile',
+            'isBiodataComplete',
+            'assignedStudents',
+            'totalKelasMengajar',
+            'totalJamMengajar'
         ));
     }
 
@@ -184,20 +190,20 @@ class GuruController extends Controller
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
             $fileName = 'guru_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-            
+
             // Make sure directory exists
             if (!file_exists(public_path('uploads/guru'))) {
                 mkdir(public_path('uploads/guru'), 0777, true);
             }
-            
+
             // Move file to public/uploads/guru/ directory
             $file->move(public_path('uploads/guru'), $fileName);
-            
+
             // Delete old photo if exists
             if ($guruProfile->foto && file_exists(public_path($guruProfile->foto))) {
                 @unlink(public_path($guruProfile->foto));
             }
-            
+
             $guruProfile->foto = 'uploads/guru/' . $fileName;
             $guruProfile->save();
         }
@@ -225,19 +231,29 @@ class GuruController extends Controller
 
         $sessions = [];
         $dayMap = [
-            'minggu' => 0, 'senin' => 1, 'selasa' => 2, 'rabu' => 3,
-            'kamis' => 4, 'jumat' => 5, 'sabtu' => 6,
-            'sunday' => 0, 'monday' => 1, 'tuesday' => 2, 'wednesday' => 3,
-            'thursday' => 4, 'friday' => 5, 'saturday' => 6
+            'minggu' => 0,
+            'senin' => 1,
+            'selasa' => 2,
+            'rabu' => 3,
+            'kamis' => 4,
+            'jumat' => 5,
+            'sabtu' => 6,
+            'sunday' => 0,
+            'monday' => 1,
+            'tuesday' => 2,
+            'wednesday' => 3,
+            'thursday' => 4,
+            'friday' => 5,
+            'saturday' => 6
         ];
 
         foreach ($assignedStudents as $siswa) {
             $biodata = $siswa->biodata ?? [];
 
             // Extract mapels for this student
-            $mapelJadwal     = $biodata['mapel_jadwal'] ?? [];
-            $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];
-            $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
+            $mapelJadwal = $biodata['mapel_jadwal'] ?? [];
+            $sesiPerMapel = $biodata['sesi_per_mapel'] ?? [];
+            $hariPerMapel = $biodata['hari_per_mapel'] ?? [];
             $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
 
             if (empty($mapelJadwal) && $siswa->tipe_paket) {
@@ -294,7 +310,7 @@ class GuruController extends Controller
             // Process sessions per mapel
             foreach ($assignedMapelsForThisGuru as $mapelName) {
                 $mIdx = array_search($mapelName, $mapelJadwal);
-                
+
                 $hariList = [];
                 $tglMulai = null;
                 $limitSesi = 0;
@@ -303,11 +319,11 @@ class GuruController extends Controller
                     $rawH = $hariPerMapel[$mIdx];
                     $hariList = is_array($rawH) ? array_values(array_filter($rawH)) : [];
                     $tglMulai = $tanggalPerMapel[$mIdx] ?? ($biodata['tanggal_mulai'] ?? null);
-                    $limitSesi = (int)($sesiPerMapel[$mIdx] ?? ($biodata['jumlah_pertemuan'] ?? 0));
+                    $limitSesi = (int) ($sesiPerMapel[$mIdx] ?? ($biodata['jumlah_pertemuan'] ?? 0));
                 } else {
                     $hariList = $biodata['hari_pertemuan'] ?? [];
                     $tglMulai = $biodata['tanggal_mulai'] ?? null;
-                    $limitSesi = (int)($biodata['jumlah_pertemuan'] ?? 0);
+                    $limitSesi = (int) ($biodata['jumlah_pertemuan'] ?? 0);
                 }
 
                 // Fallback tipe_paket parsing
@@ -316,9 +332,9 @@ class GuruController extends Controller
                 }
                 if ($limitSesi === 0 && $siswa->tipe_paket) {
                     if (preg_match('/Total Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
-                        $limitSesi = (int)$m[1];
+                        $limitSesi = (int) $m[1];
                     } elseif (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $m)) {
-                        $limitSesi = (int)$m[1];
+                        $limitSesi = (int) $m[1];
                     }
                 }
                 if (!$tglMulai && $siswa->tipe_paket && preg_match('/Mulai:\s*([\d\-]+)/i', $siswa->tipe_paket, $m)) {
@@ -474,5 +490,207 @@ class GuruController extends Controller
         }
 
         return $assigned;
+    }
+    
+    public function bankSoal(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+        }
+
+        $jenjang = strtoupper($request->input('jenjang', 'SD'));
+        if (!in_array($jenjang, ['SD', 'SMP', 'SMA'])) {
+            $jenjang = 'SD';
+        }
+
+        $sub_kategori = $request->input('sub_kategori', 'Semester 1');
+
+        // Ambil semua daftar sub_kategori unik untuk jenjang ini
+        $availableSubKategori = KategoriSoal::where('jenjang', $jenjang)
+            ->distinct()
+            ->pluck('sub_kategori')
+            ->toArray();
+
+        $defaultSubKategori = ['Semester 1', 'Semester 2', 'TKA'];
+        $allSubKategori = array_unique(array_merge($defaultSubKategori, $availableSubKategori));
+
+        // Ambil daftar kategori soal berdasarkan jenjang & sub_kategori
+        $categories = KategoriSoal::where('jenjang', $jenjang)
+            ->where('sub_kategori', $sub_kategori)
+            ->withCount('bankSoals')
+            ->get();
+
+        $selected_kategori_id = $request->input('kategori_id');
+        if (!$selected_kategori_id && $categories->isNotEmpty()) {
+            $selected_kategori_id = $categories->first()->id;
+        }
+
+        $selectedCategory = null;
+        if ($selected_kategori_id) {
+            // Gunakan with() biasa — orderBy sudah ada di relasi KategoriSoal::bankSoals()
+            $selectedCategory = KategoriSoal::with('bankSoals')->find($selected_kategori_id);
+        }
+
+        return view('guru.bankSoal', compact(
+            'jenjang',
+            'sub_kategori',
+            'allSubKategori',
+            'categories',
+            'selectedCategory',
+            'selected_kategori_id'
+        ));
+    }
+
+    /**
+     * Simpan Kategori Soal Baru.
+     */
+    public function storeKategoriSoal(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $validated = $request->validate([
+            'jenjang' => 'required|in:SD,SMP,SMA',
+            'sub_kategori' => 'required|string|max:100',
+            'nama_kategori' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $kategori = KategoriSoal::create($validated);
+
+        return redirect()->route('guru.bank-soal.index', [
+            'jenjang' => $kategori->jenjang,
+            'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
+        ])->with('success', 'Kategori Soal berhasil ditambahkan!');
+    }
+
+    /**
+     * Update Kategori Soal.
+     */
+    public function updateKategoriSoal(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $kategori = KategoriSoal::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama_kategori' => 'required|string|max:255',
+            'sub_kategori' => 'required|string|max:100',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $kategori->update($validated);
+
+        return redirect()->route('guru.bank-soal.index', [
+            'jenjang' => $kategori->jenjang,
+            'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
+        ])->with('success', 'Kategori Soal berhasil diperbarui!');
+    }
+
+    /**
+     * Hapus Kategori Soal beserta soal-soalnya.
+     */
+    public function deleteKategoriSoal($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $kategori = KategoriSoal::findOrFail($id);
+        $jenjang = $kategori->jenjang;
+        $sub_kategori = $kategori->sub_kategori;
+        $kategori->delete();
+
+        return redirect()->route('guru.bank-soal.index', [
+            'jenjang' => $jenjang,
+            'sub_kategori' => $sub_kategori,
+        ])->with('success', 'Kategori Soal beserta seluruh soal di dalamnya berhasil dihapus!');
+    }
+
+    /**
+     * Simpan Soal Baru ke Kategori.
+     */
+    public function storeSoal(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $validated = $request->validate([
+            'kategori_soal_id' => 'required|exists:kategori_soals,id',
+            'nomor' => 'required|integer|min:1',
+            'soal' => 'required|string',
+            'opsi_a' => 'required|string',
+            'opsi_b' => 'required|string',
+            'opsi_c' => 'required|string',
+            'opsi_d' => 'required|string',
+            'kunci_jawaban' => 'required|in:A,B,C,D',
+        ]);
+
+        $soal = BankSoal::create($validated);
+        $kategori = $soal->kategori;
+
+        return redirect()->route('guru.bank-soal.index', [
+            'jenjang' => $kategori->jenjang,
+            'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
+        ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil disimpan!');
+    }
+
+    /**
+     * Update Data Soal.
+     */
+    public function updateSoal(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $soal = BankSoal::findOrFail($id);
+
+        $validated = $request->validate([
+            'nomor' => 'required|integer|min:1',
+            'soal' => 'required|string',
+            'opsi_a' => 'required|string',
+            'opsi_b' => 'required|string',
+            'opsi_c' => 'required|string',
+            'opsi_d' => 'required|string',
+            'kunci_jawaban' => 'required|in:A,B,C,D',
+        ]);
+
+        $soal->update($validated);
+        $kategori = $soal->kategori;
+
+        return redirect()->route('guru.bank-soal.index', [
+            'jenjang' => $kategori->jenjang,
+            'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
+        ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil diperbarui!');
+    }
+
+    /**
+     * Hapus Soal.
+     */
+    public function deleteSoal($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $soal = BankSoal::findOrFail($id);
+        $kategori = $soal->kategori;
+        $nomor = $soal->nomor;
+        $soal->delete();
+
+        return redirect()->route('guru.bank-soal.index', [
+            'jenjang' => $kategori->jenjang,
+            'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
+        ])->with('success', 'Soal No. ' . $nomor . ' berhasil dihapus!');
     }
 }

@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaketBelajar;
+use App\Models\KategoriSoal;
+use App\Models\BankSoal;
+use App\Models\HasilUjian;
 use Illuminate\Http\Request;
 
 class SiswaController extends Controller
@@ -919,4 +922,163 @@ class SiswaController extends Controller
 
         return view('siswa.riwayat', compact('siswa', 'paket', 'hariPertemuan', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga'));
     }
+
+    /**
+     * Tampilkan Halaman Ujian / Latihan Soal Siswa (Katalog / Mode Ujian).
+     */
+    public function showUjian(Request $request)
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+
+        // Mode 2: Jika ada parameter kategori_id, tampilkan lembar pengerjaan ujian
+        if ($request->filled('kategori_id')) {
+            $selectedCategory = KategoriSoal::with(['bankSoals' => function ($q) {
+                $q->orderBy('nomor', 'asc');
+            }])->find($request->kategori_id);
+
+            if (!$selectedCategory || $selectedCategory->bankSoals->isEmpty()) {
+                return redirect()->route('siswa.ujian')
+                    ->with('error', 'Soal belum tersedia untuk kategori ujian yang dipilih.');
+            }
+
+            $mode = 'exam';
+            return view('siswa.ujian', compact('siswa', 'selectedCategory', 'mode'));
+        }
+
+        // Mode 1: Katalog Pilihan Ujian berdasarkan Jenjang & Sub-Kategori
+        $jenjangInput = strtoupper($request->input('jenjang', ''));
+
+        // Deteksi jenjang otomatis dari biodata atau paket siswa jika belum di-set
+        if (empty($jenjangInput)) {
+            $kelasSiswa = $siswa->biodata['kelas'] ?? ($siswa->paket->nama_paket ?? '');
+            if (preg_match('/(sd|1|2|3|4|5|6)/i', $kelasSiswa)) {
+                $jenjangInput = 'SD';
+            } elseif (preg_match('/(smp|7|8|9)/i', $kelasSiswa)) {
+                $jenjangInput = 'SMP';
+            } elseif (preg_match('/(sma|smk|10|11|12)/i', $kelasSiswa)) {
+                $jenjangInput = 'SMA';
+            } else {
+                $jenjangInput = 'SD';
+            }
+        }
+
+        if (!in_array($jenjangInput, ['SD', 'SMP', 'SMA'])) {
+            $jenjangInput = 'SD';
+        }
+
+        $jenjang = $jenjangInput;
+        $sub_kategori = $request->input('sub_kategori', 'Semester 1');
+
+        // Daftar sub-kategori unik dari DB
+        $availableSubKategori = KategoriSoal::where('jenjang', $jenjang)
+            ->distinct()
+            ->pluck('sub_kategori')
+            ->toArray();
+
+        $defaultSubKategori = ['Semester 1', 'Semester 2', 'TKA'];
+        $allSubKategori = array_unique(array_merge($defaultSubKategori, $availableSubKategori));
+
+        // Ambil daftar kategori soal
+        $categories = KategoriSoal::where('jenjang', $jenjang)
+            ->where('sub_kategori', $sub_kategori)
+            ->withCount('bankSoals')
+            ->get();
+
+        // Riwayat Ujian Siswa
+        $riwayatUjian = HasilUjian::where('siswa_id', $siswa->id)
+            ->with('kategori')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
+
+        $mode = 'catalog';
+
+        return view('siswa.ujian', compact(
+            'siswa',
+            'jenjang',
+            'sub_kategori',
+            'allSubKategori',
+            'categories',
+            'riwayatUjian',
+            'mode'
+        ));
+    }
+
+    /**
+     * Submit Jawaban Ujian Siswa & Hitung Nilai.
+     */
+    public function submitUjian(Request $request)
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+
+        $validated = $request->validate([
+            'kategori_soal_id' => 'required|exists:kategori_soals,id',
+            'jawaban' => 'nullable|array',
+        ]);
+
+        $kategori = KategoriSoal::with(['bankSoals' => function ($q) {
+            $q->orderBy('nomor', 'asc');
+        }])->findOrFail($request->kategori_soal_id);
+
+        $soalList = $kategori->bankSoals;
+        $totalSoal = $soalList->count();
+        $jawabanSiswa = $request->input('jawaban', []);
+
+        $jumlahBenar = 0;
+        $jumlahSalah = 0;
+        $reviewData = [];
+
+        foreach ($soalList as $soal) {
+            $soalId = $soal->id;
+            $userAnswer = $jawabanSiswa[$soalId] ?? null;
+            $isCorrect = false;
+
+            if ($userAnswer && strtoupper(trim($userAnswer)) === strtoupper(trim($soal->kunci_jawaban))) {
+                $isCorrect = true;
+                $jumlahBenar++;
+            } else {
+                $jumlahSalah++;
+            }
+
+            $reviewData[] = [
+                'soal' => $soal,
+                'jawaban_siswa' => $userAnswer,
+                'is_correct' => $isCorrect,
+            ];
+        }
+
+        $nilai = $totalSoal > 0 ? round(($jumlahBenar / $totalSoal) * 100, 2) : 0;
+
+        // Simpan Hasil Ujian ke Database
+        $hasil = HasilUjian::create([
+            'siswa_id' => $siswa->id,
+            'kategori_soal_id' => $kategori->id,
+            'jumlah_soal' => $totalSoal,
+            'jumlah_benar' => $jumlahBenar,
+            'jumlah_salah' => $jumlahSalah,
+            'nilai' => $nilai,
+            'jawaban_siswa' => $jawabanSiswa,
+        ]);
+
+        $mode = 'result';
+
+        return view('siswa.ujian', compact(
+            'siswa',
+            'kategori',
+            'hasil',
+            'reviewData',
+            'nilai',
+            'jumlahBenar',
+            'jumlahSalah',
+            'totalSoal',
+            'mode'
+        ));
+    }
 }
+

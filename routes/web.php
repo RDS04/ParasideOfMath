@@ -68,6 +68,8 @@ Route::controller(SiswaController::class)->group(function () {
     Route::get('/siswa/akademik', 'showAkademik')->middleware('auth:siswa')->name('siswa.akademik');
     Route::get('/siswa/invoice', 'showInvoice')->middleware('auth:siswa')->name('siswa.invoice');
     Route::get('/siswa/riwayat', 'showRiwayat')->middleware('auth:siswa')->name('siswa.riwayat');
+    Route::get('/siswa/ujian', 'showUjian')->middleware('auth:siswa')->name('siswa.ujian');
+    Route::post('/siswa/ujian/submit', 'submitUjian')->middleware('auth:siswa')->name('siswa.ujian.submit');
 });
 Route::controller(AuthController::class)->prefix('guru')->group(function () {
     Route::get('/register', 'showGuruRegisterForm')->name('guru.register');
@@ -83,6 +85,14 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::post('/profil', 'updateProfil')->name('guru.profil.update');
     Route::get('/jadwal', 'showJadwal')->name('guru.jadwal');
     Route::get('/siswa', 'showSiswa')->name('guru.siswa');
+
+    Route::get('/bank-soal', 'bankSoal')->name('guru.bank-soal.index');
+    Route::post('/bank-soal/kategori', 'storeKategoriSoal')->name('guru.bank-soal.kategori.store');
+    Route::put('/bank-soal/kategori/{id}', 'updateKategoriSoal')->name('guru.bank-soal.kategori.update');
+    Route::delete('/bank-soal/kategori/{id}', 'deleteKategoriSoal')->name('guru.bank-soal.kategori.delete');
+    Route::post('/bank-soal/soal', 'storeSoal')->name('guru.bank-soal.soal.store');
+    Route::put('/bank-soal/soal/{id}', 'updateSoal')->name('guru.bank-soal.soal.update');
+    Route::delete('/bank-soal/soal/{id}', 'deleteSoal')->name('guru.bank-soal.soal.delete');
 });
 Route::controller(AdminController::class)->group(function () {
     Route::get('/admin', 'index')->name('admin.dashboard');
