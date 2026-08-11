@@ -22,10 +22,8 @@
     }
 
     // Daftar sub-kategori (Semester / TKA) berdasarkan kelas & jenjang
-    $availableSubs = ['Semester 1', 'Semester 2'];
-    if (($jenjang == 'SD' && $kelas == 6) || (in_array($jenjang, ['SMP', 'SMA']) && $kelas == 3)) {
-        $availableSubs[] = 'TKA';
-    }
+    $availableSubs = \App\Models\KategoriSoal::availableSubKategori($jenjang, $kelas);
+    
 @endphp
 
 @section('content')
@@ -633,7 +631,17 @@
                         <!-- Nama Mata Pelajaran (bisa diisi user) -->
                         <div class="form-group mb-3">
                             <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Nama Mata Pelajaran <span class="text-danger">*</span></label>
-                            <input type="text" name="nama_kategori" value="{{ old('nama_kategori') }}" class="form-control rounded-xl font-bold" placeholder="Contoh: Matematika - Bab 1" required>
+                            <select name="nama_kategori" class="form-control rounded-xl font-bold" required>
+                                <option value="" disabled {{ old('nama_kategori') ? '' : 'selected' }}>-- Pilih Mata Pelajaran --</option>
+                                @foreach ($mapelOptions as $mapel)
+                                    <option value="{{ $mapel->nama_mapel }}" {{ old('nama_kategori') === $mapel->nama_mapel ? 'selected' : '' }}>
+                                        {{ $mapel->nama_mapel }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if ($mapelOptions->isEmpty())
+                                <small class="text-danger d-block mt-1">Tidak ada mapel tersedia untuk kombinasi ini.</small>
+                            @endif
                         </div>
 
                         <!-- Deskripsi (opsional) -->

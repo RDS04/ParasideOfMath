@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('kategori_soals', function (Blueprint $table) {
             $table->id();
             $table->string('jenjang'); // SD, SMP, SMA
+            $table->string('kelas');
             $table->string('sub_kategori'); // Semester 1, Semester 2, TKA, etc.
             $table->string('nama_kategori'); // e.g. Matematika, IPA, Bab 1, etc.
             $table->text('deskripsi')->nullable();

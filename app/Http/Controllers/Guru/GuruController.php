@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Guru;
 use App\Http\Controllers\Controller;
 use App\Models\BankSoal;
 use App\Models\KategoriSoal;
+use App\Models\Mapel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class GuruController extends Controller
 {
@@ -499,46 +501,41 @@ class GuruController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
         }
 
-        $jenjang = strtoupper($request->input('jenjang', 'SD'));
-        if (!in_array($jenjang, ['SD', 'SMP', 'SMA'])) {
-            $jenjang = 'SD';
-        }
+        $jenjang = strtoupper($request->input('jenjang', ''));
+        $kelas   = $request->input('kelas', '');
+        $sub     = $request->input('sub_kategori', '');
 
-        $sub_kategori = $request->input('sub_kategori', 'Semester 1');
-
-        // Ambil semua daftar sub_kategori unik untuk jenjang ini
-        $availableSubKategori = KategoriSoal::where('jenjang', $jenjang)
-            ->distinct()
-            ->pluck('sub_kategori')
-            ->toArray();
-
-        $defaultSubKategori = ['Semester 1', 'Semester 2', 'TKA'];
-        $allSubKategori = array_unique(array_merge($defaultSubKategori, $availableSubKategori));
-
-        // Ambil daftar kategori soal berdasarkan jenjang & sub_kategori
-        $categories = KategoriSoal::where('jenjang', $jenjang)
-            ->where('sub_kategori', $sub_kategori)
-            ->withCount('bankSoals')
-            ->get();
-
-        $selected_kategori_id = $request->input('kategori_id');
-        if (!$selected_kategori_id && $categories->isNotEmpty()) {
-            $selected_kategori_id = $categories->first()->id;
-        }
-
+        $categories = collect();
         $selectedCategory = null;
-        if ($selected_kategori_id) {
-            // Gunakan with() biasa — orderBy sudah ada di relasi KategoriSoal::bankSoals()
-            $selectedCategory = KategoriSoal::with('bankSoals')->find($selected_kategori_id);
+        $selected_kategori_id = $request->input('kategori_id');
+        $mapelOptions = collect();
+
+        if ($jenjang && $kelas && $sub) {
+            $categories = KategoriSoal::where('jenjang', $jenjang)
+                ->where('kelas', $kelas)
+                ->where('sub_kategori', $sub)
+                ->withCount('bankSoals')
+                ->get();
+
+            if (!$selected_kategori_id && $categories->isNotEmpty()) {
+                $selected_kategori_id = $categories->first()->id;
+            }
+            if ($selected_kategori_id) {
+                $selectedCategory = KategoriSoal::with('bankSoals')->find($selected_kategori_id);
+            }
+
+            $mapelOptions = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%')
+                ->when($sub === 'TKA', function ($q) {
+                    $q->where('nama_mapel', 'like', '%TKA%');
+                }, function ($q) {
+                    $q->where('nama_mapel', 'not like', '%TKA%');
+                })
+                ->orderBy('nama_mapel')
+                ->get();
         }
 
         return view('guru.bankSoal', compact(
-            'jenjang',
-            'sub_kategori',
-            'allSubKategori',
-            'categories',
-            'selectedCategory',
-            'selected_kategori_id'
+            'jenjang', 'categories', 'selectedCategory', 'selected_kategori_id','mapelOptions'
         ));
     }
 
@@ -552,19 +549,25 @@ class GuruController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
+        $allowedSub = KategoriSoal::availableSubKategori(
+            $request->input('jenjang'), $request->input('kelas')
+        );
+
         $validated = $request->validate([
-            'jenjang' => 'required|in:SD,SMP,SMA',
-            'sub_kategori' => 'required|string|max:100',
+            'jenjang'       => 'required|in:SD,SMP,SMA',
+            'kelas'         => 'required|integer|min:1|max:6',
+            'sub_kategori'  => ['required', 'string', Rule::in($allowedSub)],
             'nama_kategori' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
+            'deskripsi'     => 'nullable|string',
         ]);
 
         $kategori = KategoriSoal::create($validated);
 
         return redirect()->route('guru.bank-soal.index', [
-            'jenjang' => $kategori->jenjang,
+            'jenjang'      => $kategori->jenjang,
+            'kelas'        => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
-            'kategori_id' => $kategori->id,
+            'kategori_id'  => $kategori->id,
         ])->with('success', 'Kategori Soal berhasil ditambahkan!');
     }
 
@@ -590,6 +593,7 @@ class GuruController extends Controller
 
         return redirect()->route('guru.bank-soal.index', [
             'jenjang' => $kategori->jenjang,
+            'kelas' => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
             'kategori_id' => $kategori->id,
         ])->with('success', 'Kategori Soal berhasil diperbarui!');
@@ -607,11 +611,13 @@ class GuruController extends Controller
 
         $kategori = KategoriSoal::findOrFail($id);
         $jenjang = $kategori->jenjang;
+        $kelas = $kategori->kelas;
         $sub_kategori = $kategori->sub_kategori;
         $kategori->delete();
 
         return redirect()->route('guru.bank-soal.index', [
             'jenjang' => $jenjang,
+            'kelas' => $kelas,
             'sub_kategori' => $sub_kategori,
         ])->with('success', 'Kategori Soal beserta seluruh soal di dalamnya berhasil dihapus!');
     }
@@ -642,6 +648,7 @@ class GuruController extends Controller
 
         return redirect()->route('guru.bank-soal.index', [
             'jenjang' => $kategori->jenjang,
+            'kelas' => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
             'kategori_id' => $kategori->id,
         ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil disimpan!');
@@ -674,6 +681,7 @@ class GuruController extends Controller
 
         return redirect()->route('guru.bank-soal.index', [
             'jenjang' => $kategori->jenjang,
+            'kelas' => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
             'kategori_id' => $kategori->id,
         ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil diperbarui!');
@@ -696,6 +704,7 @@ class GuruController extends Controller
 
         return redirect()->route('guru.bank-soal.index', [
             'jenjang' => $kategori->jenjang,
+            'kelas' => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
             'kategori_id' => $kategori->id,
         ])->with('success', 'Soal No. ' . $nomor . ' berhasil dihapus!');
