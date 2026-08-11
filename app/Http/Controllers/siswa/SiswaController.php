@@ -527,7 +527,6 @@ class SiswaController extends Controller
         }
 
         $mapelJadwal  = $request->input('mapel_jadwal', []);
-        
         $pilihanGuru        = $request->input('pilihan_guru');
         $pilihanGuruInggris = $request->input('pilihan_guru_inggris');
         $stripLabel = fn ($v) => trim(preg_replace('/\s*\(.*?\)\s*$/', '', $v ?? ''));

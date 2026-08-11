@@ -494,7 +494,8 @@ class GuruController extends Controller
     
     public function bankSoal(Request $request)
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
         }
 
@@ -546,7 +547,8 @@ class GuruController extends Controller
      */
     public function storeKategoriSoal(Request $request)
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
@@ -571,7 +573,8 @@ class GuruController extends Controller
      */
     public function updateKategoriSoal(Request $request, $id)
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
@@ -597,7 +600,8 @@ class GuruController extends Controller
      */
     public function deleteKategoriSoal($id)
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
@@ -617,7 +621,8 @@ class GuruController extends Controller
      */
     public function storeSoal(Request $request)
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
@@ -647,7 +652,8 @@ class GuruController extends Controller
      */
     public function updateSoal(Request $request, $id)
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
@@ -678,7 +684,8 @@ class GuruController extends Controller
      */
     public function deleteSoal($id)
     {
-        if (!Auth::user() || !Auth::user()->isAdmin()) {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 

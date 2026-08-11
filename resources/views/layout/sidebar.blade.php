@@ -167,7 +167,7 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="{{ route('guru.bank-soal.index') }}"
+                                <a href=""
                                     class="nav-link {{ Route::is('guru.bank-soal.*') ? 'active' : '' }}">
                                     <i class="fas fa-folder-open nav-icon text-warning"></i>
                                     <p>Bank Soal</p>
@@ -327,7 +327,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="{{ route('guru.bank-soal.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-book-reader text-rose-400"></i>
                             <p>Materi &amp; Modul</p>
                         </a>
