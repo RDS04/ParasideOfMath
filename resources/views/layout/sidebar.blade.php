@@ -160,15 +160,15 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item {{ Route::is('guru.bank-soal.*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ Route::is('guru.bank-soal.*') ? 'active' : '' }}">
+                    <li class="nav-item {{ Route::is('admin.bank-soal.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ Route::is('admin.bank-soal.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-open text-info"></i>
                             <p>Materi &amp; Soal <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href=""
-                                    class="nav-link {{ Route::is('guru.bank-soal.*') ? 'active' : '' }}">
+                                <a href="{{ route('admin.bank-soal.index') }}"
+                                    class="nav-link {{ Route::is('admin.bank-soal.*') ? 'active' : '' }}">
                                     <i class="fas fa-folder-open nav-icon text-warning"></i>
                                     <p>Bank Soal</p>
                                 </a>

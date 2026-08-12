@@ -134,6 +134,12 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/save-token', 'saveFcmToken')->name('admin.save_token');
     Route::get('/admin/notifications', 'getNotifications')->name('admin.notifications.get');
     Route::post('/admin/notifications/read', 'markNotificationsRead')->name('admin.notifications.read');
+
+    Route::get('/admin/bank-soal', 'bankSoal')->name('admin.bank-soal.index');
+    Route::delete('/admin/bank-soal/kategori/{id}', 'deleteKategoriSoalAdmin')->name('admin.bank-soal.kategori.delete');
+    Route::post('/admin/bank-soal/soal', 'storeSoalAdmin')->name('admin.bank-soal.soal.store');
+    Route::put('/admin/bank-soal/soal/{id}', 'updateSoalAdmin')->name('admin.bank-soal.soal.update');
+    Route::delete('/admin/bank-soal/soal/{id}', 'deleteSoalAdmin')->name('admin.bank-soal.soal.delete');
 })->middleware('auth:web');
 
 // Realtime Chat API and Admin Panel

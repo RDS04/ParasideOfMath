@@ -1616,6 +1616,169 @@ class AdminController extends Controller
         return back()->with('error', 'Permintaan hapus tidak valid.');
     }
 
+    /**
+     * Bank Soal — Alur: Pilih Mapel → Jenjang → Kelas → Semester/TKA → Soal.
+     */
+    public function bankSoal(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $mapel   = $request->input('mapel', '');
+        $jenjang = strtoupper($request->input('jenjang', ''));
+        $kelas   = $request->input('kelas', '');
+        $sub     = $request->input('sub_kategori', '');
+
+        // Step 1: daftar mapel dari master data (exclude "Wajib + Lanjut")
+        $mapelList = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%')
+            ->orderBy('nama_mapel')
+            ->pluck('nama_mapel')
+            ->unique()
+            ->values();
+
+        // Step 3: kelas tersedia berdasarkan jenjang
+        $availableClasses = [];
+        if ($jenjang == 'SD') {
+            $availableClasses = range(1, 6);
+        } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
+            $availableClasses = range(1, 3);
+        }
+
+        // Step 4: semester/TKA tersedia berdasarkan jenjang+kelas
+        $availableSubs = ($jenjang && $kelas)
+            ? KategoriSoal::availableSubKategori($jenjang, $kelas)
+            : [];
+
+        $selectedCategory = null;
+
+        // Step 5: kalau kombinasi sudah lengkap, ambil kategori yang cocok
+        // atau buat otomatis kalau belum pernah ada
+        if ($mapel && $jenjang && $kelas && $sub) {
+            $selectedCategory = KategoriSoal::firstOrCreate([
+                'jenjang'       => $jenjang,
+                'kelas'         => $kelas,
+                'sub_kategori'  => $sub,
+                'nama_kategori' => $mapel,
+            ]);
+            $selectedCategory->load('bankSoals');
+        }
+
+        return view('admin.listBanksoal', compact(
+            'mapelList', 'mapel', 'jenjang', 'kelas', 'sub',
+            'availableClasses', 'availableSubs', 'selectedCategory'
+        ));
+    }
+
+    /**
+     * Hapus Kategori Soal (beserta semua soal di dalamnya) untuk kombinasi tertentu.
+     */
+    public function deleteKategoriSoalAdmin($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $kategori = KategoriSoal::findOrFail($id);
+        $mapel = $kategori->nama_kategori;
+        $jenjang = $kategori->jenjang;
+        $kelas = $kategori->kelas;
+        $sub_kategori = $kategori->sub_kategori;
+        $kategori->delete();
+
+        return redirect()->route('admin.bank-soal.index', [
+            'mapel' => $mapel,
+            'jenjang' => $jenjang,
+            'kelas' => $kelas,
+            'sub_kategori' => $sub_kategori,
+        ])->with('success', 'Semua soal ' . $mapel . ' untuk kombinasi ini berhasil dihapus!');
+    }
+
+    /**
+     * Simpan Soal Baru ke Kategori.
+     */
+    public function storeSoalAdmin(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $validated = $request->validate([
+            'kategori_soal_id' => 'required|exists:kategori_soals,id',
+            'nomor' => 'required|integer|min:1',
+            'soal' => 'required|string',
+            'opsi_a' => 'required|string',
+            'opsi_b' => 'required|string',
+            'opsi_c' => 'required|string',
+            'opsi_d' => 'required|string',
+            'kunci_jawaban' => 'required|in:A,B,C,D',
+        ]);
+
+        $soal = BankSoal::create($validated);
+        $kategori = $soal->kategori;
+
+        return redirect()->route('admin.bank-soal.index', [
+            'mapel' => $kategori->nama_kategori,
+            'jenjang' => $kategori->jenjang,
+            'kelas' => $kategori->kelas,
+            'sub_kategori' => $kategori->sub_kategori,
+        ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil disimpan!');
+    }
+
+    /**
+     * Update Data Soal.
+     */
+    public function updateSoalAdmin(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $soal = BankSoal::findOrFail($id);
+
+        $validated = $request->validate([
+            'nomor' => 'required|integer|min:1',
+            'soal' => 'required|string',
+            'opsi_a' => 'required|string',
+            'opsi_b' => 'required|string',
+            'opsi_c' => 'required|string',
+            'opsi_d' => 'required|string',
+            'kunci_jawaban' => 'required|in:A,B,C,D',
+        ]);
+
+        $soal->update($validated);
+        $kategori = $soal->kategori;
+
+        return redirect()->route('admin.bank-soal.index', [
+            'mapel' => $kategori->nama_kategori,
+            'jenjang' => $kategori->jenjang,
+            'kelas' => $kategori->kelas,
+            'sub_kategori' => $kategori->sub_kategori,
+        ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil diperbarui!');
+    }
+
+    /**
+     * Hapus Soal.
+     */
+    public function deleteSoalAdmin($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $soal = BankSoal::findOrFail($id);
+        $kategori = $soal->kategori;
+        $nomor = $soal->nomor;
+        $soal->delete();
+
+        return redirect()->route('admin.bank-soal.index', [
+            'mapel' => $kategori->nama_kategori,
+            'jenjang' => $kategori->jenjang,
+            'kelas' => $kategori->kelas,
+            'sub_kategori' => $kategori->sub_kategori,
+        ])->with('success', 'Soal No. ' . $nomor . ' berhasil dihapus!');
+    }
+
 
 }
 
