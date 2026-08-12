@@ -312,8 +312,8 @@ function sendQuickOption(text) {
     const container = document.getElementById('chat-messages-container');
     if (!container) return;
 
-    const waNumber = '62811-6612-050';
-    const waDisplay = '62811-6612-050';
+    const waNumber = '6289675053537';
+    const waDisplay = '0896-7505-3537';
     const defaultWaUrl = `https://wa.me/${waNumber}?text=Halo%20Admin%20Paradise%20of%20Math,%20saya%20ingin%20bertanya%20mengenai%20bimbingan%20belajar`;
 
     // 1. Append user message bubble to chat UI
@@ -339,7 +339,7 @@ function sendQuickOption(text) {
                 <p class="font-bold text-slate-800">📱 Nomor WhatsApp Admin:</p>
                 <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
                     <span class="text-base font-black text-emerald-700 tracking-wider"><i class="fab fa-whatsapp text-emerald-600 mr-1"></i> ${waDisplay}</span>
-                    <p class="text-[10px] text-slate-500 font-medium mt-0.5">(Kak Kiki - Pimpinan & Admin PM)</p>
+                    <p class="text-[10px] text-slate-500 font-medium mt-0.5">(Pimpinan & Admin PM)</p>
                 </div>
                 <p class="text-slate-600 text-xs mt-1">Silakan klik tombol di bawah untuk terhubung langsung ke WhatsApp:</p>
                 <a href="${waUrl}" target="_blank" class="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs no-underline shadow-md shadow-emerald-600/20 transition-all mt-1">

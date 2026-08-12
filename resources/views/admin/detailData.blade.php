@@ -160,6 +160,44 @@
                                             <td class="text-purple-900 font-weight-bold py-2 text-xs">{{ $student->tipe_paket ?? '-' }}</td>
                                         </tr>
                                         <tr class="border-top border-light">
+                                            <td class="text-muted py-2">Jam Bimbel</td>
+                                            <td class="py-2">
+                                                <div class="d-flex align-items-start justify-content-between">
+                                                    <div class="text-xs mr-1">
+                                                        @php
+                                                            $jamPerMapel = $bio['jam_per_mapel'] ?? [];
+                                                            $mapelForJam = $bio['mapel_jadwal'] ?? [];
+                                                            if (empty($mapelForJam) && $student->tipe_paket) {
+                                                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                                                    $mapelForJam = array_map('trim', explode(',', $matches[1]));
+                                                                }
+                                                            }
+                                                        @endphp
+                                                        @if(!empty($mapelForJam))
+                                                            @foreach($mapelForJam as $idx => $namaMapelJam)
+                                                                @php
+                                                                    $jamMulai   = $jamPerMapel[$idx]['jam_mulai']   ?? '-';
+                                                                    $jamSelesai = $jamPerMapel[$idx]['jam_selesai'] ?? '-';
+                                                                @endphp
+                                                                <div class="mb-1 d-flex align-items-center gap-1">
+                                                                    <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $namaMapelJam }}:</span>
+                                                                    <span class="text-slate-700 font-weight-bold text-xs">
+                                                                        <i class="far fa-clock text-purple-500 mr-0.5"></i>
+                                                                        {{ $jamMulai }} &ndash; {{ $jamSelesai }}
+                                                                    </span>
+                                                                </div>
+                                                            @endforeach
+                                                        @else
+                                                            <span class="text-muted font-italic text-xs">Belum diatur</span>
+                                                        @endif
+                                                    </div>
+                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editJamBimbelModal" style="border-color: #cbd5e1; color: #475569;">
+                                                        <i class="fas fa-clock mr-0.5 text-purple-600"></i> Atur
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-top border-light">
                                             <td class="text-muted py-2">Guru Pendamping</td>
                                             <td class="py-2">
                                                 <div class="d-flex align-items-center justify-content-between">
@@ -326,9 +364,6 @@
                                 <!-- Part 3: Jadwal Pulang & Kegiatan Rutin -->
                                 <div class="mb-4">
                                     <h6 class="font-weight-bold text-purple-950 uppercase text-xs tracking-wider mb-3 pb-2 border-bottom text-purple-700"><i class="fas fa-calendar-alt mr-1.5"></i> 3. Jadwal Sekolah &amp; Rutinitas Lain</h6>
-                                    
-                                    
-
                                     <div class="row">
                                         <!-- Hari Bimbel Pilihan -->
                                         <div class="col-12 mb-3">
@@ -650,6 +685,96 @@
                     <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
                         <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">Simpan Penugasan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Jam Bimbel Per Mapel -->
+    <div class="modal fade" id="editJamBimbelModal" tabindex="-1" role="dialog" aria-labelledby="editJamBimbelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+                <form action="{{ route('admin.siswa.update-jam-bimbel', $student->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                        <h5 class="modal-title font-weight-bold text-md text-white" id="editJamBimbelModalLabel" style="color: #fff;">
+                            <i class="fas fa-clock mr-2"></i>Atur Jam Bimbel Per Mata Pelajaran
+                        </h5>
+                        <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 text-left">
+                        @php
+                            $mapelForJamModal = $bio['mapel_jadwal'] ?? [];
+                            if (empty($mapelForJamModal) && $student->tipe_paket) {
+                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                    $mapelForJamModal = array_map('trim', explode(',', $matches[1]));
+                                }
+                            }
+                            $jamPerMapelModal = $bio['jam_per_mapel'] ?? [];
+                        @endphp
+
+                        @if(!empty($mapelForJamModal))
+                            <div class="p-3 bg-blue-50 rounded-xl border border-blue-100 mb-4" style="background-color:#eff6ff; border-color:#bfdbfe;">
+                                <p class="text-xs mb-0" style="color:#1e40af;">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    Atur <strong>Jam Mulai</strong> dan <strong>Jam Berakhir</strong> bimbingan untuk masing-masing mata pelajaran siswa ini.
+                                </p>
+                            </div>
+
+                            @foreach($mapelForJamModal as $idx => $namaMapelModal)
+                                @php
+                                    $jamMulaiVal   = $jamPerMapelModal[$idx]['jam_mulai']   ?? '';
+                                    $jamSelesaiVal = $jamPerMapelModal[$idx]['jam_selesai'] ?? '';
+                                @endphp
+                                <div class="p-3 mb-3 rounded-xl border" style="border-color: #ddd6fe; background-color: #faf9fd;">
+                                    <label class="font-weight-bold text-purple-950 text-xs d-flex align-items-center mb-3">
+                                        <i class="fas fa-book-open text-purple-600 mr-1.5"></i>
+                                        Mata Pelajaran:
+                                        <span class="badge bg-purple-600 text-white font-bold px-2.5 py-1 text-xs rounded-full ml-2">{{ $namaMapelModal }}</span>
+                                    </label>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <label class="text-xs text-muted font-weight-bold mb-1 d-block">
+                                                <i class="fas fa-play-circle text-emerald-500 mr-1"></i>Jam Mulai
+                                            </label>
+                                            <input
+                                                type="time"
+                                                name="jam_per_mapel[{{ $idx }}][jam_mulai]"
+                                                value="{{ $jamMulaiVal }}"
+                                                class="form-control text-sm font-weight-bold"
+                                                style="height: 40px; border-color: #c4b5fd; border-radius: 10px;"
+                                            >
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <label class="text-xs text-muted font-weight-bold mb-1 d-block">
+                                                <i class="fas fa-stop-circle text-rose-400 mr-1"></i>Jam Berakhir
+                                            </label>
+                                            <input
+                                                type="time"
+                                                name="jam_per_mapel[{{ $idx }}][jam_selesai]"
+                                                value="{{ $jamSelesaiVal }}"
+                                                class="form-control text-sm font-weight-bold"
+                                                style="height: 40px; border-color: #c4b5fd; border-radius: 10px;"
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-book-open text-slate-300 fa-2x mb-2"></i>
+                                <p class="text-xs text-muted mb-0">Siswa ini belum memiliki data mata pelajaran terdaftar.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">
+                            <i class="fas fa-save mr-1"></i>Simpan Jam Bimbel
+                        </button>
                     </div>
                 </form>
             </div>

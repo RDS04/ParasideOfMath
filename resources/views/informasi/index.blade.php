@@ -1921,9 +1921,9 @@
                                     <h4 class="text-sm font-extrabold text-violet-950 uppercase tracking-wider mb-1">
                                         WhatsApp Chat</h4>
                                     <p class="text-sm text-slate-600 font-semibold mb-2">
-                                        Hubungi Pimpinan / Admin (Kak Kiki)
+                                        Hubungi Admin
                                     </p>
-                                    <a href="https://wa.me/628116612050" target="_blank"
+                                    <a href="https://wa.me/6289675053537" target="_blank"
                                         class="inline-flex items-center gap-2 text-sm text-white bg-emerald-600 hover:bg-emerald-500 font-extrabold px-4 py-2 rounded-xl transition duration-200 shadow-md shadow-emerald-600/10">
                                         <i class="fab fa-whatsapp"></i> Chat WhatsApp
                                     </a>
@@ -2040,7 +2040,7 @@
                         </li>
                         <li class="flex items-center gap-2.5">
                             <span class="text-amber-400 shrink-0"><i class="fas fa-phone-alt"></i></span>
-                            <span>0811-6612-050 (Kak Kiki)</span>
+                            <span>0811-6612-050</span>
                         </li>
                     </ul>
                 </div>

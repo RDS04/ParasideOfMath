@@ -12,6 +12,7 @@
         $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];
         $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
         $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
+        $jamPerMapel     = $biodata['jam_per_mapel'] ?? [];
 
         // ── Data database untuk Modal Tambah & Bayar ──
         $availableMapels = \App\Models\Mapel::all();
@@ -83,11 +84,25 @@
         // Jam Mulai & Selesai
         $paket          = $siswa->paket;
         $jamMulai       = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
+        $jamSelesai     = $jamMulai;
         $durationMinutes = 90;
         if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5 ?? '', $dM)) {
             $durationMinutes = (int) $dM[1];
         }
-        $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+
+        if (!empty($jamPerMapel) && is_array($jamPerMapel)) {
+            foreach ($jamPerMapel as $timeSet) {
+                if (is_array($timeSet) && !empty($timeSet['jam_mulai'])) {
+                    $jamMulai = $timeSet['jam_mulai'];
+                    $jamSelesai = $timeSet['jam_selesai'] ?? date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+                    break;
+                }
+            }
+        }
+
+        if ($jamSelesai === $jamMulai) {
+            $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+        }
 
         // Parse Guru — prioritaskan biodata->tutor_per_mapel (sama seperti showJadwal())
         $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];

@@ -114,6 +114,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/siswa/request/{id}/reject', 'rejectRequestTambahMapel')->name('admin.siswa.requests.reject');
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
     Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
+    Route::post('/admin/siswa/update-jam-bimbel/{id}', 'updateJamBimbel')->name('admin.siswa.update-jam-bimbel');
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
     Route::get('/admin/kalender', 'showKalender')->name('admin.kalender');
     Route::get('/admin/foto', 'showFotoMenu')->name('admin.foto.index');
@@ -147,7 +148,7 @@ Route::get('/chat/messages', [\App\Http\Controllers\Chat\ChatController::class, 
 Route::post('/chat/send', [\App\Http\Controllers\Chat\ChatController::class, 'sendMessage']);
 
 Route::middleware('auth:web')->group(function () {
-    Route::get('/admin/chet', [\App\Http\Controllers\Chat\ChatController::class, 'adminChatPage'])->name('admin.chat');
+    Route::get('/admin/chat', [\App\Http\Controllers\Chat\ChatController::class, 'adminChatPage'])->name('admin.chat');
     Route::get('/admin/chat/sessions', [\App\Http\Controllers\Chat\ChatController::class, 'getChatSessions']);
     Route::get('/admin/chat/messages/{session_id}', [\App\Http\Controllers\Chat\ChatController::class, 'getSessionMessages']);
     Route::post('/admin/chat/send', [\App\Http\Controllers\Chat\ChatController::class, 'adminSendMessage']);

@@ -734,6 +734,7 @@ class SiswaController extends Controller
         $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];
         $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
         $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
+        $jamPerMapel     = $biodata['jam_per_mapel'] ?? [];
 
         // ── Data flat (untuk backward compat & kalender gabungan) ──
         $hariPertemuan   = $biodata['hari_pertemuan'] ?? [];
@@ -798,11 +799,25 @@ class SiswaController extends Controller
         // Jam belajar
         $paket          = $siswa->paket;
         $jamMulai       = $paket ? ($paket->jam_mulai ?? '15:30') : '15:30';
+        $jamSelesai     = $jamMulai;
         $durationMinutes = 90;
         if ($paket && preg_match('/(\d+)\s*menit/i', $paket->detail_5 ?? '', $dM)) {
             $durationMinutes = (int) $dM[1];
         }
-        $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+
+        if (!empty($jamPerMapel) && is_array($jamPerMapel)) {
+            foreach ($jamPerMapel as $timeSet) {
+                if (is_array($timeSet) && !empty($timeSet['jam_mulai'])) {
+                    $jamMulai = $timeSet['jam_mulai'];
+                    $jamSelesai = $timeSet['jam_selesai'] ?? date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+                    break;
+                }
+            }
+        }
+
+        if ($jamSelesai === $jamMulai) {
+            $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durationMinutes} minutes"));
+        }
 
         return view('siswa.jadwal', compact(
             'siswa', 'hariPertemuan', 'tanggalMulai', 'mapels',

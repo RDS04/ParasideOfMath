@@ -257,6 +257,7 @@ class GuruController extends Controller
             $sesiPerMapel = $biodata['sesi_per_mapel'] ?? [];
             $hariPerMapel = $biodata['hari_per_mapel'] ?? [];
             $tanggalPerMapel = $biodata['tanggal_mulai_per_mapel'] ?? [];
+            $jamPerMapel = $biodata['jam_per_mapel'] ?? [];
 
             if (empty($mapelJadwal) && $siswa->tipe_paket) {
                 if (preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
@@ -316,6 +317,8 @@ class GuruController extends Controller
                 $hariList = [];
                 $tglMulai = null;
                 $limitSesi = 0;
+                $jamMulaiItem = $jamMulai;
+                $jamSelesaiItem = $jamSelesai;
 
                 if ($mIdx !== false && isset($hariPerMapel[$mIdx])) {
                     $rawH = $hariPerMapel[$mIdx];
@@ -326,6 +329,15 @@ class GuruController extends Controller
                     $hariList = $biodata['hari_pertemuan'] ?? [];
                     $tglMulai = $biodata['tanggal_mulai'] ?? null;
                     $limitSesi = (int) ($biodata['jumlah_pertemuan'] ?? 0);
+                }
+
+                if ($mIdx !== false && isset($jamPerMapel[$mIdx]) && is_array($jamPerMapel[$mIdx])) {
+                    if (!empty($jamPerMapel[$mIdx]['jam_mulai'])) {
+                        $jamMulaiItem = $jamPerMapel[$mIdx]['jam_mulai'];
+                    }
+                    if (!empty($jamPerMapel[$mIdx]['jam_selesai'])) {
+                        $jamSelesaiItem = $jamPerMapel[$mIdx]['jam_selesai'];
+                    }
                 }
 
                 // Fallback tipe_paket parsing
@@ -378,7 +390,7 @@ class GuruController extends Controller
                                     'dateStr' => $dateStr,
                                     'student_name' => $siswa->name,
                                     'subject' => $mapelName,
-                                    'time' => $jamMulai . ' - ' . $jamSelesai,
+                                    'time' => $jamMulaiItem . ' - ' . $jamSelesaiItem,
                                     'whatsapp' => $siswa->whatsapp,
                                     'sekolah' => $siswa->sekolah,
                                     'session_index' => $studentSessionCount,

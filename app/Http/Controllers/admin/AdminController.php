@@ -562,6 +562,32 @@ class AdminController extends Controller
     }
 
     /**
+     * Update jam mulai dan jam berakhir bimbel siswa per mata pelajaran.
+     */
+    public function updateJamBimbel(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'jam_per_mapel'               => ['nullable', 'array'],
+            'jam_per_mapel.*.jam_mulai'   => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'jam_per_mapel.*.jam_selesai' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+        ]);
+
+        $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        $biodata['jam_per_mapel'] = $request->input('jam_per_mapel', []);
+
+        $siswa->update([
+            'biodata' => $biodata,
+        ]);
+
+        return back()->with('success', 'Jam bimbingan per mata pelajaran untuk ' . $siswa->name . ' berhasil diperbarui!');
+    }
+
+    /**
      * Tampilkan Halaman Kalender Master Admin untuk seluruh jadwal siswa.
      */
     public function showKalender()
