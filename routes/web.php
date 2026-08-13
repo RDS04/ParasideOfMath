@@ -86,6 +86,10 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::get('/jadwal', 'showJadwal')->name('guru.jadwal');
     Route::get('/siswa', 'showSiswa')->name('guru.siswa');
 
+    Route::get('/ujian', 'showUjianGuru')->name('guru.ujian.index');
+    Route::post('/ujian/assign', 'assignUjianGuru')->name('guru.ujian.assign');
+    Route::delete('/ujian/unassign', 'unassignUjianGuru')->name('guru.ujian.unassign');
+
     Route::get('/bank-soal', 'bankSoal')->name('guru.bank-soal.index');
     Route::post('/bank-soal/kategori', 'storeKategoriSoal')->name('guru.bank-soal.kategori.store');
     Route::put('/bank-soal/kategori/{id}', 'updateKategoriSoal')->name('guru.bank-soal.kategori.update');

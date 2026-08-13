@@ -519,76 +519,66 @@ class GuruController extends Controller
         $sub     = $request->input('sub_kategori', '');
         $mapel   = $request->input('mapel', '');
 
-        $categories = collect();
-        $mapelCategories = collect();
-        $selectedCategory = null;
-        $selected_kategori_id = $request->input('kategori_id');
-        $mapelOptions = collect();
+        // Step 2: Kelas tersedia berdasarkan jenjang
+        $availableClasses = [];
+        if ($jenjang === 'SD') {
+            $availableClasses = range(1, 6);
+        } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
+            $availableClasses = range(1, 3);
+        }
 
-        if ($jenjang && $kelas && $sub) {
-            // Fetch all subjects registered in admin/inputMapel (from Mapel model)
+        // Step 3: Semester / TKA tersedia berdasarkan jenjang + kelas
+        $availableSubs = ($jenjang && $kelas)
+            ? KategoriSoal::availableSubKategori($jenjang, $kelas)
+            : [];
+
+        if ($sub && !in_array($sub, $availableSubs)) {
+            $sub = '';
+        }
+
+        // Step 4: Daftar Mata Pelajaran tersedia setelah Semester / TKA dipilih
+        $mapelList = collect();
+        if ($sub) {
             $mapelQuery = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%');
             if ($sub === 'TKA') {
                 $mapelQuery->where('nama_mapel', 'like', '%TKA%');
             } else {
                 $mapelQuery->where('nama_mapel', 'not like', '%TKA%');
             }
-            $mapelOptions = $mapelQuery->orderBy('nama_mapel')->get();
+            $mapelList = $mapelQuery->orderBy('nama_mapel')
+                ->pluck('nama_mapel')
+                ->unique()
+                ->values();
+        }
 
-            if ($mapelOptions->isEmpty()) {
-                $mapelOptions = Mapel::orderBy('nama_mapel')->get();
-            }
+        $selectedCategory = null;
+        $kategoriList = collect();
+        $kategoriId = $request->input('kategori_id', '');
 
-            // All categories for this jenjang/kelas/sub (for the "existing mapels" list)
-            $categories = KategoriSoal::where('jenjang', $jenjang)
+        // Step 5: Jika kombinasi Jenjang + Kelas + Semester/TKA + Mapel lengkap,
+        //         ambil daftar KategoriSoal (judul/deskripsi) yang sudah diupload.
+        if ($jenjang && $kelas && $sub && $mapel) {
+            $kategoriList = KategoriSoal::where('jenjang', $jenjang)
                 ->where('kelas', $kelas)
                 ->where('sub_kategori', $sub)
+                ->where('nama_kategori', $mapel)
                 ->withCount('bankSoals')
+                ->orderBy('created_at', 'desc')
                 ->get();
+        }
 
-            if ($mapel) {
-                // When a mapel is selected, get all KategoriSoal entries for this mapel
-                $mapelCategories = KategoriSoal::where('jenjang', $jenjang)
-                    ->where('kelas', $kelas)
-                    ->where('sub_kategori', $sub)
-                    ->where('nama_kategori', $mapel)
-                    ->withCount('bankSoals')
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-
-                // Only load specific category when kategori_id is provided
-                if ($selected_kategori_id) {
-                    $selectedCategory = KategoriSoal::with('bankSoals')->find($selected_kategori_id);
-                }
-            } elseif ($selected_kategori_id) {
-                $selectedCategory = KategoriSoal::with('bankSoals')->find($selected_kategori_id);
-                if ($selectedCategory) {
-                    $mapel = $selectedCategory->nama_kategori;
-                    $mapelCategories = KategoriSoal::where('jenjang', $jenjang)
-                        ->where('kelas', $kelas)
-                        ->where('sub_kategori', $sub)
-                        ->where('nama_kategori', $mapel)
-                        ->withCount('bankSoals')
-                        ->orderBy('created_at', 'desc')
-                        ->get();
-                }
+        // Step 6: Jika memilih salah satu kategori, load soal-soalnya
+        if ($kategoriId) {
+            $selectedCategory = KategoriSoal::find($kategoriId);
+            if ($selectedCategory) {
+                $selectedCategory->load('bankSoals');
             }
         }
 
-        $availableClasses = [];
-        if ($jenjang == 'SD') {
-            $availableClasses = range(1, 6);
-        } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
-            $availableClasses = range(1, 3);
-        }
-
-        $availableSubs = ($jenjang && $kelas)
-            ? KategoriSoal::availableSubKategori($jenjang, $kelas)
-            : [];
-
         return view('guru.bankSoal', compact(
-            'jenjang', 'kelas', 'sub', 'mapel', 'availableClasses', 'availableSubs',
-            'categories', 'mapelCategories', 'selectedCategory', 'selected_kategori_id', 'mapelOptions'
+            'jenjang', 'kelas', 'sub', 'mapel',
+            'availableClasses', 'availableSubs', 'mapelList',
+            'kategoriList', 'selectedCategory', 'kategoriId'
         ));
     }
 
@@ -960,5 +950,156 @@ class GuruController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Tampilkan Halaman Penugasan Ujian Siswa oleh Guru.
+     */
+    public function showUjianGuru(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isGuru()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+        }
+
+        $guruNameNorm = strtolower(trim($user->name));
+
+        // Fetch active students assigned to this Guru
+        $assignedStudents = \App\Models\Siswa::with('paket')->where('status', 'active')->get()->filter(
+            fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm)
+        )->values();
+
+        // Selected student ID or first student
+        $selectedSiswaId = $request->input('siswa_id');
+        $selectedSiswa = $assignedStudents->firstWhere('id', $selectedSiswaId) ?: $assignedStudents->first();
+
+        // All available KategoriSoal (Question Packages) with question count
+        $categoriesQuery = \App\Models\KategoriSoal::withCount('bankSoals');
+
+        // Optional filtering by Jenjang or Mapel if requested
+        if ($request->filled('jenjang')) {
+            $categoriesQuery->where('jenjang', strtoupper($request->jenjang));
+        }
+        if ($request->filled('mapel')) {
+            $categoriesQuery->where('nama_kategori', $request->mapel);
+        }
+
+        $allCategories = $categoriesQuery->orderBy('created_at', 'desc')->get();
+
+        // Existing assigned exams for the selected student
+        $assignedExams = [];
+        $hasilUjians = collect();
+
+        if ($selectedSiswa) {
+            $biodata = $selectedSiswa->biodata ?? [];
+            $assignedExams = $biodata['assigned_ujian'] ?? [];
+
+            // Get exam results completed by this student
+            $hasilUjians = \App\Models\HasilUjian::where('siswa_id', $selectedSiswa->id)
+                ->with('kategori')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        return view('guru.ujian', compact(
+            'user',
+            'assignedStudents',
+            'selectedSiswa',
+            'allCategories',
+            'assignedExams',
+            'hasilUjians'
+        ));
+    }
+
+    /**
+     * Tugaskan Paket Soal Ujian ke Siswa.
+     */
+    public function assignUjianGuru(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isGuru()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+        }
+
+        $request->validate([
+            'siswa_id' => 'required|exists:siswa,id',
+            'kategori_soal_id' => 'required|exists:kategori_soals,id',
+            'catatan' => 'nullable|string|max:255',
+            'tgl_deadline' => 'nullable|date',
+        ]);
+
+        $siswa = \App\Models\Siswa::findOrFail($request->siswa_id);
+        $kategori = \App\Models\KategoriSoal::findOrFail($request->kategori_soal_id);
+
+        $biodata = $siswa->biodata ?? [];
+        $assignedExams = $biodata['assigned_ujian'] ?? [];
+
+        // Check if already assigned
+        $alreadyAssigned = false;
+        foreach ($assignedExams as $item) {
+            if (isset($item['kategori_soal_id']) && $item['kategori_soal_id'] == $kategori->id) {
+                $alreadyAssigned = true;
+                break;
+            }
+        }
+
+        if ($alreadyAssigned) {
+            return redirect()->route('guru.ujian.index', ['siswa_id' => $siswa->id])
+                ->with('error', 'Paket soal "' . ($kategori->deskripsi ?: $kategori->nama_kategori) . '" sudah ditugaskan kepada siswa ' . $siswa->name . '.');
+        }
+
+        $newAssignment = [
+            'id' => uniqid('ex_'),
+            'kategori_soal_id' => $kategori->id,
+            'nama_kategori' => $kategori->nama_kategori,
+            'deskripsi' => $kategori->deskripsi,
+            'jenjang' => $kategori->jenjang,
+            'sub_kategori' => $kategori->sub_kategori,
+            'guru_id' => $user->id,
+            'guru_name' => $user->name,
+            'tanggal_ditugaskan' => date('Y-m-d H:i'),
+            'tgl_deadline' => $request->tgl_deadline,
+            'catatan' => $request->catatan ?: 'Silakan dikerjakan dengan jujur & cermat.',
+        ];
+
+        $assignedExams[] = $newAssignment;
+        $biodata['assigned_ujian'] = array_values($assignedExams);
+
+        $siswa->biodata = $biodata;
+        $siswa->save();
+
+        return redirect()->route('guru.ujian.index', ['siswa_id' => $siswa->id])
+            ->with('success', 'Berhasil menugaskan paket soal "' . ($kategori->deskripsi ?: $kategori->nama_kategori) . '" kepada ' . $siswa->name . '!');
+    }
+
+    /**
+     * Batalkan / Hapus Penugasan Ujian Siswa.
+     */
+    public function unassignUjianGuru(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || !$user->isGuru()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+        }
+
+        $request->validate([
+            'siswa_id' => 'required|exists:siswa,id',
+            'assignment_id' => 'required|string',
+        ]);
+
+        $siswa = \App\Models\Siswa::findOrFail($request->siswa_id);
+        $biodata = $siswa->biodata ?? [];
+        $assignedExams = $biodata['assigned_ujian'] ?? [];
+
+        $filteredExams = array_filter($assignedExams, function ($item) use ($request) {
+            return isset($item['id']) && $item['id'] !== $request->assignment_id;
+        });
+
+        $biodata['assigned_ujian'] = array_values($filteredExams);
+        $siswa->biodata = $biodata;
+        $siswa->save();
+
+        return redirect()->route('guru.ujian.index', ['siswa_id' => $siswa->id])
+            ->with('success', 'Penugasan ujian telah dibatalkan!');
     }
 }

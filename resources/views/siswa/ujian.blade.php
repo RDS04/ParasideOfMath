@@ -45,6 +45,54 @@
             <!-- ════════════════ MODE 1: KATALOG PILIHAN UJIAN ════════════════ -->
             @if ($mode === 'catalog')
 
+                @if (!empty($assignedExams))
+                    <!-- BANNER UJIAN DITUGASKAN OLEH GURU -->
+                    <div class="card border-0 shadow-md rounded-2xl mb-4 overflow-hidden bg-white" style="border-left: 5px solid #a855f7;">
+                        <div class="card-header bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                            <h5 class="card-title font-extrabold mb-0 text-base d-flex align-items-center">
+                                <i class="fas fa-thumbtack text-amber-300 mr-2"></i> Ujian Ditugaskan oleh Guru Anda ({{ count($assignedExams) }})
+                            </h5>
+                            <span class="badge bg-amber-400 text-purple-950 font-extrabold px-3 py-1 rounded-full text-xs">
+                                Tugas Ujian Wajib
+                            </span>
+                        </div>
+                        <div class="card-body p-4 bg-purple-50/30">
+                            <div class="row g-3">
+                                @foreach ($assignedExams as $aEx)
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card border border-purple-200 rounded-2xl shadow-xs overflow-hidden bg-white h-100 hover:border-purple-400 transition-all">
+                                            <div class="card-body p-3.5 d-flex flex-column justify-content-between">
+                                                <div class="mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <span class="badge bg-purple-100 text-purple-900 font-extrabold px-2.5 py-1 rounded-md text-xs">
+                                                            {{ $aEx['jenjang'] ?? 'SD' }} • {{ $aEx['nama_kategori'] ?? 'Mata Pelajaran' }}
+                                                        </span>
+                                                        @if (!empty($aEx['tgl_deadline']))
+                                                            <span class="text-xs text-rose-600 font-bold">
+                                                                <i class="fas fa-clock mr-1"></i> Deadline: {{ date('d M Y', strtotime($aEx['tgl_deadline'])) }}
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                    <h5 class="font-bold text-slate-900 mb-2 text-base">
+                                                        {{ $aEx['deskripsi'] ?: ($aEx['nama_kategori'] ?? 'Paket Soal Ujian') }}
+                                                    </h5>
+                                                    <div class="text-xs text-slate-600 bg-purple-50/80 p-2.5 rounded-xl border border-purple-100">
+                                                        <i class="fas fa-quote-left text-purple-400 mr-1"></i> {{ $aEx['catatan'] ?? 'Silakan dikerjakan dengan jujur.' }}
+                                                        <span class="d-block text-[11px] text-purple-800 font-semibold mt-1.5">— Ditugaskan oleh {{ $aEx['guru_name'] ?? 'Guru Anda' }} ({{ $aEx['tanggal_ditugaskan'] ?? '' }})</span>
+                                                    </div>
+                                                </div>
+                                                <a href="{{ route('siswa.ujian', ['kategori_id' => $aEx['kategori_soal_id']]) }}" class="btn btn-purple btn-block font-extrabold rounded-xl py-2 text-xs shadow-sm">
+                                                    <i class="fas fa-pencil-alt mr-1.5"></i> Kerjakan Ujian Ini Sekarang
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- 1. TABS JENJANG (SD, SMP, SMA) -->
                 <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
                     <div class="card-body p-2 bg-purple-50/50">
@@ -79,6 +127,20 @@
                         </a>
                     @endforeach
                 </div>
+
+                <!-- INFORMASI MAPEL AKTIF SISWA -->
+                @if (!empty($siswaMapelList))
+                    <div class="alert alert-purple bg-purple-50 border border-purple-200 rounded-2xl p-3.5 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-xs">
+                        <div class="d-flex align-items-center flex-wrap gap-1.5">
+                            <i class="fas fa-book-reader text-purple-600 mr-2 fa-lg"></i>
+                            <span class="text-xs font-bold text-purple-950 mr-1">Mata Pelajaran Anda:</span>
+                            @foreach ($siswaMapelList as $sm)
+                                <span class="badge bg-purple-900 text-white font-bold px-2.5 py-1 rounded-lg text-xs shadow-xs">{{ $sm }}</span>
+                            @endforeach
+                        </div>
+                        <span class="text-xxs text-purple-700 font-semibold italic"><i class="fas fa-filter mr-1"></i> Menampilkan soal khusus untuk mata pelajaran yang Anda ambil</span>
+                    </div>
+                @endif
 
                 <!-- 3. DAFTAR KATEGORI UJIAN TERSEDIA -->
                 <div class="mb-5">

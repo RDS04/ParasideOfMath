@@ -14,6 +14,7 @@
   $isGuruDashboardActive = Request::is('guru') || Request::is('guru/dashboard');
   $isGuruBiodataActive = Request::is('guru/biodata') || Request::is('guru/biodata/*');
   $isGuruJadwalActive = Request::is('guru/jadwal') || Request::is('guru/jadwal/*');
+  $isGuruUjianActive = Request::is('guru/ujian') || Request::is('guru/ujian/*');
 @endphp
 
 @if ($isGuru)
@@ -26,11 +27,11 @@
 
         <!-- Home Dashboard Guru -->
         <a href="{{ route('guru.dashboard') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 72px; color: {{ $isGuruDashboardActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruDashboardActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isGuruDashboardActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruDashboardActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              style="width: 20px; height: 20px; transition: transform 0.25s ease; transform: {{ $isGuruDashboardActive ? 'scale(1.08)' : 'scale(1)' }};">
+              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruDashboardActive ? 'scale(1.08)' : 'scale(1)' }};">
               <path d="M12 2.5 1.5 11h3V21h6v-6h3v6h6V11h3L12 2.5z" />
             </svg>
           </div>
@@ -38,13 +39,27 @@
             style="font-size: 10px; font-weight: {{ $isGuruDashboardActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Dashboard</span>
         </a>
 
+        <!-- Penugasan Ujian -->
+        <a href="{{ route('guru.ujian.index') }}"
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruUjianActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          <div
+            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruUjianActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruUjianActive ? 'scale(1.08)' : 'scale(1)' }};">
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+            </svg>
+          </div>
+          <span
+            style="font-size: 10px; font-weight: {{ $isGuruUjianActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Ujian</span>
+        </a>
+
         <!-- Biodata Guru -->
         <a href="{{ route('guru.biodata') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 72px; color: {{ $isGuruBiodataActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruBiodataActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isGuruBiodataActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruBiodataActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              style="width: 20px; height: 20px; transition: transform 0.25s ease; transform: {{ $isGuruBiodataActive ? 'scale(1.08)' : 'scale(1)' }};">
+              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruBiodataActive ? 'scale(1.08)' : 'scale(1)' }};">
               <path
                 d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.78c0-2.33 4.67-3.5 7-3.5s7 1.17 7 3.5V19z" />
             </svg>
@@ -55,11 +70,11 @@
 
         <!-- Jadwal Bimbingan -->
         <a href="{{ route('guru.jadwal') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 72px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              style="width: 20px; height: 20px; transition: transform 0.25s ease; transform: {{ $isGuruJadwalActive ? 'scale(1.08)' : 'scale(1)' }};">
+              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruJadwalActive ? 'scale(1.08)' : 'scale(1)' }};">
               <path
                 d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
             </svg>

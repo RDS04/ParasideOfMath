@@ -1019,11 +1019,38 @@ class SiswaController extends Controller
         $defaultSubKategori = ['Semester 1', 'Semester 2', 'TKA'];
         $allSubKategori = array_unique(array_merge($defaultSubKategori, $availableSubKategori));
 
-        // Ambil daftar kategori soal
-        $categories = KategoriSoal::where('jenjang', $jenjang)
+        // Ambil daftar mata pelajaran yang diambil oleh siswa ini
+        $biodata = $siswa->biodata ?? [];
+        $rawMapels = $biodata['mapel_jadwal'] ?? [];
+
+        if (empty($rawMapels) && !empty($siswa->tipe_paket) && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $m)) {
+            $rawMapels = array_map('trim', explode(',', $m[1]));
+        }
+
+        $siswaMapelList = [];
+        foreach ((array) $rawMapels as $mItem) {
+            $cleanM = trim(preg_replace('/\s*\d+x$/i', '', $mItem));
+            if (!empty($cleanM)) {
+                $siswaMapelList[] = $cleanM;
+            }
+        }
+        $siswaMapelList = array_values(array_unique($siswaMapelList));
+
+        // Ambil daftar kategori soal khusus untuk mata pelajaran yang diambil siswa saja
+        $categoriesQuery = KategoriSoal::where('jenjang', $jenjang)
             ->where('sub_kategori', $sub_kategori)
-            ->withCount('bankSoals')
-            ->get();
+            ->withCount('bankSoals');
+
+        if (!empty($siswaMapelList)) {
+            $categoriesQuery->where(function ($q) use ($siswaMapelList) {
+                foreach ($siswaMapelList as $mapelName) {
+                    $q->orWhere('nama_kategori', 'LIKE', '%' . $mapelName . '%')
+                      ->orWhere('deskripsi', 'LIKE', '%' . $mapelName . '%');
+                }
+            });
+        }
+
+        $categories = $categoriesQuery->get();
 
         // Riwayat Ujian Siswa
         $riwayatUjian = HasilUjian::where('siswa_id', $siswa->id)
@@ -1031,6 +1058,9 @@ class SiswaController extends Controller
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get();
+
+        // Ujian yang ditugaskan oleh Guru
+        $assignedExams = $siswa->biodata['assigned_ujian'] ?? [];
 
         $mode = 'catalog';
 
@@ -1041,6 +1071,8 @@ class SiswaController extends Controller
             'allSubKategori',
             'categories',
             'riwayatUjian',
+            'assignedExams',
+            'siswaMapelList',
             'mode'
         ));
     }
