@@ -36,6 +36,56 @@
                 </div>
             @endif
 
+            <!-- Card Setting Status Display Pendaftaran Guru -->
+            <div class="card shadow-sm border-0 mb-4 rounded-xl overflow-hidden" style="border-radius: 12px; background: #ffffff;">
+                <div class="card-body p-4">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle p-3 mr-3 d-flex align-items-center justify-content-center {{ ($guruRegisterEnabled ?? true) ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600' }}" style="width: 48px; height: 48px; min-width: 48px;">
+                                <i class="fas {{ ($guruRegisterEnabled ?? true) ? 'fa-eye' : 'fa-eye-slash' }} fa-lg"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-weight-bold text-purple-950 mb-1" style="font-size: 1.05rem;">
+                                    Tampilan Pendaftaran Guru
+                                </h5>
+                                <p class="text-xs text-muted mb-0">
+                                    Atur status mengaktifkan (ON) atau menonaktifkan (OFF) tampilan link 
+                                    <span class="font-weight-bold text-purple-700">"Ingin bergabung sebagai pengajar? Daftar sebagai Guru"</span> di halaman login.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mt-3 mt-md-0">
+                            <div class="mr-3 text-right">
+                                <span class="d-block text-xs text-muted font-weight-bold text-uppercase tracking-wider">Status Tampilan</span>
+                                @if ($guruRegisterEnabled ?? true)
+                                    <span class="badge bg-emerald-100 text-emerald-800 border border-emerald-300 px-3 py-1.5 rounded-pill font-weight-bold text-xs">
+                                        <i class="fas fa-check-circle mr-1"></i> AKTIF (ON)
+                                    </span>
+                                @else
+                                    <span class="badge bg-rose-100 text-rose-800 border border-rose-300 px-3 py-1.5 rounded-pill font-weight-bold text-xs">
+                                        <i class="fas fa-times-circle mr-1"></i> NONAKTIF (OFF)
+                                    </span>
+                                @endif
+                            </div>
+                            
+                            <form action="{{ route('admin.guru.toggle-register') }}" method="POST" class="m-0">
+                                @csrf
+                                @if ($guruRegisterEnabled ?? true)
+                                    <button type="submit" class="btn btn-danger font-weight-bold px-3 py-2 rounded-lg shadow-sm text-xs d-flex align-items-center" onclick="return confirm('Apakah Anda yakin ingin menonaktifkan (OFF) tampilan link pendaftaran guru di halaman login?')">
+                                        <i class="fas fa-power-off mr-1.5"></i> Nonaktifkan (OFF)
+                                    </button>
+                                @else
+                                    <button type="submit" class="btn btn-success font-weight-bold px-3 py-2 rounded-lg shadow-sm text-xs d-flex align-items-center" onclick="return confirm('Apakah Anda yakin ingin mengaktifkan (ON) tampilan link pendaftaran guru di halaman login?')">
+                                        <i class="fas fa-toggle-on mr-1.5"></i> Aktifkan (ON)
+                                    </button>
+                                @endif
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="card shadow-sm border-light">
                 <div class="card-header bg-white py-3">
                     <h3 class="card-title font-weight-bold text-purple-950 mb-0">Semua Data Tutor</h3>

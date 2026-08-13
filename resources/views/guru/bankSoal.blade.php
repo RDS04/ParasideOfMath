@@ -6,24 +6,6 @@
     $isGuruUser = auth()->guard('web')->check() && auth()->user()->isGuru();
     $prefixRoute = $isGuruUser ? 'guru.bank-soal' : 'guru.bank-soal';
     $dashRoute = $isGuruUser ? route('guru.dashboard') : route('guru.dashboard');
-
-    // Ambil parameter dari query string
-    $jenjang = request()->input('jenjang', '');
-    $kelas   = request()->input('kelas', '');
-    $sub     = request()->input('sub_kategori', '');
-    $katId   = request()->input('kategori_id', '');
-
-    // Daftar kelas yang tersedia berdasarkan jenjang
-    $availableClasses = [];
-    if ($jenjang == 'SD') {
-        $availableClasses = range(1, 6);
-    } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
-        $availableClasses = range(1, 3);
-    }
-
-    // Daftar sub-kategori (Semester / TKA) berdasarkan kelas & jenjang
-    $availableSubs = \App\Models\KategoriSoal::availableSubKategori($jenjang, $kelas);
-    
 @endphp
 
 @section('content')
@@ -81,177 +63,220 @@
             @endif
 
             <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 1: PILIH JENJANG                                    -->
+            <!-- FILTER BANK SOAL: JENJANG, KELAS, SEMESTER, & MAPEL          -->
             <!-- ════════════════════════════════════════════════════════════ -->
             <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center">
-                    <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">1</span>
-                    <h5 class="card-title font-bold text-purple-950 mb-0 text-base">Pilih Jenjang Pendidikan</h5>
-                    @if($jenjang)
-                        <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                            <i class="fas fa-check-circle text-purple-600 mr-1"></i> {{ $jenjang }}
-                        </span>
-                    @endif
-                </div>
-                <div class="card-body p-3 bg-purple-50/40">
-                    <div class="row g-3">
-                        @foreach ([
-                            'SD' => ['Sekolah Dasar', 'fa-child', 'emerald', 'Modul & Latihan Dasar SD'],
-                            'SMP' => ['Sekolah Menengah Pertama', 'fa-user-graduate', 'indigo', 'Materi & Latihan Menengah SMP'],
-                            'SMA' => ['Sekolah Menengah Atas', 'fa-university', 'purple', 'Persiapan Ujian & TKA SMA']
-                        ] as $key => $info)
-                            @php
-                                // Buat URL dengan query string, pertahankan parameter lain kecuali jenjang
-                                $queryParams = request()->except(['jenjang', 'kelas', 'sub_kategori', 'kategori_id']);
-                                $queryParams['jenjang'] = $key;
-                                $url = route($prefixRoute . '.index', $queryParams);
-                            @endphp
-                            <div class="col-md-4 mb-2 mb-md-0">
-                                <a href="{{ $url }}"
-                                   class="card border-2 transition-all duration-200 text-decoration-none rounded-xl overflow-hidden h-100 {{ $jenjang === $key ? 'border-purple-800 bg-purple-900 text-white shadow-md' : 'border-slate-200 bg-white text-slate-700 hover:border-purple-400 hover:bg-purple-50' }}">
-                                    <div class="card-body p-3.5 d-flex align-items-center">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-xs"
-                                             style="width: 44px; height: 44px; background: {{ $jenjang === $key ? 'rgba(255,255,255,0.2)' : '#f3e8ff' }}; flex-shrink: 0;">
-                                            <i class="fas {{ $info[1] }} fa-lg {{ $jenjang === $key ? 'text-amber-300' : 'text-purple-700' }}"></i>
-                                        </div>
-                                        <div>
-                                            <span class="d-block text-base font-extrabold leading-tight mb-0.5">Jenjang {{ $key }}</span>
-                                            <span class="d-block text-xs opacity-90 {{ $jenjang === $key ? 'text-purple-200' : 'text-slate-500' }}">{{ $info[0] }}</span>
-                                        </div>
-                                        @if ($jenjang === $key)
-                                            <i class="fas fa-check-circle ml-auto text-amber-300 fa-lg"></i>
-                                        @endif
-                                    </div>
-                                </a>
-                            </div>
-                        @endforeach
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-purple-100 text-purple-900 d-flex align-items-center justify-content-center mr-3 shadow-xs" style="width: 38px; height: 38px;">
+                            <i class="fas fa-filter text-purple-700"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title font-bold text-purple-950 mb-0 text-base">Filter Bank Soal &amp; Latihan</h5>
+                            <span class="text-xs text-slate-500">Pilih Jenjang, Kelas, Semester, dan Mata Pelajaran untuk memfilter soal</span>
+                        </div>
                     </div>
+                    <div class="d-flex align-items-center gap-2">
+                        @if($jenjang && $kelas && $sub)
+                            <button type="button" class="btn btn-sm btn-outline-purple font-bold rounded-xl px-3 py-1.5 text-xs transition-all shadow-xs" data-toggle="collapse" data-target="#panelListMapel" aria-expanded="false" aria-controls="panelListMapel">
+                                <i class="fas fa-list mr-1"></i> List Mapel
+                            </button>
+                            <button type="button" class="btn btn-purple btn-sm shadow-sm rounded-xl font-bold px-3.5 py-2 text-xs" data-toggle="modal" data-target="#modalTambahKategori">
+                                <i class="fas fa-plus-circle mr-1.5"></i> Tambah Mapel Baru
+                            </button>
+                        @endif
+                        @if($jenjang || $kelas || $sub || $mapel)
+                            <a href="{{ route($prefixRoute . '.index') }}" class="btn btn-sm btn-outline-danger font-bold rounded-xl px-3 py-1.5 text-xs transition-all shadow-xs">
+                                <i class="fas fa-undo mr-1"></i> Reset Filter
+                            </a>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="card-body p-4 bg-purple-50/30">
+                    <form id="filterBankSoalFormGuru" action="{{ route($prefixRoute . '.index') }}" method="GET">
+                        <div class="row g-3">
+
+                            <!-- Dropdown 1: Jenjang -->
+                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> 1. Jenjang Pendidikan
+                                </label>
+                                <select name="jenjang" id="filterJenjang" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" onchange="handleJenjangChange(this)">
+                                    <option value="">-- Pilih Jenjang --</option>
+                                    <option value="SD" {{ $jenjang === 'SD' ? 'selected' : '' }}>SD (Sekolah Dasar)</option>
+                                    <option value="SMP" {{ $jenjang === 'SMP' ? 'selected' : '' }}>SMP (Sekolah Menengah Pertama)</option>
+                                    <option value="SMA" {{ $jenjang === 'SMA' ? 'selected' : '' }}>SMA (Sekolah Menengah Atas)</option>
+                                </select>
+                            </div>
+
+                            <!-- Dropdown 2: Kelas -->
+                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> 2. Kelas
+                                </label>
+                                <select name="kelas" id="filterKelas" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" {{ !$jenjang ? 'disabled' : '' }} onchange="handleKelasChange(this)">
+                                    <option value="">-- Pilih Kelas --</option>
+                                    @if ($jenjang)
+                                        @foreach ($availableClasses as $cls)
+                                            <option value="{{ $cls }}" {{ (string)$kelas === (string)$cls ? 'selected' : '' }}>
+                                                Kelas {{ $cls }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+
+                            <!-- Dropdown 3: Semester / TKA -->
+                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> 3. Semester / TKA
+                                </label>
+                                <select name="sub_kategori" id="filterSub" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" {{ !($jenjang && $kelas) ? 'disabled' : '' }} onchange="handleSubChange(this)">
+                                    <option value="">-- Pilih Semester / TKA --</option>
+                                    @if ($jenjang && $kelas)
+                                        @foreach ($availableSubs as $subItem)
+                                            <option value="{{ $subItem }}" {{ $sub === $subItem ? 'selected' : '' }}>
+                                                {{ $subItem }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+
+                            <!-- Dropdown 4: Mata Pelajaran -->
+                            <div class="col-md-3 col-sm-6">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-book text-purple-600 mr-1.5"></i> 4. Mata Pelajaran
+                                </label>
+                                <select name="mapel" id="filterMapel" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }} onchange="this.form.submit()">
+                                    <option value="">-- Pilih Mata Pelajaran --</option>
+                                    @if ($jenjang && $kelas && $sub)
+                                        @foreach ($mapelOptions as $mOption)
+                                            <option value="{{ $mOption->nama_mapel }}" {{ $mapel === $mOption->nama_mapel ? 'selected' : '' }}>
+                                                {{ $mOption->nama_mapel }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <!-- Active Filter Summary Badges -->
+                    @if($jenjang || $kelas || $sub || $selectedCategory)
+                        <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-3 border-top border-purple-100">
+                            <span class="text-xs font-bold text-slate-500 mr-1">Filter Aktif:</span>
+
+                            @if($jenjang)
+                                <span class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> Jenjang: {{ $jenjang }}
+                                </span>
+                            @endif
+
+                            @if($kelas)
+                                <span class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> Kelas {{ $kelas }}
+                                </span>
+                            @endif
+
+                            @if($sub)
+                                <span class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> {{ $sub }}
+                                </span>
+                            @endif
+
+                            @if($selectedCategory)
+                                <span class="badge bg-purple-900 text-white font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center shadow-xs">
+                                    <i class="fas fa-book text-amber-300 mr-1.5"></i> {{ $selectedCategory->nama_kategori }}
+                                </span>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
 
-            <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 2: PILIH KELAS (muncul jika jenjang sudah dipilih) -->
-            <!-- ════════════════════════════════════════════════════════════ -->
-            @if($jenjang)
-                <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center">
-                        <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">2</span>
-                        <h5 class="card-title font-bold text-purple-950 mb-0 text-base">
-                            Pilih Kelas <span class="badge bg-purple-100 text-purple-900 font-bold ml-2 px-2.5 py-0.5 text-xs">Jenjang {{ $jenjang }}</span>
-                        </h5>
-                        @if($kelas)
-                            <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                                <i class="fas fa-check-circle text-purple-600 mr-1"></i> Kelas {{ $kelas }}
-                            </span>
-                        @endif
-                    </div>
-                    <div class="card-body p-3.5 bg-slate-50">
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            @foreach ($availableClasses as $cls)
-                                @php
-                                    $queryParams = request()->except(['kelas', 'sub_kategori', 'kategori_id']);
-                                    $queryParams['kelas'] = $cls;
-                                    $url = route($prefixRoute . '.index', $queryParams);
-                                @endphp
-                                <a href="{{ $url }}"
-                                   class="btn font-bold rounded-xl px-4 py-2.5 text-xs transition-all {{ $kelas == $cls ? 'btn-purple shadow-md text-white' : 'btn-white border border-slate-300 text-slate-700 hover:bg-purple-100 hover:text-purple-900' }}">
-                                    <i class="fas fa-users text-purple-500 mr-2"></i>
-                                    Kelas {{ $cls }}
-                                    @if ($kelas == $cls)
-                                        <i class="fas fa-check ml-1.5 text-amber-300"></i>
-                                    @endif
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 3: PILIH SUB-KATEGORI (SEMESTER / TKA)            -->
-            <!-- ════════════════════════════════════════════════════════════ -->
-            @if($jenjang && $kelas)
-                <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center">
-                        <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">3</span>
-                        <h5 class="card-title font-bold text-purple-950 mb-0 text-base">
-                            Pilih Semester / TKA <span class="badge bg-purple-100 text-purple-900 font-bold ml-2 px-2.5 py-0.5 text-xs">Kelas {{ $kelas }}</span>
-                        </h5>
-                        @if($sub)
-                            <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                                <i class="fas fa-check-circle text-purple-600 mr-1"></i> {{ $sub }}
-                            </span>
-                        @endif
-                    </div>
-                    <div class="card-body p-3.5 bg-slate-50">
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            @foreach ($availableSubs as $subItem)
-                                @php
-                                    $queryParams = request()->except(['sub_kategori', 'kategori_id']);
-                                    $queryParams['sub_kategori'] = $subItem;
-                                    $url = route($prefixRoute . '.index', $queryParams);
-                                @endphp
-                                <a href="{{ $url }}"
-                                   class="btn font-bold rounded-xl px-4 py-2.5 text-xs transition-all {{ $sub === $subItem ? 'btn-purple shadow-md text-white' : 'btn-white border border-slate-300 text-slate-700 hover:bg-purple-100 hover:text-purple-900' }}">
-                                    <i class="fas {{ $subItem === 'TKA' ? 'fa-star text-amber-400' : 'fa-bookmark text-purple-500' }} mr-2"></i>
-                                    {{ $subItem }}
-                                    @if ($sub === $subItem)
-                                        <i class="fas fa-check ml-1.5 text-amber-300"></i>
-                                    @endif
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 4: PILIH / TAMBAH MATA PELAJARAN (KATEGORI)       -->
-            <!-- ════════════════════════════════════════════════════════════ -->
             @if($jenjang && $kelas && $sub)
+                @include('guru.listMapel', ['categories' => $categories, 'jenjang' => $jenjang, 'kelas' => $kelas, 'sub' => $sub, 'mapel' => $mapel, 'prefixRoute' => $prefixRoute])
+            @endif
+
+            <!-- Notice if filter is incomplete -->
+            @if (!($jenjang && $kelas && $sub))
                 <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">4</span>
-                            <h5 class="card-title font-bold text-purple-950 mb-0 text-base">
-                                Pilih Mata Pelajaran <span class="text-xs text-slate-400 font-normal ml-1">({{ $jenjang }} - Kelas {{ $kelas }} - {{ $sub }})</span>
-                            </h5>
+                    <div class="card-body p-5 text-center">
+                        <div class="rounded-circle bg-purple-50 text-purple-600 d-inline-flex align-items-center justify-content-center mb-3 shadow-xs" style="width: 64px; height: 64px;">
+                            <i class="fas fa-filter fa-2x"></i>
                         </div>
-                        <button type="button" class="btn btn-purple btn-sm shadow-sm rounded-xl font-bold px-3.5 py-2 text-xs" data-toggle="modal" data-target="#modalTambahKategori">
-                            <i class="fas fa-plus-circle mr-1.5"></i> Tambah Mata Pelajaran Baru
-                        </button>
+                        <h5 class="font-bold text-purple-950 mb-2 text-lg">Silakan Lengkapi Filter Soal</h5>
+                        <p class="text-slate-500 text-sm max-w-md mx-auto mb-0">
+                            Pilih <span class="font-bold text-purple-900">Jenjang</span>, <span class="font-bold text-purple-900">Kelas</span>, <span class="font-bold text-purple-900">Semester/TKA</span>, dan <span class="font-bold text-purple-900">Mata Pelajaran</span> pada filter dropdown di atas untuk mengelola soal.
+                        </p>
                     </div>
-                    <div class="card-body p-3.5">
-                        @if ($categories->isEmpty())
-                            <div class="text-center py-4 px-3 bg-purple-50/50 rounded-xl border border-dashed border-purple-200">
-                                <i class="fas fa-folder-plus text-purple-400 fa-2x mb-2"></i>
-                                <h6 class="font-bold text-purple-950 mb-1">Belum Ada Mata Pelajaran</h6>
-                                <p class="text-slate-500 text-xs max-w-md mx-auto mb-3">
-                                    Silakan buat mata pelajaran terlebih dahulu agar form tambah soal dapat muncul.
-                                </p>
-                                <button type="button" class="btn btn-purple btn-sm shadow-sm rounded-xl font-bold px-3.5 py-2 text-xs" data-toggle="modal" data-target="#modalTambahKategori">
-                                    <i class="fas fa-plus-circle mr-1"></i> Buat Mata Pelajaran Pertama
-                                </button>
+                </div>
+            @elseif ($jenjang && $kelas && $sub && !$selectedCategory)
+                {{-- Show existing mapels (categories) that already have questions --}}
+                @if ($categories->isNotEmpty())
+                    <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
+                        <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-emerald-100 text-emerald-700 d-flex align-items-center justify-content-center mr-3 shadow-xs" style="width: 38px; height: 38px;">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title font-bold text-purple-950 mb-0 text-base">Mata Pelajaran yang Sudah Memiliki Soal</h5>
+                                    <span class="text-xs text-slate-500">Klik salah satu untuk melihat dan mengedit soal</span>
+                                </div>
                             </div>
-                        @else
-                            <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="badge bg-purple-100 text-purple-900 font-bold px-3 py-1.5 rounded-lg text-xs">
+                                {{ $categories->count() }} Mapel
+                            </span>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
                                 @foreach ($categories as $cat)
                                     @php
-                                        $queryParams = request()->except(['kategori_id']);
-                                        $queryParams['kategori_id'] = $cat->id;
-                                        $url = route($prefixRoute . '.index', $queryParams);
+                                        $catUrl = route($prefixRoute . '.index', [
+                                            'jenjang' => $jenjang,
+                                            'kelas' => $kelas,
+                                            'sub_kategori' => $sub,
+                                            'mapel' => $cat->nama_kategori,
+                                            'kategori_id' => $cat->id,
+                                        ]);
                                     @endphp
-                                    <a href="{{ $url }}"
-                                       class="btn text-xs font-bold rounded-xl px-3.5 py-2 transition-all text-decoration-none d-flex align-items-center gap-2 {{ (int)$selected_kategori_id === (int)$cat->id ? 'btn-purple text-white shadow-sm' : 'btn-light border border-slate-200 text-slate-700 hover:bg-slate-100' }}">
-                                        <i class="fas fa-folder {{ (int)$selected_kategori_id === (int)$cat->id ? 'text-amber-300' : 'text-purple-600' }}"></i>
-                                        <span>{{ $cat->nama_kategori }}</span>
-                                        <span class="badge {{ (int)$selected_kategori_id === (int)$cat->id ? 'bg-white/20 text-white' : 'bg-purple-100 text-purple-900 border border-purple-200' }} px-2 py-0.5 rounded-full text-[10px]">
-                                            {{ $cat->bank_soals_count }} soal
-                                        </span>
-                                    </a>
+                                    <div class="col-md-4 col-sm-6 mb-2">
+                                        <a href="{{ $catUrl }}" class="card border-2 border-slate-200 rounded-xl text-decoration-none transition-all hover:border-purple-400 hover:shadow-md h-100 overflow-hidden">
+                                            <div class="card-body p-3.5 d-flex align-items-center">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-xs bg-purple-100" style="width: 44px; height: 44px; flex-shrink: 0;">
+                                                    <i class="fas fa-book text-purple-700 fa-lg"></i>
+                                                </div>
+                                                <div class="flex-1">
+                                                    <span class="d-block text-sm font-extrabold text-purple-950 leading-tight mb-0.5">{{ $cat->nama_kategori }}</span>
+                                                    <span class="d-block text-xs text-slate-500">
+                                                        <i class="fas fa-question-circle text-purple-400 mr-1"></i>
+                                                        {{ $cat->bank_soals_count }} soal
+                                                    </span>
+                                                </div>
+                                                <i class="fas fa-chevron-right text-slate-400 ml-2"></i>
+                                            </div>
+                                        </a>
+                                    </div>
                                 @endforeach
                             </div>
-                        @endif
+                        </div>
+                    </div>
+                @endif
+
+                {{-- Prompt to pick from dropdown --}}
+                <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
+                    <div class="card-body p-4 text-center">
+                        <div class="rounded-circle bg-purple-50 text-purple-600 d-inline-flex align-items-center justify-content-center mb-3 shadow-xs" style="width: 52px; height: 52px;">
+                            <i class="fas fa-hand-pointer fa-lg"></i>
+                        </div>
+                        <h6 class="font-bold text-purple-950 mb-1">Pilih Mata Pelajaran</h6>
+                        <p class="text-slate-500 text-xs max-w-md mx-auto mb-0">
+                            Pilih mata pelajaran pada dropdown <strong>"4. Mata Pelajaran"</strong> di atas, atau klik salah satu mapel yang sudah memiliki soal di atas.
+                        </p>
                     </div>
                 </div>
             @endif
@@ -279,7 +304,7 @@
                                 </div>
                                 <h3 class="font-bold text-xl mb-1">{{ $selectedCategory->nama_kategori }}</h3>
                                 <p class="text-sm text-purple-200 mb-0">
-                                    {{ $selectedCategory->deskripsi ?: 'Tidak ada deskripsi tambahan.' }}
+                                    {{ $selectedCategory->deskripsi ?: 'Tidak ada judul soal.' }}
                                 </p>
                             </div>
                             <div class="d-flex align-items-center gap-2">
@@ -298,15 +323,128 @@
                     </div>
                 </div>
 
+                @if (session('import_preview_soals'))
+                    @php
+                        $previewItems = session('import_preview_soals');
+                    @endphp
+                    <!-- CARD PRATINJAU / PREVIEW IMPORT SOAL -->
+                    <div class="card border-2 border-purple-600 shadow-lg rounded-2xl mb-5 bg-white overflow-hidden" id="previewSoalCard">
+                        <div class="card-header bg-purple-900 text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title font-bold mb-0 text-base d-flex align-items-center text-white">
+                                    <i class="fas fa-eye text-amber-300 mr-2"></i> Pratinjau Soal dari Excel ({{ count($previewItems) }} Soal)
+                                </h5>
+                                <span class="text-xs text-purple-200">Periksa seluruh isi soal di bawah ini sebelum disimpan secara permanen ke Database.</span>
+                            </div>
+                            <span class="badge bg-amber-400 text-slate-900 font-extrabold px-3 py-1.5 rounded-full text-xs">
+                                <i class="fas fa-exclamation-circle mr-1"></i> Belum Masuk Database
+                            </span>
+                        </div>
+                        <div class="card-body p-4 bg-purple-50/20" style="max-height: 480px; overflow-y: auto;">
+                            <div class="space-y-3">
+                                @foreach ($previewItems as $pIndex => $pItem)
+                                    <div class="card border border-slate-200 rounded-xl p-3 bg-white shadow-xs mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                                            <span class="badge bg-purple-900 text-white font-bold text-xs px-2.5 py-1 rounded-md">
+                                                Soal No. {{ $pItem['nomor'] }}
+                                            </span>
+                                            <span class="badge bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold text-xs px-2.5 py-0.5 rounded-md">
+                                                Kunci: {{ $pItem['kunci_jawaban'] }}
+                                            </span>
+                                        </div>
+                                        <p class="font-bold text-slate-900 text-sm mb-2.5 whitespace-pre-line">{{ $pItem['soal'] }}</p>
+                                        <div class="row g-2 text-xs">
+                                            @foreach (['A' => $pItem['opsi_a'], 'B' => $pItem['opsi_b'], 'C' => $pItem['opsi_c'], 'D' => $pItem['opsi_d']] as $pKey => $pVal)
+                                                @php $isKunci = $pItem['kunci_jawaban'] === $pKey; @endphp
+                                                <div class="col-md-6 mb-1">
+                                                    <div class="p-2 rounded-lg border {{ $isKunci ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700' }} d-flex align-items-center">
+                                                        <span class="badge {{ $isKunci ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' }} mr-2 px-2 py-0.5 rounded text-xs font-bold">{{ $pKey }}</span>
+                                                        <span class="flex-1">{{ $pVal }}</span>
+                                                        @if($isKunci) <i class="fas fa-check-circle text-emerald-600 ml-1.5"></i> @endif
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white py-3 px-4 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                            <div class="text-xs text-slate-500 font-semibold">
+                                <i class="fas fa-info-circle text-purple-600 mr-1"></i> Klik tombol di sebelah kanan untuk menyetujui dan menyimpan ke database.
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mt-2 mt-sm-0">
+                                <form action="{{ route('guru.bank-soal.import.cancel') }}" method="POST" class="m-0">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-danger font-bold rounded-xl text-xs px-3.5 py-2">
+                                        <i class="fas fa-times mr-1"></i> Batal Import
+                                    </button>
+                                </form>
+                                <form action="{{ route('guru.bank-soal.import.confirm') }}" method="POST" class="m-0">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success font-weight-bold rounded-xl text-xs px-4 py-2 shadow-md" style="background-color: #059669; border-color: #059669; color: #ffffff;">
+                                        <i class="fas fa-check-circle mr-1.5"></i> Konfirmasi &amp; Simpan {{ count($previewItems) }} Soal ke Database
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="row">
-                    <!-- FORM TAMBAH SOAL -->
+                    <!-- LEFT COLUMN: IMPORT EXCEL & FORM MANUAL -->
                     <div class="col-lg-5 mb-4">
+
+                        <!-- CARD IMPORT EXCEL -->
+                        <div class="card border-0 shadow-sm rounded-2xl bg-white mb-4 overflow-hidden" style="border: 1px solid #10b981;">
+                            <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center" style="background-color: #047857; color: #ffffff;">
+                                <h5 class="card-title font-weight-bold mb-0 text-sm d-flex align-items-center text-white">
+                                    <i class="fas fa-file-excel mr-2 text-warning"></i> Import Soal via Excel / CSV
+                                </h5>
+                                <a href="{{ route('guru.bank-soal.template') }}" class="btn btn-warning btn-xs font-weight-bold rounded-lg px-2.5 py-1.5 text-xs shadow-sm" style="background-color: #f59e0b; border-color: #d97706; color: #000000;">
+                                    <i class="fas fa-download mr-1"></i> Template Excel
+                                </a>
+                            </div>
+                            <div class="card-body p-3.5" style="background-color: #f0fdf4;">
+                                <div class="p-2.5 rounded-xl bg-white border mb-3 text-xs" style="border-color: #a7f3d0;">
+                                    <span class="font-weight-bold d-block mb-1 text-emerald-900" style="color: #065f46;"><i class="fas fa-info-circle mr-1" style="color: #059669;"></i> Format Struktur Excel / CSV:</span>
+                                    <ol class="mb-0 pl-3 text-slate-600" style="font-size: 11px; line-height: 1.6;">
+                                        <li>Kolom 1: <strong>No</strong> (Nomor urut)</li>
+                                        <li>Kolom 2: <strong>Soal</strong> (Isi pertanyaan)</li>
+                                        <li>Kolom 3: <strong>Jawaban A</strong></li>
+                                        <li>Kolom 4: <strong>Jawaban B</strong></li>
+                                        <li>Kolom 5: <strong>Jawaban C</strong></li>
+                                        <li>Kolom 6: <strong>Jawaban D</strong></li>
+                                        <li>Kolom 7: <strong>Kunci Jawaban</strong> (A / B / C / D)</li>
+                                    </ol>
+                                </div>
+                                
+                                <form action="{{ route('guru.bank-soal.import.preview') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="kategori_soal_id" value="{{ $selectedCategory->id }}">
+                                    
+                                    <div class="form-group mb-3">
+                                        <label class="text-xs font-weight-bold text-slate-700 uppercase tracking-wider mb-1 d-block">Pilih File Excel / CSV <span class="text-danger">*</span></label>
+                                        <div class="custom-file">
+                                            <input type="file" name="file_excel" class="custom-file-input text-xs" id="customFileExcel" accept=".xlsx,.xls,.csv" required onchange="document.getElementById('fileLabelExcel').innerText = this.files[0] ? this.files[0].name : 'Pilih file .xlsx / .csv ...'">
+                                            <label class="custom-file-label text-xs font-semibold text-slate-500 overflow-hidden" for="customFileExcel" id="fileLabelExcel">Pilih file .xlsx / .csv ...</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-success btn-block font-weight-bold py-2.5 rounded-xl text-xs shadow-sm" style="background-color: #059669; border-color: #059669; color: #ffffff;">
+                                        <i class="fas fa-eye mr-1.5"></i> Upload &amp; Pratinjau Soal
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- FORM TAMBAH SOAL MANUAL -->
                         <div class="card border-0 shadow-sm rounded-2xl bg-white sticky-top" style="top: 20px; z-index: 10;">
                             <div class="card-header bg-white py-3 px-4 border-bottom">
                                 <h5 class="card-title font-bold text-purple-950 mb-0 d-flex align-items-center text-base">
                                     <i class="fas fa-plus-circle text-purple-600 mr-2"></i> Form Input Soal Baru
                                 </h5>
-                                <p class="text-xs text-slate-400 mb-0 mt-0.5">Masukkan pertanyaan, 4 opsi jawaban, dan kunci jawaban.</p>
+                                <p class="text-xs text-slate-400 mb-0 mt-0.5">Masukkan pertanyaan, 4 opsi jawaban, dan kunci jawaban secara manual.</p>
                             </div>
                             <div class="card-body p-4">
                                 <form action="{{ route($prefixRoute . '.soal.store') }}" method="POST">
@@ -576,8 +714,8 @@
                                     </div>
 
                                     <div class="form-group mb-3">
-                                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Deskripsi (Opsional)</label>
-                                        <textarea name="deskripsi" rows="3" class="form-control rounded-xl text-sm">{{ old('deskripsi', $selectedCategory->deskripsi) }}</textarea>
+                                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Judul Soal <span class="text-danger">*</span></label>
+                                        <input type="text" name="deskripsi" value="{{ old('deskripsi', $selectedCategory->deskripsi) }}" class="form-control rounded-xl text-sm" required maxlength="255" placeholder="Contoh: Pecahan Senilai">
                                     </div>
                                 </div>
                                 <div class="modal-footer bg-slate-50 rounded-b-2xl py-2.5 px-4">
@@ -644,10 +782,10 @@
                             @endif
                         </div>
 
-                        <!-- Deskripsi (opsional) -->
+                        <!-- Judul Soal (wajib) -->
                         <div class="form-group mb-3">
-                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Deskripsi (Opsional)</label>
-                            <textarea name="deskripsi" rows="3" class="form-control rounded-xl text-sm" placeholder="Catatan atau deskripsi singkat...">{{ old('deskripsi') }}</textarea>
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Judul Soal <span class="text-danger">*</span></label>
+                            <input type="text" name="deskripsi" value="{{ old('deskripsi') }}" class="form-control rounded-xl text-sm" placeholder="Contoh: Pecahan Senilai" required maxlength="255">
                         </div>
                     </div>
                     <div class="modal-footer bg-slate-50 rounded-b-2xl py-2.5 px-4">
@@ -690,6 +828,39 @@
     </style>
 
     <script>
+        function handleJenjangChange(selectEl) {
+            const form = selectEl.form;
+            const kelasSelect = document.getElementById('filterKelas');
+            const subSelect = document.getElementById('filterSub');
+            const mapelSelect = document.getElementById('filterMapel');
+
+            if (kelasSelect) kelasSelect.value = '';
+            if (subSelect) subSelect.value = '';
+            if (mapelSelect) mapelSelect.value = '';
+
+            form.submit();
+        }
+
+        function handleKelasChange(selectEl) {
+            const form = selectEl.form;
+            const subSelect = document.getElementById('filterSub');
+            const mapelSelect = document.getElementById('filterMapel');
+
+            if (subSelect) subSelect.value = '';
+            if (mapelSelect) mapelSelect.value = '';
+
+            form.submit();
+        }
+
+        function handleSubChange(selectEl) {
+            const form = selectEl.form;
+            const mapelSelect = document.getElementById('filterMapel');
+
+            if (mapelSelect) mapelSelect.value = '';
+
+            form.submit();
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             // Radio button sync for Kunci Jawaban
             const radioButtons = document.querySelectorAll('input[name="kunci_jawaban"]');

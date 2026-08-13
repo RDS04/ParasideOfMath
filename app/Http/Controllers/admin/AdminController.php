@@ -11,6 +11,7 @@ use App\Models\Rekening;
 use App\Models\Siswa;
 use App\Models\KategoriSoal;
 use App\Models\BankSoal;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -768,8 +769,29 @@ class AdminController extends Controller
 
         // Fetch all tutors with their user details
         $gurus = Guru::with('user')->orderBy('created_at', 'desc')->get();
+        $guruRegisterEnabled = Setting::get('guru_register_enabled', '1') !== '0';
 
-        return view('admin.daftarGuru', compact('gurus'));
+        return view('admin.daftarGuru', compact('gurus', 'guruRegisterEnabled'));
+    }
+
+    /**
+     * Toggle status aktif/nonaktif tampilan pendaftaran guru di login.
+     */
+    public function toggleGuruRegisterStatus(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $current = Setting::get('guru_register_enabled', '1');
+        $newStatus = ($current === '0') ? '1' : '0';
+        Setting::set('guru_register_enabled', $newStatus);
+
+        $msg = ($newStatus === '1')
+            ? 'Tampilan link pendaftaran guru ("Ingin bergabung sebagai pengajar? Daftar sebagai Guru") berhasil DIAKTIFKAN.'
+            : 'Tampilan link pendaftaran guru ("Ingin bergabung sebagai pengajar? Daftar sebagai Guru") berhasil DINONAKTIFKAN.';
+
+        return redirect()->back()->with('success', $msg);
     }
 
     /**
@@ -1643,7 +1665,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Bank Soal — Alur: Pilih Mapel → Jenjang → Kelas → Semester/TKA → Soal.
+     * Bank Soal — Alur 5 Langkah: Jenjang → Kelas → Semester/TKA → Mapel → Soal.
      */
     public function bankSoal(Request $request)
     {
@@ -1651,48 +1673,71 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $mapel   = $request->input('mapel', '');
         $jenjang = strtoupper($request->input('jenjang', ''));
         $kelas   = $request->input('kelas', '');
         $sub     = $request->input('sub_kategori', '');
+        $mapel   = $request->input('mapel', '');
 
-        // Step 1: daftar mapel dari master data (exclude "Wajib + Lanjut")
-        $mapelList = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%')
-            ->orderBy('nama_mapel')
-            ->pluck('nama_mapel')
-            ->unique()
-            ->values();
-
-        // Step 3: kelas tersedia berdasarkan jenjang
+        // Step 2: Kelas tersedia berdasarkan jenjang
         $availableClasses = [];
-        if ($jenjang == 'SD') {
+        if ($jenjang === 'SD') {
             $availableClasses = range(1, 6);
         } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
             $availableClasses = range(1, 3);
         }
 
-        // Step 4: semester/TKA tersedia berdasarkan jenjang+kelas
+        // Step 3: Semester / TKA tersedia berdasarkan jenjang + kelas
         $availableSubs = ($jenjang && $kelas)
             ? KategoriSoal::availableSubKategori($jenjang, $kelas)
             : [];
 
-        $selectedCategory = null;
+        if ($sub && !in_array($sub, $availableSubs)) {
+            $sub = '';
+        }
 
-        // Step 5: kalau kombinasi sudah lengkap, ambil kategori yang cocok
-        // atau buat otomatis kalau belum pernah ada
-        if ($mapel && $jenjang && $kelas && $sub) {
-            $selectedCategory = KategoriSoal::firstOrCreate([
-                'jenjang'       => $jenjang,
-                'kelas'         => $kelas,
-                'sub_kategori'  => $sub,
-                'nama_kategori' => $mapel,
-            ]);
-            $selectedCategory->load('bankSoals');
+        // Step 4: Daftar Mata Pelajaran tersedia setelah Semester / TKA dipilih
+        $mapelList = collect();
+        if ($sub) {
+            $mapelQuery = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%');
+            if ($sub === 'TKA') {
+                $mapelQuery->where('nama_mapel', 'like', '%TKA%');
+            } else {
+                $mapelQuery->where('nama_mapel', 'not like', '%TKA%');
+            }
+            $mapelList = $mapelQuery->orderBy('nama_mapel')
+                ->pluck('nama_mapel')
+                ->unique()
+                ->values();
+        }
+
+        $selectedCategory = null;
+        $kategoriList = collect();
+        $kategoriId = $request->input('kategori_id', '');
+
+        // Step 5: Jika kombinasi Jenjang + Kelas + Semester/TKA + Mapel lengkap,
+        //         ambil daftar KategoriSoal (judul/deskripsi) yang sudah diupload guru.
+        if ($jenjang && $kelas && $sub && $mapel) {
+            $kategoriList = KategoriSoal::where('jenjang', $jenjang)
+                ->where('kelas', $kelas)
+                ->where('sub_kategori', $sub)
+                ->where('nama_kategori', $mapel)
+                ->withCount('bankSoals')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        // Step 6: Jika admin memilih salah satu kategori, load soal-soalnya
+        if ($kategoriId) {
+            $selectedCategory = KategoriSoal::find($kategoriId);
+            if ($selectedCategory) {
+                $selectedCategory->load('bankSoals');
+            }
         }
 
         return view('admin.listBanksoal', compact(
-            'mapelList', 'mapel', 'jenjang', 'kelas', 'sub',
-            'availableClasses', 'availableSubs', 'selectedCategory'
+            'jenjang', 'kelas', 'sub', 'mapel',
+            'availableClasses', 'availableSubs', 'mapelList',
+            'kategoriList', 'selectedCategory', 'kategoriId'
         ));
     }
 
@@ -1748,6 +1793,7 @@ class AdminController extends Controller
             'jenjang' => $kategori->jenjang,
             'kelas' => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
         ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil disimpan!');
     }
 
@@ -1780,6 +1826,7 @@ class AdminController extends Controller
             'jenjang' => $kategori->jenjang,
             'kelas' => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
         ])->with('success', 'Soal No. ' . $soal->nomor . ' berhasil diperbarui!');
     }
 
@@ -1802,6 +1849,7 @@ class AdminController extends Controller
             'jenjang' => $kategori->jenjang,
             'kelas' => $kategori->kelas,
             'sub_kategori' => $kategori->sub_kategori,
+            'kategori_id' => $kategori->id,
         ])->with('success', 'Soal No. ' . $nomor . ' berhasil dihapus!');
     }
 

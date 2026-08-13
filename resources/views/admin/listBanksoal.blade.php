@@ -17,7 +17,7 @@
                         <i class="fas fa-folder-open text-purple-600 mr-2.5"></i> Bank Soal &amp; Latihan
                     </h1>
                     <p class="text-sm text-slate-500 mb-0 mt-1">
-                        Kelola soal secara terstruktur: Mata Pelajaran → Jenjang → Kelas → Semester/TKA.
+                        Kelola soal secara terstruktur: Jenjang → Kelas → Semester/TKA → Mata Pelajaran → Soal.
                     </p>
                 </div>
                 <div class="col-sm-5">
@@ -71,174 +71,219 @@
             @endif
 
             <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 1: PILIH MATA PELAJARAN                              -->
+            <!-- FILTER BANK SOAL: JENJANG, KELAS, SEMESTER, & MAPEL          -->
             <!-- ════════════════════════════════════════════════════════════ -->
             <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center">
-                    <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">1</span>
-                    <h5 class="card-title font-bold text-purple-950 mb-0 text-base">Pilih Mata Pelajaran</h5>
-                    @if($mapel)
-                        <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                            <i class="fas fa-check-circle text-purple-600 mr-1"></i> {{ $mapel }}
-                        </span>
+                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-purple-100 text-purple-900 d-flex align-items-center justify-content-center mr-3 shadow-xs" style="width: 38px; height: 38px;">
+                            <i class="fas fa-filter text-purple-700"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title font-bold text-purple-950 mb-0 text-base">Filter Bank Soal &amp; Latihan</h5>
+                            <span class="text-xs text-slate-500">Pilih Jenjang, Kelas, Semester, dan Mata Pelajaran untuk memfilter soal</span>
+                        </div>
+                    </div>
+                    @if($jenjang || $kelas || $sub || $mapel)
+                        <a href="{{ route($prefixRoute . '.index') }}" class="btn btn-sm btn-outline-danger font-bold rounded-xl px-3 py-1.5 text-xs transition-all shadow-xs">
+                            <i class="fas fa-undo mr-1"></i> Reset Filter
+                        </a>
                     @endif
                 </div>
-                <div class="card-body p-3.5 bg-purple-50/40">
-                    @if ($mapelList->isEmpty())
-                        <div class="text-center py-4 px-3 bg-purple-50/50 rounded-xl border border-dashed border-purple-200">
-                            <i class="fas fa-book text-purple-400 fa-2x mb-2"></i>
-                            <h6 class="font-bold text-purple-950 mb-1">Belum Ada Data Mata Pelajaran</h6>
-                            <p class="text-slate-500 text-xs max-w-md mx-auto mb-3">
-                                Silakan tambahkan mata pelajaran terlebih dahulu lewat menu "Kelola Mata Pelajaran".
-                            </p>
-                            <a href="{{ route('admin.mapel') }}" class="btn btn-purple btn-sm shadow-sm rounded-xl font-bold px-3.5 py-2 text-xs">
-                                <i class="fas fa-plus-circle mr-1"></i> Kelola Mata Pelajaran
-                            </a>
-                        </div>
-                    @else
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            @foreach ($mapelList as $m)
-                                @php
-                                    $url = route($prefixRoute . '.index', ['mapel' => $m]);
-                                @endphp
-                                <a href="{{ $url }}"
-                                   class="btn font-bold rounded-xl px-4 py-2.5 text-xs transition-all {{ $mapel === $m ? 'btn-purple shadow-md text-white' : 'btn-white border border-slate-300 text-slate-700 hover:bg-purple-100 hover:text-purple-900' }}">
-                                    <i class="fas fa-book text-purple-500 mr-2"></i>
-                                    {{ $m }}
-                                    @if ($mapel === $m)
-                                        <i class="fas fa-check ml-1.5 text-amber-300"></i>
+
+                <div class="card-body p-4 bg-purple-50/30">
+                    <form id="filterBankSoalForm" action="{{ route($prefixRoute . '.index') }}" method="GET">
+                        <div class="row g-3">
+
+                            <!-- Dropdown 1: Jenjang -->
+                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> 1. Jenjang Pendidikan
+                                </label>
+                                <select name="jenjang" id="filterJenjang" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" onchange="handleJenjangChange(this)">
+                                    <option value="">-- Pilih Jenjang --</option>
+                                    <option value="SD" {{ $jenjang === 'SD' ? 'selected' : '' }}>SD (Sekolah Dasar)</option>
+                                    <option value="SMP" {{ $jenjang === 'SMP' ? 'selected' : '' }}>SMP (Sekolah Menengah Pertama)</option>
+                                    <option value="SMA" {{ $jenjang === 'SMA' ? 'selected' : '' }}>SMA (Sekolah Menengah Atas)</option>
+                                </select>
+                            </div>
+
+                            <!-- Dropdown 2: Kelas -->
+                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> 2. Kelas
+                                </label>
+                                <select name="kelas" id="filterKelas" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" {{ !$jenjang ? 'disabled' : '' }} onchange="handleKelasChange(this)">
+                                    <option value="">-- Pilih Kelas --</option>
+                                    @if ($jenjang)
+                                        @foreach ($availableClasses as $cls)
+                                            <option value="{{ $cls }}" {{ (string)$kelas === (string)$cls ? 'selected' : '' }}>
+                                                Kelas {{ $cls }}
+                                            </option>
+                                        @endforeach
                                     @endif
-                                </a>
-                            @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Dropdown 3: Semester / TKA -->
+                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> 3. Semester / TKA
+                                </label>
+                                <select name="sub_kategori" id="filterSub" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" {{ !($jenjang && $kelas) ? 'disabled' : '' }} onchange="handleSubChange(this)">
+                                    <option value="">-- Pilih Semester / TKA --</option>
+                                    @if ($jenjang && $kelas)
+                                        @foreach ($availableSubs as $subItem)
+                                            <option value="{{ $subItem }}" {{ $sub === $subItem ? 'selected' : '' }}>
+                                                {{ $subItem }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+
+                            <!-- Dropdown 4: Mata Pelajaran -->
+                            <div class="col-md-3 col-sm-6">
+                                <label class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
+                                    <i class="fas fa-book text-purple-600 mr-1.5"></i> 4. Mata Pelajaran
+                                </label>
+                                <select name="mapel" id="filterMapel" class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs" {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }} onchange="this.form.submit()">
+                                    <option value="">-- Pilih Mata Pelajaran --</option>
+                                    @if ($jenjang && $kelas && $sub)
+                                        @foreach ($mapelList as $m)
+                                            <option value="{{ $m }}" {{ $mapel === $m ? 'selected' : '' }}>
+                                                {{ $m }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <!-- Active Filter Summary Badges -->
+                    @if($jenjang || $kelas || $sub || $mapel)
+                        <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-3 border-top border-purple-100">
+                            <span class="text-xs font-bold text-slate-500 mr-1">Filter Aktif:</span>
+
+                            @if($jenjang)
+                                <span class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> Jenjang: {{ $jenjang }}
+                                </span>
+                            @endif
+
+                            @if($kelas)
+                                <span class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> Kelas {{ $kelas }}
+                                </span>
+                            @endif
+
+                            @if($sub)
+                                <span class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> {{ $sub }}
+                                </span>
+                            @endif
+
+                            @if($mapel)
+                                <span class="badge bg-purple-900 text-white font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center shadow-xs">
+                                    <i class="fas fa-book text-amber-300 mr-1.5"></i> {{ $mapel }}
+                                </span>
+                            @endif
                         </div>
                     @endif
                 </div>
             </div>
 
+            <!-- Notice if filter is incomplete -->
+            @if (!($jenjang && $kelas && $sub && $mapel))
+                <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
+                    <div class="card-body p-5 text-center">
+                        <div class="rounded-circle bg-purple-50 text-purple-600 d-inline-flex align-items-center justify-content-center mb-3 shadow-xs" style="width: 64px; height: 64px;">
+                            <i class="fas fa-filter fa-2x"></i>
+                        </div>
+                        <h5 class="font-bold text-purple-950 mb-2 text-lg">Silakan Lengkapi Filter Soal</h5>
+                        <p class="text-slate-500 text-sm max-w-md mx-auto mb-0">
+                            Pilih <span class="font-bold text-purple-900">Jenjang</span>, <span class="font-bold text-purple-900">Kelas</span>, <span class="font-bold text-purple-900">Semester/TKA</span>, dan <span class="font-bold text-purple-900">Mata Pelajaran</span> pada filter dropdown di atas untuk menampilkan daftar bank soal.
+                        </p>
+                    </div>
+                </div>
+            @endif
+
             <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 2: PILIH JENJANG (muncul jika mapel sudah dipilih)  -->
+            <!-- LANGKAH 5: DAFTAR JUDUL SOAL (DESKRIPSI KATEGORI)          -->
             <!-- ════════════════════════════════════════════════════════════ -->
-            @if($mapel)
+            @if ($jenjang && $kelas && $sub && $mapel)
                 <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
                     <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center">
-                        <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">2</span>
+                        <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">5</span>
                         <h5 class="card-title font-bold text-purple-950 mb-0 text-base">
-                            Pilih Jenjang Pendidikan <span class="badge bg-purple-100 text-purple-900 font-bold ml-2 px-2.5 py-0.5 text-xs">{{ $mapel }}</span>
+                            Daftar Soal {{ $mapel }}
+                            <span class="badge bg-purple-100 text-purple-900 font-bold ml-2 px-2.5 py-0.5 text-xs">{{ $jenjang }} - Kelas {{ $kelas }} - {{ $sub }}</span>
                         </h5>
-                        @if($jenjang)
+                        @if($kategoriId)
                             <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                                <i class="fas fa-check-circle text-purple-600 mr-1"></i> {{ $jenjang }}
+                                <i class="fas fa-check-circle text-purple-600 mr-1"></i> Terpilih
                             </span>
                         @endif
                     </div>
-                    <div class="card-body p-3 bg-purple-50/40">
-                        <div class="row g-3">
-                            @foreach ([
-                                'SD' => ['Sekolah Dasar', 'fa-child'],
-                                'SMP' => ['Sekolah Menengah Pertama', 'fa-user-graduate'],
-                                'SMA' => ['Sekolah Menengah Atas', 'fa-university']
-                            ] as $key => $info)
-                                @php
-                                    $url = route($prefixRoute . '.index', ['mapel' => $mapel, 'jenjang' => $key]);
-                                @endphp
-                                <div class="col-md-4 mb-2 mb-md-0">
-                                    <a href="{{ $url }}"
-                                       class="card border-2 transition-all duration-200 text-decoration-none rounded-xl overflow-hidden h-100 {{ $jenjang === $key ? 'border-purple-800 bg-purple-900 text-white shadow-md' : 'border-slate-200 bg-white text-slate-700 hover:border-purple-400 hover:bg-purple-50' }}">
-                                        <div class="card-body p-3.5 d-flex align-items-center">
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-xs"
-                                                 style="width: 44px; height: 44px; background: {{ $jenjang === $key ? 'rgba(255,255,255,0.2)' : '#f3e8ff' }}; flex-shrink: 0;">
-                                                <i class="fas {{ $info[1] }} fa-lg {{ $jenjang === $key ? 'text-amber-300' : 'text-purple-700' }}"></i>
+                    <div class="card-body p-4">
+                        @if ($kategoriList->isEmpty())
+                            <div class="text-center py-5">
+                                <i class="fas fa-folder-open text-slate-300 fa-3x mb-3"></i>
+                                <p class="text-slate-500 font-semibold mb-0">Belum ada soal yang diupload untuk {{ $mapel }}.</p>
+                                <p class="text-xs text-slate-400">Guru belum mengupload soal untuk kombinasi ini.</p>
+                            </div>
+                        @else
+                            <div class="row g-3">
+                                @foreach ($kategoriList as $kat)
+                                    @php
+                                        $isSelected = $kategoriId == $kat->id;
+                                        $url = route($prefixRoute . '.index', [
+                                            'jenjang' => $jenjang,
+                                            'kelas' => $kelas,
+                                            'sub_kategori' => $sub,
+                                            'mapel' => $mapel,
+                                            'kategori_id' => $kat->id,
+                                        ]);
+                                    @endphp
+                                    <div class="col-md-6 col-lg-4 mb-2">
+                                        <a href="{{ $url }}" class="card border-2 text-decoration-none rounded-xl overflow-hidden h-100 transition-all {{ $isSelected ? 'border-purple-800 bg-purple-900 text-white shadow-lg' : 'border-slate-200 bg-white text-slate-700 hover:border-purple-400 hover:shadow-md' }}">
+                                            <div class="card-body p-3.5">
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-xs"
+                                                         style="width: 40px; height: 40px; background: {{ $isSelected ? 'rgba(255,255,255,0.2)' : '#f3e8ff' }};">
+                                                        <i class="fas fa-file-alt {{ $isSelected ? 'text-amber-300' : 'text-purple-700' }}"></i>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <h6 class="font-bold mb-1 text-sm {{ $isSelected ? 'text-white' : 'text-purple-950' }}">
+                                                            {{ $kat->deskripsi ?: $kat->nama_kategori }}
+                                                        </h6>
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="badge {{ $isSelected ? 'bg-white/20 text-purple-200' : 'bg-purple-100 text-purple-800' }} font-bold px-2 py-0.5 rounded text-xs">
+                                                                <i class="fas fa-list-ol mr-1"></i> {{ $kat->bank_soals_count }} Soal
+                                                            </span>
+                                                            <span class="text-xs {{ $isSelected ? 'text-purple-300' : 'text-slate-400' }}">
+                                                                {{ $kat->created_at->diffForHumans() }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    @if ($isSelected)
+                                                        <i class="fas fa-check-circle text-amber-300 fa-lg mt-1"></i>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            <div>
-                                                <span class="d-block text-base font-extrabold leading-tight mb-0.5">Jenjang {{ $key }}</span>
-                                                <span class="d-block text-xs opacity-90 {{ $jenjang === $key ? 'text-purple-200' : 'text-slate-500' }}">{{ $info[0] }}</span>
-                                            </div>
-                                            @if ($jenjang === $key)
-                                                <i class="fas fa-check-circle ml-auto text-amber-300 fa-lg"></i>
-                                            @endif
-                                        </div>
-                                    </a>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 3: PILIH KELAS                                       -->
-            <!-- ════════════════════════════════════════════════════════════ -->
-            @if($mapel && $jenjang)
-                <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center">
-                        <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">3</span>
-                        <h5 class="card-title font-bold text-purple-950 mb-0 text-base">
-                            Pilih Kelas <span class="badge bg-purple-100 text-purple-900 font-bold ml-2 px-2.5 py-0.5 text-xs">Jenjang {{ $jenjang }}</span>
-                        </h5>
-                        @if($kelas)
-                            <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                                <i class="fas fa-check-circle text-purple-600 mr-1"></i> Kelas {{ $kelas }}
-                            </span>
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
                         @endif
                     </div>
-                    <div class="card-body p-3.5 bg-slate-50">
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            @foreach ($availableClasses as $cls)
-                                @php
-                                    $url = route($prefixRoute . '.index', ['mapel' => $mapel, 'jenjang' => $jenjang, 'kelas' => $cls]);
-                                @endphp
-                                <a href="{{ $url }}"
-                                   class="btn font-bold rounded-xl px-4 py-2.5 text-xs transition-all {{ (string)$kelas === (string)$cls ? 'btn-purple shadow-md text-white' : 'btn-white border border-slate-300 text-slate-700 hover:bg-purple-100 hover:text-purple-900' }}">
-                                    <i class="fas fa-users text-purple-500 mr-2"></i>
-                                    Kelas {{ $cls }}
-                                    @if ((string)$kelas === (string)$cls)
-                                        <i class="fas fa-check ml-1.5 text-amber-300"></i>
-                                    @endif
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
                 </div>
             @endif
 
             <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 4: PILIH SEMESTER / TKA                              -->
-            <!-- ════════════════════════════════════════════════════════════ -->
-            @if($mapel && $jenjang && $kelas)
-                <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                    <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center">
-                        <span class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; font-size: 12px;">4</span>
-                        <h5 class="card-title font-bold text-purple-950 mb-0 text-base">
-                            Pilih Semester / TKA <span class="badge bg-purple-100 text-purple-900 font-bold ml-2 px-2.5 py-0.5 text-xs">Kelas {{ $kelas }}</span>
-                        </h5>
-                        @if($sub)
-                            <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                                <i class="fas fa-check-circle text-purple-600 mr-1"></i> {{ $sub }}
-                            </span>
-                        @endif
-                    </div>
-                    <div class="card-body p-3.5 bg-slate-50">
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            @foreach ($availableSubs as $subItem)
-                                @php
-                                    $url = route($prefixRoute . '.index', ['mapel' => $mapel, 'jenjang' => $jenjang, 'kelas' => $kelas, 'sub_kategori' => $subItem]);
-                                @endphp
-                                <a href="{{ $url }}"
-                                   class="btn font-bold rounded-xl px-4 py-2.5 text-xs transition-all {{ $sub === $subItem ? 'btn-purple shadow-md text-white' : 'btn-white border border-slate-300 text-slate-700 hover:bg-purple-100 hover:text-purple-900' }}">
-                                    <i class="fas {{ $subItem === 'TKA' ? 'fa-star text-amber-400' : 'fa-bookmark text-purple-500' }} mr-2"></i>
-                                    {{ $subItem }}
-                                    @if ($sub === $subItem)
-                                        <i class="fas fa-check ml-1.5 text-amber-300"></i>
-                                    @endif
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            <!-- ════════════════════════════════════════════════════════════ -->
-            <!-- LANGKAH 5: FORM INPUT SOAL & DAFTAR SOAL                     -->
+            <!-- LANGKAH 6: DETAIL SOAL (muncul saat kategori dipilih)      -->
             <!-- ════════════════════════════════════════════════════════════ -->
             @if ($selectedCategory)
 
@@ -258,13 +303,13 @@
                                         {{ $sub }}
                                     </span>
                                 </div>
-                                <h3 class="font-bold text-xl mb-0">{{ $mapel }}</h3>
+                                <h3 class="font-bold text-xl mb-0">{{ $selectedCategory->deskripsi ?: $selectedCategory->nama_kategori }}</h3>
                             </div>
-                            <form action="{{ route($prefixRoute . '.kategori.delete', $selectedCategory->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua soal {{ $mapel }} untuk kombinasi Jenjang {{ $jenjang }} - Kelas {{ $kelas }} - {{ $sub }} ini?');">
+                            <form action="{{ route($prefixRoute . '.kategori.delete', $selectedCategory->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua soal ini?');">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-xs btn-outline-light font-bold rounded-lg px-2.5 py-1.5">
-                                    <i class="fas fa-trash-alt mr-1"></i> Hapus Semua Soal Kombinasi Ini
+                                    <i class="fas fa-trash-alt mr-1"></i> Hapus Semua Soal Ini
                                 </button>
                             </form>
                         </div>
@@ -272,97 +317,12 @@
                 </div>
 
                 <div class="row">
-                    <!-- FORM TAMBAH SOAL -->
-                    <div class="col-lg-5 mb-4">
-                        <div class="card border-0 shadow-sm rounded-2xl bg-white sticky-top" style="top: 20px; z-index: 10;">
-                            <div class="card-header bg-white py-3 px-4 border-bottom">
-                                <h5 class="card-title font-bold text-purple-950 mb-0 d-flex align-items-center text-base">
-                                    <i class="fas fa-plus-circle text-purple-600 mr-2"></i> Form Input Soal Baru
-                                </h5>
-                                <p class="text-xs text-slate-400 mb-0 mt-0.5">Masukkan pertanyaan, 4 opsi jawaban, dan kunci jawaban.</p>
-                            </div>
-                            <div class="card-body p-4">
-                                <form action="{{ route($prefixRoute . '.soal.store') }}" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="kategori_soal_id" value="{{ $selectedCategory->id }}">
-
-                                    <!-- Nomor Soal -->
-                                    <div class="form-group mb-3">
-                                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor Urut Soal <span class="text-danger">*</span></label>
-                                        @php
-                                            $nextNo = ($selectedCategory->bankSoals->max('nomor') ?? 0) + 1;
-                                        @endphp
-                                        <input type="number" name="nomor" value="{{ old('nomor', $nextNo) }}" min="1" class="form-control rounded-xl border-slate-300 font-bold" required>
-                                    </div>
-
-                                    <!-- Pertanyaan -->
-                                    <div class="form-group mb-3">
-                                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Isi Pertanyaan <span class="text-danger">*</span></label>
-                                        <textarea name="soal" rows="4" class="form-control rounded-xl border-slate-300 text-sm" placeholder="Tuliskan pertanyaan / isi soal..." required>{{ old('soal') }}</textarea>
-                                    </div>
-
-                                    <!-- Opsi A - D -->
-                                    <div class="space-y-2 mb-3">
-                                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 d-block">Pilihan Jawaban (A - D) <span class="text-danger">*</span></label>
-
-                                        <div class="input-group mb-2">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text bg-purple-100 text-purple-900 font-bold rounded-l-xl border-slate-300">A</span>
-                                            </div>
-                                            <input type="text" name="opsi_a" value="{{ old('opsi_a') }}" class="form-control border-slate-300 text-sm" placeholder="Jawaban A" required>
-                                        </div>
-
-                                        <div class="input-group mb-2">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text bg-purple-100 text-purple-900 font-bold rounded-l-xl border-slate-300">B</span>
-                                            </div>
-                                            <input type="text" name="opsi_b" value="{{ old('opsi_b') }}" class="form-control border-slate-300 text-sm" placeholder="Jawaban B" required>
-                                        </div>
-
-                                        <div class="input-group mb-2">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text bg-purple-100 text-purple-900 font-bold rounded-l-xl border-slate-300">C</span>
-                                            </div>
-                                            <input type="text" name="opsi_c" value="{{ old('opsi_c') }}" class="form-control border-slate-300 text-sm" placeholder="Jawaban C" required>
-                                        </div>
-
-                                        <div class="input-group mb-2">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text bg-purple-100 text-purple-900 font-bold rounded-l-xl border-slate-300">D</span>
-                                            </div>
-                                            <input type="text" name="opsi_d" value="{{ old('opsi_d') }}" class="form-control border-slate-300 text-sm" placeholder="Jawaban D" required>
-                                        </div>
-                                    </div>
-
-                                    <!-- Kunci Jawaban -->
-                                    <div class="form-group mb-4">
-                                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 d-block">Kunci Jawaban Benar <span class="text-danger">*</span></label>
-                                        <div class="row text-center">
-                                            @foreach (['A', 'B', 'C', 'D'] as $key)
-                                                <div class="col-3">
-                                                    <label class="btn btn-outline-purple btn-block py-2 font-extrabold rounded-xl mb-0 cursor-pointer shadow-xs transition-all">
-                                                        <input type="radio" name="kunci_jawaban" value="{{ $key }}" {{ old('kunci_jawaban', 'A') === $key ? 'checked' : '' }} required class="d-none">
-                                                        {{ $key }}
-                                                    </label>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-
-                                    <button type="submit" class="btn btn-purple btn-block font-bold py-2.5 rounded-xl shadow-md transition-all">
-                                        <i class="fas fa-save mr-1.5"></i> Simpan Soal ke Database
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- DAFTAR SOAL -->
-                    <div class="col-lg-7 mb-4">
+                    <!-- DAFTAR SOAL TERSIMPAN -->
+                    <div class="col-12 mb-4">
                         <div class="card border-0 shadow-sm rounded-2xl bg-white">
                             <div class="card-header bg-white py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
                                 <h5 class="card-title font-bold text-purple-950 mb-0 d-flex align-items-center text-base">
-                                    <i class="fas fa-list-ol text-purple-600 mr-2"></i> Daftar Soal Tersimpan
+                                    <i class="fas fa-list-ol text-purple-600 mr-2"></i> Daftar Soal — {{ $selectedCategory->deskripsi ?: $selectedCategory->nama_kategori }}
                                 </h5>
                                 <span class="badge bg-purple-100 text-purple-900 font-bold px-3 py-1 rounded-full text-xs">
                                     {{ $selectedCategory->bankSoals->count() }} Soal
@@ -372,8 +332,7 @@
                                 @if ($selectedCategory->bankSoals->isEmpty())
                                     <div class="text-center py-5">
                                         <i class="fas fa-question-circle text-slate-300 fa-3x mb-3"></i>
-                                        <p class="text-slate-500 font-semibold mb-0">Belum ada soal.</p>
-                                        <p class="text-xs text-slate-400">Gunakan form di sebelah kiri untuk menambahkan soal pertama.</p>
+                                        <p class="text-slate-500 font-semibold mb-0">Belum ada soal di dalam kategori ini.</p>
                                     </div>
                                 @else
                                     <div class="space-y-4">
@@ -388,31 +347,15 @@
                                                             Kunci: {{ $soalItem->kunci_jawaban }}
                                                         </span>
                                                     </div>
-                                                    <div class="d-flex align-items-center gap-1">
-                                                        <button type="button" class="btn btn-xs btn-outline-info rounded-lg font-bold px-2 py-1" data-toggle="modal" data-target="#modalEditSoal{{ $soalItem->id }}">
-                                                            <i class="fas fa-edit"></i> Edit
-                                                        </button>
-                                                        <form action="{{ route($prefixRoute . '.soal.delete', $soalItem->id) }}" method="POST" onsubmit="return confirm('Hapus soal no. {{ $soalItem->nomor }}?');" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-xs btn-outline-danger rounded-lg font-bold px-2 py-1">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
                                                 </div>
                                                 <div class="card-body p-3.5">
                                                     <p class="font-bold text-slate-900 mb-3 text-sm whitespace-pre-line">{{ $soalItem->soal }}</p>
                                                     <div class="row g-2">
                                                         @foreach (['A' => $soalItem->opsi_a, 'B' => $soalItem->opsi_b, 'C' => $soalItem->opsi_c, 'D' => $soalItem->opsi_d] as $optKey => $optVal)
-                                                            @php
-                                                                $isCorrect = $soalItem->kunci_jawaban === $optKey;
-                                                            @endphp
+                                                            @php $isCorrect = $soalItem->kunci_jawaban === $optKey; @endphp
                                                             <div class="col-md-6 mb-2">
                                                                 <div class="p-2.5 rounded-xl border text-xs font-semibold d-flex align-items-start {{ $isCorrect ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700' }}">
-                                                                    <span class="badge {{ $isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' }} mr-2 px-2 py-1 rounded-md text-xs font-bold">
-                                                                        {{ $optKey }}
-                                                                    </span>
+                                                                    <span class="badge {{ $isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' }} mr-2 px-2 py-1 rounded-md text-xs font-bold">{{ $optKey }}</span>
                                                                     <span class="flex-1 mt-0.5">{{ $optVal }}</span>
                                                                     @if ($isCorrect)
                                                                         <i class="fas fa-check-circle text-emerald-600 ml-1.5 mt-0.5"></i>
@@ -420,85 +363,6 @@
                                                                 </div>
                                                             </div>
                                                         @endforeach
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- MODAL EDIT SOAL -->
-                                            <div class="modal fade" id="modalEditSoal{{ $soalItem->id }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                                                    <div class="modal-content border-0 shadow-lg rounded-2xl">
-                                                        <div class="modal-header bg-purple-900 text-white rounded-t-2xl py-3 px-4">
-                                                            <h5 class="modal-title font-bold text-base"><i class="fas fa-edit mr-2"></i> Edit Soal No. {{ $soalItem->nomor }}</h5>
-                                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                        <form action="{{ route($prefixRoute . '.soal.update', $soalItem->id) }}" method="POST">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <div class="modal-body p-4 text-left">
-                                                                <div class="form-group mb-3">
-                                                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Nomor Urut Soal <span class="text-danger">*</span></label>
-                                                                    <input type="number" name="nomor" value="{{ old('nomor', $soalItem->nomor) }}" min="1" class="form-control rounded-xl font-bold" required>
-                                                                </div>
-
-                                                                <div class="form-group mb-3">
-                                                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Isi Pertanyaan <span class="text-danger">*</span></label>
-                                                                    <textarea name="soal" rows="4" class="form-control rounded-xl text-sm" required>{{ old('soal', $soalItem->soal) }}</textarea>
-                                                                </div>
-
-                                                                <div class="space-y-2 mb-3">
-                                                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-1 d-block">Pilihan Jawaban (A - D) <span class="text-danger">*</span></label>
-
-                                                                    <div class="input-group mb-2">
-                                                                        <div class="input-group-prepend">
-                                                                            <span class="input-group-text bg-purple-100 text-purple-900 font-bold">A</span>
-                                                                        </div>
-                                                                        <input type="text" name="opsi_a" value="{{ old('opsi_a', $soalItem->opsi_a) }}" class="form-control text-sm" required>
-                                                                    </div>
-
-                                                                    <div class="input-group mb-2">
-                                                                        <div class="input-group-prepend">
-                                                                            <span class="input-group-text bg-purple-100 text-purple-900 font-bold">B</span>
-                                                                        </div>
-                                                                        <input type="text" name="opsi_b" value="{{ old('opsi_b', $soalItem->opsi_b) }}" class="form-control text-sm" required>
-                                                                    </div>
-
-                                                                    <div class="input-group mb-2">
-                                                                        <div class="input-group-prepend">
-                                                                            <span class="input-group-text bg-purple-100 text-purple-900 font-bold">C</span>
-                                                                        </div>
-                                                                        <input type="text" name="opsi_c" value="{{ old('opsi_c', $soalItem->opsi_c) }}" class="form-control text-sm" required>
-                                                                    </div>
-
-                                                                    <div class="input-group mb-2">
-                                                                        <div class="input-group-prepend">
-                                                                            <span class="input-group-text bg-purple-100 text-purple-900 font-bold">D</span>
-                                                                        </div>
-                                                                        <input type="text" name="opsi_d" value="{{ old('opsi_d', $soalItem->opsi_d) }}" class="form-control text-sm" required>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="form-group mb-3">
-                                                                    <label class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 d-block">Kunci Jawaban Benar <span class="text-danger">*</span></label>
-                                                                    <div class="row text-center">
-                                                                        @foreach (['A', 'B', 'C', 'D'] as $key)
-                                                                            <div class="col-3">
-                                                                                <label class="btn btn-outline-purple btn-block py-2 font-extrabold rounded-xl mb-0 cursor-pointer shadow-xs">
-                                                                                    <input type="radio" name="kunci_jawaban" value="{{ $key }}" {{ old('kunci_jawaban', $soalItem->kunci_jawaban) === $key ? 'checked' : '' }} required class="d-none">
-                                                                                    {{ $key }}
-                                                                                </label>
-                                                                            </div>
-                                                                        @endforeach
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer bg-slate-50 rounded-b-2xl py-2.5 px-4">
-                                                                <button type="button" class="btn btn-light font-bold rounded-xl text-xs px-3 py-2" data-dismiss="modal">Batal</button>
-                                                                <button type="submit" class="btn btn-purple font-bold rounded-xl text-xs px-4 py-2">Simpan Perubahan</button>
-                                                            </div>
-                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>
@@ -544,6 +408,39 @@
     </style>
 
     <script>
+        function handleJenjangChange(selectEl) {
+            const form = selectEl.form;
+            const kelasSelect = document.getElementById('filterKelas');
+            const subSelect = document.getElementById('filterSub');
+            const mapelSelect = document.getElementById('filterMapel');
+
+            if (kelasSelect) kelasSelect.value = '';
+            if (subSelect) subSelect.value = '';
+            if (mapelSelect) mapelSelect.value = '';
+
+            form.submit();
+        }
+
+        function handleKelasChange(selectEl) {
+            const form = selectEl.form;
+            const subSelect = document.getElementById('filterSub');
+            const mapelSelect = document.getElementById('filterMapel');
+
+            if (subSelect) subSelect.value = '';
+            if (mapelSelect) mapelSelect.value = '';
+
+            form.submit();
+        }
+
+        function handleSubChange(selectEl) {
+            const form = selectEl.form;
+            const mapelSelect = document.getElementById('filterMapel');
+
+            if (mapelSelect) mapelSelect.value = '';
+
+            form.submit();
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const radioButtons = document.querySelectorAll('input[name="kunci_jawaban"]');
             radioButtons.forEach(radio => {
@@ -553,10 +450,11 @@
                     form.querySelectorAll(`input[name="${groupName}"]`).forEach(r => {
                         const parentLabel = r.closest('label');
                         if (r.checked) {
-                            parentLabel.classList.add('bg-purple-900', 'text-white');
-                            parentLabel.classList.remove('bg-purple-100', 'text-purple-900');
+                            parentLabel.classList.add('btn-purple', 'shadow-sm', 'text-white');
+                            parentLabel.classList.remove('btn-outline-purple');
                         } else {
-                            parentLabel.classList.remove('bg-purple-900', 'text-white');
+                            parentLabel.classList.remove('btn-purple', 'shadow-sm', 'text-white');
+                            parentLabel.classList.add('btn-outline-purple');
                         }
                     });
                 });

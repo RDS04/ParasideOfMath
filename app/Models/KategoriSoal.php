@@ -27,9 +27,11 @@ class KategoriSoal extends Model
     {
         $subs = ['Semester 1', 'Semester 2'];
 
+        $k = (int) $kelas;
         $isKelasAkhir =
-            ($jenjang === 'SD'  && (int) $kelas === 6) ||
-            (in_array($jenjang, ['SMP', 'SMA']) && (int) $kelas === 3);
+            ($jenjang === 'SD'  && $k === 6) ||
+            ($jenjang === 'SMP' && in_array($k, [3, 9])) ||
+            ($jenjang === 'SMA' && in_array($k, [3, 12]));
 
         if ($isKelasAkhir) {
             $subs[] = 'TKA';

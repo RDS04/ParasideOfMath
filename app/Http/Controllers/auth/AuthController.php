@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Siswa;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -125,6 +126,9 @@ class AuthController extends Controller
      */
     public function showGuruRegisterForm()
     {
+        if (Setting::get('guru_register_enabled', '1') === '0') {
+            return redirect()->route('login')->with('error', 'Pendaftaran guru/tutor saat ini sedang nonaktif.');
+        }
         return view('guru.register');
     }
 

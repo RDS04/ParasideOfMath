@@ -91,6 +91,11 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::put('/bank-soal/kategori/{id}', 'updateKategoriSoal')->name('guru.bank-soal.kategori.update');
     Route::delete('/bank-soal/kategori/{id}', 'deleteKategoriSoal')->name('guru.bank-soal.kategori.delete');
     Route::post('/bank-soal/soal', 'storeSoal')->name('guru.bank-soal.soal.store');
+    Route::post('/bank-soal/import', 'importSoal')->name('guru.bank-soal.import');
+    Route::post('/bank-soal/import/preview', 'previewImportSoal')->name('guru.bank-soal.import.preview');
+    Route::post('/bank-soal/import/confirm', 'confirmImportSoal')->name('guru.bank-soal.import.confirm');
+    Route::post('/bank-soal/import/cancel', 'cancelImportSoal')->name('guru.bank-soal.import.cancel');
+    Route::get('/bank-soal/template', 'downloadTemplateSoal')->name('guru.bank-soal.template');
     Route::put('/bank-soal/soal/{id}', 'updateSoal')->name('guru.bank-soal.soal.update');
     Route::delete('/bank-soal/soal/{id}', 'deleteSoal')->name('guru.bank-soal.soal.delete');
 });
@@ -126,6 +131,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/galeri/delete', 'deleteGaleriFoto')->name('admin.galeri.delete');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
+    Route::post('/admin/guru/toggle-register', 'toggleGuruRegisterStatus')->name('admin.guru.toggle-register');
     Route::get('/admin/guru/detail/{id}', 'detailGuru')->name('admin.guru.detail');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
     Route::get('/admin/riwayat-pembayaran', 'allRiwayatPayment')->name('admin.riwayat-pembayaran');

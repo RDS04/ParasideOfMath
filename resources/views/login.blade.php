@@ -517,9 +517,11 @@
             </form>
 
             <div class="mt-8 pt-5 border-t border-gray-100 text-center">
-                <p class="text-xs text-gray-500 mb-2">
-                    Ingin bergabung sebagai pengajar? <a href="{{ route('guru.register') }}" class="link-purple">Daftar sebagai Guru</a>
-                </p>
+                @if(\App\Models\Setting::get('guru_register_enabled', '1') !== '0')
+                    <p class="text-xs text-gray-500 mb-2">
+                        Ingin bergabung sebagai pengajar? <a href="{{ route('guru.register') }}" class="link-purple">Daftar sebagai Guru</a>
+                    </p>
+                @endif
                 <p class="text-xs text-gray-400 tracking-wide">
                     &copy; 2026 · Paradise of Math — bimbingan privat No.1
                 </p>
