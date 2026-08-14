@@ -147,10 +147,16 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/notifications/read', 'markNotificationsRead')->name('admin.notifications.read');
 
     Route::get('/admin/bank-soal', 'bankSoal')->name('admin.bank-soal.index');
+    Route::post('/admin/bank-soal/kategori', 'storeKategoriSoalAdmin')->name('admin.bank-soal.kategori.store');
+    Route::put('/admin/bank-soal/kategori/{id}', 'updateKategoriSoalAdmin')->name('admin.bank-soal.kategori.update');
     Route::delete('/admin/bank-soal/kategori/{id}', 'deleteKategoriSoalAdmin')->name('admin.bank-soal.kategori.delete');
     Route::post('/admin/bank-soal/soal', 'storeSoalAdmin')->name('admin.bank-soal.soal.store');
     Route::put('/admin/bank-soal/soal/{id}', 'updateSoalAdmin')->name('admin.bank-soal.soal.update');
     Route::delete('/admin/bank-soal/soal/{id}', 'deleteSoalAdmin')->name('admin.bank-soal.soal.delete');
+    Route::post('/admin/bank-soal/import/preview', 'previewImportSoalAdmin')->name('admin.bank-soal.import.preview');
+    Route::post('/admin/bank-soal/import/confirm', 'confirmImportSoalAdmin')->name('admin.bank-soal.import.confirm');
+    Route::post('/admin/bank-soal/import/cancel', 'cancelImportSoalAdmin')->name('admin.bank-soal.import.cancel');
+    Route::get('/admin/bank-soal/template', 'downloadTemplateSoalAdmin')->name('admin.bank-soal.template');
 })->middleware('auth:web');
 
 // Realtime Chat API and Admin Panel

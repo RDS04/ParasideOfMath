@@ -14,6 +14,8 @@ use App\Models\BankSoal;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
@@ -1851,6 +1853,248 @@ class AdminController extends Controller
             'sub_kategori' => $kategori->sub_kategori,
             'kategori_id' => $kategori->id,
         ])->with('success', 'Soal No. ' . $nomor . ' berhasil dihapus!');
+    }
+
+    /**
+     * Simpan Kategori Soal Baru (Admin).
+     */
+    public function storeKategoriSoalAdmin(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $allowedSub = KategoriSoal::availableSubKategori(
+            $request->input('jenjang'), $request->input('kelas')
+        );
+
+        $validated = $request->validate([
+            'jenjang'       => 'required|in:SD,SMP,SMA',
+            'kelas'         => 'required|integer|min:1|max:6',
+            'sub_kategori'  => ['required', 'string', Rule::in($allowedSub)],
+            'nama_kategori' => 'required|string|max:255',
+            'deskripsi'     => 'required|string|max:255',
+        ]);
+
+        $kategori = KategoriSoal::create($validated);
+
+        return redirect()->route('admin.bank-soal.index', [
+            'jenjang'      => $kategori->jenjang,
+            'kelas'        => $kategori->kelas,
+            'sub_kategori' => $kategori->sub_kategori,
+            'mapel'        => $kategori->nama_kategori,
+            'kategori_id'  => $kategori->id,
+        ])->with('success', 'Paket soal "' . $kategori->deskripsi . '" berhasil dibuat!');
+    }
+
+    /**
+     * Update Kategori Soal (Admin).
+     */
+    public function updateKategoriSoalAdmin(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $kategori = KategoriSoal::findOrFail($id);
+
+        $validated = $request->validate([
+            'nama_kategori' => 'required|string|max:255',
+            'sub_kategori'  => 'required|string|max:100',
+            'deskripsi'     => 'required|string|max:255',
+        ]);
+
+        $kategori->update($validated);
+
+        return redirect()->route('admin.bank-soal.index', [
+            'jenjang'      => $kategori->jenjang,
+            'kelas'        => $kategori->kelas,
+            'sub_kategori' => $kategori->sub_kategori,
+            'mapel'        => $kategori->nama_kategori,
+            'kategori_id'  => $kategori->id,
+        ])->with('success', 'Kategori Soal berhasil diperbarui!');
+    }
+
+    /**
+     * Preview Import Soal dari Excel/CSV (Admin).
+     */
+    public function previewImportSoalAdmin(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'kategori_soal_id' => 'required|exists:kategori_soals,id',
+            'file_excel'        => 'required|file|mimes:xlsx,xls,csv,txt|max:5120',
+        ], [
+            'file_excel.required' => 'File Excel / CSV wajib diunggah.',
+            'file_excel.mimes'    => 'Format file harus berupa Excel (.xlsx, .xls) atau CSV (.csv).',
+            'file_excel.max'      => 'Ukuran file maksimal 5MB.',
+        ]);
+
+        $kategoriId = $request->input('kategori_soal_id');
+        $kategori   = KategoriSoal::findOrFail($kategoriId);
+
+        $file      = $request->file('file_excel');
+        $filePath  = $file->getRealPath();
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        $rows = [];
+
+        try {
+            if (in_array($extension, ['csv', 'txt'])) {
+                if (($handle = fopen($filePath, 'r')) !== false) {
+                    while (($data = fgetcsv($handle, 2000, ',')) !== false) {
+                        if (count($data) === 1 && str_contains($data[0], ';')) {
+                            $data = explode(';', $data[0]);
+                        }
+                        $rows[] = $data;
+                    }
+                    fclose($handle);
+                }
+            } else {
+                $spreadsheet = IOFactory::load($filePath);
+                $worksheet   = $spreadsheet->getActiveSheet();
+                $rows        = $worksheet->toArray();
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal membaca file Excel: ' . $e->getMessage());
+        }
+
+        if (empty($rows)) {
+            return redirect()->back()->with('error', 'File Excel kosong atau tidak dapat dibaca.');
+        }
+
+        $maxNo = (int) ($kategori->bankSoals()->max('nomor') ?? 0);
+        $previewData = [];
+
+        foreach ($rows as $index => $row) {
+            $col0 = trim((string)($row[0] ?? ''));
+            $col1 = trim((string)($row[1] ?? ''));
+
+            if ($index === 0 && (!is_numeric($col0) || strtolower($col1) === 'soal' || strtolower($col0) === 'no')) {
+                continue;
+            }
+
+            $no        = $col0;
+            $soalText  = $col1;
+            $opsiA     = trim((string)($row[2] ?? ''));
+            $opsiB     = trim((string)($row[3] ?? ''));
+            $opsiC     = trim((string)($row[4] ?? ''));
+            $opsiD     = trim((string)($row[5] ?? ''));
+            $kunciRaw  = strtoupper(trim((string)($row[6] ?? 'A')));
+
+            if (empty($soalText) || empty($opsiA) || empty($opsiB)) {
+                continue;
+            }
+
+            $nomorSoal = is_numeric($no) && (int)$no > 0 ? (int)$no : ($maxNo + count($previewData) + 1);
+            $kunci     = in_array($kunciRaw, ['A', 'B', 'C', 'D']) ? $kunciRaw : 'A';
+
+            $previewData[] = [
+                'nomor'         => $nomorSoal,
+                'soal'          => $soalText,
+                'opsi_a'        => $opsiA,
+                'opsi_b'        => $opsiB,
+                'opsi_c'        => $opsiC,
+                'opsi_d'        => $opsiD,
+                'kunci_jawaban' => $kunci,
+            ];
+        }
+
+        if (empty($previewData)) {
+            return redirect()->back()->with('error', 'Tidak ditemukan data soal yang valid dalam file Excel tersebut.');
+        }
+
+        session([
+            'import_preview_soals' => $previewData,
+            'import_kategori_id'   => $kategoriId,
+        ]);
+
+        return redirect()->route('admin.bank-soal.index', [
+            'jenjang'      => $kategori->jenjang,
+            'kelas'        => $kategori->kelas,
+            'sub_kategori' => $kategori->sub_kategori,
+            'mapel'        => $kategori->nama_kategori,
+            'kategori_id'  => $kategori->id,
+        ])->with('success', 'Pratinjau ' . count($previewData) . ' soal dari Excel berhasil dimuat. Silakan periksa dan klik "Konfirmasi & Simpan ke Database".');
+    }
+
+    /**
+     * Konfirmasi dan simpan soal dari session pratinjau ke Database (Admin).
+     */
+    public function confirmImportSoalAdmin(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $previewData = session('import_preview_soals', []);
+        $kategoriId  = session('import_kategori_id');
+
+        if (empty($previewData) || !$kategoriId) {
+            return redirect()->back()->with('error', 'Data pratinjau tidak ditemukan atau sudah kedaluwarsa.');
+        }
+
+        $kategori = KategoriSoal::findOrFail($kategoriId);
+        $savedCount = 0;
+
+        foreach ($previewData as $item) {
+            BankSoal::updateOrCreate([
+                'kategori_soal_id' => $kategoriId,
+                'nomor'            => $item['nomor'],
+            ], [
+                'soal'          => $item['soal'],
+                'opsi_a'        => $item['opsi_a'],
+                'opsi_b'        => $item['opsi_b'],
+                'opsi_c'        => $item['opsi_c'],
+                'opsi_d'        => $item['opsi_d'],
+                'kunci_jawaban' => $item['kunci_jawaban'],
+            ]);
+            $savedCount++;
+        }
+
+        session()->forget(['import_preview_soals', 'import_kategori_id']);
+
+        return redirect()->route('admin.bank-soal.index', [
+            'jenjang'      => $kategori->jenjang,
+            'kelas'        => $kategori->kelas,
+            'sub_kategori' => $kategori->sub_kategori,
+            'mapel'        => $kategori->nama_kategori,
+            'kategori_id'  => $kategori->id,
+        ])->with('success', 'Berhasil menyimpan ' . $savedCount . ' soal dari file Excel ke database!');
+    }
+
+    /**
+     * Batalkan pratinjau impor soal (Admin).
+     */
+    public function cancelImportSoalAdmin(Request $request)
+    {
+        session()->forget(['import_preview_soals', 'import_kategori_id']);
+        return redirect()->back()->with('success', 'Pratinjau impor soal berhasil dibatalkan.');
+    }
+
+    /**
+     * Download Template File Excel / CSV untuk Import Soal (Admin).
+     */
+    public function downloadTemplateSoalAdmin()
+    {
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="template_import_soal.csv"',
+        ];
+
+        $callback = function () {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, ['no', 'soal', 'jawaban_a', 'jawaban_b', 'jawaban_c', 'jawaban_d', 'kunci_jawaban']);
+            fputcsv($file, ['1', 'Berapakah hasil dari 15 + 25?', '30', '35', '40', '45', 'C']);
+            fputcsv($file, ['2', 'Apa nama ibu kota negara Indonesia?', 'Jakarta', 'Bandung', 'Surabaya', 'Medan', 'A']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
 
