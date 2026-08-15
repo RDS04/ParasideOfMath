@@ -58,6 +58,13 @@
                             <p>Latihan Soal &amp; Ujian</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="#"
+                            class="nav-link {{ Route::is('siswa.transkip-nilai') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-file-alt text-cyan-400"></i>
+                            <p>Transkip Nilai</p>
+                        </a>
+                    </li>
 
                     <li class="nav-header">KEUANGAN</li>
 
@@ -72,6 +79,15 @@
                             class="nav-link {{ Route::is('siswa.riwayat') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-history text-emerald-400"></i>
                             <p>Riwayat Pembayaran</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-header">LAINNYA</li>
+                    <li class="nav-item">
+                        <a href="#"
+                            class="nav-link {{ Route::is('siswa.chat') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-comments text-blue-400"></i>
+                            <p>Chat Guru</p>
                         </a>
                     </li>
 
@@ -90,13 +106,6 @@
                                     class="nav-link {{ Route::is('admin.siswa.daftar.index') ? 'active' : '' }}">
                                     <i class="fas fa-users nav-icon text-purple-400"></i>
                                     <p>Daftar Siswa</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('admin.siswa.tambah.index') }}"
-                                    class="nav-link {{ Route::is('admin.siswa.tambah.index') ? 'active' : '' }}">
-                                    <i class="fas fa-user-plus nav-icon text-success"></i>
-                                    <p>Tambah Siswa</p>
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -129,12 +138,6 @@
                                     <p>Daftar Tutor</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-plus-circle nav-icon text-success"></i>
-                                    <p>Tambah Tutor</p>
-                                </a>
-                            </li>
                         </ul>
                     </li>
 
@@ -151,12 +154,6 @@
                                     <p>Kalender Jadwal</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-calendar-plus nav-icon text-success"></i>
-                                    <p>Tambah Jadwal</p>
-                                </a>
-                            </li>
                         </ul>
                     </li>
 
@@ -171,12 +168,6 @@
                                     class="nav-link {{ Route::is('admin.bank-soal.*') ? 'active' : '' }}">
                                     <i class="fas fa-folder-open nav-icon text-warning"></i>
                                     <p>Bank Soal</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-tags nav-icon text-info"></i>
-                                    <p>Kategori Materi</p>
                                 </a>
                             </li>
                         </ul>
@@ -197,12 +188,6 @@
                                     <p>Riwayat Pembayaran</p>
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-file-invoice nav-icon text-rose-400"></i>
-                                    <p>Invoice</p>
-                                </a>
-                            </li>
                         </ul>
                     </li>
 
@@ -217,12 +202,6 @@
                                     class="nav-link {{ Route::is('admin.laporan-pendapatan') ? 'active' : '' }}">
                                     <i class="fas fa-chart-bar nav-icon text-success"></i>
                                     <p>Laporan Pendapatan</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-clipboard-list nav-icon text-primary"></i>
-                                    <p>Laporan Kehadiran</p>
                                 </a>
                             </li>
                         </ul>
@@ -283,27 +262,6 @@
                     </li>
 
                     <li class="nav-header">LAINNYA</li>
-
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-users-cog text-slate-400"></i>
-                            <p>Pengguna &amp; Peran <i class="right fas fa-angle-left"></i></p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-users nav-icon text-slate-400"></i>
-                                    <p>Daftar Pengguna</p>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="fas fa-user-shield nav-icon text-rose-400"></i>
-                                    <p>Peran &amp; Izin</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
                 @elseif ($currentUser && $currentUser->isGuru())
                     <!-- ══════ GURU (TUTOR) NAVIGATION ══════ -->
                     <li class="nav-header">MENGAJAR</li>
@@ -312,12 +270,6 @@
                             class="nav-link {{ Route::is('guru.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-check text-purple-400"></i>
                             <p>Jadwal Mengajar</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-chalkboard-teacher text-amber-400"></i>
-                            <p>Kelas Bimbingan</p>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -346,16 +298,10 @@
                             <p>Biodata Guru</p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="nav-icon fas fa-user-circle text-teal-400"></i>
-                            <p>Profil Pengajar</p>
-                        </a>
-                    </li>
                 @endif
 
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('pengaturan.index') }}" class="nav-link {{ Route::is('pengaturan.index') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-cog text-slate-300"></i>
                         <p>Pengaturan</p>
                     </a>

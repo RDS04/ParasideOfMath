@@ -68,12 +68,30 @@
                                 @forelse($assignedStudents as $s)
                                     @php
                                         $sBio = $s->biodata ?? [];
-                                        $tutorNames = $sBio['tutor_names'] ?? [];
-                                        $tutorSubjects = $sBio['tutor_subjects'] ?? [];
-                                        
-                                        // Find index of logged in teacher
-                                        $teacherIndex = is_array($tutorNames) ? array_search(Auth::user()->name, $tutorNames) : false;
-                                        $assignedMapel = ($teacherIndex !== false && isset($tutorSubjects[$teacherIndex])) ? $tutorSubjects[$teacherIndex] : '—';
+                                        $tutorPerMapel = $sBio['tutor_per_mapel'] ?? [];
+                                        $guruNameNorm = strtolower(trim(Auth::user()->name));
+
+                                        $assignedMapels = [];
+                                        if (is_array($tutorPerMapel)) {
+                                            foreach ($tutorPerMapel as $mapelName => $guruName) {
+                                                if (strtolower(trim($guruName)) === $guruNameNorm) {
+                                                    $assignedMapels[] = $mapelName;
+                                                }
+                                            }
+                                        }
+
+                                        // Fallback: parse dari tipe_paket kalau tutor_per_mapel kosong
+                                        if (empty($assignedMapels) && $s->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $s->tipe_paket, $m)) {
+                                            $guruParts = array_map('trim', explode(',', $m[1]));
+                                            foreach ($guruParts as $part) {
+                                                if (str_contains(strtolower($part), $guruNameNorm) && str_contains($part, ':')) {
+                                                    $p = explode(':', $part);
+                                                    $assignedMapels[] = trim($p[0]);
+                                                }
+                                            }
+                                        }
+
+                                        $assignedMapel = !empty($assignedMapels) ? implode(', ', $assignedMapels) : '—';
                                     @endphp
                                     <tr>
                                         <!-- Siswa Column -->

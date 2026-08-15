@@ -82,7 +82,7 @@
                                             </td>
                                             <td class="px-4 py-3 font-weight-medium">
                                                 @if ($paket)
-                                                    {{ $paket->nama_paket }} <small class="text-muted block text-xxs">({{ $student->tipe_paket ?? '' }})</small>
+                                                    {{ $paket->nama_paket }}
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif

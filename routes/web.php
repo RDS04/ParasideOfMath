@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Siswa\SiswaController;
 use App\Http\Controllers\Guru\GuruController;
+use App\Http\Controllers\SettingsController;
 
 
 
@@ -169,4 +170,10 @@ Route::middleware('auth:web')->group(function () {
     Route::get('/admin/chat/messages/{session_id}', [\App\Http\Controllers\Chat\ChatController::class, 'getSessionMessages']);
     Route::post('/admin/chat/send', [\App\Http\Controllers\Chat\ChatController::class, 'adminSendMessage']);
 });
+
+Route::prefix('pengaturan')->name('pengaturan.')->middleware('auth:web,siswa')->group(function () {
+        Route::get('/', [SettingsController::class, 'index'])->name('index');
+        Route::put('/email', [SettingsController::class, 'updateEmail'])->name('email');
+        Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
+    });
 

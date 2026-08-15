@@ -392,22 +392,6 @@
                                 <div class="card-body">
                                     <div class="academic-menu-grid">
                                         <!-- Menu 1 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #d1fae5; color: #065f46;">
-                                                <i class="fas fa-qrcode"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Presence QR Code</span>
-                                        </div>
-                                        <!-- Menu 2 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #fef3c7; color: #92400e;">
-                                                <i class="fas fa-id-card"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Student e-Card</span>
-                                        </div>
-                                        <!-- Menu 3 -->
                                         <a href="{{ route('siswa.invoice') }}" class="academic-menu-item text-decoration-none">
                                             <div class="academic-menu-icon-wrapper"
                                                 style="background-color: #ecfeff; color: #0e7490;">
@@ -415,7 +399,7 @@
                                             </div>
                                             <span class="academic-menu-label">Invoice Payment</span>
                                         </a>
-                                        <!-- Menu 4 -->
+                                        <!-- Menu 2 -->
                                         <a href="{{ route('siswa.riwayat') }}" class="academic-menu-item">
                                             <div class="academic-menu-icon-wrapper"
                                                 style="background-color: #d1fae5; color: #065f46;">
@@ -423,86 +407,14 @@
                                             </div>
                                             <span class="academic-menu-label">Riwayat Payment</span>
                                         </a>
-                                        <!-- Menu 5 -->
-                                        <div class="academic-menu-item">
+                                        <!-- Menu 3 -->
+                                         <a href="#" class="academic-menu-item">
                                             <div class="academic-menu-icon-wrapper"
                                                 style="background-color: #d1fae5; color: #065f46;">
-                                                <i class="fas fa-poll"></i>
+                                                <i class="fas fa-file-alt"></i>
                                             </div>
-                                            <span class="academic-menu-label">Exam Result</span>
-                                        </div>
-                                        <!-- Menu 6 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #d1fae5; color: #065f46;">
-                                                <i class="fas fa-book"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Thesis</span>
-                                        </div>
-                                        <!-- Menu 7 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #d1fae5; color: #065f46;">
-                                                <i class="fas fa-comments"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Lecturer Consultation</span>
-                                        </div>
-                                        <!-- Menu 8 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #fef3c7; color: #92400e;">
-                                                <i class="fas fa-award"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Transcript</span>
-                                        </div>
-                                        <!-- Menu 9 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #fef3c7; color: #92400e;">
-                                                <i class="fas fa-chart-line"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Learning Progress</span>
-                                        </div>
-                                        <!-- Menu 10 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #d1fae5; color: #065f46;">
-                                                <i class="fas fa-clipboard-check"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Assessment</span>
-                                        </div>
-                                        <!-- Menu 11 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #d1fae5; color: #065f46;">
-                                                <i class="fas fa-file-signature"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Input KRS</span>
-                                        </div>
-                                        <!-- Menu 12 -->
-                                        <a href="{{ route('siswa.akademik') }}" class="academic-menu-item text-decoration-none">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #fef3c7; color: #92400e;">
-                                                <i class="fas fa-user-graduate"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Academic Data</span>
-                                        </a>
-                                        <!-- Menu 13 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #e0e7ff; color: #3730a3;">
-                                                <i class="fas fa-hotel"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Accreditation</span>
-                                        </div>
-                                        <!-- Menu 14 -->
-                                        <div class="academic-menu-item">
-                                            <div class="academic-menu-icon-wrapper"
-                                                style="background-color: #e0e7ff; color: #3730a3;">
-                                                <i class="fas fa-shield-alt"></i>
-                                            </div>
-                                            <span class="academic-menu-label">Majors' Accreditation</span>
-                                        </div>
+                                            <span class="academic-menu-label">Transkip Nilai</span>
+                                         </a>
                                     </div>
                                 </div>
                             </div>

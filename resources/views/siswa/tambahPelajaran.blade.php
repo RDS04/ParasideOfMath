@@ -29,6 +29,547 @@
             border-color: #ef4444 !important;
             background-color: #fef2f2 !important;
         }
+
+        /* =========================================================
+        MOBILE UI - TAMBAH PELAJARAN
+        ========================================================= */
+
+        @media (max-width: 767.98px) {
+
+            /* =========================
+            PAGE WRAPPER
+            ========================== */
+            .content-header {
+                padding-top: 12px;
+                padding-bottom: 4px;
+            }
+
+            .content-header .container-fluid,
+            .content .container-fluid {
+                padding-left: 14px !important;
+                padding-right: 14px !important;
+            }
+
+            .content-header .row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            /* =========================
+            TITLE
+            ========================== */
+            .content-header h1 {
+                font-size: 23px !important;
+                line-height: 1.25;
+                margin-bottom: 5px !important;
+            }
+
+            .content-header p {
+                font-size: 11.5px !important;
+                line-height: 1.5;
+                margin-bottom: 8px !important;
+            }
+
+            /* Clock di mobile */
+            #live-clock-container {
+                display: inline-flex !important;
+                align-items: center;
+                padding: 7px 10px !important;
+                font-size: 10.5px !important;
+                border-radius: 10px !important;
+            }
+
+            /* =========================
+            MAIN CARD
+            ========================== */
+            .content .card {
+                border-radius: 16px !important;
+                margin-bottom: 18px !important;
+                box-shadow: 0 6px 18px rgba(31, 41, 55, 0.07) !important;
+            }
+
+            .content .card-header {
+                padding: 16px 15px 11px !important;
+            }
+
+            .content .card-header h5 {
+                font-size: 15px !important;
+                line-height: 1.4;
+            }
+
+            .content .card-header h5 i {
+                margin-right: 7px !important;
+            }
+
+            .content .card-header p {
+                font-size: 10.5px !important;
+                line-height: 1.5;
+            }
+
+            /* Tombol tambah */
+            .content .card-header a.btn {
+                width: 100%;
+                justify-content: center;
+                padding: 9px 12px !important;
+                font-size: 11.5px !important;
+                border-radius: 10px !important;
+                margin-top: 2px;
+            }
+
+            /* Card body */
+            .content .card-body {
+                padding: 12px 15px 17px !important;
+            }
+
+
+            /* =====================================================
+            INFO ACTIVE / PENDING
+            ====================================================== */
+
+            .content .card-body .rounded-2xl {
+                border-radius: 14px !important;
+            }
+
+            .content .card-body .w-10.h-10 {
+                width: 38px !important;
+                height: 38px !important;
+                min-width: 38px;
+            }
+
+            .content .card-body h6 {
+                font-size: 13px !important;
+                line-height: 1.35;
+            }
+
+            .content .card-body p.text-xs {
+                font-size: 10.5px !important;
+                line-height: 1.5;
+            }
+
+
+            /* =====================================================
+            EMPTY STATE
+            ====================================================== */
+
+            .content .card-body .text-center.py-5 {
+                padding-top: 28px !important;
+                padding-bottom: 28px !important;
+            }
+
+            .content .card-body .text-center .w-16 {
+                width: 58px !important;
+                height: 58px !important;
+            }
+
+            .content .card-body .text-center .fa-2x {
+                font-size: 1.4em;
+            }
+
+            .content .card-body .text-center h6 {
+                font-size: 13px !important;
+                line-height: 1.45;
+            }
+
+            .content .card-body .text-center p {
+                font-size: 10.5px !important;
+                line-height: 1.55;
+            }
+
+            .content .card-body .text-center a.btn {
+                width: 100%;
+                font-size: 11px !important;
+                padding: 9px 12px !important;
+            }
+
+
+            /* =====================================================
+            MAPEL CARDS
+            ====================================================== */
+
+            .content .row > [class*="col-"] {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+
+            .content .row {
+                margin-left: -5px;
+                margin-right: -5px;
+            }
+
+            .content .row > .col-md-4 {
+                width: 100%;
+            }
+
+            .content .row > .col-sm-6 {
+                width: 100%;
+            }
+
+            /* Card mapel */
+            .content .row > .col-12 > div.p-3\.5 {
+                padding: 13px !important;
+                border-radius: 14px !important;
+            }
+
+            /* Badge status */
+            .content .row > .col-12 .badge {
+                font-size: 8.5px !important;
+                padding: 5px 7px !important;
+                border-radius: 7px !important;
+            }
+
+            /* Nama mapel */
+            .content .row > .col-12 h6.text-base {
+                font-size: 13.5px !important;
+                line-height: 1.3;
+                margin-top: 4px;
+            }
+
+            /* Info sesi */
+            .content .row > .col-12 p.text-xs {
+                font-size: 10px !important;
+            }
+
+            /* Icon buku */
+            .content .row > .col-12 .w-12 {
+                width: 40px !important;
+                height: 40px !important;
+                border-radius: 11px !important;
+                font-size: 14px !important;
+            }
+
+            /* Tombol Edit / Hapus */
+            .content .row > .col-12 button {
+                min-height: 34px;
+                font-size: 10px !important;
+                border-radius: 9px !important;
+            }
+
+            .content .row > .col-12 button i {
+                margin-right: 4px !important;
+            }
+
+
+            /* =====================================================
+            ALERT
+            ====================================================== */
+
+            .alert {
+                border-radius: 12px !important;
+                padding: 12px 13px !important;
+                font-size: 11px !important;
+            }
+
+            .alert h5 {
+                font-size: 13px !important;
+                margin-bottom: 4px;
+            }
+
+
+            /* =====================================================
+            MODAL UMUM
+            ====================================================== */
+
+            .modal-dialog {
+                margin: 10px !important;
+                width: auto !important;
+                max-width: none !important;
+            }
+
+            .modal-dialog.modal-lg {
+                max-width: none !important;
+            }
+
+            .modal-content {
+                border-radius: 17px !important;
+                max-height: calc(100vh - 20px);
+            }
+
+            .modal-header {
+                padding: 15px 16px 11px !important;
+            }
+
+            .modal-header .modal-title {
+                font-size: 14px !important;
+                line-height: 1.35;
+                padding-right: 10px;
+            }
+
+            .modal-header .modal-title i {
+                margin-right: 7px !important;
+            }
+
+            .modal-header .close {
+                font-size: 25px;
+                line-height: 1;
+                margin: -2px 0 0 8px !important;
+            }
+
+            .modal-body {
+                padding: 16px !important;
+            }
+
+            .modal-footer {
+                padding: 11px 16px 14px !important;
+                gap: 8px;
+            }
+
+            .modal-footer .btn {
+                flex: 1;
+                min-height: 38px;
+                font-size: 10.5px !important;
+                padding: 8px 10px !important;
+                border-radius: 9px !important;
+                margin: 0 !important;
+                white-space: normal;
+            }
+
+
+            /* =====================================================
+            MODAL TAMBAH PELAJARAN
+            ====================================================== */
+
+            #modalTambahPelajaran .modal-body {
+                max-height: calc(100vh - 175px) !important;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            #modalTambahPelajaran .modal-body > p {
+                font-size: 10.5px !important;
+                line-height: 1.5;
+                margin-bottom: 13px !important;
+            }
+
+            /* Card pilihan mapel */
+            #modalTambahPelajaran .mapel-select-card {
+                border-radius: 13px !important;
+            }
+
+            #modalTambahPelajaran .mapel-select-card .card-body {
+                padding: 11px !important;
+            }
+
+            #modalTambahPelajaran .custom-control-label {
+                font-size: 11.5px !important;
+                line-height: 1.4;
+            }
+
+            #modalTambahPelajaran .badge {
+                font-size: 8.5px !important;
+                padding: 4px 6px !important;
+            }
+
+            #modalTambahPelajaran .mapel-select-card label.text-xxs {
+                font-size: 8.5px !important;
+            }
+
+            #modalTambahPelajaran select {
+                height: 36px !important;
+                font-size: 10.5px !important;
+                border-radius: 8px !important;
+            }
+
+            /* Footer modal tambah */
+            #modalTambahPelajaran .modal-footer {
+                flex-direction: column-reverse;
+            }
+
+            #modalTambahPelajaran .modal-footer .btn {
+                width: 100%;
+            }
+
+
+            /* =====================================================
+            MODAL EDIT
+            ====================================================== */
+
+            #modalEditPelajaran .modal-body p {
+                font-size: 11px !important;
+                line-height: 1.5;
+            }
+
+            #modalEditPelajaran .modal-body label {
+                font-size: 9px !important;
+            }
+
+            #modalEditPelajaran select {
+                height: 40px !important;
+                font-size: 11px !important;
+            }
+
+            #modalEditPelajaran .modal-footer {
+                flex-direction: column-reverse;
+            }
+
+            #modalEditPelajaran .modal-footer .btn {
+                width: 100%;
+            }
+
+
+            /* =====================================================
+            MODAL HAPUS
+            ====================================================== */
+
+            #modalHapusPelajaran .modal-body p {
+                font-size: 11.5px !important;
+                line-height: 1.6;
+            }
+
+            #modalHapusPelajaran .modal-footer {
+                flex-direction: column-reverse;
+            }
+
+            #modalHapusPelajaran .modal-footer .btn {
+                width: 100%;
+            }
+
+
+            /* =====================================================
+            MODAL PEMBAYARAN
+            ====================================================== */
+
+            #modalBayarPelajaran .modal-body {
+                max-height: calc(100vh - 175px) !important;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Ringkasan harga */
+            #modalBayarPelajaran .modal-body > .p-3\.5 {
+                padding: 12px !important;
+                border-radius: 13px !important;
+            }
+
+            #modalBayarPelajaran .modal-body > .p-3\.5 h4 {
+                font-size: 18px !important;
+                margin-top: 2px;
+            }
+
+            #modalBayarPelajaran .modal-body > .p-3\.5 p {
+                font-size: 9px !important;
+                line-height: 1.5;
+            }
+
+            #modalBayarPelajaran .modal-body > .p-3\.5 .badge {
+                align-self: flex-start;
+                font-size: 9px !important;
+            }
+
+            /* Payment method */
+            #modalBayarPelajaran .payment-method-option {
+                padding: 11px 7px !important;
+                min-height: 84px;
+                border-radius: 12px !important;
+            }
+
+            #modalBayarPelajaran .payment-method-option i {
+                font-size: 16px !important;
+            }
+
+            #modalBayarPelajaran .payment-method-option span {
+                font-size: 9.5px !important;
+                line-height: 1.4;
+            }
+
+            /* Rekening */
+            #modalBayarPelajaran .payment-panel {
+                font-size: 10px;
+            }
+
+            #modalBayarPelajaran .payment-panel .p-2\.5 {
+                padding: 9px !important;
+                border-radius: 10px !important;
+            }
+
+            #modalBayarPelajaran .payment-panel .text-sm {
+                font-size: 12px !important;
+            }
+
+            #modalBayarPelajaran input[type="file"] {
+                width: 100%;
+                font-size: 10px !important;
+                padding: 7px !important;
+            }
+
+            /* Informasi tunai */
+            #modalBayarPelajaran #panel_tunai {
+                font-size: 10px !important;
+            }
+
+            #modalBayarPelajaran #panel_tunai p {
+                font-size: 9.5px !important;
+                line-height: 1.55;
+            }
+
+            /* Footer bayar */
+            #modalBayarPelajaran .modal-footer {
+                flex-direction: column-reverse;
+            }
+
+            #modalBayarPelajaran .modal-footer .btn {
+                width: 100%;
+            }
+
+
+            /* =====================================================
+            EXTRA SMALL PHONE
+            ====================================================== */
+
+            @media (max-width: 360px) {
+
+                .content-header h1 {
+                    font-size: 21px !important;
+                }
+
+                .content-header p {
+                    font-size: 10.5px !important;
+                }
+
+                .content .card-header {
+                    padding-left: 12px !important;
+                    padding-right: 12px !important;
+                }
+
+                .content .card-body {
+                    padding-left: 12px !important;
+                    padding-right: 12px !important;
+                }
+
+                .content .card-header h5 {
+                    font-size: 14px !important;
+                }
+
+                .content .row > .col-12 > div.p-3\.5 {
+                    padding: 11px !important;
+                }
+
+                .content .row > .col-12 h6.text-base {
+                    font-size: 12.5px !important;
+                }
+
+                .content .row > .col-12 .setting-info span {
+                    font-size: 10px !important;
+                }
+
+                .modal-dialog {
+                    margin: 7px !important;
+                }
+
+                .modal-header {
+                    padding-left: 13px !important;
+                    padding-right: 13px !important;
+                }
+
+                .modal-body {
+                    padding: 13px !important;
+                }
+
+                .modal-footer {
+                    padding-left: 13px !important;
+                    padding-right: 13px !important;
+                }
+            }
+        }
     </style>
 
     <!-- Content Header -->
