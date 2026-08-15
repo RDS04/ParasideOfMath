@@ -83,17 +83,24 @@
                     </thead>
                     <tbody>
                         @php
-                            $totalSesi = $jumlahPertemuan ?: 9;
                             $listMapels = count($mapels) > 0 ? $mapels : ['MATH'];
                             $listGurus = count($gurus) > 0 ? $gurus : ['YULIA'];
                             $numMapels = count($listMapels);
-                            
-                            // Distribute sessions among mapels
+
+                            // Gunakan sesi ASLI per mapel jika tersedia (bukan dibagi rata)
                             $sessionsPerMapel = [];
-                            $baseSesi = floor($totalSesi / $numMapels);
-                            $remainder = $totalSesi % $numMapels;
-                            for ($i = 0; $i < $numMapels; $i++) {
-                                $sessionsPerMapel[$i] = $baseSesi + ($i < $remainder ? 1 : 0);
+                            if (!empty($sesiPerMapel) && count($sesiPerMapel) === $numMapels) {
+                                foreach ($sesiPerMapel as $idx => $sVal) {
+                                    $sessionsPerMapel[$idx] = (int) $sVal;
+                                }
+                            } else {
+                                // Fallback lama: bagi rata (hanya dipakai kalau data sesi_per_mapel tidak tersedia/tidak sinkron)
+                                $totalSesi = $jumlahPertemuan ?: 9;
+                                $baseSesi = floor($totalSesi / $numMapels);
+                                $remainder = $totalSesi % $numMapels;
+                                for ($i = 0; $i < $numMapels; $i++) {
+                                    $sessionsPerMapel[$i] = $baseSesi + ($i < $remainder ? 1 : 0);
+                                }
                             }
                         @endphp
 

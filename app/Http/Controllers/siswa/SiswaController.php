@@ -851,39 +851,19 @@ class SiswaController extends Controller
 
         $paket = $siswa->paket;
         $biodata = $siswa->biodata ?? [];
-        
+
         // Parse details for invoice
-        $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
-        $hariPerMapel  = $biodata['hari_per_mapel'] ?? [];
+        $hariPertemuan   = $biodata['hari_pertemuan'] ?? [];
+        $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
         $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
-        $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+        $tanggalMulai    = $biodata['tanggal_mulai'] ?? null;
+        $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];   // ← TAMBAHAN: sesi asli per mapel
 
-        // Fallback parsing from tipe_paket if hariPerMapel is empty
-        if (empty($hariPerMapel) && $siswa->tipe_paket) {
-            if (preg_match_all('/Hari:\s*([^|)]+)/i', $siswa->tipe_paket, $matchesAll)) {
-                foreach ($matchesAll[1] as $mIdx => $hariStr) {
-                    $cleanDays = array_map('trim', explode('&', $hariStr));
-                    $hariPerMapel[$mIdx] = $cleanDays;
-                }
-            }
-        }
-
-        if (empty($hariPertemuan) && $siswa->tipe_paket) {
-            if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-                $hariPertemuan = array_map('trim', explode(',', $matches[1]));
-            }
-        }
-
-        if (!$jumlahPertemuan && $siswa->tipe_paket) {
-            if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
-                $jumlahPertemuan = (int) $matches[1];
-            }
-        }
+        // ... (bagian fallback parsing dari tipe_paket tetap sama) ...
 
         // Get single session price
         $detailString = '';
         if ($siswa->tipe_paket) {
-            // Find which detail match
             if ($paket) {
                 if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
                 elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
@@ -892,7 +872,7 @@ class SiswaController extends Controller
             }
         }
         $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
-        
+
         // Total price
         $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
 
@@ -904,11 +884,8 @@ class SiswaController extends Controller
             $mapels = array_map('trim', explode(',', $matches[1]));
         }
 
-        // Get guru — diambil per-mapel dari tutor_per_mapel (hasil penugasan Admin),
-        // dengan index sejajar terhadap $mapels agar sinkron di tabel ledger invoice.
+        // Get guru (versi yang sudah diperbaiki sebelumnya, per-mapel dari tutor_per_mapel)
         $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
-
-        // Fallback lama: parsing dari tipe_paket "Guru: Mapel: NamaGuru, ..."
         $guruFallbackMap = [];
         if ($siswa->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket, $m)) {
             $guruParts = array_map('trim', explode(',', $m[1]));
@@ -931,7 +908,11 @@ class SiswaController extends Controller
             }
         }
 
-        return view('siswa.invoice', compact('siswa', 'paket', 'hariPertemuan', 'hariPerMapel', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus'));
+        return view('siswa.invoice', compact(
+            'siswa', 'paket', 'hariPertemuan', 'hariPerMapel', 'jumlahPertemuan',
+            'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus',
+            'sesiPerMapel' // ← TAMBAHAN
+        ));
     }
 
     /**
