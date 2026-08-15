@@ -904,10 +904,31 @@ class SiswaController extends Controller
             $mapels = array_map('trim', explode(',', $matches[1]));
         }
 
-        // Get guru
+        // Get guru — diambil per-mapel dari tutor_per_mapel (hasil penugasan Admin),
+        // dengan index sejajar terhadap $mapels agar sinkron di tabel ledger invoice.
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+
+        // Fallback lama: parsing dari tipe_paket "Guru: Mapel: NamaGuru, ..."
+        $guruFallbackMap = [];
+        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket, $m)) {
+            $guruParts = array_map('trim', explode(',', $m[1]));
+            foreach ($guruParts as $part) {
+                if (str_contains($part, ':')) {
+                    [$pMapel, $pGuru] = array_map('trim', explode(':', $part, 2));
+                    $guruFallbackMap[$pMapel] = $pGuru;
+                }
+            }
+        }
+
         $gurus = [];
-        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-            $gurus = array_map('trim', explode(',', $matches[1]));
+        foreach ($mapels as $idx => $mapelName) {
+            if (!empty($tutorPerMapel[$mapelName])) {
+                $gurus[$idx] = $tutorPerMapel[$mapelName];
+            } elseif (!empty($guruFallbackMap[$mapelName])) {
+                $gurus[$idx] = $guruFallbackMap[$mapelName];
+            } else {
+                $gurus[$idx] = 'Belum Ditentukan';
+            }
         }
 
         return view('siswa.invoice', compact('siswa', 'paket', 'hariPertemuan', 'hariPerMapel', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus'));
