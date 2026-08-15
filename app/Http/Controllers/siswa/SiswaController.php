@@ -1150,5 +1150,73 @@ class SiswaController extends Controller
             'mode'
         ));
     }
+    /**
+     * Tampilkan Halaman Transkip Nilai Siswa (Rekap Nilai per Mata Pelajaran per Semester).
+     */
+    public function showTranskipNilai(Request $request)
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+
+        $availableSemesters = ['Semester 1', 'Semester 2', 'TKA'];
+        $semester = $request->input('semester', 'Semester 1');
+        if (!in_array($semester, $availableSemesters)) {
+            $semester = 'Semester 1';
+        }
+
+        // Ambil seluruh hasil ujian siswa untuk semester/sub-kategori terpilih
+        $hasilUjians = HasilUjian::where('siswa_id', $siswa->id)
+            ->whereHas('kategori', function ($q) use ($semester) {
+                $q->where('sub_kategori', $semester);
+            })
+            ->with('kategori')
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Rekap per Mata Pelajaran (kategori_soal_id): nilai terbaik, nilai terakhir, jumlah percobaan
+        $rekapMapel = [];
+        foreach ($hasilUjians as $hasil) {
+            if (!$hasil->kategori) {
+                continue;
+            }
+
+            $kategoriId = $hasil->kategori_soal_id;
+
+            if (!isset($rekapMapel[$kategoriId])) {
+                $rekapMapel[$kategoriId] = [
+                    'kategori'          => $hasil->kategori,
+                    'nilai_terbaik'     => $hasil->nilai,
+                    'nilai_terakhir'    => $hasil->nilai,
+                    'tanggal_terakhir'  => $hasil->created_at,
+                    'jumlah_percobaan'  => 0,
+                ];
+            }
+
+            $rekapMapel[$kategoriId]['jumlah_percobaan']++;
+
+            if ($hasil->nilai > $rekapMapel[$kategoriId]['nilai_terbaik']) {
+                $rekapMapel[$kategoriId]['nilai_terbaik'] = $hasil->nilai;
+            }
+
+            if ($hasil->created_at->greaterThanOrEqualTo($rekapMapel[$kategoriId]['tanggal_terakhir'])) {
+                $rekapMapel[$kategoriId]['nilai_terakhir']   = $hasil->nilai;
+                $rekapMapel[$kategoriId]['tanggal_terakhir'] = $hasil->created_at;
+            }
+        }
+
+        $rekapMapel = collect($rekapMapel)
+            ->sortBy(fn ($item) => $item['kategori']->nama_kategori ?? '')
+            ->values();
+
+        $rataRata = $rekapMapel->count() > 0
+            ? round($rekapMapel->avg('nilai_terbaik'), 1)
+            : 0;
+
+        return view('siswa.transkipNilai', compact(
+            'siswa', 'semester', 'availableSemesters', 'rekapMapel', 'rataRata'
+        ));
+    }
 }
 

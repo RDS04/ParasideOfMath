@@ -59,7 +59,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="#"
+                        <a href="{{ route('siswa.transkip-nilai') }}"
                             class="nav-link {{ Route::is('siswa.transkip-nilai') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-alt text-cyan-400"></i>
                             <p>Transkip Nilai</p>

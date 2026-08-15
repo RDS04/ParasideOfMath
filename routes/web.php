@@ -71,6 +71,8 @@ Route::controller(SiswaController::class)->group(function () {
     Route::get('/siswa/riwayat', 'showRiwayat')->middleware('auth:siswa')->name('siswa.riwayat');
     Route::get('/siswa/ujian', 'showUjian')->middleware('auth:siswa')->name('siswa.ujian');
     Route::post('/siswa/ujian/submit', 'submitUjian')->middleware('auth:siswa')->name('siswa.ujian.submit');
+    Route::get('/siswa/transkip-nilai', 'showTranskipNilai')->middleware('auth:siswa')->name('siswa.transkip-nilai');
+
 });
 Route::controller(AuthController::class)->prefix('guru')->group(function () {
     Route::get('/register', 'showGuruRegisterForm')->name('guru.register');

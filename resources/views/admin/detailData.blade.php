@@ -720,49 +720,52 @@
                             <div class="p-3 bg-blue-50 rounded-xl border border-blue-100 mb-4" style="background-color:#eff6ff; border-color:#bfdbfe;">
                                 <p class="text-xs mb-0" style="color:#1e40af;">
                                     <i class="fas fa-info-circle mr-1"></i>
-                                    Atur <strong>Jam Mulai</strong> dan <strong>Jam Berakhir</strong> bimbingan untuk masing-masing mata pelajaran siswa ini.
+                                    Atur <strong>Jam Mulai</strong> bimbingan untuk masing-masing mata pelajaran. Jam Berakhir akan otomatis dihitung <strong>+90 menit</strong> dari Jam Mulai.
                                 </p>
                             </div>
 
                             @foreach($mapelForJamModal as $idx => $namaMapelModal)
-                                @php
-                                    $jamMulaiVal   = $jamPerMapelModal[$idx]['jam_mulai']   ?? '';
-                                    $jamSelesaiVal = $jamPerMapelModal[$idx]['jam_selesai'] ?? '';
-                                @endphp
-                                <div class="p-3 mb-3 rounded-xl border" style="border-color: #ddd6fe; background-color: #faf9fd;">
-                                    <label class="font-weight-bold text-purple-950 text-xs d-flex align-items-center mb-3">
-                                        <i class="fas fa-book-open text-purple-600 mr-1.5"></i>
-                                        Mata Pelajaran:
-                                        <span class="badge bg-purple-600 text-white font-bold px-2.5 py-1 text-xs rounded-full ml-2">{{ $namaMapelModal }}</span>
-                                    </label>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-2">
-                                            <label class="text-xs text-muted font-weight-bold mb-1 d-block">
-                                                <i class="fas fa-play-circle text-emerald-500 mr-1"></i>Jam Mulai
-                                            </label>
-                                            <input
-                                                type="time"
-                                                name="jam_per_mapel[{{ $idx }}][jam_mulai]"
-                                                value="{{ $jamMulaiVal }}"
-                                                class="form-control text-sm font-weight-bold"
-                                                style="height: 40px; border-color: #c4b5fd; border-radius: 10px;"
-                                            >
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            <label class="text-xs text-muted font-weight-bold mb-1 d-block">
-                                                <i class="fas fa-stop-circle text-rose-400 mr-1"></i>Jam Berakhir
-                                            </label>
-                                            <input
-                                                type="time"
-                                                name="jam_per_mapel[{{ $idx }}][jam_selesai]"
-                                                value="{{ $jamSelesaiVal }}"
-                                                class="form-control text-sm font-weight-bold"
-                                                style="height: 40px; border-color: #c4b5fd; border-radius: 10px;"
-                                            >
-                                        </div>
+                            @php
+                                $jamMulaiVal   = $jamPerMapelModal[$idx]['jam_mulai']   ?? '';
+                                $jamSelesaiVal = $jamMulaiVal ? date('H:i', strtotime($jamMulaiVal . ' + 90 minutes')) : '';
+                            @endphp
+                            <div class="p-3 mb-3 rounded-xl border" style="border-color: #ddd6fe; background-color: #faf9fd;">
+                                <label class="font-weight-bold text-purple-950 text-xs d-flex align-items-center mb-3">
+                                    <i class="fas fa-book-open text-purple-600 mr-1.5"></i>
+                                    Mata Pelajaran:
+                                    <span class="badge bg-purple-600 text-white font-bold px-2.5 py-1 text-xs rounded-full ml-2">{{ $namaMapelModal }}</span>
+                                </label>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label class="text-xs text-muted font-weight-bold mb-1 d-block">
+                                            <i class="fas fa-play-circle text-emerald-500 mr-1"></i>Jam Mulai
+                                        </label>
+                                        <input
+                                            type="time"
+                                            name="jam_per_mapel[{{ $idx }}][jam_mulai]"
+                                            value="{{ $jamMulaiVal }}"
+                                            class="form-control text-sm font-weight-bold jam-mulai-input"
+                                            data-target="#jamSelesaiPreview{{ $idx }}"
+                                            style="height: 40px; border-color: #c4b5fd; border-radius: 10px;"
+                                        >
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label class="text-xs text-muted font-weight-bold mb-1 d-block">
+                                            <i class="fas fa-stop-circle text-rose-400 mr-1"></i>Jam Berakhir <span class="text-slate-400 font-normal normal-case">(otomatis, +90 menit)</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="jamSelesaiPreview{{ $idx }}"
+                                            value="{{ $jamSelesaiVal ?: '—' }}"
+                                            class="form-control text-sm font-weight-bold text-slate-500 bg-light"
+                                            style="height: 40px; border-color: #e2e8f0; border-radius: 10px;"
+                                            disabled
+                                            readonly
+                                        >
                                     </div>
                                 </div>
-                            @endforeach
+                            </div>
+                        @endforeach
                         @else
                             <div class="text-center py-4">
                                 <i class="fas fa-book-open text-slate-300 fa-2x mb-2"></i>
@@ -799,6 +802,24 @@
                     });
                 });
             }
+        });
+        document.querySelectorAll('.jam-mulai-input').forEach(function (input) {
+            input.addEventListener('input', function () {
+                const targetSelector = this.getAttribute('data-target');
+                const targetEl = document.querySelector(targetSelector);
+                if (!targetEl) return;
+
+                if (!this.value) {
+                    targetEl.value = '—';
+                    return;
+                }
+
+                const [h, m] = this.value.split(':').map(Number);
+                const totalMinutes = h * 60 + m + 90;
+                const endH = Math.floor((totalMinutes % 1440) / 60).toString().padStart(2, '0');
+                const endM = (totalMinutes % 60).toString().padStart(2, '0');
+                targetEl.value = `${endH}:${endM}`;
+            });
         });
     </script>
 

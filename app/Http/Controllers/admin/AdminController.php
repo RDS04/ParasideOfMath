@@ -574,20 +574,39 @@ class AdminController extends Controller
         }
 
         $request->validate([
-            'jam_per_mapel'               => ['nullable', 'array'],
-            'jam_per_mapel.*.jam_mulai'   => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
-            'jam_per_mapel.*.jam_selesai' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
+            'jam_per_mapel'             => ['nullable', 'array'],
+            'jam_per_mapel.*.jam_mulai' => ['nullable', 'regex:/^\d{2}:\d{2}$/'],
         ]);
 
         $siswa = Siswa::findOrFail($id);
         $biodata = $siswa->biodata ?? [];
-        $biodata['jam_per_mapel'] = $request->input('jam_per_mapel', []);
+
+        $durasiMenit = 90; // Semua mata pelajaran durasinya 90 menit
+        $jamPerMapelInput = $request->input('jam_per_mapel', []);
+        $jamPerMapelFinal = [];
+
+        foreach ($jamPerMapelInput as $idx => $item) {
+            $jamMulai = $item['jam_mulai'] ?? null;
+
+            if ($jamMulai) {
+                $jamSelesai = date('H:i', strtotime($jamMulai . " + {$durasiMenit} minutes"));
+            } else {
+                $jamSelesai = null;
+            }
+
+            $jamPerMapelFinal[$idx] = [
+                'jam_mulai'   => $jamMulai,
+                'jam_selesai' => $jamSelesai,
+            ];
+        }
+
+        $biodata['jam_per_mapel'] = $jamPerMapelFinal;
 
         $siswa->update([
             'biodata' => $biodata,
         ]);
 
-        return back()->with('success', 'Jam bimbingan per mata pelajaran untuk ' . $siswa->name . ' berhasil diperbarui!');
+        return back()->with('success', 'Jam bimbingan per mata pelajaran untuk ' . $siswa->name . ' berhasil diperbarui! Jam berakhir otomatis dihitung +90 menit dari jam mulai.');
     }
 
     /**

@@ -408,7 +408,7 @@
                                             <span class="academic-menu-label">Riwayat Payment</span>
                                         </a>
                                         <!-- Menu 3 -->
-                                         <a href="#" class="academic-menu-item">
+                                         <a href="{{ route('siswa.transkip-nilai') }}" class="academic-menu-item">
                                             <div class="academic-menu-icon-wrapper"
                                                 style="background-color: #d1fae5; color: #065f46;">
                                                 <i class="fas fa-file-alt"></i>

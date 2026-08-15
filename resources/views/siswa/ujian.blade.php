@@ -8,15 +8,15 @@
         <div class="container-fluid">
             <div class="row align-items-center">
                 <div class="col-sm-7">
-                    <h1 class="m-0 font-weight-bold text-purple-950 d-flex align-items-center">
+                    <h1 class="m-0 font-weight-bold text-purple-950 d-flex align-items-center page-title-mobile">
                         <i class="fas fa-pencil-alt text-purple-600 mr-2.5"></i> Latihan Soal &amp; Ujian Online
                     </h1>
                     <p class="text-sm text-slate-500 mb-0 mt-1">
-                        Uji pemahaman materi Anda berdasarkan Jenjang (SD, SMP, SMA) dan Sub-Kategori (Semester 1, 2, TKA).
+                        Uji pemahaman materi Anda melalui paket-paket soal latihan yang tersedia.
                     </p>
                 </div>
                 <div class="col-sm-5">
-                    <ol class="breadcrumb float-sm-right text-sm bg-transparent p-0 m-0">
+                    <ol class="breadcrumb float-sm-right text-sm bg-transparent p-0 m-0 mt-2 mt-sm-0">
                         <li class="breadcrumb-item"><a href="{{ route('siswa.dashboard') }}" class="text-purple-600 font-semibold">Dashboard</a></li>
                         <li class="breadcrumb-item active text-slate-500">Latihan Ujian</li>
                     </ol>
@@ -48,12 +48,12 @@
                 @if (!empty($assignedExams))
                     <!-- BANNER UJIAN DITUGASKAN OLEH GURU -->
                     <div class="card border-0 shadow-md rounded-2xl mb-4 overflow-hidden bg-white" style="border-left: 5px solid #a855f7;">
-                        <div class="card-header bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-gradient-to-r from-purple-900 via-indigo-900 to-slate-900 text-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
                             <h5 class="card-title font-extrabold mb-0 text-base d-flex align-items-center">
-                                <i class="fas fa-thumbtack text-amber-300 mr-2"></i> Ujian Ditugaskan oleh Guru Anda ({{ count($assignedExams) }})
+                                <i class="fas fa-thumbtack text-amber-300 mr-2"></i> Ujian Ditugaskan ({{ count($assignedExams) }})
                             </h5>
                             <span class="badge bg-amber-400 text-purple-950 font-extrabold px-3 py-1 rounded-full text-xs">
-                                Tugas Ujian Wajib
+                                Tugas Wajib
                             </span>
                         </div>
                         <div class="card-body p-4 bg-purple-50/30">
@@ -63,7 +63,7 @@
                                         <div class="card border border-purple-200 rounded-2xl shadow-xs overflow-hidden bg-white h-100 hover:border-purple-400 transition-all">
                                             <div class="card-body p-3.5 d-flex flex-column justify-content-between">
                                                 <div class="mb-3">
-                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-2">
                                                         <span class="badge bg-purple-100 text-purple-900 font-extrabold px-2.5 py-1 rounded-md text-xs">
                                                             {{ $aEx['jenjang'] ?? 'SD' }} • {{ $aEx['nama_kategori'] ?? 'Mata Pelajaran' }}
                                                         </span>
@@ -93,67 +93,21 @@
                     </div>
                 @endif
 
-                <!-- 1. TABS JENJANG (SD, SMP, SMA) -->
-                <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                    <div class="card-body p-2 bg-purple-50/50">
-                        <ul class="nav nav-pills nav-justified gap-2">
-                            @foreach (['SD' => ['Sekolah Dasar', 'fa-child'], 'SMP' => ['Sekolah Menengah Pertama', 'fa-user-graduate'], 'SMA' => ['Sekolah Menengah Atas', 'fa-university']] as $key => $info)
-                                <li class="nav-item">
-                                    <a href="{{ route('siswa.ujian', ['jenjang' => $key, 'sub_kategori' => 'Semester 1']) }}" 
-                                       class="nav-link py-3 px-4 font-bold rounded-xl d-flex align-items-center justify-content-center transition-all duration-200 {{ $jenjang === $key ? 'bg-purple-900 text-white shadow-md' : 'text-slate-600 hover:bg-purple-100 hover:text-purple-900' }}">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mr-2.5 shadow-sm" 
-                                             style="width: 32px; height: 32px; background: {{ $jenjang === $key ? 'rgba(255,255,255,0.2)' : '#eef2ff' }};">
-                                            <i class="fas {{ $info[1] }} {{ $jenjang === $key ? 'text-white' : 'text-purple-700' }}"></i>
-                                        </div>
-                                        <div class="text-left">
-                                            <span class="d-block text-base leading-tight font-extrabold">Jenjang {{ $key }}</span>
-                                            <span class="d-block text-[11px] opacity-80 font-normal">{{ $info[0] }}</span>
-                                        </div>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
 
-                <!-- 2. SUB-KATEGORI PILLS -->
-                <div class="d-flex align-items-center flex-wrap gap-2 mb-4">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2">Pilih Cabang / Semester:</span>
-                    @foreach ($allSubKategori as $sub)
-                        <a href="{{ route('siswa.ujian', ['jenjang' => $jenjang, 'sub_kategori' => $sub]) }}"
-                           class="btn btn-sm font-semibold rounded-full px-3.5 py-1.5 text-xs transition-all {{ $sub_kategori === $sub ? 'btn-purple shadow-sm text-white' : 'btn-light border border-slate-200 text-slate-700 hover:bg-slate-100' }}">
-                            <i class="fas {{ $sub === 'TKA' ? 'fa-star text-amber-400' : 'fa-bookmark text-purple-400' }} mr-1.5"></i>
-                            {{ $sub }}
-                        </a>
-                    @endforeach
-                </div>
-
-                <!-- INFORMASI MAPEL AKTIF SISWA -->
-                @if (!empty($siswaMapelList))
-                    <div class="alert alert-purple bg-purple-50 border border-purple-200 rounded-2xl p-3.5 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-2 shadow-xs">
-                        <div class="d-flex align-items-center flex-wrap gap-1.5">
-                            <i class="fas fa-book-reader text-purple-600 mr-2 fa-lg"></i>
-                            <span class="text-xs font-bold text-purple-950 mr-1">Mata Pelajaran Anda:</span>
-                            @foreach ($siswaMapelList as $sm)
-                                <span class="badge bg-purple-900 text-white font-bold px-2.5 py-1 rounded-lg text-xs shadow-xs">{{ $sm }}</span>
-                            @endforeach
-                        </div>
-                        <span class="text-xxs text-purple-700 font-semibold italic"><i class="fas fa-filter mr-1"></i> Menampilkan soal khusus untuk mata pelajaran yang Anda ambil</span>
-                    </div>
-                @endif
 
                 <!-- 3. DAFTAR KATEGORI UJIAN TERSEDIA -->
                 <div class="mb-5">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="font-bold text-purple-950 text-lg mb-0 d-flex align-items-center">
-                            <i class="fas fa-layer-group text-purple-600 mr-2"></i> Daftar Paket Ujian (Jenjang {{ $jenjang }} - {{ $sub_kategori }})
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                        <h4 class="font-bold text-purple-950 mb-0 d-flex align-items-center exam-list-title">
+                            <i class="fas fa-layer-group text-purple-600 mr-2"></i>
+                            <span>Daftar Paket Ujian <span class="d-block d-sm-inline text-sm font-normal text-slate-500">({{ $jenjang }} - {{ $sub_kategori }})</span></span>
                         </h4>
-                        <span class="badge bg-purple-100 text-purple-900 font-bold px-3 py-1 rounded-full text-xs">
-                            {{ $categories->count() }} Paket Soal
+                        <span class="badge bg-purple-100 text-purple-900 font-bold px-3 py-1 rounded-full text-xs shrink-0">
+                            {{ $categories->count() }} Paket
                         </span>
                     </div>
 
-                    @if ($categories->isEmpty())
+                    @if ($categories->isEmpty() && empty($assignedExams))
                         <div class="card border-0 shadow-sm rounded-2xl text-center py-5 px-4 bg-white">
                             <div class="card-body">
                                 <div class="mx-auto mb-3 rounded-full bg-purple-50 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
@@ -165,13 +119,14 @@
                                 </p>
                             </div>
                         </div>
+                    @elseif ($categories->isEmpty())
                     @else
                         <div class="row">
                             @foreach ($categories as $cat)
                                 <div class="col-md-6 col-lg-4 mb-4">
                                     <div class="card border-0 shadow-sm rounded-2xl bg-white h-100 transition-all hover:shadow-md hover:-translate-y-1 overflow-hidden d-flex flex-column">
                                         <div class="card-header bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 border-0">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-1 mb-2">
                                                 <span class="badge bg-purple-500/30 text-purple-200 border border-purple-400/30 px-2.5 py-1 rounded-md text-[11px] font-bold">
                                                     {{ $cat->jenjang }} • {{ $cat->sub_kategori }}
                                                 </span>
@@ -185,7 +140,7 @@
                                             <p class="text-xs text-slate-600 mb-4 leading-relaxed">
                                                 {{ $cat->deskripsi ?: 'Latihan soal pilihan ganda untuk menguji pemahaman materi ' . $cat->nama_kategori . '.' }}
                                             </p>
-                                            
+
                                             @if ($cat->bank_soals_count > 0)
                                                 <a href="{{ route('siswa.ujian', ['kategori_id' => $cat->id]) }}" class="btn btn-purple btn-block font-bold rounded-xl py-2.5 text-sm shadow-sm">
                                                     <i class="fas fa-play-circle mr-1.5"></i> Mulai Kerjakan Soal
@@ -327,10 +282,10 @@
                                         <!-- Opsi Jawaban Radio Buttons -->
                                         <div class="space-y-3">
                                             @foreach (['A' => $soalItem->opsi_a, 'B' => $soalItem->opsi_b, 'C' => $soalItem->opsi_c, 'D' => $soalItem->opsi_d] as $optKey => $optVal)
-                                                <label class="d-flex align-items-start p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-purple-50 hover:border-purple-300 cursor-pointer transition-all duration-150 option-label mb-2" 
+                                                <label class="d-flex align-items-start p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-purple-50 hover:border-purple-300 cursor-pointer transition-all duration-150 option-label mb-2"
                                                        style="user-select: none;">
-                                                    <input type="radio" name="jawaban[{{ $soalItem->id }}]" value="{{ $optKey }}" 
-                                                           class="mt-1 mr-3 option-radio" 
+                                                    <input type="radio" name="jawaban[{{ $soalItem->id }}]" value="{{ $optKey }}"
+                                                           class="mt-1 mr-3 option-radio"
                                                            data-soal-id="{{ $soalItem->id }}">
                                                     <div class="d-flex align-items-start">
                                                         <span class="badge bg-purple-100 text-purple-950 font-extrabold mr-2.5 px-2.5 py-1 rounded-md text-xs">
@@ -357,8 +312,8 @@
                                 <div class="card-body p-4 text-center">
                                     <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                                         @foreach ($selectedCategory->bankSoals as $index => $soalItem)
-                                            <a href="#soal_card_{{ $soalItem->id }}" 
-                                               id="nav_btn_{{ $soalItem->id }}" 
+                                            <a href="#soal_card_{{ $soalItem->id }}"
+                                               id="nav_btn_{{ $soalItem->id }}"
                                                class="btn btn-outline-secondary font-bold rounded-xl text-xs d-flex align-items-center justify-content-center nav-soal-btn transition-all"
                                                style="width: 42px; height: 42px;">
                                                 {{ $soalItem->nomor }}
@@ -377,7 +332,7 @@
                                         </div>
                                     </div>
 
-                                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin mengumpulkan seluruh jawaban ujian ini?');" 
+                                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin mengumpulkan seluruh jawaban ujian ini?');"
                                             class="btn btn-purple btn-block font-extrabold py-3 rounded-xl shadow-md text-sm transition-all">
                                         <i class="fas fa-paper-plane mr-2"></i> Kumpulkan Ujian
                                     </button>
@@ -504,13 +459,13 @@
                                                     $isSelectedByUser = ($userAns === $optKey);
                                                 @endphp
                                                 <div class="col-md-6 mb-2">
-                                                    <div class="p-3 rounded-xl border text-xs font-semibold d-flex align-items-start 
+                                                    <div class="p-3 rounded-xl border text-xs font-semibold d-flex align-items-start
                                                         {{ $isKey ? 'bg-emerald-100 border-emerald-400 text-emerald-950 font-bold' : ($isSelectedByUser && !$isKey ? 'bg-rose-100 border-rose-400 text-rose-950' : 'bg-slate-50 border-slate-200 text-slate-700') }}">
-                                                        
+
                                                         <span class="badge {{ $isKey ? 'bg-emerald-700 text-white' : ($isSelectedByUser ? 'bg-rose-700 text-white' : 'bg-slate-200 text-slate-700') }} mr-2.5 px-2.5 py-1 rounded-md text-xs font-bold">
                                                             {{ $optKey }}
                                                         </span>
-                                                        
+
                                                         <div class="flex-1 mt-0.5">
                                                             <span>{{ $optVal }}</span>
                                                             @if ($isKey)
@@ -562,6 +517,46 @@
             color: #ffffff !important;
             border-color: #581c87 !important;
         }
+
+        /* ── Responsive Mobile Tweaks ── */
+        .exam-list-title {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 576px) {
+            .page-title-mobile {
+                font-size: 1.15rem;
+                line-height: 1.3;
+            }
+            .content-header {
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+            }
+            .exam-list-title {
+                font-size: 0.95rem;
+                width: 100%;
+            }
+            .card-title {
+                font-size: 0.95rem;
+            }
+            .soal-card .card-body {
+                padding: 1rem !important;
+            }
+            .soal-card h5 {
+                font-size: 0.95rem;
+            }
+            .option-label {
+                padding: 0.75rem !important;
+            }
+            .nav-soal-btn {
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 0.75rem;
+            }
+            .table-responsive table {
+                font-size: 0.75rem;
+            }
+        }
     </style>
 
     <script>
@@ -572,7 +567,7 @@
             radioButtons.forEach(radio => {
                 radio.addEventListener('change', function() {
                     const soalId = this.getAttribute('data-soal-id');
-                    
+
                     // Reset styling in same question group
                     const parentCard = document.getElementById(`soal_card_${soalId}`);
                     if (parentCard) {
