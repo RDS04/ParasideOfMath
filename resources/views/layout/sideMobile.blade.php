@@ -53,19 +53,20 @@
             style="font-size: 10px; font-weight: {{ $isGuruUjianActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Ujian</span>
         </a>
 
-        <!-- Biodata Guru -->
-        <a href="{{ route('guru.biodata') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruBiodataActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+        <!-- Chat -->
+        <a href="{{ route('guru.chat.index') }}"
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isChatActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruBiodataActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isChatActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruBiodataActive ? 'scale(1.08)' : 'scale(1)' }};">
-              <path
-                d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.78c0-2.33 4.67-3.5 7-3.5s7 1.17 7 3.5V19z" />
+              style="width: 20px; height: 20px; transition: transform 0.25s ease; transform: {{ $isChatActive ? 'scale(1.08)' : 'scale(1)' }};">
+              <path d="M4 4h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3.5V15H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+                opacity="0.55" />
+              <path d="M9 8h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1v2.8L16 18h-7a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z" />
             </svg>
           </div>
           <span
-            style="font-size: 10px; font-weight: {{ $isGuruBiodataActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; white-space: nowrap; transition: font-weight 0.25s;">Biodata</span>
+            style="font-size: 10px; font-weight: {{ $isChatActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Chat</span>
         </a>
 
         <!-- Jadwal Bimbingan -->
@@ -159,7 +160,7 @@
         </a>
 
         <!-- Chat -->
-        <a href="#"
+        <a href="{{ route('siswa.chat.index') }}"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isChatActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isChatActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
