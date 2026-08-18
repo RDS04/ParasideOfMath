@@ -145,7 +145,7 @@ class SiswaController extends Controller
         }
         $waMessage .= "\nMohon bantuan untuk melakukan verifikasi bukti transfer dan aktivasi akun belajar saya. Terima kasih!";
 
-        $waUrl = "https://wa.me/6282284260507?text=" . rawurlencode($waMessage);
+        $waUrl = "https://wa.me/6289675053537?text=" . rawurlencode($waMessage);
 
         return view('siswa.pending', compact('siswa', 'paket', 'waUrl'));
     }

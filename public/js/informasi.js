@@ -10,6 +10,8 @@ if (!sessionId) {
     localStorage.setItem('chat_session_id', sessionId);
 }
 
+let visitorRenderedMsgIds = new Set();
+
 document.addEventListener('DOMContentLoaded', function () {
     // ── 1. MOBILE MENU TOGGLE ──
     const toggleBtn = document.getElementById('mobile-menu-toggle');
@@ -159,8 +161,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    let visitorRenderedMsgIds = new Set();
-
     // Load messages from database (Incremental Append - High Performance)
     function loadMessages() {
         if (!chatContainer) return;
@@ -168,6 +168,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.length === 0 && visitorRenderedMsgIds.size === 0) {
+                    visitorRenderedMsgIds.add('welcome_1');
+                    visitorRenderedMsgIds.add('welcome_2');
                     appendLocalMessage('Halo! Selamat datang di <strong>Paradise of Math</strong>. 🎓', 'bot');
                     appendLocalMessage('Ada yang bisa kami bantu hari ini? Silakan ketik pesan Anda atau klik opsi di bawah:', 'bot');
                     return;
@@ -209,11 +211,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 message: messageText
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            loadMessages();
-        })
-        .catch(err => console.error("Error sending message:", err));
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.id) {
+                    visitorRenderedMsgIds.add(data.id);
+                }
+                loadMessages();
+            })
+            .catch(err => console.error("Error sending message:", err));
     }
 
     // Polling Control Functions
@@ -405,21 +410,30 @@ function sendQuickOption(text) {
             message: text
         })
     })
-    .then(res => res.json())
-    .then(data => {
-        fetch('/chat/send', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': token
-            },
-            body: JSON.stringify({
-                session_id: sessionId,
-                sender_name: 'Customer Service PM',
-                sender_role: 'admin',
-                message: botReply
-            })
-        });
-    })
-    .catch(err => console.error("Error sending quick option:", err));
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.id) {
+                visitorRenderedMsgIds.add(data.id);
+            }
+            return fetch('/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({
+                    session_id: sessionId,
+                    sender_name: 'Customer Service PM',
+                    sender_role: 'admin',
+                    message: botReply
+                })
+            });
+        })
+        .then(res => res ? res.json() : null)
+        .then(botData => {
+            if (botData && botData.id) {
+                visitorRenderedMsgIds.add(botData.id);
+            }
+        })
+        .catch(err => console.error("Error sending quick option:", err));
 }

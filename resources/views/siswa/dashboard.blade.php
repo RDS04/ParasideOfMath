@@ -278,7 +278,7 @@
                                 <span>Lihat Tutor Pengajar</span> <i class="fas fa-eye text-xxs"></i>
                             </a>
                         @else
-                            <a href="https://wa.me/6282284260507" target="_blank"
+                            <a href="https://wa.me/6289675053537" target="_blank"
                                 class="small-box-footer text-teal-600 mt-3 pt-2 border-top text-left text-xs font-semibold d-flex items-center justify-between">
                                 <span>Hubungi Admin/Tutor</span> <i class="fas fa-chevron-right text-xxs"></i>
                             </a>
