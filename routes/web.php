@@ -179,3 +179,17 @@ Route::prefix('pengaturan')->name('pengaturan.')->middleware('auth:web,siswa')->
         Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
     });
 
+Route::middleware('auth:siswa')->prefix('siswa/chat')->name('siswa.chat.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Chat\ChatController::class, 'siswaChatPage'])->name('index');
+    Route::get('/contacts', [\App\Http\Controllers\Chat\ChatController::class, 'siswaContacts'])->name('contacts');
+    Route::get('/messages/{session_id}', [\App\Http\Controllers\Chat\ChatController::class, 'siswaMessages'])->name('messages');
+    Route::post('/send', [\App\Http\Controllers\Chat\ChatController::class, 'siswaSendMessage'])->name('send');
+});
+
+Route::middleware('auth:web')->prefix('guru/chat')->name('guru.chat.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Chat\ChatController::class, 'guruChatPage'])->name('index');
+    Route::get('/contacts', [\App\Http\Controllers\Chat\ChatController::class, 'guruContacts'])->name('contacts');
+    Route::get('/messages/{session_id}', [\App\Http\Controllers\Chat\ChatController::class, 'guruMessages'])->name('messages');
+    Route::post('/send', [\App\Http\Controllers\Chat\ChatController::class, 'guruSendMessage'])->name('send');
+});
+

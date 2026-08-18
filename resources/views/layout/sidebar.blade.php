@@ -84,7 +84,7 @@
 
                     <li class="nav-header">LAINNYA</li>
                     <li class="nav-item">
-                        <a href="#"
+                        <a href="{{ route('siswa.chat.index') }}"
                             class="nav-link {{ Route::is('siswa.chat') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-comments text-blue-400"></i>
                             <p>Chat Guru</p>
@@ -291,6 +291,12 @@
                         </a>
                     </li>
                     <li class="nav-header">LAINNYA</li>
+                    <li class="nav-item">
+                        <a href="{{ route('guru.chat.index') }}" class="nav-link {{ Route::is('guru.chat.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-comments text-blue-400"></i>
+                            <p>Chat Siswa</p>
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a href="{{ route('guru.biodata') }}"
                             class="nav-link {{ Route::is('guru.biodata') ? 'active' : '' }}">
