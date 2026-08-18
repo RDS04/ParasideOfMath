@@ -11,6 +11,26 @@ if (!sessionId) {
 }
 
 let visitorRenderedMsgIds = new Set();
+let isInitialVisitorLoad = true;
+
+function showDesktopNotif(title, body) {
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    try {
+        const notif = new Notification(title, {
+            body: body || 'Ada pesan baru masuk.',
+            icon: '/images/logoPM.webp',
+            badge: '/images/logoPM.webp',
+            tag: 'chat-pm-' + Date.now(),
+            renotify: true
+        });
+        notif.onclick = function() {
+            window.focus();
+            this.close();
+        };
+    } catch(e) {
+        console.error("System notification error:", e);
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function () {
     // ── 1. MOBILE MENU TOGGLE ──
@@ -181,9 +201,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (!visitorRenderedMsgIds.has(msgId)) {
                         visitorRenderedMsgIds.add(msgId);
                         hasNewMessages = true;
+
+                        if (msg.sender_role !== 'visitor' && !isInitialVisitorLoad) {
+                            showDesktopNotif('💬 Customer Service PM', msg.message);
+                        }
+
                         appendLocalMessage(msg.message, msg.sender_role === 'visitor' ? 'user' : 'bot');
                     }
                 });
+
+                isInitialVisitorLoad = false;
 
                 if (hasNewMessages) {
                     chatContainer.scrollTop = chatContainer.scrollHeight;
