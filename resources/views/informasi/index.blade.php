@@ -2058,7 +2058,7 @@
     </footer>
 
 
-    <script src="{{ asset('js/informasi.js') }}"></script>
+    <script src="{{ asset('js/informasi.js') }}?v={{ filemtime(public_path('js/informasi.js')) }}"></script>
 
     <!-- ================= FLOATING REALTIME CHAT WIDGET ================= -->
     <div class="fixed bottom-6 right-6 z-50 no-print">

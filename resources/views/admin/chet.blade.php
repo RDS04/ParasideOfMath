@@ -25,6 +25,17 @@
     <section class="content">
         <div class="container-fluid">
             
+            <!-- Notification Permission Banner -->
+            <div id="notif-perm-banner" class="alert border-0 rounded-xl mb-3 d-flex align-items-center justify-content-between p-2.5 shadow-sm text-xs hidden" style="background-color: #f3e8ff; color: #4c1d95;">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-bell text-purple-600 text-sm"></i>
+                    <span>Aktifkan <strong>Notifikasi Perangkat</strong> untuk menerima pemberitahuan pesan chat masuk secara real-time.</span>
+                </div>
+                <button onclick="requestNotificationPermission()" class="btn btn-sm text-xs font-weight-bold rounded-lg px-3 py-1 text-white shadow-sm" style="background-color: #7c3aed;">
+                    <i class="fas fa-bell mr-1"></i> Izinkan Notifikasi
+                </button>
+            </div>
+
             <div class="row mb-5" style="height: 600px; max-height: calc(100vh - 200px);">
                 
                 <!-- LEFT COLUMN: SESSIONS LIST (4 cols) -->
@@ -166,7 +177,55 @@
         let messagePoll = null;
         let renderedMsgIds = new Set();
 
+        let previousUnreadCounts = {};
+        let isInitialSessionsLoad = true;
+        let isInitialMessagesLoad = true;
+
+        // System Native Desktop Notification Helpers
+        function checkNotificationPermission() {
+            const banner = document.getElementById('notif-perm-banner');
+            if (!banner) return;
+            if ("Notification" in window && Notification.permission === "default") {
+                banner.classList.remove('hidden');
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("Browser Anda tidak mendukung Notifikasi Perangkat.");
+                return;
+            }
+            Notification.requestPermission().then(perm => {
+                if (perm === "granted") {
+                    showDesktopNotif("Notifikasi Berhasil Diaktifkan! 🔔", "Anda akan menerima pemberitahuan perangkat setiap kali ada pesan chat masuk.");
+                }
+                checkNotificationPermission();
+            });
+        }
+
+        function showDesktopNotif(title, body) {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+            try {
+                const notif = new Notification(title, {
+                    body: body || 'Ada pesan chat baru masuk.',
+                    icon: '{{ asset("images/logoPM.webp") }}',
+                    badge: '{{ asset("images/logoPM.webp") }}',
+                    tag: 'chat-pm-' + Date.now(),
+                    renotify: true
+                });
+                notif.onclick = function() {
+                    window.focus();
+                    this.close();
+                };
+            } catch(e) {
+                console.error("System notification error:", e);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            checkNotificationPermission();
             // Initial responsive layouts check
             updateResponsiveView();
             window.addEventListener('resize', updateResponsiveView);
@@ -247,6 +306,16 @@
 
                     let html = '';
                     data.forEach(sess => {
+                        const prevUnread = previousUnreadCounts[sess.session_id] || 0;
+                        if (!isInitialSessionsLoad && sess.unread_count > prevUnread) {
+                            const roleLabel = sess.user_role ? ` (${sess.user_role})` : ' (Pengunjung/Anonim)';
+                            showDesktopNotif(
+                                `💬 Chat Masuk: ${sess.sender_name}${roleLabel}`,
+                                sess.last_message || 'Mengirim pesan baru...'
+                            );
+                        }
+                        previousUnreadCounts[sess.session_id] = sess.unread_count;
+
                         const isActive = sess.session_id === currentSessionId ? 'active' : '';
                         const dateFormatted = new Date(sess.last_activity).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
                         const unreadBadge = sess.unread_count > 0 
@@ -280,6 +349,7 @@
                         `;
                     });
 
+                    isInitialSessionsLoad = false;
                     listContainer.innerHTML = html;
                 })
                 .catch(err => console.error("Error loading sessions:", err));
@@ -290,6 +360,7 @@
             currentSessionId = sessionId;
             currentVisitorName = name;
             renderedMsgIds.clear();
+            isInitialMessagesLoad = true;
 
             const container = document.getElementById('admin-messages-container');
             if (container) container.innerHTML = '';
@@ -344,6 +415,14 @@
                             hasNewMessages = true;
 
                             const isUser = msg.sender_role === 'admin';
+                            
+                            if (!isUser && !isInitialMessagesLoad) {
+                                showDesktopNotif(
+                                    `💬 ${msg.sender_name || 'Anonim'}`,
+                                    msg.message
+                                );
+                            }
+
                             const msgDiv = document.createElement('div');
                             
                             if (isUser) {
@@ -367,6 +446,8 @@
                             container.appendChild(msgDiv);
                         }
                     });
+
+                    isInitialMessagesLoad = false;
 
                     if (hasNewMessages) {
                         container.scrollTop = container.scrollHeight;
