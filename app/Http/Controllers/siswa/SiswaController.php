@@ -21,6 +21,9 @@ class SiswaController extends Controller
             if ($siswa->status === 'active') {
                 return redirect()->route('siswa.dashboard');
             }
+            if ($siswa->status === 'nonaktif') {
+                return redirect()->route('siswa.pending');
+            }
             if ($siswa->status === 'rejected') {
                 $siswa->status = 'pending';
                 $siswa->save();
@@ -86,6 +89,9 @@ class SiswaController extends Controller
                     $activeMapels = array_map('trim', explode(',', $m[1]));
                 }
             } else {
+                if ($siswa->status === 'nonaktif') {
+                    return redirect()->route('siswa.pending');
+                }
                 // ── Mode pendaftaran siswa baru (logika lama tetap) ──
                 if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
                     return redirect()->route('siswa.pending');
@@ -125,25 +131,36 @@ class SiswaController extends Controller
                 return redirect()->route('siswa.biodata')
                     ->with('error', 'Pendaftaran Anda sebelumnya ditolak oleh Admin. Seluruh data registrasi & biodata telah dibersihkan. Silakan isi kembali biodata Anda dari awal.');
             }
-            if (empty($siswa->biodata) || empty($siswa->bukti_transfer)) {
+            // Siswa nonaktif tetap harus mendarat di halaman ini, apapun kondisi biodata/bukti_transfer-nya
+            if ($siswa->status !== 'nonaktif' && (empty($siswa->biodata) || empty($siswa->bukti_transfer))) {
                 return redirect()->route('siswa.biodata');
             }
         }
 
         $paket = $siswa ? PaketBelajar::find($siswa->paket_id) : null;
 
-        $waMessage = "Halo Admin Paradise of Math,\n\nSaya telah mengunggah bukti transfer pembayaran pendaftaran bimbingan belajar. Berikut adalah rincian data diri saya:\n\n";
-        if ($siswa) {
+        if ($siswa && $siswa->status === 'nonaktif') {
+            $waMessage = "Halo Admin Paradise of Math,\n\nSaya ingin menanyakan terkait akun belajar saya yang saat ini berstatus *nonaktif*. Berikut data diri saya:\n\n";
             $waMessage .= "• Nama: " . $siswa->name . "\n";
             $waMessage .= "• Email: " . $siswa->email . "\n";
+            if ($paket) {
+                $waMessage .= "• Paket Belajar: " . $paket->nama_paket . " (" . $paket->kategori . ")\n";
+            }
+            $waMessage .= "\nMohon informasi terkait alasan penonaktifan dan apakah akun saya bisa diaktifkan kembali. Terima kasih!";
+        } else {
+            $waMessage = "Halo Admin Paradise of Math,\n\nSaya telah mengunggah bukti transfer pembayaran pendaftaran bimbingan belajar. Berikut adalah rincian data diri saya:\n\n";
+            if ($siswa) {
+                $waMessage .= "• Nama: " . $siswa->name . "\n";
+                $waMessage .= "• Email: " . $siswa->email . "\n";
+            }
+            if ($paket) {
+                $waMessage .= "• Paket Belajar: " . $paket->nama_paket . " (" . $paket->kategori . ")\n";
+            }
+            if ($siswa && $siswa->tipe_paket) {
+                $waMessage .= "• Pilihan Kelas: " . $siswa->tipe_paket . "\n";
+            }
+            $waMessage .= "\nMohon bantuan untuk melakukan verifikasi bukti transfer dan aktivasi akun belajar saya. Terima kasih!";
         }
-        if ($paket) {
-            $waMessage .= "• Paket Belajar: " . $paket->nama_paket . " (" . $paket->kategori . ")\n";
-        }
-        if ($siswa && $siswa->tipe_paket) {
-            $waMessage .= "• Pilihan Kelas: " . $siswa->tipe_paket . "\n";
-        }
-        $waMessage .= "\nMohon bantuan untuk melakukan verifikasi bukti transfer dan aktivasi akun belajar saya. Terima kasih!";
 
         $waUrl = "https://wa.me/6289675053537?text=" . rawurlencode($waMessage);
 
@@ -157,6 +174,9 @@ class SiswaController extends Controller
     {
         $siswa = auth()->guard('siswa')->user();
         if ($siswa) {
+            if ($siswa->status === 'nonaktif') {
+                return redirect()->route('siswa.pending');
+            }
             if ($siswa->status === 'rejected') {
                 return redirect()->route('siswa.biodata');
             }
@@ -272,6 +292,9 @@ class SiswaController extends Controller
         $siswa = auth()->guard('siswa')->user();
         if (!$siswa) {
             return redirect()->route('login');
+        }
+        if ($siswa->status === 'nonaktif') {
+            return redirect()->route('siswa.pending');
         }
         if ($siswa->status === 'rejected') {
             $siswa->status = 'pending';
@@ -679,6 +702,9 @@ class SiswaController extends Controller
         if (!$siswa) {
             return redirect()->route('login');
         }
+        if ($siswa->status === 'nonaktif') {
+            return redirect()->route('siswa.pending');
+        }
         if ($siswa->status !== 'active') {
             if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
                 return redirect()->route('siswa.pending');
@@ -969,6 +995,9 @@ class SiswaController extends Controller
     public function showUjian(Request $request)
     {
         $siswa = auth()->guard('siswa')->user();
+        if ($redirect = $this->checkActiveStatus($siswa)) {
+            return $redirect;
+        }
         if (!$siswa) {
             return redirect()->route('login');
         }
@@ -1085,6 +1114,9 @@ class SiswaController extends Controller
     public function submitUjian(Request $request)
     {
         $siswa = auth()->guard('siswa')->user();
+        if ($redirect = $this->checkActiveStatus($siswa)) {
+            return $redirect;
+        }
         if (!$siswa) {
             return redirect()->route('login');
         }

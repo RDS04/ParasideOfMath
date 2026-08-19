@@ -47,6 +47,9 @@ Route::get('/siswa', function () {
                 return redirect()->route('siswa.register-kategori');
             }
         }
+        if ($siswa->status === 'nonaktif') {
+            return redirect()->route('siswa.pending');
+        }
         if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer)) {
             return redirect()->route('siswa.pending');
         }
@@ -160,6 +163,8 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/bank-soal/import/confirm', 'confirmImportSoalAdmin')->name('admin.bank-soal.import.confirm');
     Route::post('/admin/bank-soal/import/cancel', 'cancelImportSoalAdmin')->name('admin.bank-soal.import.cancel');
     Route::get('/admin/bank-soal/template', 'downloadTemplateSoalAdmin')->name('admin.bank-soal.template');
+
+    Route::post('/admin/siswa/toggle-status/{id}', 'toggleStatusSiswa')->name('admin.siswa.toggle-status');
 })->middleware('auth:web');
 
 // Realtime Chat API and Admin Panel

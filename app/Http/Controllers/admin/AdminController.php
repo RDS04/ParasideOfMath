@@ -767,16 +767,47 @@ class AdminController extends Controller
     /**
      * Tampilkan Halaman Daftar Siswa Keseluruhan.
      */
-    public function daftarSiswa()
+    public function daftarSiswa(Request $request)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        // Fetch all students (e.g. active status or all sorted by registration date)
-        $students = Siswa::orderBy('created_at', 'desc')->get();
+        $search = $request->input('search');
 
-        return view('admin.daftarSiswa', compact('students'));
+        $students = Siswa::when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('whatsapp', 'like', "%{$search}%")
+                    ->orWhere('sekolah', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.daftarSiswa', compact('students', 'search'));
+    }
+
+    public function toggleStatusSiswa($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = Siswa::findOrFail($id);
+
+        if ($siswa->status === 'active') {
+            $siswa->update(['status' => 'nonaktif']);
+            $message = 'Akun siswa ' . $siswa->name . ' berhasil DINONAKTIFKAN.';
+        } elseif ($siswa->status === 'nonaktif') {
+            $siswa->update(['status' => 'active']);
+            $message = 'Akun siswa ' . $siswa->name . ' berhasil DIAKTIFKAN kembali.';
+        } else {
+            return back()->with('error', 'Status siswa ini (' . $siswa->status . ') tidak dapat diubah dari sini. Gunakan halaman Persetujuan untuk status tersebut.');
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
