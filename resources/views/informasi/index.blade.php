@@ -7,6 +7,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Paradise Of Math - Bimbingan Belajar Terpercaya</title>
 
+    <!-- Favicon / Tab Icon -->
+    <link rel="icon" type="image/webp" href="{{ asset('images/logoPM.webp') }}">
+    <link rel="shortcut icon" type="image/webp" href="{{ asset('images/logoPM.webp') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logoPM.webp') }}">
+
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -756,22 +761,22 @@
                         @php
                             $heroDir = public_path('uploads/landing/hero');
                             $heroFiles = glob($heroDir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE) ?: [];
-                            
-                            usort($heroFiles, function($a, $b) {
+
+                            usort($heroFiles, function ($a, $b) {
                                 return filemtime($b) - filemtime($a);
                             });
 
                             $heroImagesList = [];
-                            foreach($heroFiles as $hf) {
+                            foreach ($heroFiles as $hf) {
                                 $bn = basename($hf);
                                 $heroImagesList[] = asset("uploads/landing/hero/{$bn}") . '?v=' . filemtime($hf);
                             }
 
                             // Fallback single file check if list empty
-                            if(empty($heroImagesList)) {
-                                foreach(['jpg','jpeg','png','webp'] as $ext) {
+                            if (empty($heroImagesList)) {
+                                foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
                                     $fp = public_path("uploads/landing/hero_image.{$ext}");
-                                    if(file_exists($fp)) {
+                                    if (file_exists($fp)) {
                                         $heroImagesList[] = asset("uploads/landing/hero_image.{$ext}") . '?v=' . filemtime($fp);
                                         break;
                                     }
@@ -782,20 +787,24 @@
                         @if(count($heroImagesList) > 0)
                             <div class="relative w-full h-full overflow-hidden rounded-[22px]" id="landingHeroSlider">
                                 @foreach($heroImagesList as $idx => $imgUrl)
-                                    <img src="{{ $imgUrl }}" alt="Paradise of Math Hero Image {{ $idx+1 }}" 
-                                         class="landing-hero-item absolute top-0 left-0 w-full h-full object-cover rounded-[22px] shadow-md transition-opacity duration-700 ease-in-out" 
-                                         style="opacity: {{ $idx === 0 ? '1' : '0' }}; z-index: {{ $idx === 0 ? '10' : '1' }};" />
+                                    <img src="{{ $imgUrl }}" alt="Paradise of Math Hero Image {{ $idx + 1 }}"
+                                        class="landing-hero-item absolute top-0 left-0 w-full h-full object-cover rounded-[22px] shadow-md transition-opacity duration-700 ease-in-out"
+                                        style="opacity: {{ $idx === 0 ? '1' : '0' }}; z-index: {{ $idx === 0 ? '10' : '1' }};" />
                                 @endforeach
                             </div>
                             @if(count($heroImagesList) > 1)
-                                <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20" id="landingHeroDots">
+                                <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-20"
+                                    id="landingHeroDots">
                                     @foreach($heroImagesList as $idx => $imgUrl)
-                                        <span class="landing-hero-dot w-2 h-2 rounded-full bg-white shadow-sm transition-all duration-300" style="opacity: {{ $idx === 0 ? '1' : '0.4' }};"></span>
+                                        <span
+                                            class="landing-hero-dot w-2 h-2 rounded-full bg-white shadow-sm transition-all duration-300"
+                                            style="opacity: {{ $idx === 0 ? '1' : '0.4' }};"></span>
                                     @endforeach
                                 </div>
                             @endif
                         @elseif(file_exists(public_path('images/hero-student.jpg')))
-                            <img src="{{ asset('images/hero-student.jpg') }}" alt="Paradise of Math Hero Student" class="w-full h-full object-cover rounded-[22px] shadow-md" />
+                            <img src="{{ asset('images/hero-student.jpg') }}" alt="Paradise of Math Hero Student"
+                                class="w-full h-full object-cover rounded-[22px] shadow-md" />
                         @else
                             <div
                                 class="w-20 h-20 rounded-full bg-violet-600/50 flex items-center justify-center mb-4 border border-violet-400/40 text-amber-300">
@@ -1102,9 +1111,9 @@
                         class="relative aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
                         @php
                             $imgKelas = null;
-                            foreach(['jpg','jpeg','png','webp'] as $ext) {
+                            foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
                                 $fp = public_path("uploads/landing/fasilitas_kelas.{$ext}");
-                                if(file_exists($fp)) {
+                                if (file_exists($fp)) {
                                     $imgKelas = asset("uploads/landing/fasilitas_kelas.{$ext}") . '?v=' . filemtime($fp);
                                     break;
                                 }
@@ -1112,9 +1121,11 @@
                         @endphp
 
                         @if($imgKelas)
-                            <img src="{{ $imgKelas }}" alt="Ruang Kelas Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                            <img src="{{ $imgKelas }}" alt="Ruang Kelas Paradise of Math"
+                                class="w-full h-full object-cover rounded-xl" />
                         @elseif(file_exists(public_path('images/fasilitas-kelas.jpg')))
-                            <img src="{{ asset('images/fasilitas-kelas.jpg') }}" alt="Ruang Kelas Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                            <img src="{{ asset('images/fasilitas-kelas.jpg') }}" alt="Ruang Kelas Paradise of Math"
+                                class="w-full h-full object-cover rounded-xl" />
                         @else
                             <span class="text-violet-200 font-bold text-xs sm:text-base px-2">
                                 [ foto kelas ber-AC & WiFi ]
@@ -1144,10 +1155,14 @@
                     </div>
                     <div class="p-3 sm:p-5 flex items-center justify-between flex-wrap gap-2 mt-2">
                         <div>
-                            <h3 class="font-extrabold text-violet-950 text-sm sm:text-base md:text-lg">Ruang Kelas Ber-AC &amp; High-Speed WiFi</h3>
-                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Ruangan sejuk, pencahayaan optimal, dan meja-kursi nyaman untuk fokus belajar.</p>
+                            <h3 class="font-extrabold text-violet-950 text-sm sm:text-base md:text-lg">Ruang Kelas
+                                Ber-AC &amp; High-Speed WiFi</h3>
+                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Ruangan sejuk, pencahayaan optimal, dan
+                                meja-kursi nyaman untuk fokus belajar.</p>
                         </div>
-                        <span class="px-2.5 py-1 bg-violet-100 text-violet-900 font-extrabold text-[10px] sm:text-xs rounded-full">★ Utama</span>
+                        <span
+                            class="px-2.5 py-1 bg-violet-100 text-violet-900 font-extrabold text-[10px] sm:text-xs rounded-full">★
+                            Utama</span>
                     </div>
                 </div>
 
@@ -1158,9 +1173,9 @@
                         class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
                         @php
                             $imgToilet = null;
-                            foreach(['jpg','jpeg','png','webp'] as $ext) {
+                            foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
                                 $fp = public_path("uploads/landing/fasilitas_toilet.{$ext}");
-                                if(file_exists($fp)) {
+                                if (file_exists($fp)) {
                                     $imgToilet = asset("uploads/landing/fasilitas_toilet.{$ext}") . '?v=' . filemtime($fp);
                                     break;
                                 }
@@ -1168,9 +1183,11 @@
                         @endphp
 
                         @if($imgToilet)
-                            <img src="{{ $imgToilet }}" alt="Toilet Bersih Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                            <img src="{{ $imgToilet }}" alt="Toilet Bersih Paradise of Math"
+                                class="w-full h-full object-cover rounded-xl" />
                         @elseif(file_exists(public_path('images/fasilitas-toilet.jpg')))
-                            <img src="{{ asset('images/fasilitas-toilet.jpg') }}" alt="Toilet Bersih Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                            <img src="{{ asset('images/fasilitas-toilet.jpg') }}" alt="Toilet Bersih Paradise of Math"
+                                class="w-full h-full object-cover rounded-xl" />
                         @else
                             <span class="text-violet-200 font-bold text-xs sm:text-sm px-2">
                                 [ foto toilet ]
@@ -1187,8 +1204,10 @@
                         </div>
                     </div>
                     <div class="p-3 sm:p-4 mt-2">
-                        <h3 class="font-extrabold text-violet-950 text-sm sm:text-base mb-1">Toilet Bersih &amp; Higienis</h3>
-                        <p class="text-slate-500 text-xs sm:text-sm">Fasilitas sanitasi yang selalu terawat dan bersih demi kenyamanan setiap hari.</p>
+                        <h3 class="font-extrabold text-violet-950 text-sm sm:text-base mb-1">Toilet Bersih &amp;
+                            Higienis</h3>
+                        <p class="text-slate-500 text-xs sm:text-sm">Fasilitas sanitasi yang selalu terawat dan bersih
+                            demi kenyamanan setiap hari.</p>
                     </div>
                 </div>
 
@@ -1199,9 +1218,9 @@
                         class="relative aspect-[4/3] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
                         @php
                             $imgMushala = null;
-                            foreach(['jpg','jpeg','png','webp'] as $ext) {
+                            foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
                                 $fp = public_path("uploads/landing/fasilitas_mushala.{$ext}");
-                                if(file_exists($fp)) {
+                                if (file_exists($fp)) {
                                     $imgMushala = asset("uploads/landing/fasilitas_mushala.{$ext}") . '?v=' . filemtime($fp);
                                     break;
                                 }
@@ -1209,9 +1228,11 @@
                         @endphp
 
                         @if($imgMushala)
-                            <img src="{{ $imgMushala }}" alt="Mushala Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                            <img src="{{ $imgMushala }}" alt="Mushala Paradise of Math"
+                                class="w-full h-full object-cover rounded-xl" />
                         @elseif(file_exists(public_path('images/fasilitas-mushala.jpg')))
-                            <img src="{{ asset('images/fasilitas-mushala.jpg') }}" alt="Mushala Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                            <img src="{{ asset('images/fasilitas-mushala.jpg') }}" alt="Mushala Paradise of Math"
+                                class="w-full h-full object-cover rounded-xl" />
                         @else
                             <span class="text-violet-200 font-bold text-xs sm:text-sm px-2">
                                 [ foto mushala ]
@@ -1228,22 +1249,24 @@
                         </div>
                     </div>
                     <div class="p-3 sm:p-4 mt-2">
-                        <h3 class="font-extrabold text-violet-950 text-sm sm:text-base mb-1">Mushala Luas &amp; Suci</h3>
-                        <p class="text-slate-500 text-xs sm:text-sm">Tempat ibadah yang tenang, harum, dan luas agar siswa beribadah tepat waktu.</p>
+                        <h3 class="font-extrabold text-violet-950 text-sm sm:text-base mb-1">Mushala Luas &amp; Suci
+                        </h3>
+                        <p class="text-slate-500 text-xs sm:text-sm">Tempat ibadah yang tenang, harum, dan luas agar
+                            siswa beribadah tepat waktu.</p>
                     </div>
                 </div>
 
                 <!-- Card 4: Pigura Foto Gedung / Rumah Bimbel -->
                 @php
                     $imgGedung = null;
-                    foreach(['jpg','jpeg','png','webp'] as $ext) {
+                    foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
                         $fp = public_path("uploads/landing/fasilitas_gedung.{$ext}");
-                        if(file_exists($fp)) {
+                        if (file_exists($fp)) {
                             $imgGedung = asset("uploads/landing/fasilitas_gedung.{$ext}") . '?v=' . filemtime($fp);
                             break;
                         }
                     }
-                    if(!$imgGedung && file_exists(public_path('images/fasilitas-gedung.jpg'))) {
+                    if (!$imgGedung && file_exists(public_path('images/fasilitas-gedung.jpg'))) {
                         $imgGedung = asset('images/fasilitas-gedung.jpg');
                     }
                 @endphp
@@ -1252,7 +1275,8 @@
                     <div
                         class="relative aspect-[16/10] sm:aspect-[16/9] rounded-2xl bg-violet-950 overflow-hidden flex flex-col items-center justify-center text-center p-1.5 sm:p-2">
                         @if($imgGedung)
-                            <img src="{{ $imgGedung }}" alt="Gedung Bimbel Paradise of Math" class="w-full h-full object-cover rounded-xl" />
+                            <img src="{{ $imgGedung }}" alt="Gedung Bimbel Paradise of Math"
+                                class="w-full h-full object-cover rounded-xl" />
                         @else
                             <span class="text-violet-200 font-bold text-xs sm:text-base px-2">
                                 [ foto gedung/rumah bimbel ]
@@ -1276,10 +1300,14 @@
                     </div>
                     <div class="p-3 sm:p-5 flex items-center justify-between flex-wrap gap-2 mt-2">
                         <div>
-                            <h3 class="font-extrabold text-violet-950 text-sm sm:text-base md:text-lg">Gedung &amp; Lingkungan Belajar</h3>
-                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Lokasi bimbingan belajar yang sejuk, tenang, dan bebas bising untuk kenyamanan belajar.</p>
+                            <h3 class="font-extrabold text-violet-950 text-sm sm:text-base md:text-lg">Gedung &amp;
+                                Lingkungan Belajar</h3>
+                            <p class="text-slate-500 text-xs sm:text-sm mt-0.5">Lokasi bimbingan belajar yang sejuk,
+                                tenang, dan bebas bising untuk kenyamanan belajar.</p>
                         </div>
-                        <span class="px-2.5 py-1 bg-amber-100 text-amber-900 font-extrabold text-[10px] sm:text-xs rounded-full">🏠 Lokasi</span>
+                        <span
+                            class="px-2.5 py-1 bg-amber-100 text-amber-900 font-extrabold text-[10px] sm:text-xs rounded-full">🏠
+                            Lokasi</span>
                     </div>
                 </div>
             </div>
@@ -1292,16 +1320,26 @@
 
                     <!-- Social Media Links -->
                     <div class="flex flex-wrap items-center gap-4">
-                        <div
-                            class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15">
-                            <span class="text-pink-400 text-lg">📸</span>
-                            <span class="text-xs sm:text-sm font-extrabold text-amber-300">@paradiseofmath</span>
-                        </div>
-                        <div
-                            class="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15">
-                            <span class="text-white text-lg">🎵</span>
-                            <span class="text-xs sm:text-sm font-extrabold text-amber-300">@paradiseofmath</span>
-                        </div>
+                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank" rel="noopener noreferrer"
+                            class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-pink-400/50 hover:scale-105 transition-all duration-300 group">
+                            <span class="w-5 h-5 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                                </svg>
+                            </span>
+                            <span class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">@paradiseofmath</span>
+                        </a>
+                        <a href="https://www.tiktok.com/@paradiseofmath?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer"
+                            class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-cyan-400/50 hover:scale-105 transition-all duration-300 group">
+                            <span class="w-5 h-5 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                                <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.59 4.23.86.97 2.07 1.62 3.39 1.83v3.71c-1.84-.02-3.61-.71-4.96-1.97-.24-.2-.46-.43-.66-.67v6.62c.04 2.64-1.28 5.12-3.51 6.47-2.3 1.48-5.3 1.68-7.74.52-2.73-1.22-4.48-4.22-4.26-7.22.18-3.08 2.37-5.78 5.37-6.5 1.09-.27 2.22-.24 3.29.07V10.7c-.89-.31-1.87-.33-2.76-.04-1.39.42-2.45 1.62-2.71 3.05-.33 1.62.43 3.3 1.88 4.09 1.34.78 3.1.66 4.31-.31.86-.68 1.35-1.74 1.33-2.84V.02z" />
+                                </svg>
+                            </span>
+                            <span class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">@paradiseofmath</span>
+                        </a>
                     </div>
 
                     <!-- Contact & Address -->
@@ -1312,7 +1350,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-amber-400 font-bold shrink-0">📞 WhatsApp / Kontak:</span>
-                            <span class="font-extrabold text-white">0811-6612-050 (Pimpinan - Kiki)</span>
+                            <span class="font-extrabold text-white">08116612050 (Pimpinan - Kak Ika)</span>
                         </div>
                     </div>
 
@@ -1322,14 +1360,19 @@
             <div id="facility-gallery-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4 py-6">
                 <div class="absolute inset-0 bg-violet-950/80 backdrop-blur-md" data-facility-gallery-close></div>
 
-                <div class="relative w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl border border-violet-200">
+                <div
+                    class="relative w-full max-w-6xl overflow-hidden rounded-3xl bg-white shadow-2xl border border-violet-200">
                     <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 sm:px-6 py-4">
                         <div>
-                            <p class="text-[11px] sm:text-xs font-black tracking-[0.2em] text-amber-500 uppercase mb-1">Galeri Lengkap</p>
-                            <h3 class="text-lg sm:text-2xl font-black text-violet-950">Semua Foto Fasilitas & Upload Admin</h3>
+                            <p class="text-[11px] sm:text-xs font-black tracking-[0.2em] text-amber-500 uppercase mb-1">
+                                Galeri Lengkap</p>
+                            <h3 class="text-lg sm:text-2xl font-black text-violet-950">Semua Foto Fasilitas & Upload
+                                Admin</h3>
                         </div>
 
-                        <button type="button" class="shrink-0 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors" data-facility-gallery-close>
+                        <button type="button"
+                            class="shrink-0 rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                            data-facility-gallery-close>
                             Tutup
                         </button>
                     </div>
@@ -1338,9 +1381,11 @@
                         @if(count($galleryItems) > 0)
                             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                                 @foreach($galleryItems as $photo)
-                                    <figure class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                    <figure
+                                        class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                                         <div class="aspect-square overflow-hidden bg-violet-950">
-                                            <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                                            <img src="{{ $photo['url'] }}" alt="{{ $photo['alt'] }}"
+                                                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                                         </div>
                                         <figcaption class="p-3">
                                             <p class="text-sm font-bold text-violet-950 truncate">{{ $photo['title'] }}</p>
@@ -2007,7 +2052,8 @@
                             </svg>
                         </a>
                         <!-- TikTok Button -->
-                        <a href="https://www.tiktok.com/@paradiseofmath?is_from_webapp=1&sender_device=pc" target="_blank"
+                        <a href="https://www.tiktok.com/@paradiseofmath?is_from_webapp=1&sender_device=pc"
+                            target="_blank"
                             class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-black hover:border-transparent hover:scale-110 hover:shadow-cyan-400/20 hover:shadow-lg transition duration-300 shadow-md">
                             <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -2063,33 +2109,41 @@
     <!-- ================= FLOATING REALTIME CHAT WIDGET ================= -->
     <div class="fixed bottom-6 right-6 z-50 no-print">
         <!-- Chat Bubble Trigger -->
-        <button id="chat-trigger-btn" class="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-violet-300 hover:scale-105 hover:shadow-violet-400 active:scale-95 transition-all duration-300 focus:outline-none">
+        <button id="chat-trigger-btn"
+            class="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-violet-300 hover:scale-105 hover:shadow-violet-400 active:scale-95 transition-all duration-300 focus:outline-none">
             <!-- Pulsing ring effect -->
             <span class="absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75 animate-ping"></span>
-            
+
             <i class="fas fa-comments text-xl relative z-10"></i>
-            
+
             <!-- Notification Badge -->
-            <span class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center border-2 border-white animate-bounce">1</span>
+            <span
+                class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 rounded-full text-white text-[10px] font-bold flex items-center justify-center border-2 border-white animate-bounce">1</span>
         </button>
 
         <!-- Chat Window Box -->
-        <div id="chat-window-box" class="absolute bottom-20 right-0 w-[320px] sm:w-[360px] h-[480px] bg-white rounded-2xl shadow-2xl border border-violet-100/80 flex flex-col overflow-hidden hidden transform scale-95 opacity-0 origin-bottom-right transition-all duration-300">
+        <div id="chat-window-box"
+            class="absolute bottom-20 right-0 w-[320px] sm:w-[360px] h-[480px] bg-white rounded-2xl shadow-2xl border border-violet-100/80 flex flex-col overflow-hidden hidden transform scale-95 opacity-0 origin-bottom-right transition-all duration-300">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-violet-700 to-indigo-800 p-4 text-white flex items-center justify-between shadow-md">
+            <div
+                class="bg-gradient-to-r from-violet-700 to-indigo-800 p-4 text-white flex items-center justify-between shadow-md">
                 <div class="flex items-center gap-3">
                     <div class="relative w-10 h-10 rounded-full bg-white/20 p-0.5">
-                        <img src="{{ asset('images/logoPM.webp') }}" alt="logo" class="w-full h-full object-contain rounded-full bg-white">
-                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+                        <img src="{{ asset('images/logoPM.webp') }}" alt="logo"
+                            class="w-full h-full object-contain rounded-full bg-white">
+                        <span
+                            class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
                     </div>
                     <div>
                         <div class="font-bold text-sm">Customer Service PM</div>
                         <div class="text-[10px] text-violet-200 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online (Siap Membantu)
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online (Siap
+                            Membantu)
                         </div>
                     </div>
                 </div>
-                <button id="chat-close-btn" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors focus:outline-none">
+                <button id="chat-close-btn"
+                    class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors focus:outline-none">
                     <i class="fas fa-times text-xs"></i>
                 </button>
             </div>
@@ -2099,16 +2153,25 @@
             </div>
 
             <!-- Quick Option Chips -->
-            <div id="quick-options-container" class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
-                <button onclick="sendQuickOption('Tanya Paket Belajar')" class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">📦 Paket Belajar</button>
-                <button onclick="sendQuickOption('Biaya Pendaftaran')" class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">💰 Biaya & Promo</button>
-                <button onclick="sendQuickOption('Hubungi WhatsApp')" class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">💬 WhatsApp Admin</button>
+            <div id="quick-options-container"
+                class="px-4 py-2 bg-slate-50 border-t border-slate-100 flex flex-wrap gap-1.5">
+                <button onclick="sendQuickOption('Tanya Paket Belajar')"
+                    class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">📦
+                    Paket Belajar</button>
+                <button onclick="sendQuickOption('Biaya Pendaftaran')"
+                    class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">💰
+                    Biaya & Promo</button>
+                <button onclick="sendQuickOption('Hubungi WhatsApp')"
+                    class="px-2.5 py-1.5 rounded-full bg-white border border-violet-200 text-[10px] font-semibold text-violet-700 hover:bg-violet-50 transition-colors focus:outline-none">💬
+                    WhatsApp Admin</button>
             </div>
 
             <!-- Footer Input -->
             <form id="chat-input-form" class="p-3 bg-white border-t border-slate-100 flex items-center gap-2">
-                <input type="text" id="chat-input-text" placeholder="Tulis pesan..." autocomplete="off" class="flex-1 bg-slate-100 text-xs px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-600 transition-all">
-                <button type="submit" class="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors focus:outline-none">
+                <input type="text" id="chat-input-text" placeholder="Tulis pesan..." autocomplete="off"
+                    class="flex-1 bg-slate-100 text-xs px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-600 transition-all">
+                <button type="submit"
+                    class="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors focus:outline-none">
                     <i class="fas fa-paper-plane text-xs"></i>
                 </button>
             </form>
@@ -2124,7 +2187,7 @@
     </script>
     <!-- Script Auto-Rotator Hero Slider -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const galleryModal = document.getElementById('facility-gallery-modal');
             const galleryOpenButton = document.getElementById('gallery-view-all-btn');
 
@@ -2139,17 +2202,17 @@
             }
 
             if (galleryOpenButton && galleryModal) {
-                galleryOpenButton.addEventListener('click', function() {
+                galleryOpenButton.addEventListener('click', function () {
                     galleryModal.classList.remove('hidden');
                     galleryModal.classList.add('flex');
                     document.body.classList.add('overflow-hidden');
                 });
 
-                galleryModal.querySelectorAll('[data-facility-gallery-close]').forEach(function(button) {
+                galleryModal.querySelectorAll('[data-facility-gallery-close]').forEach(function (button) {
                     button.addEventListener('click', hideGalleryModal);
                 });
 
-                document.addEventListener('keydown', function(event) {
+                document.addEventListener('keydown', function (event) {
                     if (event.key === 'Escape') {
                         hideGalleryModal();
                     }
@@ -2160,7 +2223,7 @@
             const heroDots = document.querySelectorAll('.landing-hero-dot');
             if (heroItems.length > 1) {
                 let currentHeroIndex = 0;
-                setInterval(function() {
+                setInterval(function () {
                     heroItems[currentHeroIndex].style.opacity = '0';
                     heroItems[currentHeroIndex].style.zIndex = '1';
                     if (heroDots[currentHeroIndex]) heroDots[currentHeroIndex].style.opacity = '0.4';
@@ -2175,4 +2238,5 @@
         });
     </script>
 </body>
+
 </html>

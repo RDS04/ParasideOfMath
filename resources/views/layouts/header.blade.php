@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pendaftaran Kategori Belajar · Paradise of Math</title>
+
+    <!-- Favicon / Tab Icon -->
+    <link rel="icon" type="image/webp" href="{{ asset('images/logoPM.webp') }}">
+    <link rel="shortcut icon" type="image/webp" href="{{ asset('images/logoPM.webp') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logoPM.webp') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

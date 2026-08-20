@@ -31,17 +31,17 @@ class DatabaseSeeder extends Seeder
         $guruSeeds = [
             [
                 'name' => 'Kak Ika',
-                'email' => 'ika@example.com',
+                'email' => 'ika@gmail.com',
                 'spesialisasi' => 'Matematika (Master)',
             ],
             [
                 'name' => 'Kak Angel',
-                'email' => 'angel@example.com',
+                'email' => 'angel@gmail.com',
                 'spesialisasi' => 'Matematika & Bahasa Inggris (Co Master)',
             ],
             [
                 'name' => 'Kak Sofia',
-                'email' => 'sofia@example.com',
+                'email' => 'sofia@gmail.com',
                 'spesialisasi' => 'Matematika & Bahasa Inggris (Co Master)',
             ],
         ];
@@ -66,10 +66,10 @@ class DatabaseSeeder extends Seeder
         }
 
         // Tetap pertahankan 1 akun guru generik buat testing lama
-        if (User::where('email', 'guru@example.com')->doesntExist()) {
+        if (User::where('email', 'ica@gmail.com')->doesntExist()) {
             $guruUser = User::create([
                 'name' => 'Guru Test',
-                'email' => 'guru@example.com',
+                'email' => 'ica@gmail.com.com',
                 'password' => \Illuminate\Support\Facades\Hash::make('password'),
                 'role' => 'guru',
             ]);
@@ -82,17 +82,6 @@ class DatabaseSeeder extends Seeder
                 'status' => 'aktif',
             ]);
         }
-
-        // 3. Seed Siswa / Student (siswa table)
-        if (\App\Models\Siswa::where('email', 'siswa@example.com')->doesntExist()) {
-            \App\Models\Siswa::create([
-                'name' => 'Siswa Test',
-                'email' => 'siswa@example.com',
-                'password' => \Illuminate\Support\Facades\Hash::make('password'),
-                'status' => 'active', // Langsung active agar bisa akses dashboard
-            ]);
-        }
-
         $this->call([
             PaketBelajarSeeder::class,
             MapelSeeder::class,

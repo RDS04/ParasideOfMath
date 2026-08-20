@@ -8,6 +8,11 @@
     <meta name="user-role" content="{{ Auth::user() ? Auth::user()->role : '' }}">
     <title>@yield('title', 'Paradise of Math')</title>
 
+    <!-- Favicon / Tab Icon -->
+    <link rel="icon" type="image/webp" href="{{ asset('images/logoPM.webp') }}">
+    <link rel="shortcut icon" type="image/webp" href="{{ asset('images/logoPM.webp') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logoPM.webp') }}">
+
     @if(auth()->check() && auth()->user()->isAdmin())
         <!-- Firebase SDK Compat -->
         <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
