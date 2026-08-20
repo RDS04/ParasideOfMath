@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Validation\Rule;
 use App\Models\RiwayatPembayaran;
+use App\Models\YoutubeLink;
 
 class AdminController extends Controller
 {
@@ -2154,6 +2155,203 @@ class AdminController extends Controller
         ]);
     }
 
+    public function showYoutubeLink()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
 
+        $youtubeLinks = YoutubeLink::orderBy('urutan', 'asc')->orderBy('id', 'desc')->get();
+        return view('admin.link', compact('youtubeLinks'));
+    }
+
+    public function storeYoutubeLink(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'youtube_url' => 'required|string',
+            'kategori' => 'nullable|string|max:100',
+            'deskripsi' => 'nullable|string',
+            'urutan' => 'nullable|integer',
+        ]);
+
+        $youtubeId = YoutubeLink::parseYoutubeId($request->youtube_url);
+
+        YoutubeLink::create([
+            'judul' => $request->judul,
+            'youtube_url' => $request->youtube_url,
+            'youtube_id' => $youtubeId,
+            'kategori' => $request->kategori ?? 'Tutorial',
+            'deskripsi' => $request->deskripsi,
+            'urutan' => $request->urutan ?? 0,
+        ]);
+
+        return redirect()->back()->with('success', 'Link YouTube tutorial berhasil ditambahkan!');
+    }
+
+    public function updateYoutubeLink(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $link = YoutubeLink::findOrFail($id);
+
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'youtube_url' => 'required|string',
+            'kategori' => 'nullable|string|max:100',
+            'deskripsi' => 'nullable|string',
+            'urutan' => 'nullable|integer',
+        ]);
+
+        $youtubeId = YoutubeLink::parseYoutubeId($request->youtube_url);
+
+        $link->update([
+            'judul' => $request->judul,
+            'youtube_url' => $request->youtube_url,
+            'youtube_id' => $youtubeId,
+            'kategori' => $request->kategori ?? 'Tutorial',
+            'deskripsi' => $request->deskripsi,
+            'urutan' => $request->urutan ?? 0,
+        ]);
+
+        return redirect()->back()->with('success', 'Link YouTube tutorial berhasil diperbarui!');
+    }
+
+    public function deleteYoutubeLink($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $link = YoutubeLink::findOrFail($id);
+        $link->delete();
+
+        return redirect()->back()->with('success', 'Link YouTube tutorial berhasil dihapus!');
+    }
+
+    /**
+     * Halaman Input / Kelola Foto Guru & Banner Landing (Admin).
+     */
+    public function showInputFotoGuru()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $gurus = Guru::with('user')->get();
+
+        // Banner photos
+        $bannerFiles = [];
+        $rawBanner = glob(public_path('uploads/landing/guru_banner*.*')) ?: [];
+        foreach ($rawBanner as $file) {
+            $bannerFiles[] = [
+                'filename' => basename($file),
+                'url'      => asset('uploads/landing/' . basename($file)) . '?v=' . filemtime($file),
+            ];
+        }
+
+        return view('admin.inputfotoGuru', compact('gurus', 'bannerFiles'));
+    }
+
+    /**
+     * Upload Foto Banner Guru & Sertifikat Landing Page (Admin).
+     */
+    public function storeBannerGuruFoto(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'foto_banner' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'foto_banner.required' => 'File foto banner wajib dipilih.',
+            'foto_banner.image'    => 'File harus berupa gambar.',
+            'foto_banner.mimes'    => 'Format gambar harus JPG, JPEG, PNG, atau WEBP.',
+            'foto_banner.max'      => 'Ukuran foto maksimal 5MB.',
+        ]);
+
+        $file = $request->file('foto_banner');
+        $extension = $file->getClientOriginalExtension();
+        $filename = 'guru_banner_' . time() . '.' . $extension;
+
+        $destinationPath = public_path('uploads/landing');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0777, true);
+        }
+
+        $file->move($destinationPath, $filename);
+
+        return redirect()->back()->with('success', 'Foto Banner Tim Pengajar & Sertifikat berhasil diunggah!');
+    }
+
+    /**
+     * Hapus Foto Banner Guru Landing Page (Admin).
+     */
+    public function deleteBannerGuruFoto($filename)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $filePath = public_path('uploads/landing/' . basename($filename));
+        if (file_exists($filePath)) {
+            unlink($filePath);
+            return redirect()->back()->with('success', 'Foto banner berhasil dihapus!');
+        }
+
+        return redirect()->back()->with('error', 'File foto banner tidak ditemukan.');
+    }
+
+    /**
+     * Upload Foto Profil Guru Spesifik (Admin).
+     */
+    public function storeProfilGuruFoto(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $guru = Guru::findOrFail($id);
+
+        $request->validate([
+            'foto_guru' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'foto_guru.required' => 'File foto profil guru wajib dipilih.',
+            'foto_guru.image'    => 'File harus berupa gambar.',
+            'foto_guru.mimes'    => 'Format gambar harus JPG, JPEG, PNG, atau WEBP.',
+            'foto_guru.max'      => 'Ukuran foto maksimal 5MB.',
+        ]);
+
+        // Hapus foto lama jika ada
+        if (!empty($guru->foto)) {
+            $oldPath = public_path('uploads/guru/' . $guru->foto);
+            if (file_exists($oldPath)) {
+                @unlink($oldPath);
+            }
+        }
+
+        $file = $request->file('foto_guru');
+        $extension = $file->getClientOriginalExtension();
+        $filename = 'guru_' . $guru->id . '_' . time() . '.' . $extension;
+
+        $destinationPath = public_path('uploads/guru');
+        if (!file_exists($destinationPath)) {
+            mkdir($destinationPath, 0777, true);
+        }
+
+        $file->move($destinationPath, $filename);
+
+        $guru->foto = $filename;
+        $guru->save();
+
+        return redirect()->back()->with('success', 'Foto profil untuk ' . ($guru->user ? $guru->user->name : 'Guru') . ' berhasil diperbarui!');
+    }
 }
 

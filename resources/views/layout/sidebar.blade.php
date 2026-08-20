@@ -229,7 +229,21 @@
                                     <p>Foto Fasilitas &amp; Galeri</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.foto-guru.index') }}"
+                                    class="nav-link {{ Route::is('admin.foto-guru.*') ? 'active' : '' }}">
+                                    <i class="fas fa-chalkboard-teacher nav-icon text-indigo-400"></i>
+                                    <p>Foto Guru &amp; Banner</p>
+                                </a>
+                            </li>
                         </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.link') }}"
+                            class="nav-link {{ Route::is('admin.link') ? 'active' : '' }}">
+                            <i class="nav-icon fab fa-youtube text-red-500"></i>
+                            <p>Kelola Link YouTube</p>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('admin.paket') }}"

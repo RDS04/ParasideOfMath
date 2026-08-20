@@ -857,6 +857,202 @@
         </div>
     </section>
 
+    <!-- ================= YOUTUBE TUTORIAL SECTION ================= -->
+    <section id="youtube-tutorial"
+        class="py-16 sm:py-24 bg-gradient-to-b from-violet-950 via-slate-900 to-violet-950 text-white relative overflow-hidden">
+        <!-- Ambient Glow Backgrounds -->
+        <div class="absolute top-1/4 -left-32 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-1/4 -right-32 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl pointer-events-none">
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16 reveal-element">
+                <span
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-extrabold tracking-wide uppercase shadow-sm mb-4">
+                    <i class="fab fa-youtube text-base text-red-500"></i> YouTube Tutorial &amp; Preview Belajar
+                </span>
+                <h2 class="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+                    Tonton Serunya Belajar &amp; <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500">Trik
+                    </span>
+                </h2>
+                <p class="mt-4 text-sm sm:text-base text-violet-200/80 leading-relaxed font-medium">
+                    Pelajari teknik cepat berhitung, pembahasan soal ujian, dan suasana kelas bimbingan interaktif
+                    bersama para
+                    master tutor Paradise of Math.
+                </p>
+            </div>
+
+            @php
+                $hasLinks = isset($youtubeLinks) && count($youtubeLinks) > 0;
+                $firstVideo = $hasLinks ? $youtubeLinks->first() : null;
+                $firstId = $hasLinks ? $firstVideo->youtube_id : '5p2g1YVwSxE';
+                $firstTitle = $hasLinks ? $firstVideo->judul : '🚀 Trik Cepat Hitung Matematika & Pembahasan Soal';
+                $firstDesc = $hasLinks ? ($firstVideo->deskripsi ?: 'Video tutorial eksklusif penjelasan konsep matematika secara simpel dan menyenangkan.') : 'Video tutorial eksklusif penjelasan konsep matematika secara simpel dan menyenangkan.';
+                $firstUrl = $hasLinks ? $firstVideo->youtube_url : 'https://www.youtube.com';
+            @endphp
+
+            <!-- Featured Video Player & Preview Cards Grid -->
+            <div class="grid lg:grid-cols-12 gap-8 items-start reveal-element delay-100">
+                <!-- Main Featured Player Container (8 cols on lg) -->
+                <div
+                    class="lg:col-span-8 bg-violet-900/40 backdrop-blur-xl border border-violet-700/50 rounded-3xl p-3 sm:p-5 shadow-2xl relative group">
+                    <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-inner border border-white/10"
+                        id="yt-featured-container">
+                        <iframe id="main-yt-iframe" class="w-full h-full rounded-2xl"
+                            src="https://www.youtube-nocookie.com/embed/{{ $firstId }}?autoplay=0&rel=0"
+                            title="Paradise of Math YouTube Tutorial Preview" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+
+                    <!-- Video Details Banner -->
+                    <div
+                        class="mt-4 px-2 sm:px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-white/10 pt-4">
+                        <div>
+                            <h3 id="yt-featured-title" class="text-base sm:text-xl font-extrabold text-white">
+                                {{ $firstTitle }}
+                            </h3>
+                            <p id="yt-featured-desc" class="text-xs sm:text-sm text-violet-200/70 mt-1">
+                                {{ $firstDesc }}
+                            </p>
+                        </div>
+                        <a id="yt-featured-link" href="{{ $firstUrl }}" target="_blank" rel="noopener noreferrer"
+                            class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-red-600/30 hover:scale-105 active:scale-95 transition-all duration-300">
+                            <i class="fab fa-youtube text-lg"></i>
+                            <span>Buka di YouTube</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Playlist / Video Preview Selector List (4 cols on lg) -->
+                <div class="lg:col-span-4 flex flex-col gap-4">
+                    <div class="flex items-center justify-between px-2">
+                        <h4
+                            class="text-sm font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-play-circle text-red-500"></i> Video Pilihan Tutorial
+                        </h4>
+                        <span class="text-xs text-violet-300 font-semibold">{{ $hasLinks ? count($youtubeLinks) : 3 }}
+                            Video</span>
+                    </div>
+
+                    @if($hasLinks)
+                        @foreach($youtubeLinks as $idx => $link)
+                            <button type="button"
+                                onclick="switchYtVideo('{{ $link->youtube_id }}', '{{ addslashes($link->judul) }}', '{{ addslashes($link->deskripsi ?: '') }}', '{{ addslashes($link->youtube_url) }}', this)"
+                                class="yt-playlist-item text-left p-3.5 rounded-2xl {{ $idx === 0 ? 'bg-white/10 border-2 border-amber-400/80' : 'bg-white/5 border border-white/10 hover:border-amber-400/50' }} shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                                <div
+                                    class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                    <img src="https://img.youtube.com/vi/{{ $link->youtube_id }}/hqdefault.jpg"
+                                        alt="{{ $link->judul }}"
+                                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                    <div
+                                        class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                                        <span
+                                            class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                                class="fas fa-play ml-0.5"></i></span>
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <span
+                                        class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider">{{ $link->kategori }}</span>
+                                    <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">{{ $link->judul }}
+                                    </h5>
+                                    <p class="text-[11px] text-violet-200/70 truncate mt-0.5">
+                                        {{ $link->deskripsi ?: 'Tonton video tutorial selengkapnya' }}
+                                    </p>
+                                </div>
+                            </button>
+                        @endforeach
+                    @else
+                        <!-- Video Item 1 (Active by default) -->
+                        <button type="button"
+                            onclick="switchYtVideo('5p2g1YVwSxE', '🚀 Trik Cepat Hitung Matematika & Pembahasan Soal', 'Video tutorial eksklusif penjelasan konsep matematika secara simpel dan menyenangkan.', 'https://www.youtube.com', this)"
+                            class="yt-playlist-item text-left p-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border-2 border-amber-400/80 shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                            <div
+                                class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                <img src="https://img.youtube.com/vi/5p2g1YVwSxE/hqdefault.jpg" alt="Preview Video 1"
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                <div
+                                    class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                                    <span
+                                        class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                            class="fas fa-play ml-0.5"></i></span>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <span
+                                    class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider">Trik
+                                    Hitung</span>
+                                <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Trik Cepat Cerdas
+                                    Matematika</h5>
+                                <p class="text-[11px] text-violet-200/70 truncate mt-0.5">Pembahasan konsep dasar &amp;
+                                    metode
+                                    kilat</p>
+                            </div>
+                        </button>
+
+                        <!-- Video Item 2 -->
+                        <button type="button"
+                            onclick="switchYtVideo('_uQrJ0TkZlc', '📐 Kuasai Rumus Aljabar & Geometri Mudah', 'Panduan langkah demi langkah memahami materi aljabar dan bangun ruang tanpa hafal rumus mati.', 'https://www.youtube.com', this)"
+                            class="yt-playlist-item text-left p-3.5 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-amber-400/50 shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                            <div
+                                class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                <img src="https://img.youtube.com/vi/_uQrJ0TkZlc/hqdefault.jpg" alt="Preview Video 2"
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                <div
+                                    class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                                    <span
+                                        class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                            class="fas fa-play ml-0.5"></i></span>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <span
+                                    class="px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px] font-black uppercase tracking-wider">Aljabar
+                                    &amp; Bangun Ruang</span>
+                                <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Kuasai Aljabar Tanpa
+                                    Stres
+                                </h5>
+                                <p class="text-[11px] text-violet-200/70 truncate mt-0.5">Metode visual &amp; contoh
+                                    penerapan
+                                    soal</p>
+                            </div>
+                        </button>
+
+                        <!-- Video Item 3 -->
+                        <button type="button"
+                            onclick="switchYtVideo('3JZ_D3ELwOQ', '🎯 Strategi Lolos Ujian & Bedah Soal PTN', 'Kupas tuntas soal-soal latihan ujian sekolah dan tryout persiapan jenjang SD, SMP, SMA.', 'https://www.youtube.com', this)"
+                            class="yt-playlist-item text-left p-3.5 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-amber-400/50 shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                            <div
+                                class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                <img src="https://img.youtube.com/vi/3JZ_D3ELwOQ/hqdefault.jpg" alt="Preview Video 3"
+                                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                                <div
+                                    class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                                    <span
+                                        class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                            class="fas fa-play ml-0.5"></i></span>
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <span
+                                    class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider">Bedah
+                                    Soal</span>
+                                <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Persiapan Ujian &amp;
+                                    Tryout</h5>
+                                <p class="text-[11px] text-violet-200/70 truncate mt-0.5">Strategi pengerjaan cepat &amp;
+                                    akurat</p>
+                            </div>
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ================= ABOUT ================= -->
     <section id="about"
         class="py-20 sm:py-24 md:py-28 bg-gradient-to-b from-white via-violet-50/30 to-white relative overflow-hidden">
@@ -1312,8 +1508,87 @@
                 </div>
             </div>
 
+            <!-- ================= BANNER FOTO GURU & SERTIFIKAT AUTO-SLIDER SECTION ================= -->
+            <div id="banner-guru-section" class="mt-14 mb-14 reveal-element">
+                <div class="relative w-full rounded-3xl overflow-hidden border-2 border-violet-800/80 shadow-2xl group bg-violet-950">
+                    @php
+                        $guruBannerFiles = glob(public_path('uploads/landing/guru_banner*.*')) ?: [];
+                        if (empty($guruBannerFiles)) {
+                            $guruBannerFiles = glob(public_path('uploads/guru/*.*')) ?: [];
+                        }
+                        if (empty($guruBannerFiles)) {
+                            $guruBannerFiles = glob(public_path('uploads/landing/galeri/*.*')) ?: [];
+                        }
 
-            <!-- Footer Banner Contact & Address (Matching Bottom of Uploaded Image) -->
+                        $guruBannerImagesList = [];
+                        foreach ($guruBannerFiles as $gbf) {
+                            $bn = basename($gbf);
+                            $dirName = str_contains($gbf, 'uploads/guru') ? 'guru' : (str_contains($gbf, 'uploads/landing/galeri') ? 'landing/galeri' : 'landing');
+                            $guruBannerImagesList[] = asset("uploads/{$dirName}/{$bn}") . '?v=' . filemtime($gbf);
+                        }
+                    @endphp
+
+                    <!-- Banner Image Slider Container -->
+                    <div class="relative w-full h-[300px] sm:h-[380px] md:h-[430px] lg:h-[480px] overflow-hidden" id="bannerGuruSlider">
+                        @if(count($guruBannerImagesList) > 0)
+                            @foreach($guruBannerImagesList as $idx => $imgUrl)
+                                <img src="{{ $imgUrl }}" alt="Foto Tim Pengajar & Sertifikat {{ $idx + 1 }}"
+                                    class="banner-guru-item absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out"
+                                    style="opacity: {{ $idx === 0 ? '1' : '0' }}; z-index: {{ $idx === 0 ? '10' : '1' }};" />
+                            @endforeach
+                        @else
+                            <!-- Default Fallback Banner Slides if no uploaded image files yet -->
+                            <div class="banner-guru-item absolute top-0 left-0 w-full h-full bg-gradient-to-r from-violet-950 via-purple-900 to-indigo-950 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 ease-in-out" style="opacity: 1; z-index: 10;">
+                                <div class="w-20 h-20 rounded-2xl bg-amber-400/20 border border-amber-300/40 text-amber-300 flex items-center justify-center text-3xl mb-3 shadow-xl backdrop-blur-md">🎓</div>
+                                <span class="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-widest mb-1">Master Tutor Kak Ika, S.Pd.</span>
+                                <h3 class="text-xl sm:text-3xl font-black text-white max-w-xl leading-tight">Pimpinan &amp; Master Tutor Matematika</h3>
+                            </div>
+                            <div class="banner-guru-item absolute top-0 left-0 w-full h-full bg-gradient-to-r from-indigo-950 via-purple-950 to-violet-900 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 ease-in-out" style="opacity: 0; z-index: 1;">
+                                <div class="w-20 h-20 rounded-2xl bg-purple-400/20 border border-purple-300/40 text-purple-200 flex items-center justify-center text-3xl mb-3 shadow-xl backdrop-blur-md">⭐</div>
+                                <span class="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-widest mb-1">Co Master Tutor Kak Angel &amp; Kak Sofia</span>
+                                <h3 class="text-xl sm:text-3xl font-black text-white max-w-xl leading-tight">Spesialisasi Matematika &amp; Bahasa Inggris</h3>
+                            </div>
+                        @endif
+
+                        <!-- Dark Overlay Gradients for Readable Text -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-violet-950 via-violet-950/40 to-transparent pointer-events-none z-10"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-violet-950/70 via-transparent to-violet-950/70 pointer-events-none z-10"></div>
+
+                        <!-- Top Floating Badges -->
+                        <div class="absolute top-4 left-4 sm:top-6 sm:left-6 flex flex-wrap items-center gap-2 z-20">
+                            <span class="px-3 py-1.5 rounded-xl bg-amber-400 text-violet-950 font-black text-xs sm:text-sm shadow-lg transform -rotate-1">
+                                🎓 Tim Pengajar &amp; Master Tutor
+                            </span>
+                            <span class="px-3 py-1.5 rounded-xl bg-violet-950/90 text-amber-300 font-extrabold text-xs border border-amber-300/40 shadow-lg backdrop-blur-md">
+                                📜 Sertifikat Terverifikasi
+                            </span>
+                        </div>
+
+                        <!-- Bottom Banner Content & Slide Indicators -->
+                        <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 z-20 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+                            <div class="max-w-2xl">
+                                <h3 class="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                    Pengajar Profesional &amp; Bersertifikasi Master
+                                </h3>
+                                <p class="text-violet-100/90 text-xs sm:text-sm mt-1.5 font-medium leading-relaxed drop-shadow">
+                                    Kak Ika, S.Pd. (Master Tutor), Kak Angel, dan Kak Sofia membimbing siswa dengan pendekatan personal, metode cepat, dan kurikulum terbaik.
+                                </p>
+                            </div>
+
+                            <!-- Dots Indicator for Auto-Slider -->
+                            <div class="flex items-center gap-2 shrink-0 bg-violet-950/70 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md" id="bannerGuruDots">
+                                @php
+                                    $slideCount = max(count($guruBannerImagesList), 2);
+                                @endphp
+                                @for($i = 0; $i < $slideCount; $i++)
+                                    <span class="banner-guru-dot w-2.5 h-2.5 rounded-full bg-white transition-all duration-300 cursor-pointer"
+                                        style="opacity: {{ $i === 0 ? '1' : '0.4' }};" data-slide-index="{{ $i }}"></span>
+                                @endfor
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div
                 class="reveal-element delay-300 rounded-3xl bg-gradient-to-r from-violet-950 via-violet-900 to-violet-950 text-white p-6 sm:p-8 shadow-2xl border border-violet-800">
                 <div class="grid md:grid-cols-2 gap-6 items-center">
@@ -1322,23 +1597,30 @@
                     <div class="flex flex-wrap items-center gap-4">
                         <a href="https://www.instagram.com/paradiseofmath/" target="_blank" rel="noopener noreferrer"
                             class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-pink-400/50 hover:scale-105 transition-all duration-300 group">
-                            <span class="w-5 h-5 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
-                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <span
+                                class="w-5 h-5 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
                                 </svg>
                             </span>
-                            <span class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">@paradiseofmath</span>
+                            <span
+                                class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">@paradiseofmath</span>
                         </a>
-                        <a href="https://www.tiktok.com/@paradiseofmath?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer"
+                        <a href="https://www.tiktok.com/@paradiseofmath?is_from_webapp=1&sender_device=pc"
+                            target="_blank" rel="noopener noreferrer"
                             class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-cyan-400/50 hover:scale-105 transition-all duration-300 group">
-                            <span class="w-5 h-5 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                                <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <span
+                                class="w-5 h-5 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                                <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.59 4.23.86.97 2.07 1.62 3.39 1.83v3.71c-1.84-.02-3.61-.71-4.96-1.97-.24-.2-.46-.43-.66-.67v6.62c.04 2.64-1.28 5.12-3.51 6.47-2.3 1.48-5.3 1.68-7.74.52-2.73-1.22-4.48-4.22-4.26-7.22.18-3.08 2.37-5.78 5.37-6.5 1.09-.27 2.22-.24 3.29.07V10.7c-.89-.31-1.87-.33-2.76-.04-1.39.42-2.45 1.62-2.71 3.05-.33 1.62.43 3.3 1.88 4.09 1.34.78 3.1.66 4.31-.31.86-.68 1.35-1.74 1.33-2.84V.02z" />
                                 </svg>
                             </span>
-                            <span class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">@paradiseofmath</span>
+                            <span
+                                class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">@paradiseofmath</span>
                         </a>
                     </div>
 
@@ -2235,7 +2517,66 @@
                     if (heroDots[currentHeroIndex]) heroDots[currentHeroIndex].style.opacity = '1';
                 }, 3500);
             }
+
+            // Script Auto-Rotator Banner Foto Guru & Sertifikat
+            const bannerGuruItems = document.querySelectorAll('.banner-guru-item');
+            const bannerGuruDots = document.querySelectorAll('.banner-guru-dot');
+            if (bannerGuruItems.length > 1) {
+                let currentGuruIndex = 0;
+                setInterval(function () {
+                    bannerGuruItems[currentGuruIndex].style.opacity = '0';
+                    bannerGuruItems[currentGuruIndex].style.zIndex = '1';
+                    if (bannerGuruDots[currentGuruIndex]) bannerGuruDots[currentGuruIndex].style.opacity = '0.4';
+
+                    currentGuruIndex = (currentGuruIndex + 1) % bannerGuruItems.length;
+
+                    bannerGuruItems[currentGuruIndex].style.opacity = '1';
+                    bannerGuruItems[currentGuruIndex].style.zIndex = '10';
+                    if (bannerGuruDots[currentGuruIndex]) bannerGuruDots[currentGuruIndex].style.opacity = '1';
+                }, 3500);
+
+                bannerGuruDots.forEach((dot, idx) => {
+                    dot.addEventListener('click', function () {
+                        bannerGuruItems[currentGuruIndex].style.opacity = '0';
+                        bannerGuruItems[currentGuruIndex].style.zIndex = '1';
+                        if (bannerGuruDots[currentGuruIndex]) bannerGuruDots[currentGuruIndex].style.opacity = '0.4';
+
+                        currentGuruIndex = idx;
+
+                        bannerGuruItems[currentGuruIndex].style.opacity = '1';
+                        bannerGuruItems[currentGuruIndex].style.zIndex = '10';
+                        if (bannerGuruDots[currentGuruIndex]) bannerGuruDots[currentGuruIndex].style.opacity = '1';
+                    });
+                });
+            }
         });
+    </script>
+
+    <!-- Script Controller YouTube Video Switcher -->
+    <script>
+        function switchYtVideo(videoId, title, desc, videoUrl, btnEl) {
+            const iframe = document.getElementById('main-yt-iframe');
+            const titleEl = document.getElementById('yt-featured-title');
+            const descEl = document.getElementById('yt-featured-desc');
+            const linkEl = document.getElementById('yt-featured-link');
+
+            if (iframe) {
+                iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+            }
+            if (titleEl) titleEl.innerText = title;
+            if (descEl) descEl.innerText = desc || 'Video tutorial eksklusif bimbingan belajar.';
+            if (linkEl && videoUrl) linkEl.href = videoUrl;
+
+            document.querySelectorAll('.yt-playlist-item').forEach(el => {
+                el.classList.remove('border-2', 'border-amber-400/80', 'bg-white/10');
+                el.classList.add('border-white/10', 'bg-white/5');
+            });
+
+            if (btnEl) {
+                btnEl.classList.remove('border-white/10', 'bg-white/5');
+                btnEl.classList.add('border-2', 'border-amber-400/80', 'bg-white/10');
+            }
+        }
     </script>
 </body>
 

@@ -45,57 +45,88 @@
                 </div>
             </div>
 
-            <!-- Admin Metrics -->
-            <div class="row">
+            <!-- Admin Metrics Cards (Matching Design Image) -->
+            <div class="row mb-4">
                 <!-- Metric 1: Total Siswa -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-purple-950">{{ \App\Models\Siswa::count() }}</h3>
-                            <p class="text-muted mb-1">Siswa Terdaftar</p>
+                <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
+                    <div class="card h-100 border-0 rounded-2xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-all duration-300">
+                        <div class="card-body p-4 d-flex justify-content-between align-items-start">
+                            <div>
+                                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-1">
+                                    {{ \App\Models\Siswa::count() }}
+                                </h2>
+                                <p class="text-slate-500 text-xs sm:text-sm font-medium mb-0">Siswa Terdaftar</p>
+                            </div>
+                            <div class="text-purple-600 text-4xl opacity-90 pl-2">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
                         </div>
-                        <div class="icon text-purple"><i class="fas fa-user-graduate"></i></div>
-                        <a href="#" class="small-box-footer text-purple mt-2 pt-2 border-top text-left text-xs font-semibold">
-                            Kelola Siswa <i class="fas fa-arrow-right ml-1"></i>
+                        <a href="{{ route('admin.siswa.daftar.index') }}" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 text-xs font-bold text-slate-700 d-flex align-items-center justify-content-between border-top text-decoration-none transition-colors">
+                            <span>Kelola Siswa</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>
                 </div>
+
                 <!-- Metric 2: Total Guru -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-purple-950">{{ \App\Models\User::where('role', 'guru')->count() }}</h3>
-                            <p class="text-muted mb-1">Tutor Pengajar (Guru)</p>
+                <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
+                    <div class="card h-100 border-0 rounded-2xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-all duration-300">
+                        <div class="card-body p-4 d-flex justify-content-between align-items-start">
+                            <div>
+                                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-1">
+                                    {{ \App\Models\User::where('role', 'guru')->count() }}
+                                </h2>
+                                <p class="text-slate-500 text-xs sm:text-sm font-medium mb-0">Tutor Pengajar (Guru)</p>
+                            </div>
+                            <div class="text-emerald-500 text-4xl opacity-90 pl-2">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
                         </div>
-                        <div class="icon text-teal"><i class="fas fa-chalkboard-teacher"></i></div>
-                        <a href="#" class="small-box-footer text-teal mt-2 pt-2 border-top text-left text-xs font-semibold">
-                            Kelola Pengajar <i class="fas fa-arrow-right ml-1"></i>
+                        <a href="{{ route('admin.guru.daftar.index') }}" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 text-xs font-bold text-slate-700 d-flex align-items-center justify-content-between border-top text-decoration-none transition-colors">
+                            <span>Kelola Pengajar</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>
                 </div>
+
                 <!-- Metric 3: Total Paket Belajar -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-purple-950">{{ \App\Models\PaketBelajar::count() }}</h3>
-                            <p class="text-muted mb-1">Paket Belajar Aktif</p>
+                <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
+                    <div class="card h-100 border-0 rounded-2xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-all duration-300">
+                        <div class="card-body p-4 d-flex justify-content-between align-items-start">
+                            <div>
+                                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-1">
+                                    {{ \App\Models\PaketBelajar::count() }}
+                                </h2>
+                                <p class="text-slate-500 text-xs sm:text-sm font-medium mb-0">Paket Belajar Aktif</p>
+                            </div>
+                            <div class="text-purple-600 text-4xl opacity-90 pl-2">
+                                <i class="fas fa-tag"></i>
+                            </div>
                         </div>
-                        <div class="icon text-indigo"><i class="fas fa-tags"></i></div>
-                        <a href="{{ route('admin.paket') }}" class="small-box-footer text-indigo mt-2 pt-2 border-top text-left text-xs font-semibold">
-                            Kelola Harga Paket <i class="fas fa-arrow-right ml-1"></i>
+                        <a href="{{ route('admin.paket') }}" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 text-xs font-bold text-slate-700 d-flex align-items-center justify-content-between border-top text-decoration-none transition-colors">
+                            <span>Kelola Harga Paket</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
                         </a>
                     </div>
                 </div>
+
                 <!-- Metric 4: Total Admin -->
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-white p-3">
-                        <div class="inner">
-                            <h3 class="font-weight-bold text-purple-950">{{ \App\Models\User::where('role', 'admin')->count() }}</h3>
-                            <p class="text-muted mb-1">Administrator Sistem</p>
+                <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
+                    <div class="card h-100 border-0 rounded-2xl shadow-sm overflow-hidden bg-white hover:shadow-md transition-all duration-300">
+                        <div class="card-body p-4 d-flex justify-content-between align-items-start">
+                            <div>
+                                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-1">
+                                    {{ \App\Models\User::where('role', 'admin')->count() }}
+                                </h2>
+                                <p class="text-slate-500 text-xs sm:text-sm font-medium mb-0">Administrator Sistem</p>
+                            </div>
+                            <div class="text-amber-500 text-4xl opacity-90 pl-2">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
                         </div>
-                        <div class="icon text-warning"><i class="fas fa-users-cog"></i></div>
-                        <a href="{{ route('admin.register') }}" class="small-box-footer text-warning mt-2 pt-2 border-top text-left text-xs font-semibold">
-                            Daftar Admin Baru <i class="fas fa-user-plus ml-1"></i>
+                        <a href="{{ route('admin.register') }}" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 text-xs font-bold text-slate-700 d-flex align-items-center justify-content-between border-top text-decoration-none transition-colors">
+                            <span>Daftar Admin Baru</span>
+                            <i class="fas fa-user-plus text-[10px]"></i>
                         </a>
                     </div>
                 </div>

@@ -14,7 +14,8 @@ class AuthController extends Controller
 {
     public function information()
     {
-        return view('informasi.index');
+        $youtubeLinks = \App\Models\YoutubeLink::orderBy('urutan', 'asc')->orderBy('id', 'desc')->get();
+        return view('informasi.index', compact('youtubeLinks'));
     }
     public function showLoginForm()
     {

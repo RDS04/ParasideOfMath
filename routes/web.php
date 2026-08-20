@@ -139,6 +139,18 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/galeri/update', 'updateGaleriFoto')->name('admin.galeri.update');
     Route::post('/admin/galeri/store-extra', 'storeGaleriTambahan')->name('admin.galeri.extra.store');
     Route::post('/admin/galeri/delete', 'deleteGaleriFoto')->name('admin.galeri.delete');
+
+    // Kelola Foto Guru & Banner Landing
+    Route::get('/admin/foto-guru', 'showInputFotoGuru')->name('admin.foto-guru.index');
+    Route::post('/admin/foto-guru/banner', 'storeBannerGuruFoto')->name('admin.foto-guru.banner.store');
+    Route::delete('/admin/foto-guru/banner/{filename}', 'deleteBannerGuruFoto')->name('admin.foto-guru.banner.delete');
+    Route::post('/admin/foto-guru/profil/{id}', 'storeProfilGuruFoto')->name('admin.foto-guru.profil.store');
+
+    // YouTube Tutorial Link Management Routes
+    Route::get('/admin/link', 'showYoutubeLink')->name('admin.link');
+    Route::post('/admin/link', 'storeYoutubeLink')->name('admin.link.store');
+    Route::put('/admin/link/{id}', 'updateYoutubeLink')->name('admin.link.update');
+    Route::delete('/admin/link/{id}', 'deleteYoutubeLink')->name('admin.link.delete');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
     Route::post('/admin/guru/toggle-register', 'toggleGuruRegisterStatus')->name('admin.guru.toggle-register');
