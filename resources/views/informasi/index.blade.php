@@ -2007,7 +2007,7 @@
                             </svg>
                         </a>
                         <!-- TikTok Button -->
-                        <a href="https://www.instagram.com/paradiseofmath/" target="_blank"
+                        <a href="https://www.tiktok.com/@paradiseofmath?is_from_webapp=1&sender_device=pc" target="_blank"
                             class="w-10 h-10 rounded-full bg-violet-900/50 border border-violet-750/50 text-white flex items-center justify-center hover:bg-black hover:border-transparent hover:scale-110 hover:shadow-cyan-400/20 hover:shadow-lg transition duration-300 shadow-md">
                             <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24"
                                 xmlns="http://www.w3.org/2000/svg">

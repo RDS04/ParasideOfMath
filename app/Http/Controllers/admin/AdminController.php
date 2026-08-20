@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Validation\Rule;
+use App\Models\RiwayatPembayaran;
 
 class AdminController extends Controller
 {
@@ -343,6 +344,10 @@ class AdminController extends Controller
             'biodata' => $biodata,
         ]);
 
+        RiwayatPembayaran::where('siswa_id', $siswa->id)
+            ->where('status', 'under_review')
+            ->update(['status' => 'approved', 'approved_at' => now()]);
+
         return back()->with('success', 'Akun pendaftaran ' . $siswa->name . ' berhasil disetujui dan diaktifkan!');
     }
 
@@ -407,6 +412,10 @@ class AdminController extends Controller
             $siswa->update(['biodata' => $biodata]);
         }
 
+        RiwayatPembayaran::where('siswa_id', $siswa->id)
+            ->where('status', 'under_review')
+            ->update(['status' => 'approved', 'approved_at' => now()]);
+
         return back()->with('success', 'Request tambah mapel siswa ' . $siswa->name . ' berhasil disetujui.');
     }
 
@@ -425,6 +434,10 @@ class AdminController extends Controller
         unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'],$biodata['pending_hari_per_mapel'], $biodata['pending_tanggal_mulai_per_mapel'], $biodata['pending_jumlah_pertemuan']);
         $siswa->update(['biodata' => $biodata]);
 
+         RiwayatPembayaran::where('siswa_id', $siswa->id)
+        ->where('status', 'under_review')
+        ->update(['status' => 'rejected']);
+
         return back()->with('success', 'Request tambah mapel siswa ' . $siswa->name . ' berhasil ditolak.');
     }
 
@@ -439,10 +452,10 @@ class AdminController extends Controller
 
         $siswa = Siswa::findOrFail($id);
 
-        // Delete physical proof file if exists
-        if ($siswa->bukti_transfer && file_exists(public_path($siswa->bukti_transfer))) {
-            @unlink(public_path($siswa->bukti_transfer));
-        }
+        RiwayatPembayaran::where('siswa_id', $siswa->id)
+        ->where('status', 'under_review')
+        ->update(['status' => 'rejected']);
+
 
         // Reset all registration data EXCEPT email & password
         $siswa->update([
@@ -767,16 +780,47 @@ class AdminController extends Controller
     /**
      * Tampilkan Halaman Daftar Siswa Keseluruhan.
      */
-    public function daftarSiswa()
+    public function daftarSiswa(Request $request)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        // Fetch all students (e.g. active status or all sorted by registration date)
-        $students = Siswa::orderBy('created_at', 'desc')->get();
+        $search = $request->input('search');
 
-        return view('admin.daftarSiswa', compact('students'));
+        $students = Siswa::when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('whatsapp', 'like', "%{$search}%")
+                    ->orWhere('sekolah', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.daftarSiswa', compact('students', 'search'));
+    }
+
+    public function toggleStatusSiswa($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = Siswa::findOrFail($id);
+
+        if ($siswa->status === 'active') {
+            $siswa->update(['status' => 'nonaktif']);
+            $message = 'Akun siswa ' . $siswa->name . ' berhasil DINONAKTIFKAN.';
+        } elseif ($siswa->status === 'nonaktif') {
+            $siswa->update(['status' => 'active']);
+            $message = 'Akun siswa ' . $siswa->name . ' berhasil DIAKTIFKAN kembali.';
+        } else {
+            return back()->with('error', 'Status siswa ini (' . $siswa->status . ') tidak dapat diubah dari sini. Gunakan halaman Persetujuan untuk status tersebut.');
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
@@ -977,58 +1021,37 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $siswas = Siswa::with('paket')
-            ->whereNotNull('bukti_transfer')
-            ->where('bukti_transfer', '!=', '')
-            ->orderBy('updated_at', 'desc')
+        $riwayatList = \App\Models\RiwayatPembayaran::with(['siswa', 'paket'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        $payments = $siswas->map(function ($siswa) {
-            $paket = $siswa->paket;
-            $biodata = $siswa->biodata ?? [];
-            
-            $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
-            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
-            $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
-            
-            if (empty($hariPertemuan) && $siswa->tipe_paket) {
-                if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-                    $hariPertemuan = array_map('trim', explode(',', $matches[1]));
-                }
-            }
-            if (!$jumlahPertemuan && $siswa->tipe_paket) {
-                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
-                    $jumlahPertemuan = (int) $matches[1];
-                }
-            }
-            
-            $detailString = '';
-            if ($siswa->tipe_paket && $paket) {
-                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
-            }
-            
-            $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
-            
-            $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
-            
+        $payments = $riwayatList->map(function ($riwayat) {
+            $siswa = $riwayat->siswa;
+            $paket = $riwayat->paket;
+
+            $jumlahSesi  = $riwayat->jumlah_sesi ?: 1;
+            $hargaPerSesi = $jumlahSesi > 0 ? intdiv($riwayat->total_harga, $jumlahSesi) : $riwayat->total_harga;
+
+            // Mapping status histori -> label status yang sudah dikenal blade (active/under_review/rejected)
+            $displayStatus = match ($riwayat->status) {
+                'approved'     => 'active',
+                'rejected'     => 'rejected',
+                default        => 'under_review',
+            };
+
             return (object) [
-                'id' => $siswa->id,
-                'name' => $siswa->name,
-                'email' => $siswa->email,
-                'whatsapp' => $siswa->whatsapp,
-                'nama_paket' => $paket ? $paket->nama_paket : 'Pendaftaran Bimbel',
-                'tipe_paket' => $siswa->tipe_paket,
-                'total_bayar' => $totalHarga,
-                'harga_sesi' => $hargaPerSesi,
-                'jumlah_pertemuan' => $jumlahPertemuan ?: 1,
-                'hari_pertemuan' => implode(', ', (array) $hariPertemuan),
-                'tanggal_mulai' => $tanggalMulai ?: '-',
-                'bukti_transfer' => $siswa->bukti_transfer,
-                'status' => $siswa->status,
-                'tanggal' => $siswa->updated_at ? $siswa->updated_at->format('d M Y H:i') : ($siswa->created_at ? $siswa->created_at->format('d M Y H:i') : '-'),
+                'id'               => $riwayat->id, // ← sekarang ID transaksi asli, bukan ID siswa
+                'name'             => $siswa->name ?? '(Siswa terhapus)',
+                'email'            => $siswa->email ?? '-',
+                'whatsapp'         => $siswa->whatsapp ?? null,
+                'nama_paket'       => $paket ? $paket->nama_paket : 'Pendaftaran Bimbel',
+                'tipe_paket'       => $riwayat->tipe_paket_snapshot,
+                'total_bayar'      => $riwayat->total_harga,
+                'harga_sesi'       => $hargaPerSesi,
+                'jumlah_pertemuan' => $jumlahSesi,
+                'bukti_transfer'   => $riwayat->bukti_transfer,
+                'status'           => $displayStatus,
+                'tanggal'          => $riwayat->created_at->format('d M Y H:i'),
             ];
         });
 
@@ -2114,6 +2137,21 @@ class AdminController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    private function syncRiwayatStatus(int $siswaId, string $newStatus, ?int $riwayatId = null): void
+    {
+        $query = RiwayatPembayaran::where('siswa_id', $siswaId)
+            ->where('status', 'under_review');
+
+        if ($riwayatId) {
+            $query->where('id', $riwayatId); // spesifik, bukan asal broad
+        }
+
+        $query->update([
+            'status' => $newStatus,
+            'approved_at' => $newStatus === 'approved' ? now() : null,
+        ]);
     }
 
 

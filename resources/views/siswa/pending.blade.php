@@ -68,19 +68,34 @@
 <body class="min-h-screen flex items-center justify-center p-4 sm:p-8">
 
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-purple-100 p-8 text-center relative overflow-hidden">
-        
-        <!-- Top decorative border color -->
-        <div class="absolute top-0 left-0 w-full h-2 bg-amber-400"></div>
 
-        <!-- Clock status icon -->
-        <div class="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-6 pulse-icon border border-amber-100">
-            <i class="far fa-clock text-3xl"></i>
-        </div>
+        @if ($siswa->status === 'nonaktif')
+            <!-- Top decorative border color -->
+            <div class="absolute top-0 left-0 w-full h-2 bg-red-500"></div>
 
-        <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Pembayaran Ditinjau</h1>
-        <p class="text-sm text-slate-500 leading-relaxed mb-6">
-            Terima kasih! Bukti transfer Anda telah kami terima dan saat ini sedang dalam proses verifikasi oleh Admin. Akun belajar Anda akan aktif otomatis maksimal dalam waktu 1x24 jam.
-        </p>
+            <!-- Deactivated status icon -->
+            <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mx-auto mb-6 border border-red-100">
+                <i class="fas fa-user-slash text-3xl"></i>
+            </div>
+
+            <h1 class="font-display text-2xl font-bold text-red-700 mb-3">Akun Dinonaktifkan</h1>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Mohon maaf, akun belajar Anda saat ini <strong>dinonaktifkan oleh Admin</strong> dan tidak dapat mengakses fitur belajar untuk sementara. Jika Anda merasa ini adalah kesalahan, silakan hubungi Admin melalui tombol di bawah ini.
+            </p>
+        @else
+            <!-- Top decorative border color -->
+            <div class="absolute top-0 left-0 w-full h-2 bg-amber-400"></div>
+
+            <!-- Clock status icon -->
+            <div class="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-6 pulse-icon border border-amber-100">
+                <i class="far fa-clock text-3xl"></i>
+            </div>
+
+            <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Pembayaran Ditinjau</h1>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Terima kasih! Bukti transfer Anda telah kami terima dan saat ini sedang dalam proses verifikasi oleh Admin. Akun belajar Anda akan aktif otomatis maksimal dalam waktu 1x24 jam.
+            </p>
+        @endif
 
         <!-- Summary box -->
         @if ($siswa && $paket)
@@ -90,7 +105,11 @@
                 <span class="d-block text-xs text-slate-500 mt-0.5">{{ $siswa->tipe_paket }}</span>
                 <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between">
                     <span class="text-xs text-slate-400 font-medium">Status Pendaftaran</span>
-                    @if ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer))
+                    @if ($siswa->status === 'nonaktif')
+                    <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                        Nonaktif
+                    </span>
+                    @elseif ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer))
                     <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
                         Menunggu Konfirmasi
                     </span>
@@ -106,7 +125,7 @@
         <!-- Call to actions -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="{{ $waUrl }}" 
-               target="_blank" class="btn-wa justify-center">
+            target="_blank" class="btn-wa justify-center">
                 <i class="fab fa-whatsapp text-lg"></i> Hubungi Admin
             </a>
             
