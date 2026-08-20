@@ -38,8 +38,9 @@ class ChatController extends Controller
         ]);
 
         $senderName = $request->sender_name;
-        if (($senderName === 'Anonymous' || empty($senderName)) && Auth::check()) {
-            $senderName = Auth::user()->name;
+        $chatUser = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
+        if (($senderName === 'Anonymous' || empty($senderName) || str_starts_with($senderName, 'visitor_')) && $chatUser) {
+            $senderName = $chatUser->name;
         }
 
         $role = $request->input('sender_role', 'visitor');
@@ -78,8 +79,14 @@ class ChatController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Fetch registered user roles into a fast memory map
+        // Fetch registered user & siswa roles into a fast memory map
         $userRoles = \App\Models\User::pluck('role', 'name')->toArray();
+        $siswaNames = \App\Models\Siswa::pluck('name')->toArray();
+        foreach ($siswaNames as $sName) {
+            if (!empty($sName) && !isset($userRoles[$sName])) {
+                $userRoles[$sName] = 'siswa';
+            }
+        }
 
         // 1. Single optimized aggregation query
         $rawSessions = Chat::select('session_id')

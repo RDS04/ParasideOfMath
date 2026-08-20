@@ -194,6 +194,187 @@
         @endif
     @endif
 
+@php
+    $authUser = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
+    $pollEndpoint = null;
+    $chatTargetUrl = null;
+    $userType = null;
+
+    if ($authUser) {
+        if ($authUser->isAdmin()) {
+            $pollEndpoint = url('/admin/chat/sessions');
+            $chatTargetUrl = route('admin.chat');
+            $userType = 'admin';
+        } elseif ($authUser->isGuru()) {
+            $pollEndpoint = route('guru.chat.contacts');
+            $chatTargetUrl = route('guru.chat.index');
+            $userType = 'guru';
+        } elseif ($authUser->isSiswa()) {
+            $pollEndpoint = route('siswa.chat.contacts');
+            $chatTargetUrl = route('siswa.chat.index');
+            $userType = 'siswa';
+        }
+    }
+@endphp
+
+@if($pollEndpoint)
+<!-- Floating Notification Permission Prompt Toast if permission is default -->
+<div id="global-notif-toast" class="fixed bottom-4 right-4 z-50 bg-purple-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-purple-700 flex items-center gap-3 hidden animate-bounce">
+    <div class="w-8 h-8 rounded-full bg-amber-400 text-purple-950 flex items-center justify-center font-bold flex-shrink-0">
+        <i class="fas fa-bell"></i>
+    </div>
+    <div class="text-xs">
+        <p class="font-bold mb-0">Aktifkan Notifikasi Chat Perangkat</p>
+        <p class="text-[10px] text-purple-200 mb-0">Terima pesan masuk langsung di sistem PC/HP Anda.</p>
+    </div>
+    <button onclick="requestGlobalNotifPermission()" class="bg-amber-400 hover:bg-amber-300 text-purple-950 text-xs font-black px-3 py-1.5 rounded-xl shadow transition">
+        Izinkan
+    </button>
+    <button onclick="this.parentElement.remove()" class="text-purple-300 hover:text-white text-xs px-1">
+        <i class="fas fa-times"></i>
+    </button>
+</div>
+
+<script>
+    function requestGlobalNotifPermission() {
+        if (!("Notification" in window)) {
+            alert("Browser Anda tidak mendukung Notifikasi Perangkat.");
+            return;
+        }
+        Notification.requestPermission().then(perm => {
+            const toast = document.getElementById('global-notif-toast');
+            if (toast) toast.remove();
+            if (perm === "granted") {
+                try {
+                    new Notification("Notifikasi Berhasil Diaktifkan! 🔔", {
+                        body: "Anda akan menerima pemberitahuan pesan chat meskipun sedang berada di Dashboard.",
+                        icon: '/images/logoPM.webp'
+                    });
+                } catch(e) {}
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const pollEndpoint = "{{ $pollEndpoint }}";
+        const chatTargetUrl = "{{ $chatTargetUrl }}";
+        const userType = "{{ $userType }}";
+
+        // Persistent unread map across tab navigation
+        let globalUnreadCounts = {};
+        try {
+            globalUnreadCounts = JSON.parse(localStorage.getItem('pm_unread_map_' + userType) || '{}');
+        } catch(e) {}
+
+        let isFirstGlobalPoll = true;
+
+        // Check if permission is default -> show toast after 2s
+        if ("Notification" in window && Notification.permission === "default") {
+            setTimeout(() => {
+                const toast = document.getElementById('global-notif-toast');
+                if (toast) toast.classList.remove('hidden');
+            }, 2000);
+        }
+
+        // Web Audio Chime Sound Player
+        function playNotificationChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12); // A5
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function triggerGlobalDesktopNotif(title, body) {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+            try {
+                const notif = new Notification(title, {
+                    body: body || 'Ada pesan baru masuk.',
+                    icon: '/images/logoPM.webp',
+                    badge: '/images/logoPM.webp',
+                    tag: 'global-chat-' + Date.now(),
+                    renotify: true
+                });
+                notif.onclick = function() {
+                    window.focus();
+                    window.location.href = chatTargetUrl;
+                    this.close();
+                };
+                playNotificationChime();
+            } catch(e) {
+                console.error("Global notification error:", e);
+            }
+        }
+
+        function pollGlobalChatNotifications() {
+            // Skip when user is actively inside the chat screen
+            if (window.location.pathname.includes('/chat')) return;
+
+            fetch(pollEndpoint)
+                .then(res => {
+                    if (!res.ok) return null;
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data || !Array.isArray(data)) return;
+
+                    let mapChanged = false;
+
+                    data.forEach(item => {
+                        const id = item.session_id;
+                        const unread = item.unread_count || 0;
+                        const prevUnread = (id in globalUnreadCounts) ? globalUnreadCounts[id] : 0;
+
+                        if (unread > prevUnread) {
+                            let title = '';
+                            let body = item.last_message || 'Mengirim pesan baru...';
+
+                            if (userType === 'admin') {
+                                const roleLabel = item.user_role ? ` (${item.user_role})` : ' (Pengunjung)';
+                                title = `💬 Chat Masuk: ${item.sender_name || 'Anonim'}${roleLabel}`;
+                            } else if (userType === 'guru') {
+                                title = `💬 Chat Siswa: ${item.contact_name || 'Siswa'}`;
+                            } else if (userType === 'siswa') {
+                                title = `💬 Chat Guru: ${item.contact_name || 'Guru'}`;
+                            }
+
+                            triggerGlobalDesktopNotif(title, body);
+                        }
+
+                        if (globalUnreadCounts[id] !== unread) {
+                            globalUnreadCounts[id] = unread;
+                            mapChanged = true;
+                        }
+                    });
+
+                    if (mapChanged) {
+                        try {
+                            localStorage.setItem('pm_unread_map_' + userType, JSON.stringify(globalUnreadCounts));
+                        } catch(e) {}
+                    }
+
+                    isFirstGlobalPoll = false;
+                })
+                .catch(err => {});
+        }
+
+        pollGlobalChatNotifications();
+        setInterval(pollGlobalChatNotifications, 4000);
+    });
+</script>
+@endif
+
 </div>
 <!-- ./wrapper -->
 

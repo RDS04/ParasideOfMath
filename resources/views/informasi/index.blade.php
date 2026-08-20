@@ -2115,9 +2115,12 @@
         </div>
     </div>
 
+    @php
+        $chatAppUser = auth()->guard('siswa')->user() ?? auth()->guard('web')->user();
+    @endphp
     <script>
-        window.currentUserName = "{{ Auth::check() ? Auth::user()->name : 'Anonymous' }}";
-        window.currentUserRole = "{{ Auth::check() ? Auth::user()->role : 'visitor' }}";
+        window.currentUserName = "{{ $chatAppUser ? $chatAppUser->name : 'Anonymous' }}";
+        window.currentUserRole = "{{ $chatAppUser ? (auth()->guard('siswa')->check() ? 'siswa' : $chatAppUser->role) : 'visitor' }}";
     </script>
     <!-- Script Auto-Rotator Hero Slider -->
     <script>
