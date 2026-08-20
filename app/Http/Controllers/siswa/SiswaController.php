@@ -8,6 +8,7 @@ use App\Models\KategoriSoal;
 use App\Models\BankSoal;
 use App\Models\HasilUjian;
 use Illuminate\Http\Request;
+use App\Models\RiwayatPembayaran;
 
 class SiswaController extends Controller
 {
@@ -498,6 +499,23 @@ class SiswaController extends Controller
      */
     public function submitPayment(Request $request)
     {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login')->with('error', 'Silakan masuk terlebih dahulu.');
+        }
+
+        // Cegah submit ganda untuk request tambah mapel yang masih diproses admin
+        if ($siswa->status === 'active') {
+            $adaPending = RiwayatPembayaran::where('siswa_id', $siswa->id)
+                ->where('status', 'under_review')
+                ->exists();
+
+            if ($adaPending) {
+                return redirect()->route('siswa.tambah-pelajaran')
+                    ->with('error', 'Anda masih memiliki pengajuan tambah mapel yang sedang menunggu persetujuan Admin. Mohon tunggu hingga diproses sebelum mengajukan lagi.');
+            }
+        }
+        
         $paymentMethod = $request->input('payment_method', 'bank');
 
         $rules = [
@@ -505,6 +523,7 @@ class SiswaController extends Controller
             'tipe_paket'     => ['nullable'],
             'payment_method' => ['required', 'in:bank,ewallet,tunai'],
         ];
+
 
         if ($paymentMethod !== 'tunai') {
             $rules['bukti_transfer'] = ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'];
@@ -642,6 +661,17 @@ class SiswaController extends Controller
             'bukti_transfer' => $buktiPath,
             'status'         => $siswa->status === 'active' ? 'active' : 'under_review',
             'biodata'        => $biodata,
+        ]);
+
+        RiwayatPembayaran::create([
+            'siswa_id'            => $siswa->id,
+            'paket_id'            => $paketId,
+            'tipe_paket_snapshot' => $finalTipePaket,
+            'bukti_transfer'      => $buktiPath,
+            'payment_method'      => $paymentMethod,
+            'jumlah_sesi'         => $totalSesi,
+            'total_harga'         => $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000) * $totalSesi,
+            'status'              => 'under_review',
         ]);
 
         $title   = "Pemberitahuan Pembayaran Siswa";

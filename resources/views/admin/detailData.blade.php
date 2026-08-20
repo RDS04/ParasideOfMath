@@ -104,6 +104,15 @@
                     }
                 }
                 $hariPilihanLower = array_map('strtolower', $hariPilihan);
+
+                $statusBadgeMap = [
+                    'active'       => ['label' => 'Aktif',       'class' => 'bg-emerald-500'],
+                    'nonaktif'     => ['label' => 'Nonaktif',     'class' => 'bg-red-500'],
+                    'under_review' => ['label' => 'Menunggu',     'class' => 'bg-amber-500'],
+                    'rejected'     => ['label' => 'Ditolak',      'class' => 'bg-red-500'],
+                    'pending'      => ['label' => 'Pending',      'class' => 'bg-slate-400'],
+                ];
+                $statusBadge = $statusBadgeMap[$student->status] ?? ['label' => 'Menunggu', 'class' => 'bg-amber-500'];
             @endphp
 
             @if(empty($student->biodata))
@@ -123,8 +132,8 @@
                     <div class="card shadow-sm border-light rounded-2xl overflow-hidden mb-4">
                         <div class="card-header text-white py-3 d-flex align-items-center justify-content-between" style="background-color: #2e1065;">
                             <span class="font-weight-bold mb-0 text-white" style="font-size: 0.95rem;">Informasi Akun</span>
-                            <span class="badge {{ $student->status === 'active' ? 'bg-emerald-500' : 'bg-amber-500' }} text-white text-xxs font-bold uppercase px-2 py-0.5">
-                                {{ $student->status === 'active' ? 'Aktif' : 'Menunggu' }}
+                            <span class="badge {{ $statusBadge['class'] }} text-white text-xxs font-bold uppercase px-2 py-0.5">
+                                {{ $statusBadge['label'] }}
                             </span>
                         </div>
                         <div class="card-body p-3">
@@ -278,6 +287,12 @@
                                                 <i class="fas fa-check-circle mr-1"></i> Setujui &amp; Aktifkan Akun
                                             </button>
                                         </form>
+                                    @elseif ($student->status === 'nonaktif')
+                                        <div class="w-100 text-center py-1">
+                                            <span class="badge bg-red-100 text-red-700 border border-red-200 font-bold uppercase text-[10px] px-2.5 py-1.5 rounded-pill">
+                                                <i class="fas fa-user-slash mr-1"></i> Akun Dinonaktifkan Admin
+                                            </span>
+                                        </div>
                                     @else
                                         <button type="button" class="btn btn-xs btn-light border w-100 text-slate-400 font-weight-bold py-2 rounded-lg text-xs" disabled>
                                             <i class="fas fa-check mr-1"></i> Sudah Aktif
@@ -292,7 +307,79 @@
                             @endif
                         </div>
                     </div>
+                    <!-- Riwayat Pembayaran Siswa Ini -->
+                    <div class="card shadow-sm border-light rounded-2xl overflow-hidden mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h3 class="card-title font-weight-bold text-purple-950 mb-0" style="font-size: 0.95rem;">
+                                Riwayat Seluruh Pembayaran
+                            </h3>
+                        </div>
+    
+                        <div class="card-body p-3">
+                            @php
+                                $riwayatPembayaran = \App\Models\RiwayatPembayaran::where('siswa_id', $student->id)
+                                    ->orderBy('created_at', 'desc')
+                                    ->get();
+                            @endphp
+    
+                            @if($riwayatPembayaran->isEmpty())
+                                <p class="text-xs text-muted mb-0 text-center py-3">
+                                    Belum ada riwayat transaksi.
+                                </p>
+                            @else
+                                @foreach($riwayatPembayaran as $riwayat)
+                                    <div class="d-flex justify-content-between align-items-center py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                        <div class="pr-2">
+                                            <span class="d-block text-xs font-weight-bold text-purple-950">
+                                                Rp {{ number_format($riwayat->total_harga, 0, ',', '.') }}
+                                                <span class="text-slate-400 font-weight-normal">
+                                                    ({{ $riwayat->jumlah_sesi }}x sesi)
+                                                </span>
+                                            </span>
+    
+                                            <span class="d-block text-[10px] text-muted">
+                                                {{ $riwayat->created_at->format('d M Y, H:i') }}
+                                                &middot;
+                                                {{ strtoupper($riwayat->payment_method) }}
+                                            </span>
+                                        </div>
+    
+                                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                            @if($riwayat->status === 'approved')
+                                                <span class="badge bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-1 rounded-pill">
+                                                    Disetujui
+                                                </span>
+                                            @elseif($riwayat->status === 'rejected')
+                                                <span class="badge bg-red-100 text-red-700 text-[9px] font-bold px-2 py-1 rounded-pill">
+                                                    Ditolak
+                                                </span>
+                                            @else
+                                                <span class="badge bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-1 rounded-pill">
+                                                    Menunggu
+                                                </span>
+                                            @endif
+    
+                                            @php
+                                                $riwayatExt = pathinfo($riwayat->bukti_transfer, PATHINFO_EXTENSION);
+                                                $riwayatIsImage = in_array(strtolower($riwayatExt), ['jpg', 'jpeg', 'png', 'webp']);
+                                            @endphp
+                                            <button type="button"
+                                                    class="btn btn-xs btn-outline-purple rounded-lg px-2 py-1 text-[10px] preview-bukti-trigger"
+                                                    data-toggle="modal"
+                                                    data-target="#previewBuktiModal"
+                                                    data-src="{{ asset($riwayat->bukti_transfer) }}"
+                                                    data-type="{{ $riwayatIsImage ? 'image' : 'pdf' }}"
+                                                    data-label="Rp {{ number_format($riwayat->total_harga, 0, ',', '.') }} · {{ $riwayat->created_at->format('d M Y, H:i') }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+                    </div>
                 </div>
+
 
                 <!-- RIGHT COLUMN: Detailed Student Form Biodata (8 cols) -->
                 <div class="col-lg-8 mb-4">
@@ -784,6 +871,39 @@
         </div>
     </div>
 
+    <!-- Modal Preview Bukti Pembayaran (Shared, dipakai semua item riwayat) -->
+    <div class="modal fade" id="previewBuktiModal" tabindex="-1" role="dialog" aria-labelledby="previewBuktiModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+                <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                    <h5 class="modal-title font-weight-bold text-md text-white" id="previewBuktiModalLabel" style="color: #fff;">
+                        <i class="fas fa-receipt mr-2"></i>Bukti Pembayaran
+                    </h5>
+                    <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-3 text-center" style="background-color: #f8fafc; min-height: 320px; display: flex; align-items: center; justify-content: center;">
+                    <div id="previewBuktiLoading" class="py-5 text-muted text-xs">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2 text-purple-500"></i>
+                        <div>Memuat bukti pembayaran...</div>
+                    </div>
+                    <img id="previewBuktiImage" src="" alt="Bukti Pembayaran" class="img-fluid rounded-xl shadow-sm d-none" style="max-height: 65vh; width: auto;">
+                    <iframe id="previewBuktiPdf" src="" class="d-none rounded-xl border" style="width: 100%; height: 65vh;"></iframe>
+                </div>
+                <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-between align-items-center">
+                    <span id="previewBuktiLabel" class="text-xs text-muted font-weight-semibold"></span>
+                    <div class="d-flex gap-2">
+                        <a id="previewBuktiDownload" href="#" target="_blank" class="btn btn-sm btn-outline-purple rounded-lg font-weight-bold px-3 text-xs">
+                            <i class="fas fa-external-link-alt mr-1"></i> Buka Tab Baru
+                        </a>
+                        <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3 text-xs" data-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchTutorInput');
@@ -819,6 +939,48 @@
                 const endH = Math.floor((totalMinutes % 1440) / 60).toString().padStart(2, '0');
                 const endM = (totalMinutes % 60).toString().padStart(2, '0');
                 targetEl.value = `${endH}:${endM}`;
+            });
+        });
+        // Handle preview bukti pembayaran dalam modal
+        document.querySelectorAll('.preview-bukti-trigger').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const src   = this.getAttribute('data-src');
+                const type  = this.getAttribute('data-type');
+                const label = this.getAttribute('data-label') || '';
+
+                const imgEl      = document.getElementById('previewBuktiImage');
+                const pdfEl      = document.getElementById('previewBuktiPdf');
+                const loadingEl  = document.getElementById('previewBuktiLoading');
+                const labelEl    = document.getElementById('previewBuktiLabel');
+                const downloadEl = document.getElementById('previewBuktiDownload');
+
+                // Reset dulu tiap kali diklik (supaya gak nampilin sisa konten sebelumnya)
+                imgEl.classList.add('d-none');
+                pdfEl.classList.add('d-none');
+                imgEl.src = '';
+                pdfEl.src = '';
+                loadingEl.classList.remove('d-none');
+                loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin fa-2x mb-2 text-purple-500"></i><div>Memuat bukti pembayaran...</div>';
+
+                labelEl.textContent = label;
+                downloadEl.href = src; // ← ini yang tadi gak pernah kejalan
+
+                if (type === 'pdf') {
+                    pdfEl.src = src;
+                    pdfEl.onload = function () {
+                        loadingEl.classList.add('d-none');
+                        pdfEl.classList.remove('d-none');
+                    };
+                } else {
+                    imgEl.onload = function () {
+                        loadingEl.classList.add('d-none');
+                        imgEl.classList.remove('d-none');
+                    };
+                    imgEl.onerror = function () {
+                        loadingEl.innerHTML = '<i class="fas fa-exclamation-triangle text-danger fa-2x mb-2"></i><div>Gagal memuat gambar. Cek apakah file ada di server.</div>';
+                    };
+                    imgEl.src = src;
+                }
             });
         });
     </script>
