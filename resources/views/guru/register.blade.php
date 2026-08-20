@@ -292,7 +292,8 @@
 
             <div class="mt-8 pt-5 border-t border-gray-100 text-center">
                 <p class="text-xs text-gray-400 tracking-wide">
-                    &copy; 2026 · Paradise of Math — Panel Pengajar
+                    &copy; {{ date('Y') }} · Paradise of Math — Hak Cipta Dilindungi.<br/>
+                    <span class="text-[11px] text-gray-500 font-medium mt-0.5 inline-block">Dikelola &amp; Dikembangkan oleh <strong>Reyhan &amp; Rizky</strong> (Universitas Metamedia)</span>
                 </p>
             </div>
         </div>

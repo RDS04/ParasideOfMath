@@ -35,9 +35,10 @@
 
         /* Swiper Pricing Slider Styles */
         .pricing-swiper {
-            padding-top: 2rem !important;
-            padding-bottom: 4rem !important;
-            overflow: visible !important;
+            padding-top: 1.5rem !important;
+            padding-bottom: 3.5rem !important;
+            overflow: hidden !important;
+            width: 100% !important;
         }
 
         .pricing-swiper .swiper-wrapper {
@@ -47,30 +48,37 @@
         .pricing-swiper .swiper-slide {
             position: relative;
             z-index: 1;
-            width: 385px !important;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: scale(0.86);
-            filter: blur(3px);
-            opacity: 0.5;
-        }
-
-        @media (max-width: 640px) {
-            .pricing-swiper .swiper-slide {
-                width: 300px !important;
-            }
-
-            .pricing-swiper .swiper-slide-active {
-                transform: translateX(12px) scale(1.06) !important;
-                z-index: 20 !important;
-            }
+            width: 360px !important;
+            transition: all 0.4s ease;
+            transform: scale(0.9);
+            filter: blur(2px);
+            opacity: 0.6;
         }
 
         .pricing-swiper .swiper-slide-active {
             position: relative;
-            transform: scale(1.06) !important;
+            transform: scale(1) !important;
             filter: blur(0px) !important;
             opacity: 1 !important;
             z-index: 10 !important;
+        }
+
+        @media (max-width: 640px) {
+            .pricing-swiper {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+
+            .pricing-swiper .swiper-slide {
+                width: 285px !important;
+                max-width: 82vw !important;
+            }
+            .pricing-swiper .swiper-slide-active {
+                transform: translateX(30px) scale(1) !important;
+                filter: blur(0px) !important;
+                opacity: 1 !important;
+                z-index: 20 !important;
+            }
         }
 
         .swiper-button-prev-custom,
@@ -258,6 +266,49 @@
 
         .delay-300 {
             transition-delay: 300ms;
+        }
+
+        /* ── UNIVERSAL RESPONSIVE STYLES (ALL HP & TABLET SIZES) ── */
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden !important;
+        }
+
+        img, video, iframe, embed, object {
+            max-width: 100%;
+        }
+
+        /* Ultra Small Mobile (320px - 380px: Galaxy Fold, iPhone SE, Small Androids) */
+        @media (max-width: 380px) {
+            .container, .max-w-7xl, .max-w-6xl, .max-w-5xl {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+            }
+            h1 { font-size: 1.65rem !important; line-height: 1.25 !important; }
+            h2 { font-size: 1.3rem !important; line-height: 1.25 !important; }
+            .yellow-sticker-badge {
+                padding: 4px 14px !important;
+                font-size: 0.7rem !important;
+            }
+            .pricing-swiper .swiper-slide {
+                width: 270px !important;
+                max-width: 80vw !important;
+            }
+        }
+
+        /* Standard Mobile Devices (381px - 480px: iPhone 12/13/14/15, Samsung Galaxy S) */
+        @media (min-width: 381px) and (max-width: 480px) {
+            .pricing-swiper .swiper-slide {
+                width: 290px !important;
+                max-width: 84vw !important;
+            }
+        }
+
+        /* Tablets & Foldables Portrait (640px - 1024px: iPad Mini, iPad Air, Galaxy Tab) */
+        @media (min-width: 640px) and (max-width: 1024px) {
+            .pricing-swiper .swiper-slide {
+                width: 340px !important;
+            }
         }
 
         /* ================= CUSTOM DIAGONAL PAGE CURL EFFECT ================= */
@@ -707,7 +758,7 @@
 
                 <!-- CTA Buttons -->
                 <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                    <a href="#kelas"
+                    <a href="{{ route('login') }}"
                         class="relative group px-7 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-300 text-violet-950 font-extrabold shadow-lg shadow-amber-400/25 hover:shadow-xl hover:shadow-amber-400/40 hover:scale-105 active:scale-95 transition-all duration-300 overflow-hidden">
                         <span class="relative z-10 flex items-center gap-2">
                             Daftar Sekarang
@@ -719,35 +770,16 @@
                         </span>
                     </a>
 
-                    <a href="#about"
+                    <a href="#Youtube"
                         class="px-7 py-3.5 rounded-xl backdrop-blur-md bg-white/10 border-2 border-white/30 text-white font-extrabold hover:bg-white hover:text-violet-950 hover:scale-105 active:scale-95 transition-all duration-300">
                         Pelajari Lebih Lanjut
                     </a>
                 </div>
 
-                <!-- Floating stat highlight -->
-                <div
-                    class="mt-10 pt-6 border-t border-violet-800/80 flex items-center justify-center md:justify-start gap-8">
-                    <div>
-                        <div class="text-2xl font-extrabold text-amber-400">1000+</div>
-                        <div class="text-xs text-violet-200/80 font-medium">Siswa Aktif</div>
-                    </div>
-                    <div class="w-px h-8 bg-violet-800"></div>
-                    <div>
-                        <div class="text-2xl font-extrabold text-amber-400">98%</div>
-                        <div class="text-xs text-violet-200/80 font-medium">Kelulusan PTN</div>
-                    </div>
-                    <div class="w-px h-8 bg-violet-800"></div>
-                    <div>
-                        <div class="text-2xl font-extrabold text-amber-400">4.9/5</div>
-                        <div class="text-xs text-violet-200/80 font-medium">Rating Tutor</div>
-                    </div>
-                </div>
-
             </div>
 
             <!-- Kanan (gambar / illustration with floating cards) -->
-            <div class="flex justify-center relative reveal-element delay-200">
+            <div class="flex justify-center relative reveal-element delay-200" id="Youtube">
                 <div class="relative w-full max-w-xs sm:max-w-sm">
 
                     <!-- Glow effect behind image -->
@@ -857,30 +889,29 @@
         </div>
     </section>
 
-    <!-- ================= YOUTUBE TUTORIAL SECTION ================= -->
+    <!-- ================= YOUTUBE TUTORIAL & PREVIEW SECTION ================= -->
     <section id="youtube-tutorial"
-        class="py-16 sm:py-24 bg-gradient-to-b from-violet-950 via-slate-900 to-violet-950 text-white relative overflow-hidden">
+        class="py-12 sm:py-20 md:py-24 bg-gradient-to-b from-violet-950 via-slate-900 to-violet-950 text-white relative overflow-hidden">
         <!-- Ambient Glow Backgrounds -->
-        <div class="absolute top-1/4 -left-32 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-1/4 -right-32 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl pointer-events-none">
+        <div class="absolute top-1/4 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-1/4 -right-32 w-80 sm:w-96 h-80 sm:h-96 bg-violet-600/20 rounded-full blur-3xl pointer-events-none">
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
             <!-- Section Header -->
-            <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16 reveal-element">
+            <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-14 reveal-element">
                 <span
-                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-extrabold tracking-wide uppercase shadow-sm mb-4">
-                    <i class="fab fa-youtube text-base text-red-500"></i> YouTube Tutorial &amp; Preview Belajar
+                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-extrabold tracking-wide uppercase shadow-sm mb-3 sm:mb-4">
+                    <i class="fab fa-youtube text-sm sm:text-base text-red-500"></i> YouTube Tutorial &amp; Preview Belajar
                 </span>
-                <h2 class="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+                <h2 class="text-xl sm:text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
                     Tonton Serunya Belajar &amp; <span
                         class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500">Trik
                     </span>
                 </h2>
-                <p class="mt-4 text-sm sm:text-base text-violet-200/80 leading-relaxed font-medium">
+                <p class="mt-2.5 sm:mt-4 text-xs sm:text-base text-violet-200/80 leading-relaxed font-medium px-2">
                     Pelajari teknik cepat berhitung, pembahasan soal ujian, dan suasana kelas bimbingan interaktif
-                    bersama para
-                    master tutor Paradise of Math.
+                    bersama para master tutor Paradise of Math.
                 </p>
             </div>
 
@@ -894,13 +925,13 @@
             @endphp
 
             <!-- Featured Video Player & Preview Cards Grid -->
-            <div class="grid lg:grid-cols-12 gap-8 items-start reveal-element delay-100">
+            <div class="grid lg:grid-cols-12 gap-6 sm:gap-8 items-start reveal-element delay-100">
                 <!-- Main Featured Player Container (8 cols on lg) -->
                 <div
-                    class="lg:col-span-8 bg-violet-900/40 backdrop-blur-xl border border-violet-700/50 rounded-3xl p-3 sm:p-5 shadow-2xl relative group">
-                    <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-inner border border-white/10"
+                    class="lg:col-span-8 bg-violet-900/40 backdrop-blur-xl border border-violet-700/50 rounded-2xl sm:rounded-3xl p-2.5 sm:p-5 shadow-2xl relative group">
+                    <div class="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden bg-black shadow-inner border border-white/10"
                         id="yt-featured-container">
-                        <iframe id="main-yt-iframe" class="w-full h-full rounded-2xl"
+                        <iframe id="main-yt-iframe" class="w-full h-full rounded-xl sm:rounded-2xl"
                             src="https://www.youtube-nocookie.com/embed/{{ $firstId }}?autoplay=0&rel=0"
                             title="Paradise of Math YouTube Tutorial Preview" frameborder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -910,31 +941,31 @@
 
                     <!-- Video Details Banner -->
                     <div
-                        class="mt-4 px-2 sm:px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-t border-white/10 pt-4">
-                        <div>
-                            <h3 id="yt-featured-title" class="text-base sm:text-xl font-extrabold text-white">
+                        class="mt-3 sm:mt-4 px-1 sm:px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 border-t border-white/10 pt-3 sm:pt-4">
+                        <div class="min-w-0 flex-1">
+                            <h3 id="yt-featured-title" class="text-sm sm:text-xl font-extrabold text-white leading-snug">
                                 {{ $firstTitle }}
                             </h3>
-                            <p id="yt-featured-desc" class="text-xs sm:text-sm text-violet-200/70 mt-1">
+                            <p id="yt-featured-desc" class="text-xs sm:text-sm text-violet-200/70 mt-1 leading-relaxed">
                                 {{ $firstDesc }}
                             </p>
                         </div>
                         <a id="yt-featured-link" href="{{ $firstUrl }}" target="_blank" rel="noopener noreferrer"
-                            class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-red-600/30 hover:scale-105 active:scale-95 transition-all duration-300">
-                            <i class="fab fa-youtube text-lg"></i>
+                            class="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm shadow-lg shadow-red-600/30 hover:scale-105 active:scale-95 transition-all duration-300">
+                            <i class="fab fa-youtube text-base sm:text-lg"></i>
                             <span>Buka di YouTube</span>
                         </a>
                     </div>
                 </div>
 
                 <!-- Playlist / Video Preview Selector List (4 cols on lg) -->
-                <div class="lg:col-span-4 flex flex-col gap-4">
-                    <div class="flex items-center justify-between px-2">
+                <div class="lg:col-span-4 flex flex-col gap-3 sm:gap-4">
+                    <div class="flex items-center justify-between px-1">
                         <h4
-                            class="text-sm font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                            class="text-xs sm:text-sm font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-2">
                             <i class="fas fa-play-circle text-red-500"></i> Video Pilihan Tutorial
                         </h4>
-                        <span class="text-xs text-violet-300 font-semibold">{{ $hasLinks ? count($youtubeLinks) : 3 }}
+                        <span class="text-[11px] sm:text-xs text-violet-300 font-semibold">{{ $hasLinks ? count($youtubeLinks) : 3 }}
                             Video</span>
                     </div>
 
@@ -942,25 +973,25 @@
                         @foreach($youtubeLinks as $idx => $link)
                             <button type="button"
                                 onclick="switchYtVideo('{{ $link->youtube_id }}', '{{ addslashes($link->judul) }}', '{{ addslashes($link->deskripsi ?: '') }}', '{{ addslashes($link->youtube_url) }}', this)"
-                                class="yt-playlist-item text-left p-3.5 rounded-2xl {{ $idx === 0 ? 'bg-white/10 border-2 border-amber-400/80' : 'bg-white/5 border border-white/10 hover:border-amber-400/50' }} shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                                class="yt-playlist-item text-left p-2.5 sm:p-3.5 rounded-2xl {{ $idx === 0 ? 'bg-white/10 border-2 border-amber-400/80' : 'bg-white/5 border border-white/10 hover:border-amber-400/50' }} shadow-md transition-all duration-300 flex gap-2.5 sm:gap-3.5 items-center group cursor-pointer">
                                 <div
-                                    class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                    class="relative w-20 sm:w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
                                     <img src="https://img.youtube.com/vi/{{ $link->youtube_id }}/hqdefault.jpg"
                                         alt="{{ $link->judul }}"
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                                     <div
                                         class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
                                         <span
-                                            class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                            class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px] sm:text-xs shadow-md"><i
                                                 class="fas fa-play ml-0.5"></i></span>
                                     </div>
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <span
-                                        class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider">{{ $link->kategori }}</span>
+                                        class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[9px] sm:text-[10px] font-black uppercase tracking-wider">{{ $link->kategori }}</span>
                                     <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">{{ $link->judul }}
                                     </h5>
-                                    <p class="text-[11px] text-violet-200/70 truncate mt-0.5">
+                                    <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">
                                         {{ $link->deskripsi ?: 'Tonton video tutorial selengkapnya' }}
                                     </p>
                                 </div>
@@ -970,80 +1001,78 @@
                         <!-- Video Item 1 (Active by default) -->
                         <button type="button"
                             onclick="switchYtVideo('5p2g1YVwSxE', '🚀 Trik Cepat Hitung Matematika & Pembahasan Soal', 'Video tutorial eksklusif penjelasan konsep matematika secara simpel dan menyenangkan.', 'https://www.youtube.com', this)"
-                            class="yt-playlist-item text-left p-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border-2 border-amber-400/80 shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                            class="yt-playlist-item text-left p-2.5 sm:p-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border-2 border-amber-400/80 shadow-md transition-all duration-300 flex gap-2.5 sm:gap-3.5 items-center group cursor-pointer">
                             <div
-                                class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                class="relative w-20 sm:w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
                                 <img src="https://img.youtube.com/vi/5p2g1YVwSxE/hqdefault.jpg" alt="Preview Video 1"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                                 <div
                                     class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
                                     <span
-                                        class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                        class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px] sm:text-xs shadow-md"><i
                                             class="fas fa-play ml-0.5"></i></span>
                                 </div>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <span
-                                    class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider">Trik
+                                    class="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[9px] sm:text-[10px] font-black uppercase tracking-wider">Trik
                                     Hitung</span>
                                 <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Trik Cepat Cerdas
                                     Matematika</h5>
-                                <p class="text-[11px] text-violet-200/70 truncate mt-0.5">Pembahasan konsep dasar &amp;
-                                    metode
-                                    kilat</p>
+                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Pembahasan konsep dasar &amp;
+                                    metode kilat</p>
                             </div>
                         </button>
 
                         <!-- Video Item 2 -->
                         <button type="button"
                             onclick="switchYtVideo('_uQrJ0TkZlc', '📐 Kuasai Rumus Aljabar & Geometri Mudah', 'Panduan langkah demi langkah memahami materi aljabar dan bangun ruang tanpa hafal rumus mati.', 'https://www.youtube.com', this)"
-                            class="yt-playlist-item text-left p-3.5 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-amber-400/50 shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                            class="yt-playlist-item text-left p-2.5 sm:p-3.5 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-amber-400/50 shadow-md transition-all duration-300 flex gap-2.5 sm:gap-3.5 items-center group cursor-pointer">
                             <div
-                                class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                class="relative w-20 sm:w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
                                 <img src="https://img.youtube.com/vi/_uQrJ0TkZlc/hqdefault.jpg" alt="Preview Video 2"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                                 <div
                                     class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
                                     <span
-                                        class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                        class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px] sm:text-xs shadow-md"><i
                                             class="fas fa-play ml-0.5"></i></span>
                                 </div>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <span
-                                    class="px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[10px] font-black uppercase tracking-wider">Aljabar
+                                    class="px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 text-[9px] sm:text-[10px] font-black uppercase tracking-wider">Aljabar
                                     &amp; Bangun Ruang</span>
                                 <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Kuasai Aljabar Tanpa
                                     Stres
                                 </h5>
-                                <p class="text-[11px] text-violet-200/70 truncate mt-0.5">Metode visual &amp; contoh
-                                    penerapan
-                                    soal</p>
+                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Metode visual &amp; contoh
+                                    penerapan soal</p>
                             </div>
                         </button>
 
                         <!-- Video Item 3 -->
                         <button type="button"
                             onclick="switchYtVideo('3JZ_D3ELwOQ', '🎯 Strategi Lolos Ujian & Bedah Soal PTN', 'Kupas tuntas soal-soal latihan ujian sekolah dan tryout persiapan jenjang SD, SMP, SMA.', 'https://www.youtube.com', this)"
-                            class="yt-playlist-item text-left p-3.5 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-amber-400/50 shadow-md transition-all duration-300 flex gap-3.5 items-center group cursor-pointer">
+                            class="yt-playlist-item text-left p-2.5 sm:p-3.5 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/10 hover:border-amber-400/50 shadow-md transition-all duration-300 flex gap-2.5 sm:gap-3.5 items-center group cursor-pointer">
                             <div
-                                class="relative w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
+                                class="relative w-20 sm:w-28 aspect-video rounded-xl overflow-hidden bg-violet-950 shrink-0 border border-white/20">
                                 <img src="https://img.youtube.com/vi/3JZ_D3ELwOQ/hqdefault.jpg" alt="Preview Video 3"
                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                                 <div
                                     class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-colors">
                                     <span
-                                        class="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-xs shadow-md"><i
+                                        class="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-red-600 text-white flex items-center justify-center text-[10px] sm:text-xs shadow-md"><i
                                             class="fas fa-play ml-0.5"></i></span>
                                 </div>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <span
-                                    class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider">Bedah
+                                    class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px] sm:text-[10px] font-black uppercase tracking-wider">Bedah
                                     Soal</span>
                                 <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Persiapan Ujian &amp;
                                     Tryout</h5>
-                                <p class="text-[11px] text-violet-200/70 truncate mt-0.5">Strategi pengerjaan cepat &amp;
+                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Strategi pengerjaan cepat &amp;
                                     akurat</p>
                             </div>
                         </button>
@@ -1510,7 +1539,8 @@
 
             <!-- ================= BANNER FOTO GURU & SERTIFIKAT AUTO-SLIDER SECTION ================= -->
             <div id="banner-guru-section" class="mt-14 mb-14 reveal-element">
-                <div class="relative w-full rounded-3xl overflow-hidden border-2 border-violet-800/80 shadow-2xl group bg-violet-950">
+                <div
+                    class="relative w-full rounded-3xl overflow-hidden border border-slate-700/60 shadow-2xl group bg-slate-950">
                     @php
                         $guruBannerFiles = glob(public_path('uploads/landing/guru_banner*.*')) ?: [];
                         if (empty($guruBannerFiles)) {
@@ -1529,7 +1559,8 @@
                     @endphp
 
                     <!-- Banner Image Slider Container -->
-                    <div class="relative w-full h-[300px] sm:h-[380px] md:h-[430px] lg:h-[480px] overflow-hidden" id="bannerGuruSlider">
+                    <div class="relative w-full h-[300px] sm:h-[380px] md:h-[430px] lg:h-[480px] overflow-hidden"
+                        id="bannerGuruSlider">
                         @if(count($guruBannerImagesList) > 0)
                             @foreach($guruBannerImagesList as $idx => $imgUrl)
                                 <img src="{{ $imgUrl }}" alt="Foto Tim Pengajar & Sertifikat {{ $idx + 1 }}"
@@ -1538,50 +1569,71 @@
                             @endforeach
                         @else
                             <!-- Default Fallback Banner Slides if no uploaded image files yet -->
-                            <div class="banner-guru-item absolute top-0 left-0 w-full h-full bg-gradient-to-r from-violet-950 via-purple-900 to-indigo-950 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 ease-in-out" style="opacity: 1; z-index: 10;">
-                                <div class="w-20 h-20 rounded-2xl bg-amber-400/20 border border-amber-300/40 text-amber-300 flex items-center justify-center text-3xl mb-3 shadow-xl backdrop-blur-md">🎓</div>
-                                <span class="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-widest mb-1">Master Tutor Kak Ika, S.Pd.</span>
-                                <h3 class="text-xl sm:text-3xl font-black text-white max-w-xl leading-tight">Pimpinan &amp; Master Tutor Matematika</h3>
+                            <div class="banner-guru-item absolute top-0 left-0 w-full h-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 ease-in-out"
+                                style="opacity: 1; z-index: 10;">
+                                <div
+                                    class="w-20 h-20 rounded-2xl bg-amber-400/20 border border-amber-300/40 text-amber-300 flex items-center justify-center text-3xl mb-3 shadow-xl backdrop-blur-md">
+                                    🎓</div>
+                                <span
+                                    class="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-widest mb-1">Master
+                                    Tutor Kak Ika, S.Pd.</span>
+                                <h3 class="text-xl sm:text-3xl font-black text-white max-w-xl leading-tight">Pimpinan &amp;
+                                    Master Tutor Matematika</h3>
                             </div>
-                            <div class="banner-guru-item absolute top-0 left-0 w-full h-full bg-gradient-to-r from-indigo-950 via-purple-950 to-violet-900 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 ease-in-out" style="opacity: 0; z-index: 1;">
-                                <div class="w-20 h-20 rounded-2xl bg-purple-400/20 border border-purple-300/40 text-purple-200 flex items-center justify-center text-3xl mb-3 shadow-xl backdrop-blur-md">⭐</div>
-                                <span class="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-widest mb-1">Co Master Tutor Kak Angel &amp; Kak Sofia</span>
-                                <h3 class="text-xl sm:text-3xl font-black text-white max-w-xl leading-tight">Spesialisasi Matematika &amp; Bahasa Inggris</h3>
+                            <div class="banner-guru-item absolute top-0 left-0 w-full h-full bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-700 ease-in-out"
+                                style="opacity: 0; z-index: 1;">
+                                <div
+                                    class="w-20 h-20 rounded-2xl bg-purple-400/20 border border-purple-300/40 text-purple-200 flex items-center justify-center text-3xl mb-3 shadow-xl backdrop-blur-md">
+                                    ⭐</div>
+                                <span
+                                    class="text-amber-300 font-extrabold text-xs sm:text-sm uppercase tracking-widest mb-1">Co
+                                    Master Tutor Kak Angel &amp; Kak Sofia</span>
+                                <h3 class="text-xl sm:text-3xl font-black text-white max-w-xl leading-tight">Spesialisasi
+                                    Matematika &amp; Bahasa Inggris</h3>
                             </div>
                         @endif
 
-                        <!-- Dark Overlay Gradients for Readable Text -->
-                        <div class="absolute inset-0 bg-gradient-to-t from-violet-950 via-violet-950/40 to-transparent pointer-events-none z-10"></div>
-                        <div class="absolute inset-0 bg-gradient-to-r from-violet-950/70 via-transparent to-violet-950/70 pointer-events-none z-10"></div>
+                        <!-- Neutral Dark Bottom Overlay Gradient (NO PURPLE TINT) for crisp text contrast -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none z-10">
+                        </div>
 
                         <!-- Top Floating Badges -->
                         <div class="absolute top-4 left-4 sm:top-6 sm:left-6 flex flex-wrap items-center gap-2 z-20">
-                            <span class="px-3 py-1.5 rounded-xl bg-amber-400 text-violet-950 font-black text-xs sm:text-sm shadow-lg transform -rotate-1">
+                            <span
+                                class="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-lg transform -rotate-1">
                                 🎓 Tim Pengajar &amp; Master Tutor
                             </span>
-                            <span class="px-3 py-1.5 rounded-xl bg-violet-950/90 text-amber-300 font-extrabold text-xs border border-amber-300/40 shadow-lg backdrop-blur-md">
+                            <span
+                                class="px-3 py-1.5 rounded-xl bg-slate-900/90 text-amber-300 font-extrabold text-xs border border-amber-300/40 shadow-lg backdrop-blur-md">
                                 📜 Sertifikat Terverifikasi
                             </span>
                         </div>
 
                         <!-- Bottom Banner Content & Slide Indicators -->
-                        <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 z-20 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+                        <div
+                            class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 z-20 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
                             <div class="max-w-2xl">
-                                <h3 class="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
+                                <h3
+                                    class="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow-md">
                                     Pengajar Profesional &amp; Bersertifikasi Master
                                 </h3>
-                                <p class="text-violet-100/90 text-xs sm:text-sm mt-1.5 font-medium leading-relaxed drop-shadow">
-                                    Kak Ika, S.Pd. (Master Tutor), Kak Angel, dan Kak Sofia membimbing siswa dengan pendekatan personal, metode cepat, dan kurikulum terbaik.
+                                <p
+                                    class="text-slate-200 text-xs sm:text-sm mt-1.5 font-medium leading-relaxed drop-shadow">
+                                    Kak Ika, S.Pd. (Master Tutor), Kak Angel, dan Kak Sofia membimbing siswa dengan
+                                    pendekatan personal, metode cepat, dan kurikulum terbaik.
                                 </p>
                             </div>
 
                             <!-- Dots Indicator for Auto-Slider -->
-                            <div class="flex items-center gap-2 shrink-0 bg-violet-950/70 px-3 py-1.5 rounded-full border border-white/10 backdrop-blur-md" id="bannerGuruDots">
+                            <div class="flex items-center gap-2 shrink-0 bg-slate-900/80 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-md"
+                                id="bannerGuruDots">
                                 @php
                                     $slideCount = max(count($guruBannerImagesList), 2);
                                 @endphp
                                 @for($i = 0; $i < $slideCount; $i++)
-                                    <span class="banner-guru-dot w-2.5 h-2.5 rounded-full bg-white transition-all duration-300 cursor-pointer"
+                                    <span
+                                        class="banner-guru-dot w-2.5 h-2.5 rounded-full bg-white transition-all duration-300 cursor-pointer"
                                         style="opacity: {{ $i === 0 ? '1' : '0.4' }};" data-slide-index="{{ $i }}"></span>
                                 @endfor
                             </div>
@@ -1726,7 +1778,7 @@
                             <div class="swiper-slide py-6 h-auto">
                                 @if($paket->is_populer)
                                     <div
-                                        class="bg-gradient-to-b from-violet-900 to-violet-955 text-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 relative h-full min-h-[500px] shadow-xl shadow-purple-950/20 border-2 border-amber-400 animate-pulse-glow-subtle">
+                                        class="bg-gradient-to-b from-violet-900 to-violet-955 text-white rounded-3xl p-5 sm:p-8 flex flex-col justify-between hover:shadow-2xl transition-all duration-300 relative h-full min-h-[500px] shadow-xl shadow-purple-950/20 border-2 border-amber-400 animate-pulse-glow-subtle">
                                         <!-- Popular Tag badge -->
                                         <div
                                             class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 bg-amber-400 text-purple-950 text-xs font-black uppercase tracking-wider rounded-full shadow-md">
@@ -1796,7 +1848,7 @@
                                     </div>
                                 @else
                                     <div
-                                        class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
+                                        class="bg-white rounded-3xl border border-violet-100 shadow-lg shadow-violet-100/30 p-5 sm:p-8 flex flex-col justify-between hover:shadow-xl transition-all duration-300 relative h-full min-h-[500px]">
                                         <div>
                                             <div class="mb-4">
                                                 <span
@@ -2366,18 +2418,14 @@
                             <span>Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Padang, Sumatera Barat,
                                 25121</span>
                         </li>
-                        <li class="flex items-center gap-2.5">
-                            <span class="text-amber-400 shrink-0"><i class="fas fa-phone-alt"></i></span>
-                            <span>0811-6612-050</span>
-                        </li>
                     </ul>
                 </div>
             </div>
 
             <!-- Copyright Strip -->
-            <div
-                class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-violet-300/60">
-                <span>© {{ date('Y') }} LBB Paradise of Math. Seluruh hak cipta dilindungi.</span>
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+                <span>© {{ date('Y') }} LBB Paradise of Math. Hak Cipta Dilindungi. Dikelola &amp; Dikembangkan oleh
+                    <strong class="text-amber-300 font-bold">Reyhan &amp; Rizky</strong> (Universitas Metamedia).</span>
                 <span class="flex gap-4">
                     <a href="#beranda" class="hover:text-white transition">Kembali ke Atas</a>
                 </span>
@@ -2386,17 +2434,36 @@
     </footer>
 
 
-    <script src="{{ asset('js/informasi.js') }}?v={{ filemtime(public_path('js/informasi.js')) }}"></script>
+    <!-- ================= FLOATING SCROLL PROGRESS BACK-TO-TOP BUTTON ================= -->
+    <div id="scroll-to-top-btn"
+        class="fixed bottom-20 sm:bottom-24 right-5 sm:right-7 z-40 opacity-0 pointer-events-none transition-all duration-300 transform translate-y-4 no-print">
+        <button type="button" onclick="scrollToTop()" aria-label="Kembali ke atas"
+            class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white text-violet-950 shadow-xl flex items-center justify-center group hover:scale-110 active:scale-95 transition-transform duration-200 border border-violet-100 cursor-pointer">
+            <!-- SVG Progress Ring Circle -->
+            <svg class="absolute inset-0 w-full h-full -rotate-90 transform" viewBox="0 0 48 48">
+                <!-- Background Ring -->
+                <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="3" fill="transparent"
+                    class="text-violet-100" />
+                <!-- Dynamic Scroll Progress Ring -->
+                <circle id="scroll-progress-circle" cx="24" cy="24" r="20" stroke="currentColor" stroke-width="3.5"
+                    fill="transparent" stroke-dasharray="125.66" stroke-dashoffset="125.66" stroke-linecap="round"
+                    class="text-amber-400 transition-all duration-75" />
+            </svg>
+            <!-- Arrow Up Icon -->
+            <i
+                class="fas fa-arrow-up text-xs sm:text-sm font-bold text-violet-950 group-hover:text-amber-500 group-hover:-translate-y-0.5 transition-all duration-200 relative z-10"></i>
+        </button>
+    </div>
 
     <!-- ================= FLOATING REALTIME CHAT WIDGET ================= -->
-    <div class="fixed bottom-6 right-6 z-50 no-print">
+    <div class="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 no-print">
         <!-- Chat Bubble Trigger -->
         <button id="chat-trigger-btn"
-            class="relative w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-violet-300 hover:scale-105 hover:shadow-violet-400 active:scale-95 transition-all duration-300 focus:outline-none">
+            class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-violet-600 to-indigo-700 text-white flex items-center justify-center shadow-lg shadow-violet-300 hover:scale-105 hover:shadow-violet-400 active:scale-95 transition-all duration-300 focus:outline-none">
             <!-- Pulsing ring effect -->
             <span class="absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75 animate-ping"></span>
 
-            <i class="fas fa-comments text-xl relative z-10"></i>
+            <i class="fas fa-comments text-lg sm:text-xl relative z-10"></i>
 
             <!-- Notification Badge -->
             <span
@@ -2405,7 +2472,7 @@
 
         <!-- Chat Window Box -->
         <div id="chat-window-box"
-            class="absolute bottom-20 right-0 w-[320px] sm:w-[360px] h-[480px] bg-white rounded-2xl shadow-2xl border border-violet-100/80 flex flex-col overflow-hidden hidden transform scale-95 opacity-0 origin-bottom-right transition-all duration-300">
+            class="absolute bottom-16 sm:bottom-20 right-0 w-[calc(100vw-2rem)] max-w-[320px] sm:max-w-[360px] h-[440px] sm:h-[480px] bg-white rounded-2xl shadow-2xl border border-violet-100/80 flex flex-col overflow-hidden hidden transform scale-95 opacity-0 origin-bottom-right transition-all duration-300">
             <!-- Header -->
             <div
                 class="bg-gradient-to-r from-violet-700 to-indigo-800 p-4 text-white flex items-center justify-between shadow-md">
@@ -2578,6 +2645,42 @@
             }
         }
     </script>
+
+    <!-- Script Controller Scroll Progress & Back To Top Button -->
+    <script>
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        window.addEventListener('scroll', function () {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollBtn = document.getElementById('scroll-to-top-btn');
+            const progressCircle = document.getElementById('scroll-progress-circle');
+
+            if (scrollBtn && progressCircle && scrollHeight > 0) {
+                if (scrollTop > 180) {
+                    scrollBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+                    scrollBtn.classList.add('opacity-100', 'translate-y-0');
+                } else {
+                    scrollBtn.classList.remove('opacity-100', 'translate-y-0');
+                    scrollBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+                }
+
+                const progress = Math.min(Math.max(scrollTop / scrollHeight, 0), 1);
+                const radius = 20;
+                const circumference = 2 * Math.PI * radius;
+                const strokeDashoffset = circumference - (progress * circumference);
+
+                progressCircle.style.strokeDasharray = circumference;
+                progressCircle.style.strokeDashoffset = strokeDashoffset;
+            }
+        });
+    </script>
+        <script src="{{ asset('js/informasi.js') }}?v={{ filemtime(public_path('js/informasi.js')) }}"></script>
 </body>
 
 </html>

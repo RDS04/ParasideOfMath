@@ -528,7 +528,8 @@
                     </p>
                 @endif
                 <p class="text-xs text-gray-400 tracking-wide">
-                    &copy; 2026 · Paradise of Math — bimbingan privat No.1
+                    &copy; {{ date('Y') }} · Paradise of Math — Hak Cipta Dilindungi.<br/>
+                    <span class="text-[11px] text-gray-500 font-medium mt-0.5 inline-block">Dikelola &amp; Dikembangkan oleh <strong>Reyhan &amp; Rizky</strong> (Universitas Metamedia)</span>
                 </p>
             </div>
 

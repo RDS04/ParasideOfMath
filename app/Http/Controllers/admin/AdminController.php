@@ -1969,11 +1969,11 @@ class AdminController extends Controller
 
         $request->validate([
             'kategori_soal_id' => 'required|exists:kategori_soals,id',
-            'file_excel'        => 'required|file|mimes:xlsx,xls,csv,txt|max:5120',
+            'file_excel'        => 'required|file|mimes:pdf,doc,docx,xlsx,xls,csv,txt|max:10240',
         ], [
-            'file_excel.required' => 'File Excel / CSV wajib diunggah.',
-            'file_excel.mimes'    => 'Format file harus berupa Excel (.xlsx, .xls) atau CSV (.csv).',
-            'file_excel.max'      => 'Ukuran file maksimal 5MB.',
+            'file_excel.required' => 'File dokumen wajib diunggah.',
+            'file_excel.mimes'    => 'Format file harus berupa PDF (.pdf), Word (.doc, .docx), Excel (.xlsx, .xls), atau CSV.',
+            'file_excel.max'      => 'Ukuran file maksimal 10MB.',
         ]);
 
         $kategoriId = $request->input('kategori_soal_id');
@@ -1982,6 +1982,25 @@ class AdminController extends Controller
         $file      = $request->file('file_excel');
         $filePath  = $file->getRealPath();
         $extension = strtolower($file->getClientOriginalExtension());
+        $origName  = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+        if (in_array($extension, ['pdf', 'doc', 'docx'])) {
+            $destDir = public_path('uploads/bank_soal_docs');
+            if (!file_exists($destDir)) {
+                mkdir($destDir, 0777, true);
+            }
+            $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $origName);
+            $fileName = "doc_{$kategoriId}_" . time() . "_{$safeName}.{$extension}";
+            $file->move($destDir, $fileName);
+
+            return redirect()->route('admin.bank-soal.index', [
+                'jenjang'      => $kategori->jenjang,
+                'kelas'        => $kategori->kelas,
+                'sub_kategori' => $kategori->sub_kategori,
+                'mapel'        => $kategori->nama_kategori,
+                'kategori_id'  => $kategori->id,
+            ])->with('success', 'File dokumen ' . strtoupper($extension) . ' ("' . $file->getClientOriginalName() . '") berhasil diunggah & tersimpan untuk kategori ini!');
+        }
 
         $rows = [];
 

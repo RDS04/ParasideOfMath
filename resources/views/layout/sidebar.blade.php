@@ -180,7 +180,8 @@
                             <i class="nav-icon fas fa-wallet text-emerald-400"></i>
                             <p>Pembayaran <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.riwayat-pembayaran') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview"
+                            style="{{ Route::is('admin.riwayat-pembayaran') ? 'display: block;' : '' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.riwayat-pembayaran') }}"
                                     class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
@@ -196,7 +197,8 @@
                             <i class="nav-icon fas fa-chart-line text-rose-400"></i>
                             <p>Laporan <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.laporan-pendapatan') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview"
+                            style="{{ Route::is('admin.laporan-pendapatan') ? 'display: block;' : '' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.laporan-pendapatan') }}"
                                     class="nav-link {{ Route::is('admin.laporan-pendapatan') ? 'active' : '' }}">
@@ -208,13 +210,15 @@
                     </li>
 
                     <li class="nav-header">PENGELOLAAN HARGA & KONTEN</li>
-                    <li class="nav-item {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'menu-open' : '' }}">
+                    <li
+                        class="nav-item {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'menu-open' : '' }}">
                         <a href="#"
                             class="nav-link {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-images text-rose-400"></i>
                             <p>Kelola Foto <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview"
+                            style="{{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'display: block;' : '' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.foto.index') }}"
                                     class="nav-link {{ Route::is('admin.foto.index') ? 'active' : '' }}">
