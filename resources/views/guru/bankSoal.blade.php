@@ -262,10 +262,11 @@
                                 </button>
                             </div>
                         @else
-                            <div class="row g-3">
+                            <div class="d-flex flex-column gap-2.5">
                                 @foreach ($kategoriList as $kat)
                                     @php
                                         $isSelected = $kategoriId == $kat->id;
+                                        $docCount = count(glob(public_path("uploads/bank_soal_docs/doc_{$kat->id}_*.*")) ?: []);
                                         $url = route($prefixRoute . '.index', [
                                             'jenjang' => $jenjang,
                                             'kelas' => $kelas,
@@ -274,37 +275,44 @@
                                             'kategori_id' => $kat->id,
                                         ]);
                                     @endphp
-                                    <div class="col-md-6 col-lg-4 mb-2">
-                                        <a href="{{ $url }}"
-                                            class="card text-decoration-none rounded-2xl overflow-hidden h-100 transition-all shadow-sm"
-                                            style="{{ $isSelected ? 'background: linear-gradient(135deg, #4c1d95, #6b21a8) !important; color: #ffffff !important; border: 2px solid #facc15 !important;' : 'background-color: #ffffff !important; color: #1e1b4b !important; border: 2px solid #e2e8f0 !important;' }}">
-                                            <div class="card-body p-3.5">
-                                                <div class="d-flex align-items-start gap-3">
-                                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-xs"
-                                                        style="width: 40px; height: 40px; background: {{ $isSelected ? 'rgba(255,255,255,0.2)' : '#f3e8ff' }};">
-                                                        <i
-                                                            class="fas fa-file-alt {{ $isSelected ? 'text-amber-300' : 'text-purple-700' }}"></i>
-                                                    </div>
-                                                    <div class="flex-1 min-w-0">
-                                                        <h6 class="font-bold mb-1 text-sm text-truncate" style="color: {{ $isSelected ? '#ffffff' : '#3b0764' }} !important;" title="{{ $kat->deskripsi ?: $kat->nama_kategori }}">
-                                                            {{ $kat->deskripsi ?: $kat->nama_kategori }}
-                                                        </h6>
-                                                        <div class="d-flex align-items-center gap-2">
-                                                            <span class="badge font-bold px-2 py-0.5 rounded text-xs" style="{{ $isSelected ? 'background-color: rgba(255, 255, 255, 0.2) !important; color: #fef08a !important;' : 'background-color: #f3e8ff !important; color: #6b21a8 !important;' }}">
-                                                                <i class="fas fa-list-ol mr-1"></i> {{ $kat->bank_soals_count }} Soal
-                                                            </span>
-                                                            <span class="text-xs" style="color: {{ $isSelected ? '#e9d5ff' : '#64748b' }} !important;">
-                                                                {{ $kat->created_at->diffForHumans() }}
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                    <a href="{{ $url }}"
+                                        class="p-3.5 rounded-2xl text-decoration-none d-flex flex-column flex-sm-row items-stretch items-sm-center justify-content-between gap-3 transition-all shadow-xs"
+                                        style="{{ $isSelected ? 'background: linear-gradient(135deg, #4c1d95, #6b21a8) !important; color: #ffffff !important; border: 2px solid #facc15 !important;' : 'background-color: #ffffff !important; color: #1e1b4b !important; border: 2px solid #e2e8f0 !important;' }}">
+                                        <div class="d-flex items-center gap-3 min-w-0 flex-1">
+                                            <div class="rounded-2xl p-3 d-flex items-center justify-center shrink-0 shadow-xs"
+                                                style="width: 46px; height: 46px; background: {{ $isSelected ? 'rgba(255,255,255,0.2)' : '#f3e8ff' }};">
+                                                <i class="fas fa-folder-open fa-lg {{ $isSelected ? 'text-amber-300' : 'text-purple-700' }}"></i>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="d-flex items-center gap-2 flex-wrap mb-1">
+                                                    <h6 class="font-bold text-sm sm:text-base text-truncate mb-0" style="color: {{ $isSelected ? '#ffffff' : '#3b0764' }} !important;" title="{{ $kat->deskripsi ?: $kat->nama_kategori }}">
+                                                        {{ $kat->deskripsi ?: $kat->nama_kategori }}
+                                                    </h6>
                                                     @if ($isSelected)
-                                                        <i class="fas fa-check-circle fa-lg mt-1 shrink-0" style="color: #facc15 !important;"></i>
+                                                        <span class="badge bg-amber-400 text-purple-950 font-bold px-2 py-0.5 rounded-md text-[10px] uppercase">
+                                                            <i class="fas fa-check-circle mr-1"></i> Terpilih
+                                                        </span>
                                                     @endif
                                                 </div>
+                                                <div class="d-flex items-center gap-2 flex-wrap">
+                                                    <span class="badge font-bold px-2.5 py-1 rounded-lg text-xs" style="{{ $isSelected ? 'background-color: rgba(255, 255, 255, 0.2) !important; color: #fef08a !important;' : 'background-color: #f3e8ff !important; color: #6b21a8 !important;' }}">
+                                                        <i class="fas fa-list-ol mr-1"></i> {{ $kat->bank_soals_count }} Soal Manual
+                                                    </span>
+                                                    <span class="badge font-bold px-2.5 py-1 rounded-lg text-xs" style="{{ $isSelected ? 'background-color: rgba(255, 255, 255, 0.2) !important; color: #7dd3fc !important;' : 'background-color: #e0f2fe !important; color: #0369a1 !important;' }}">
+                                                        <i class="fas fa-file-pdf mr-1"></i> {{ $docCount }} Dokumen/PDF
+                                                    </span>
+                                                    <span class="text-xs ml-sm-auto" style="color: {{ $isSelected ? '#e9d5ff' : '#64748b' }} !important;">
+                                                        <i class="far fa-clock mr-1"></i> Dibuat {{ $kat->created_at->diffForHumans() }}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </a>
-                                    </div>
+                                        </div>
+                                        <div class="d-flex items-center justify-content-end gap-2 shrink-0">
+                                            <span class="btn btn-xs font-bold rounded-xl px-3.5 py-2 text-xs shadow-xs" style="{{ $isSelected ? 'background-color: #facc15 !important; color: #3b0764 !important; border: none !important;' : 'background-color: #f3e8ff !important; color: #6b21a8 !important; border: 1px solid #d8b4fe !important;' }}">
+                                                {{ $isSelected ? 'Paket Aktif' : 'Pilih Paket' }} <i class="fas fa-chevron-right ml-1"></i>
+                                            </span>
+                                        </div>
+                                    </a>
                                 @endforeach
                             </div>
                         @endif
@@ -315,7 +323,7 @@
             <!-- ════════════════════════════════════════════════════════════ -->
             <!-- LANGKAH 6: DETAIL SOAL (muncul saat kategori dipilih)      -->
             <!-- ════════════════════════════════════════════════════════════ -->
-            @if ($selectedCategory)
+            @if ($selectedCategory && !empty($kategoriId))
 
                 <!-- Active Combo Detail Header Card -->
                 <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-gradient-to-r from-purple-900 to-indigo-900 text-white">

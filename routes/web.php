@@ -97,6 +97,8 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::delete('/ujian/unassign', 'unassignUjianGuru')->name('guru.ujian.unassign');
 
     Route::get('/bank-soal', 'bankSoal')->name('guru.bank-soal.index');
+    Route::get('/list-soal', 'listSoal')->name('guru.list-soal.index');
+    Route::get('/list-soal/detail/{id}', 'detailListSoal')->name('guru.list-soal.detail');
     Route::post('/bank-soal/kategori', 'storeKategoriSoal')->name('guru.bank-soal.kategori.store');
     Route::put('/bank-soal/kategori/{id}', 'updateKategoriSoal')->name('guru.bank-soal.kategori.update');
     Route::delete('/bank-soal/kategori/{id}', 'deleteKategoriSoal')->name('guru.bank-soal.kategori.delete');

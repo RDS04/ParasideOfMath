@@ -304,11 +304,30 @@
                             <p>Penugasan Ujian Siswa</p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{{ route('guru.bank-soal.index') }}" class="nav-link">
+                    <li class="nav-item {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-reader text-rose-400"></i>
-                            <p>Materi &amp; Modul</p>
+                            <p>
+                                Modul
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
                         </a>
+                        <ul class="nav nav-treeview" style="{{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'display: block;' : '' }}">
+                            <li class="nav-item">
+                                <a href="{{ route('guru.bank-soal.index') }}"
+                                    class="nav-link {{ Route::is('guru.bank-soal.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-plus-circle text-purple-400"></i>
+                                    <p>Input Soal</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('guru.list-soal.index') }}"
+                                    class="nav-link {{ Route::is('guru.list-soal.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-list-alt text-amber-400"></i>
+                                    <p>List Soal</p>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <li class="nav-header">LAINNYA</li>
                     <li class="nav-item">
