@@ -405,11 +405,6 @@
                                                                 </div>
 
                                                                 <div class="mb-3">
-                                                                    <label class="form-label text-xs font-bold text-slate-700 uppercase">Tenggat Waktu / Deadline (Opsional)</label>
-                                                                    <input type="date" name="tgl_deadline" class="form-control rounded-xl font-semibold text-xs border-slate-200" min="{{ date('Y-m-d') }}">
-                                                                </div>
-
-                                                                <div class="mb-3">
                                                                     <label class="form-label text-xs font-bold text-slate-700 uppercase">Catatan / Instruksi untuk Siswa</label>
                                                                     <textarea name="catatan" class="form-control rounded-xl text-xs border-slate-200" rows="3" placeholder="Contoh: Silakan dikerjakan sebelum pertemuan les berikutnya hari Rabu.">Silakan dikerjakan dengan jujur &amp; cermat.</textarea>
                                                                 </div>
