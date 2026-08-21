@@ -121,39 +121,174 @@
                         </div>
                     @elseif ($categories->isEmpty())
                     @else
-                        <div class="row">
-                            @foreach ($categories as $cat)
-                                <div class="col-md-6 col-lg-4 mb-4">
-                                    <div class="card border-0 shadow-sm rounded-2xl bg-white h-100 transition-all hover:shadow-md hover:-translate-y-1 overflow-hidden d-flex flex-column">
-                                        <div class="card-header bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 border-0">
-                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-1 mb-2">
-                                                <span class="badge bg-purple-500/30 text-purple-200 border border-purple-400/30 px-2.5 py-1 rounded-md text-[11px] font-bold">
-                                                    {{ $cat->jenjang }} • {{ $cat->sub_kategori }}
-                                                </span>
-                                                <span class="badge bg-amber-400 text-purple-950 font-extrabold px-2.5 py-1 rounded-full text-xs">
-                                                    <i class="fas fa-question-circle mr-1"></i> {{ $cat->bank_soals_count }} Soal
-                                                </span>
-                                            </div>
-                                            <h5 class="font-bold text-lg mb-1 leading-snug">{{ $cat->nama_kategori }}</h5>
-                                        </div>
-                                        <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
-                                            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
-                                                {{ $cat->deskripsi ?: 'Latihan soal pilihan ganda untuk menguji pemahaman materi ' . $cat->nama_kategori . '.' }}
-                                            </p>
+                        @php
+                            $allDocFilesCountSiswa = 0;
+                            foreach ($categories as $cCheck) {
+                                $allDocFilesCountSiswa += count(glob(public_path("uploads/bank_soal_docs/doc_{$cCheck->id}_*.*")) ?: []);
+                            }
+                        @endphp
 
-                                            @if ($cat->bank_soals_count > 0)
-                                                <a href="{{ route('siswa.ujian', ['kategori_id' => $cat->id]) }}" class="btn btn-purple btn-block font-bold rounded-xl py-2.5 text-sm shadow-sm">
-                                                    <i class="fas fa-play-circle mr-1.5"></i> Mulai Kerjakan Soal
-                                                </a>
-                                            @else
-                                                <button disabled class="btn btn-light btn-block font-bold rounded-xl py-2.5 text-xs text-slate-400">
-                                                    <i class="fas fa-lock mr-1.5"></i> Soal Belum Belum Siap
-                                                </button>
+                        <!-- ═══════ TAB: SOAL UJIAN (Web) | MODUL PDF ═══════ -->
+                        <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
+                            <div class="card-header p-2 bg-slate-100 border-bottom">
+                                <ul class="nav nav-pills nav-justified w-100 tab-nav-list" id="tabUjianSoalModul" role="tablist">
+                                    <li class="nav-item flex-1" role="presentation">
+                                        <a class="nav-link active tab-nav-link tab-nav-soal" id="tab-soal-web" data-toggle="pill"
+                                            href="#content-soal-web" role="tab" aria-controls="content-soal-web" aria-selected="true">
+                                            <i class="fas fa-list-ol"></i>
+                                            <span>Soal Ujian ({{ $categories->count() }})</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item flex-1" role="presentation">
+                                        <a class="nav-link tab-nav-link tab-nav-modul" id="tab-modul-pdf-siswa" data-toggle="pill"
+                                            href="#content-modul-pdf-siswa" role="tab" aria-controls="content-modul-pdf-siswa" aria-selected="false">
+                                            <i class="fas fa-file-pdf"></i>
+                                            <span>Modul PDF ({{ $allDocFilesCountSiswa }})</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="card-body p-3 p-md-4 bg-slate-50">
+                                <div class="tab-content" id="tabUjianSoalModulContent">
+
+                                    <!-- TAB 1: SOAL UJIAN (dibuat guru lewat web) -->
+                                    <div class="tab-pane fade show active" id="content-soal-web" role="tabpanel" aria-labelledby="tab-soal-web">
+                                        <div class="row">
+                                            @foreach ($categories as $cat)
+                                                <div class="col-md-6 col-lg-4 mb-4">
+                                                    <div class="card border-0 shadow-sm rounded-2xl bg-white h-100 transition-all hover:shadow-md hover:-translate-y-1 overflow-hidden d-flex flex-column">
+                                                        <div class="card-header bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 border-0">
+                                                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-1 mb-2">
+                                                                <span class="badge bg-purple-500/30 text-purple-200 border border-purple-400/30 px-2.5 py-1 rounded-md text-[11px] font-bold">
+                                                                    {{ $cat->jenjang }} • {{ $cat->sub_kategori }}
+                                                                </span>
+                                                                <span class="badge bg-amber-400 text-purple-950 font-extrabold px-2.5 py-1 rounded-full text-xs">
+                                                                    <i class="fas fa-question-circle mr-1"></i> {{ $cat->bank_soals_count }} Soal
+                                                                </span>
+                                                            </div>
+                                                            <h5 class="font-bold text-lg mb-1 leading-snug">{{ $cat->nama_kategori }}</h5>
+                                                        </div>
+                                                        <div class="card-body p-4 d-flex flex-column justify-content-between flex-grow-1">
+                                                            <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                                                                {{ $cat->deskripsi ?: 'Latihan soal pilihan ganda untuk menguji pemahaman materi ' . $cat->nama_kategori . '.' }}
+                                                            </p>
+
+                                                            @if ($cat->bank_soals_count > 0)
+                                                                <a href="{{ route('siswa.ujian', ['kategori_id' => $cat->id]) }}" class="btn btn-purple btn-block font-bold rounded-xl py-2.5 text-sm shadow-sm">
+                                                                    <i class="fas fa-play-circle mr-1.5"></i> Mulai Kerjakan Soal
+                                                                </a>
+                                                            @else
+                                                                <button disabled class="btn btn-light btn-block font-bold rounded-xl py-2.5 text-xs text-slate-400">
+                                                                    <i class="fas fa-lock mr-1.5"></i> Soal Belum Belum Siap
+                                                                </button>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <!-- TAB 2: MODUL PDF -->
+                                    <div class="tab-pane fade" id="content-modul-pdf-siswa" role="tabpanel" aria-labelledby="tab-modul-pdf-siswa">
+                                        @php $hasAnyDocFilesSiswa = false; @endphp
+
+                                        <div class="d-flex flex-column doc-group-list">
+                                            @foreach ($categories as $catMod)
+                                                @php
+                                                    $gModDocFilesSiswa = glob(public_path("uploads/bank_soal_docs/doc_{$catMod->id}_*.*")) ?: [];
+                                                @endphp
+                                                @if (count($gModDocFilesSiswa) > 0)
+                                                    @php $hasAnyDocFilesSiswa = true; @endphp
+                                                    <div class="doc-group-card">
+                                                        <div class="doc-group-header">
+                                                            <span class="doc-group-title">
+                                                                <i class="fas fa-folder"></i> {{ $catMod->deskripsi ?: $catMod->nama_kategori }}
+                                                            </span>
+                                                            <span class="doc-group-count">{{ count($gModDocFilesSiswa) }} File PDF</span>
+                                                        </div>
+                                                        <div class="doc-group-body">
+                                                            <div class="d-flex flex-column doc-file-list">
+                                                                @foreach($gModDocFilesSiswa as $sDocIdx => $sDocPath)
+                                                                    @php
+                                                                        $sDocFileName = basename($sDocPath);
+                                                                        $sDocExt = strtolower(pathinfo($sDocFileName, PATHINFO_EXTENSION));
+                                                                        $sDocDisplay = preg_replace('/^doc_\d+_\d+_/', '', $sDocFileName);
+                                                                        $sDocUrl = asset("uploads/bank_soal_docs/{$sDocFileName}");
+                                                                        $sIsPdf = $sDocExt === 'pdf';
+                                                                    @endphp
+                                                                    <div class="doc-file-item">
+                                                                        <div class="doc-file-left">
+                                                                            <div class="doc-file-icon {{ $sIsPdf ? 'doc-file-icon-pdf' : 'doc-file-icon-word' }}">
+                                                                                <i class="fas {{ $sIsPdf ? 'fa-file-pdf' : 'fa-file-word' }}"></i>
+                                                                            </div>
+                                                                            <div class="doc-file-info">
+                                                                                <div class="doc-file-name-row">
+                                                                                    <h6 class="doc-file-name" title="{{ $sDocDisplay }}">{{ $sDocDisplay }}</h6>
+                                                                                    <span class="doc-file-ext {{ $sIsPdf ? 'doc-file-ext-pdf' : 'doc-file-ext-word' }}">
+                                                                                        {{ strtoupper($sDocExt) }}
+                                                                                    </span>
+                                                                                </div>
+                                                                                <span class="doc-file-sub">File Dokumen Modul Pembelajaran</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="doc-file-right">
+                                                                            @if($sIsPdf)
+                                                                                <button type="button" class="doc-file-read-btn" data-toggle="modal"
+                                                                                    data-target="#modalUjianPreviewDoc_{{ $catMod->id }}_{{ $sDocIdx }}">
+                                                                                    <i class="fas fa-book-reader"></i> Baca Dokumen PDF
+                                                                                </button>
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+
+                                                                    @if($sIsPdf)
+                                                                        <div class="modal fade p-0" id="modalUjianPreviewDoc_{{ $catMod->id }}_{{ $sDocIdx }}"
+                                                                            tabindex="-1" role="dialog" aria-hidden="true" style="padding-right: 0 !important;">
+                                                                            <div class="modal-dialog m-0 pdf-modal-dialog" role="document">
+                                                                                <div class="modal-content border-0 rounded-0 shadow-none h-100 pdf-modal-content">
+                                                                                    <div class="pdf-modal-header">
+                                                                                        <div class="pdf-modal-header-left">
+                                                                                            <i class="fas fa-file-pdf"></i>
+                                                                                            <div class="min-w-0">
+                                                                                                <h5 class="pdf-modal-title" title="{{ $sDocDisplay }}">{{ $sDocDisplay }}</h5>
+                                                                                                <span class="pdf-modal-protection">
+                                                                                                    <i class="fas fa-shield-alt mr-1"></i>Mode Baca Saja (Proteksi Unduh Aktif)
+                                                                                                </span>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <button type="button" class="pdf-modal-close-btn" data-dismiss="modal" aria-label="Close">
+                                                                                            <i class="fas fa-times mr-1"></i> Tutup Reader
+                                                                                        </button>
+                                                                                    </div>
+                                                                                    <div class="pdf-modal-body" oncontextmenu="return false;">
+                                                                                        <iframe src="{{ $sDocUrl }}#toolbar=0&navpanes=0&scrollbar=1&view=FitH"
+                                                                                            class="w-100 h-100 border-0" oncontextmenu="return false;"></iframe>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    @endif
+                                                                @endforeach
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+
+                                            @if (!$hasAnyDocFilesSiswa)
+                                                <div class="text-center py-5 bg-white empty-state-box">
+                                                    <i class="fas fa-file-pdf empty-state-icon"></i>
+                                                    <h6 class="font-bold empty-state-title">Belum ada dokumen modul PDF terunggah untuk {{ $jenjang }} - {{ $sub_kategori }}.</h6>
+                                                    <p class="empty-state-text">Modul PDF akan muncul di sini setelah guru mengunggahnya.</p>
+                                                </div>
                                             @endif
                                         </div>
                                     </div>
+
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -557,6 +692,74 @@
                 font-size: 0.75rem;
             }
         }
+
+        /* ============== TABS SOAL / MODUL PDF (siswa) ============== */
+        .tab-nav-list { gap: 8px; }
+        .tab-nav-link {
+            font-weight: 700; font-size: 13px; padding: 10px 8px;
+            border-radius: 10px; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+            transition: all 0.2s ease; text-align: center;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .tab-nav-soal { border: 2px solid #6b21a8; }
+        .tab-nav-soal i { color: #f59e0b; }
+        .tab-nav-modul { border: 2px solid #0284c7; }
+        .tab-nav-modul i { color: #f43f5e; }
+
+        .empty-state-box { border: 2px dashed #e2e8f0; border-radius: 16px; padding: 20px; }
+        .empty-state-icon { color: #cbd5e1; font-size: 42px; margin-bottom: 12px; display: block; }
+        .empty-state-title { color: #334155; font-size: 14px; margin-bottom: 4px; }
+        .empty-state-text { color: #94a3b8; font-size: 12px; margin-bottom: 12px; }
+
+        .doc-group-list { gap: 12px; }
+        .doc-group-card { border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04); }
+        .doc-group-header { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; }
+        .doc-group-title { font-size: 12px; font-weight: 700; color: #3b0764; }
+        .doc-group-title i { color: #9333ea; margin-right: 6px; }
+        .doc-group-count { background: #581c87; color: #ffffff; font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 6px; }
+        .doc-group-body { padding: 12px; background: #f8fafc; }
+        .doc-file-list { gap: 8px; }
+
+        .doc-file-item {
+            display: flex; flex-direction: column; gap: 10px; justify-content: space-between; align-items: stretch;
+            padding: 14px; border-radius: 16px; border: 1px solid #e2e8f0; background: #ffffff;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); transition: border-color 0.2s ease;
+        }
+        .doc-file-item:hover { border-color: #c084fc; }
+        .doc-file-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+        .doc-file-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 18px; flex-shrink: 0; }
+        .doc-file-icon-pdf { background: #ffe4e6; color: #e11d48; }
+        .doc-file-icon-word { background: #dbeafe; color: #2563eb; }
+        .doc-file-info { min-width: 0; flex: 1; }
+        .doc-file-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px; }
+        .doc-file-name { font-size: 13px; font-weight: 700; color: #3b0764; margin-bottom: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .doc-file-ext { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; border: 1px solid; }
+        .doc-file-ext-pdf { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+        .doc-file-ext-word { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .doc-file-sub { font-size: 11px; color: #94a3b8; display: block; }
+        .doc-file-right { display: flex; align-items: center; flex-shrink: 0; }
+        .doc-file-read-btn {
+            width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px 14px; border-radius: 10px; font-size: 12px; font-weight: 700;
+            color: #ffffff; border: none; background: linear-gradient(135deg, #6b21a8, #4c1d95);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+        }
+        .doc-file-read-btn i { color: #fcd34d; }
+
+        @media (min-width: 576px) {
+            .doc-file-item { flex-direction: row; align-items: center; }
+            .doc-file-read-btn { width: auto; }
+        }
+
+        .pdf-modal-dialog { max-width: 100vw; width: 100vw; height: 100vh; margin: 0; }
+        .pdf-modal-content { background: #0f172a; }
+        .pdf-modal-header { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; background: #3b0764; color: #ffffff; padding: 10px 14px; border-bottom: 1px solid #581c87; }
+        .pdf-modal-header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .pdf-modal-header-left > i { color: #fb7185; font-size: 18px; flex-shrink: 0; }
+        .pdf-modal-title { font-size: 13px; font-weight: 700; color: #ffffff; margin-bottom: 0; max-width: 60vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .pdf-modal-protection { font-size: 10px; color: #fcd34d; display: block; font-weight: 500; }
+        .pdf-modal-close-btn { flex-shrink: 0; background: #dc2626; color: #ffffff; border: none; font-weight: 700; font-size: 12px; border-radius: 8px; padding: 6px 12px; }
+        .pdf-modal-body { padding: 0; background: #0f172a; overflow: hidden; height: calc(100vh - 58px); user-select: none; }
     </style>
 
     <script>

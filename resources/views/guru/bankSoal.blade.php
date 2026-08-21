@@ -78,143 +78,228 @@
             <!-- ════════════════════════════════════════════════════════════ -->
             <!-- FILTER BANK SOAL: JENJANG, KELAS, SEMESTER, & MAPEL          -->
             <!-- ════════════════════════════════════════════════════════════ -->
-            <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                <div class="card-header bg-white py-3 px-3.5 sm:px-4 border-bottom d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-2.5">
-                    <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-purple-100 text-purple-900 d-flex align-items-center justify-content-center mr-3 shadow-xs shrink-0"
-                            style="width: 38px; height: 38px;">
-                            <i class="fas fa-filter text-purple-700"></i>
+            <!-- FILTER BANK SOAL -->
+            <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden bank-filter-card">
+
+                <!-- Filter Header -->
+                <div class="card-header bg-white border-bottom px-3 px-md-4 py-3">
+                    <div class="filter-header">
+
+                        <!-- Judul -->
+                        <div class="filter-header-title">
+                            <div class="filter-icon">
+                                <i class="fas fa-filter"></i>
+                            </div>
+
+                            <div class="filter-title-content">
+                                <h5 class="mb-0 font-bold text-purple-950">
+                                    Filter Bank Soal &amp; Latihan
+                                </h5>
+
+                                <span class="filter-subtitle">
+                                    Pilih Jenjang, Kelas, Semester, dan Mata Pelajaran
+                                </span>
+                            </div>
                         </div>
-                        <div>
-                            <h5 class="card-title font-bold text-purple-950 mb-0 text-sm sm:text-base">Filter Bank Soal &amp; Latihan</h5>
-                            <span class="text-xs text-slate-500 d-block">Pilih Jenjang, Kelas, Semester, dan Mata Pelajaran</span>
-                        </div>
+
+                        <!-- Reset -->
+                        @if($jenjang || $kelas || $sub || $mapel)
+                            <a href="{{ route($prefixRoute . '.index') }}"
+                                class="btn btn-outline-danger btn-sm font-bold rounded-xl px-3 reset-filter-btn">
+                                <i class="fas fa-undo mr-1"></i>
+                                Reset Filter
+                            </a>
+                        @endif
+
                     </div>
-                    @if($jenjang || $kelas || $sub || $mapel)
-                        <a href="{{ route($prefixRoute . '.index') }}"
-                            class="btn btn-sm btn-outline-danger font-bold rounded-xl px-3 py-2 text-xs transition-all shadow-xs text-center w-100 w-sm-auto shrink-0">
-                            <i class="fas fa-undo mr-1"></i> Reset Filter
-                        </a>
-                    @endif
                 </div>
 
-                <div class="card-body p-3.5 sm:p-4 bg-purple-50/30">
-                    <form id="filterBankSoalForm" action="{{ route($prefixRoute . '.index') }}" method="GET">
-                        <div class="row g-3">
+                <!-- Filter Body -->
+                <div class="card-body p-3 p-md-4 bg-purple-50">
 
-                            <!-- Dropdown 1: Jenjang -->
-                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
-                                <label
-                                    class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
-                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> 1. Jenjang Pendidikan
-                                </label>
-                                <select name="jenjang" id="filterJenjang"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
-                                    onchange="handleJenjangChange(this)">
-                                    <option value="">-- Pilih Jenjang --</option>
-                                    <option value="SD" {{ $jenjang === 'SD' ? 'selected' : '' }}>SD (Sekolah Dasar)</option>
-                                    <option value="SMP" {{ $jenjang === 'SMP' ? 'selected' : '' }}>SMP (Sekolah Menengah Pertama)</option>
-                                    <option value="SMA" {{ $jenjang === 'SMA' ? 'selected' : '' }}>SMA (Sekolah Menengah Atas)</option>
-                                </select>
+                    <form id="filterBankSoalForm"
+                        action="{{ route($prefixRoute . '.index') }}"
+                        method="GET">
+
+                        <div class="row">
+
+                            <!-- 1. Jenjang -->
+                            <div class="col-12 col-md-6 col-lg-3 mb-3 mb-lg-0">
+                                <div class="filter-field">
+
+                                    <label for="filterJenjang">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        1. Jenjang Pendidikan
+                                    </label>
+
+                                    <select name="jenjang"
+                                        id="filterJenjang"
+                                        class="form-control custom-select filter-select"
+                                        onchange="handleJenjangChange(this)">
+
+                                        <option value="">-- Pilih Jenjang --</option>
+
+                                        <option value="SD"
+                                            {{ $jenjang === 'SD' ? 'selected' : '' }}>
+                                            SD (Sekolah Dasar)
+                                        </option>
+
+                                        <option value="SMP"
+                                            {{ $jenjang === 'SMP' ? 'selected' : '' }}>
+                                            SMP (Sekolah Menengah Pertama)
+                                        </option>
+
+                                        <option value="SMA"
+                                            {{ $jenjang === 'SMA' ? 'selected' : '' }}>
+                                            SMA (Sekolah Menengah Atas)
+                                        </option>
+
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Dropdown 2: Kelas -->
-                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
-                                <label
-                                    class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
-                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> 2. Kelas
-                                </label>
-                                <select name="kelas" id="filterKelas"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
-                                    {{ !$jenjang ? 'disabled' : '' }} onchange="handleKelasChange(this)">
-                                    <option value="">-- Pilih Kelas --</option>
-                                    @if ($jenjang)
-                                        @foreach ($availableClasses as $cls)
-                                            <option value="{{ $cls }}" {{ (string) $kelas === (string) $cls ? 'selected' : '' }}>
-                                                Kelas {{ $cls }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
+
+                            <!-- 2. Kelas -->
+                            <div class="col-12 col-md-6 col-lg-3 mb-3 mb-lg-0">
+                                <div class="filter-field">
+
+                                    <label for="filterKelas">
+                                        <i class="fas fa-users"></i>
+                                        2. Kelas
+                                    </label>
+
+                                    <select name="kelas"
+                                        id="filterKelas"
+                                        class="form-control custom-select filter-select"
+                                        {{ !$jenjang ? 'disabled' : '' }}
+                                        onchange="handleKelasChange(this)">
+
+                                        <option value="">-- Pilih Kelas --</option>
+
+                                        @if ($jenjang)
+                                            @foreach ($availableClasses as $cls)
+                                                <option value="{{ $cls }}"
+                                                    {{ (string) $kelas === (string) $cls ? 'selected' : '' }}>
+                                                    Kelas {{ $cls }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Dropdown 3: Semester / TKA -->
-                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
-                                <label
-                                    class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
-                                    <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> 3. Semester / TKA
-                                </label>
-                                <select name="sub_kategori" id="filterSub"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
-                                    {{ !($jenjang && $kelas) ? 'disabled' : '' }} onchange="handleSubChange(this)">
-                                    <option value="">-- Pilih Semester / TKA --</option>
-                                    @if ($jenjang && $kelas)
-                                        @foreach ($availableSubs as $subItem)
-                                            <option value="{{ $subItem }}" {{ $sub === $subItem ? 'selected' : '' }}>
-                                                {{ $subItem }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
+
+                            <!-- 3. Semester / TKA -->
+                            <div class="col-12 col-md-6 col-lg-3 mb-3 mb-lg-0">
+                                <div class="filter-field">
+
+                                    <label for="filterSub">
+                                        <i class="fas fa-bookmark"></i>
+                                        3. Semester / TKA
+                                    </label>
+
+                                    <select name="sub_kategori"
+                                        id="filterSub"
+                                        class="form-control custom-select filter-select"
+                                        {{ !($jenjang && $kelas) ? 'disabled' : '' }}
+                                        onchange="handleSubChange(this)">
+
+                                        <option value="">
+                                            -- Pilih Semester / TKA --
+                                        </option>
+
+                                        @if ($jenjang && $kelas)
+                                            @foreach ($availableSubs as $subItem)
+                                                <option value="{{ $subItem }}"
+                                                    {{ $sub === $subItem ? 'selected' : '' }}>
+                                                    {{ $subItem }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+
+                                    </select>
+                                </div>
                             </div>
 
-                            <!-- Dropdown 4: Mata Pelajaran -->
-                            <div class="col-12 col-sm-6 col-lg-3">
-                                <label
-                                    class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
-                                    <i class="fas fa-book text-purple-600 mr-1.5"></i> 4. Mata Pelajaran
-                                </label>
-                                <select name="mapel" id="filterMapel"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
-                                    {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }} onchange="this.form.submit()">
-                                    <option value="">-- Pilih Mata Pelajaran --</option>
-                                    @if ($jenjang && $kelas && $sub)
-                                        @foreach ($mapelList as $m)
-                                            <option value="{{ $m }}" {{ $mapel === $m ? 'selected' : '' }}>
-                                                {{ $m }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
+
+                            <!-- 4. Mata Pelajaran -->
+                            <div class="col-12 col-md-6 col-lg-3">
+                                <div class="filter-field">
+
+                                    <label for="filterMapel">
+                                        <i class="fas fa-book"></i>
+                                        4. Mata Pelajaran
+                                    </label>
+
+                                    <select name="mapel"
+                                        id="filterMapel"
+                                        class="form-control custom-select filter-select"
+                                        {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }}
+                                        onchange="this.form.submit()">
+
+                                        <option value="">
+                                            -- Pilih Mata Pelajaran --
+                                        </option>
+
+                                        @if ($jenjang && $kelas && $sub)
+                                            @foreach ($mapelList as $m)
+                                                <option value="{{ $m }}"
+                                                    {{ $mapel === $m ? 'selected' : '' }}>
+                                                    {{ $m }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+
+                                    </select>
+                                </div>
                             </div>
 
                         </div>
                     </form>
 
-                    <!-- Active Filter Summary Badges -->
+
+                    <!-- Active Filter -->
                     @if($jenjang || $kelas || $sub || $mapel)
-                        <div class="d-flex flex-wrap align-items-center gap-1.5 sm:gap-2 mt-3 pt-3 border-top border-purple-100">
-                            <span class="text-xs font-bold text-slate-500 mr-1">Filter Aktif:</span>
+
+                        <div class="active-filter">
+
+                            <span class="active-filter-label">
+                                Filter Aktif:
+                            </span>
 
                             @if($jenjang)
-                                <span
-                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-2.5 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
-                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> {{ $jenjang }}
+                                <span class="filter-badge">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    {{ $jenjang }}
                                 </span>
                             @endif
 
                             @if($kelas)
-                                <span
-                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-2.5 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
-                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> Kelas {{ $kelas }}
+                                <span class="filter-badge">
+                                    <i class="fas fa-users"></i>
+                                    Kelas {{ $kelas }}
                                 </span>
                             @endif
 
                             @if($sub)
-                                <span
-                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-2.5 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
-                                    <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> {{ $sub }}
+                                <span class="filter-badge">
+                                    <i class="fas fa-bookmark"></i>
+                                    {{ $sub }}
                                 </span>
                             @endif
 
                             @if($mapel)
-                                <span
-                                    class="badge bg-purple-900 text-white font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center shadow-xs">
-                                    <i class="fas fa-book text-amber-300 mr-1.5"></i> {{ $mapel }}
+                                <span class="filter-badge filter-badge-active">
+                                    <i class="fas fa-book"></i>
+                                    {{ $mapel }}
                                 </span>
                             @endif
+
                         </div>
+
                     @endif
+
                 </div>
             </div>
             <!-- ════════════════════════════════════════════════════════════ -->
@@ -398,6 +483,259 @@
             color: #ffffff !important;
             border-color: #581c87 !important;
             box-shadow: 0 4px 6px -1px rgba(88, 28, 135, 0.4);
+        }
+
+        /* =========================================================
+        FILTER BANK SOAL
+        ========================================================= */
+
+        .bank-filter-card {
+            border-radius: 18px !important;
+        }
+
+        /* Header */
+
+        .filter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .filter-header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .filter-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #f3e8ff;
+            color: #7e22ce;
+
+            box-shadow: 0 2px 6px rgba(88, 28, 135, 0.08);
+        }
+
+        .filter-title-content {
+            min-width: 0;
+        }
+
+        .filter-title-content h5 {
+            font-size: 15px;
+            line-height: 1.3;
+        }
+
+        .filter-subtitle {
+            display: block;
+            margin-top: 3px;
+
+            font-size: 12px;
+            line-height: 1.4;
+
+            color: #64748b;
+        }
+
+        .reset-filter-btn {
+            flex: 0 0 auto !important;
+            width: auto !important;
+
+            white-space: nowrap;
+
+            min-height: 36px;
+
+            border-width: 1px;
+        }
+
+
+        /* Body */
+
+        .bank-filter-card .card-body {
+            background: #faf5ff !important;
+        }
+
+
+        /* Field */
+
+        .filter-field {
+            height: 100%;
+        }
+
+        .filter-field label {
+            display: flex;
+            align-items: center;
+
+            margin-bottom: 7px;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+
+            color: #3b0764;
+        }
+
+        .filter-field label i {
+            width: 18px;
+            margin-right: 5px;
+
+            color: #9333ea;
+        }
+
+
+        /* Select */
+
+        .filter-select {
+            height: 43px !important;
+
+            padding: 8px 12px !important;
+
+            border: 1px solid #ddd6fe !important;
+            border-radius: 10px !important;
+
+            background-color: #ffffff !important;
+
+            color: #334155 !important;
+
+            font-size: 13px !important;
+            font-weight: 600 !important;
+
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:hover {
+            border-color: #c084fc !important;
+        }
+
+        .filter-select:focus {
+            border-color: #9333ea !important;
+
+            box-shadow:
+                0 0 0 3px rgba(147, 51, 234, 0.10),
+                0 2px 5px rgba(15, 23, 42, 0.05) !important;
+
+            outline: none !important;
+        }
+
+        .filter-select:disabled {
+            background-color: #f1f5f9 !important;
+
+            color: #94a3b8 !important;
+
+            cursor: not-allowed;
+
+            opacity: 0.85;
+        }
+
+
+        /* Active filter */
+
+        .active-filter {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+
+            gap: 7px;
+
+            margin-top: 18px;
+            padding-top: 14px;
+
+            border-top: 1px solid #ede9fe;
+        }
+
+        .active-filter-label {
+            margin-right: 3px;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            color: #64748b;
+        }
+
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+
+            padding: 6px 9px;
+
+            border-radius: 8px;
+
+            background: #f3e8ff;
+            border: 1px solid #ddd6fe;
+
+            color: #581c87;
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .filter-badge i {
+            margin-right: 5px;
+
+            color: #9333ea;
+        }
+
+        .filter-badge-active {
+            background: #581c87;
+            border-color: #581c87;
+
+            color: #ffffff;
+        }
+
+        .filter-badge-active i {
+            color: #facc15;
+        }
+
+
+        /* =========================================================
+        MOBILE
+        ========================================================= */
+
+        @media (max-width: 767.98px) {
+
+            .filter-header {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .filter-header-title {
+                width: 100%;
+            }
+
+            .filter-title-content h5 {
+                font-size: 14px;
+            }
+
+            .filter-subtitle {
+                font-size: 11px;
+            }
+
+            .reset-filter-btn {
+                width: 100% !important;
+            }
+
+            .filter-select {
+                height: 42px !important;
+            }
+
+            .active-filter {
+                align-items: flex-start;
+            }
+
         }
     </style>
 
