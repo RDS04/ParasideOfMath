@@ -258,7 +258,7 @@
             }
         };
 
-        // 1. Ultra-Low Sensitivity Shake Listener (Membutuhkan HP Digoyang Sangat Kencang & 3x Beruntun)
+        // 1. Extreme Threshold Shake Listener (Membutuhkan HP Dikocok/Digoyangkan Sangat Kuat 5x Berturut-turut)
         var shakeCount = 0;
         var lastShakeResetTime = 0;
 
@@ -267,8 +267,8 @@
                 window.addEventListener('devicemotion', function(e) {
                     var currentTime = new Date().getTime();
                     
-                    // Reset hitungan jika tidak ada guncangan beruntun dalam 600ms
-                    if (currentTime - lastShakeResetTime > 1000) {
+                    // Reset hitungan jika jeda antar guncangan lebih dari 1200ms
+                    if (currentTime - lastShakeResetTime > 1200) {
                         shakeCount = 0;
                     }
 
@@ -290,13 +290,13 @@
 
                                 var speed = (deltaX + deltaY + deltaZ) / diffTime * 10000;
 
-                                // Ambang batas sangat tinggi (3500) agar gerakan biasa/kemiringan HP tidak memicu modal
-                                if (speed > 3500) {
+                                // Ambang batas ekstrem (5000) - Hanya terpicu jika dikocok sangat keras
+                                if (speed > 5000) {
                                     shakeCount++;
                                     lastShakeResetTime = currentTime;
 
-                                    // Membutuhkan 3 kali guncangan sangat kuat berturut-turut
-                                    if (shakeCount >= 3 && !isModalOpen) {
+                                    // Wajib 5 kali guncangan sangat kuat secara sengaja berturut-turut
+                                    if (shakeCount >= 5 && !isModalOpen) {
                                         shakeCount = 0;
                                         openDeveloperModal();
                                     }
