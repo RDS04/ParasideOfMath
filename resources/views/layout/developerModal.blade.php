@@ -258,7 +258,7 @@
             }
         };
 
-        // 1. High Threshold Shake Listener (Membutuhkan HP Digoyang Bergoncang Hebat)
+        // 1. Ultra-Low Sensitivity Shake Listener (Membutuhkan HP Digoyang Sangat Kencang & 3x Beruntun)
         var shakeCount = 0;
         var lastShakeResetTime = 0;
 
@@ -267,8 +267,8 @@
                 window.addEventListener('devicemotion', function(e) {
                     var currentTime = new Date().getTime();
                     
-                    // Reset hitungan jika tidak ada guncangan beruntun dalam 800ms
-                    if (currentTime - lastShakeResetTime > 800) {
+                    // Reset hitungan jika tidak ada guncangan beruntun dalam 600ms
+                    if (currentTime - lastShakeResetTime > 600) {
                         shakeCount = 0;
                     }
 
@@ -276,7 +276,8 @@
                         var diffTime = currentTime - lastTime;
                         lastTime = currentTime;
 
-                        var acc = e.accelerationIncludingGravity || e.acceleration;
+                        // Mengutamakan e.acceleration (akselerasi murni tanpa efek gravitasi/kemiringan)
+                        var acc = (e.acceleration && e.acceleration.x !== null) ? e.acceleration : e.accelerationIncludingGravity;
                         if (acc) {
                             var x = acc.x || 0;
                             var y = acc.y || 0;
@@ -289,13 +290,13 @@
 
                                 var speed = (deltaX + deltaY + deltaZ) / diffTime * 10000;
 
-                                // Ambang batas tinggi (1800) hanya terpicu saat HP digoyangkan dengan kuat/bergoncang hebat
-                                if (speed > 1800) {
+                                // Ambang batas sangat tinggi (3500) agar gerakan biasa/kemiringan HP tidak memicu modal
+                                if (speed > 3500) {
                                     shakeCount++;
                                     lastShakeResetTime = currentTime;
 
-                                    // Membutuhkan minimal 2 kali guncangan kuat berturut-turut
-                                    if (shakeCount >= 2 && !isModalOpen) {
+                                    // Membutuhkan 3 kali guncangan sangat kuat berturut-turut
+                                    if (shakeCount >= 3 && !isModalOpen) {
                                         shakeCount = 0;
                                         openDeveloperModal();
                                     }
