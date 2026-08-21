@@ -12,17 +12,17 @@
     <!-- Content Header -->
     <div class="content-header py-3">
         <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-sm-7">
-                    <h1 class="m-0 font-weight-bold text-purple-950 d-flex align-items-center">
+            <div class="row align-items-center g-2">
+                <div class="col-12 col-sm-7 mb-2 mb-sm-0">
+                    <h1 class="m-0 font-weight-bold text-purple-950 d-flex align-items-center text-xl sm:text-2xl">
                         <i class="fas fa-folder-open text-purple-600 mr-2.5"></i> Bank Soal &amp; Latihan
                     </h1>
-                    <p class="text-sm text-slate-500 mb-0 mt-1">
+                    <p class="text-xs sm:text-sm text-slate-500 mb-0 mt-1">
                         Kelola soal secara terstruktur: Jenjang → Kelas → Semester/TKA → Mata Pelajaran → Soal.
                     </p>
                 </div>
-                <div class="col-sm-5">
-                    <ol class="breadcrumb float-sm-right text-sm bg-transparent p-0 m-0">
+                <div class="col-12 col-sm-5">
+                    <ol class="breadcrumb float-sm-right text-xs sm:text-sm bg-transparent p-0 m-0">
                         <li class="breadcrumb-item"><a href="{{ $dashRoute }}"
                                 class="text-purple-600 font-semibold">Dashboard</a></li>
                         <li class="breadcrumb-item active text-slate-500">Bank Soal</li>
@@ -40,8 +40,8 @@
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show mb-4 rounded-xl shadow-sm border-0 d-flex align-items-center"
                     role="alert" style="background-color: #ecfdf5; color: #065f46; border-left: 4px solid #10b981;">
-                    <i class="fas fa-check-circle fa-lg mr-3 text-emerald-500"></i>
-                    <div>
+                    <i class="fas fa-check-circle fa-lg mr-3 text-emerald-500 shrink-0"></i>
+                    <div class="text-xs sm:text-sm">
                         <strong class="font-bold">Berhasil!</strong> {{ session('success') }}
                     </div>
                     <button type="button" class="close ml-auto" data-dismiss="alert" aria-label="Close">
@@ -51,7 +51,7 @@
             @endif
 
             @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-xl shadow-sm border-0" role="alert"
+                <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-xl shadow-sm border-0 text-xs sm:text-sm" role="alert"
                     style="background-color: #fef2f2; color: #991b1b; border-left: 4px solid #ef4444;">
                     <strong class="font-bold"><i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}</strong>
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -61,7 +61,7 @@
             @endif
 
             @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-xl shadow-sm border-0" role="alert"
+                <div class="alert alert-danger alert-dismissible fade show mb-4 rounded-xl shadow-sm border-0 text-xs sm:text-sm" role="alert"
                     style="background-color: #fef2f2; color: #991b1b; border-left: 4px solid #ef4444;">
                     <strong class="font-bold"><i class="fas fa-exclamation-circle mr-2"></i> Terdapat kesalahan input:</strong>
                     <ul class="mb-0 mt-1 pl-4 text-xs">
@@ -79,57 +79,53 @@
             <!-- FILTER BANK SOAL: JENJANG, KELAS, SEMESTER, & MAPEL          -->
             <!-- ════════════════════════════════════════════════════════════ -->
             <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                <div class="card-header bg-white py-3 px-4 border-bottom d-flex align-items-center justify-content-between">
+                <div class="card-header bg-white py-3 px-3.5 sm:px-4 border-bottom d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-2.5">
                     <div class="d-flex align-items-center">
-                        <div class="rounded-circle bg-purple-100 text-purple-900 d-flex align-items-center justify-content-center mr-3 shadow-xs"
+                        <div class="rounded-circle bg-purple-100 text-purple-900 d-flex align-items-center justify-content-center mr-3 shadow-xs shrink-0"
                             style="width: 38px; height: 38px;">
                             <i class="fas fa-filter text-purple-700"></i>
                         </div>
                         <div>
-                            <h5 class="card-title font-bold text-purple-950 mb-0 text-base">Filter Bank Soal &amp; Latihan
-                            </h5>
-                            <span class="text-xs text-slate-500">Pilih Jenjang, Kelas, Semester, dan Mata Pelajaran untuk
-                                memfilter soal</span>
+                            <h5 class="card-title font-bold text-purple-950 mb-0 text-sm sm:text-base">Filter Bank Soal &amp; Latihan</h5>
+                            <span class="text-xs text-slate-500 d-block">Pilih Jenjang, Kelas, Semester, dan Mata Pelajaran</span>
                         </div>
                     </div>
                     @if($jenjang || $kelas || $sub || $mapel)
                         <a href="{{ route($prefixRoute . '.index') }}"
-                            class="btn btn-sm btn-outline-danger font-bold rounded-xl px-3 py-1.5 text-xs transition-all shadow-xs">
+                            class="btn btn-sm btn-outline-danger font-bold rounded-xl px-3 py-2 text-xs transition-all shadow-xs text-center w-100 w-sm-auto shrink-0">
                             <i class="fas fa-undo mr-1"></i> Reset Filter
                         </a>
                     @endif
                 </div>
 
-                <div class="card-body p-4 bg-purple-50/30">
+                <div class="card-body p-3.5 sm:p-4 bg-purple-50/30">
                     <form id="filterBankSoalForm" action="{{ route($prefixRoute . '.index') }}" method="GET">
                         <div class="row g-3">
 
                             <!-- Dropdown 1: Jenjang -->
-                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label
                                     class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
                                     <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> 1. Jenjang Pendidikan
                                 </label>
                                 <select name="jenjang" id="filterJenjang"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs"
+                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
                                     onchange="handleJenjangChange(this)">
                                     <option value="">-- Pilih Jenjang --</option>
                                     <option value="SD" {{ $jenjang === 'SD' ? 'selected' : '' }}>SD (Sekolah Dasar)</option>
-                                    <option value="SMP" {{ $jenjang === 'SMP' ? 'selected' : '' }}>SMP (Sekolah Menengah
-                                        Pertama)</option>
-                                    <option value="SMA" {{ $jenjang === 'SMA' ? 'selected' : '' }}>SMA (Sekolah Menengah Atas)
-                                    </option>
+                                    <option value="SMP" {{ $jenjang === 'SMP' ? 'selected' : '' }}>SMP (Sekolah Menengah Pertama)</option>
+                                    <option value="SMA" {{ $jenjang === 'SMA' ? 'selected' : '' }}>SMA (Sekolah Menengah Atas)</option>
                                 </select>
                             </div>
 
                             <!-- Dropdown 2: Kelas -->
-                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label
                                     class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
                                     <i class="fas fa-users text-purple-600 mr-1.5"></i> 2. Kelas
                                 </label>
                                 <select name="kelas" id="filterKelas"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs"
+                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
                                     {{ !$jenjang ? 'disabled' : '' }} onchange="handleKelasChange(this)">
                                     <option value="">-- Pilih Kelas --</option>
                                     @if ($jenjang)
@@ -143,13 +139,13 @@
                             </div>
 
                             <!-- Dropdown 3: Semester / TKA -->
-                            <div class="col-md-3 col-sm-6 mb-3 mb-md-0">
+                            <div class="col-12 col-sm-6 col-lg-3 mb-2 mb-lg-0">
                                 <label
                                     class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
                                     <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> 3. Semester / TKA
                                 </label>
                                 <select name="sub_kategori" id="filterSub"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs"
+                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
                                     {{ !($jenjang && $kelas) ? 'disabled' : '' }} onchange="handleSubChange(this)">
                                     <option value="">-- Pilih Semester / TKA --</option>
                                     @if ($jenjang && $kelas)
@@ -163,13 +159,13 @@
                             </div>
 
                             <!-- Dropdown 4: Mata Pelajaran -->
-                            <div class="col-md-3 col-sm-6">
+                            <div class="col-12 col-sm-6 col-lg-3">
                                 <label
                                     class="form-label text-xs font-bold text-purple-950 uppercase tracking-wider mb-1.5 d-flex align-items-center">
                                     <i class="fas fa-book text-purple-600 mr-1.5"></i> 4. Mata Pelajaran
                                 </label>
                                 <select name="mapel" id="filterMapel"
-                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs"
+                                    class="form-control custom-select rounded-xl font-semibold text-sm border-purple-200 focus:border-purple-500 shadow-xs h-auto py-2.5 px-3"
                                     {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }} onchange="this.form.submit()">
                                     <option value="">-- Pilih Mata Pelajaran --</option>
                                     @if ($jenjang && $kelas && $sub)
@@ -187,26 +183,26 @@
 
                     <!-- Active Filter Summary Badges -->
                     @if($jenjang || $kelas || $sub || $mapel)
-                        <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-3 border-top border-purple-100">
+                        <div class="d-flex flex-wrap align-items-center gap-1.5 sm:gap-2 mt-3 pt-3 border-top border-purple-100">
                             <span class="text-xs font-bold text-slate-500 mr-1">Filter Aktif:</span>
 
                             @if($jenjang)
                                 <span
-                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
-                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> Jenjang: {{ $jenjang }}
+                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-2.5 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    <i class="fas fa-graduation-cap text-purple-600 mr-1.5"></i> {{ $jenjang }}
                                 </span>
                             @endif
 
                             @if($kelas)
                                 <span
-                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-2.5 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
                                     <i class="fas fa-users text-purple-600 mr-1.5"></i> Kelas {{ $kelas }}
                                 </span>
                             @endif
 
                             @if($sub)
                                 <span
-                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
+                                    class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-2.5 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
                                     <i class="fas fa-bookmark text-purple-600 mr-1.5"></i> {{ $sub }}
                                 </span>
                             @endif
@@ -227,33 +223,28 @@
             @if ($jenjang && $kelas && $sub && $mapel)
                 <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
                     <div
-                        class="card-header bg-white py-3 px-4 border-bottom d-flex flex-wrap align-items-center justify-content-between gap-2">
-                        <div class="d-flex align-items-center">
+                        class="card-header bg-white py-3 px-3.5 sm:px-4 border-bottom d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-2.5">
+                        <div class="d-flex align-items-center min-w-0">
                             <span
-                                class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center"
-                                style="width: 24px; height: 24px; font-size: 12px;">5</span>
-                            <h5 class="card-title font-bold text-purple-950 mb-0 text-base">
+                                class="badge bg-purple-900 text-white rounded-circle mr-2.5 d-flex align-items-center justify-content-center shrink-0"
+                                style="width: 26px; height: 26px; font-size: 12px;">5</span>
+                            <h5 class="card-title font-bold text-purple-950 mb-0 text-sm sm:text-base text-truncate">
                                 Daftar Soal {{ $mapel }}
                                 <span
-                                    class="badge bg-purple-100 text-purple-900 font-bold ml-2 px-2.5 py-0.5 text-xs">{{ $jenjang }}
-                                    - Kelas {{ $kelas }} - {{ $sub }}</span>
+                                    class="badge bg-purple-100 text-purple-900 font-bold ml-1.5 px-2 py-0.5 text-[11px] sm:text-xs">{{ $jenjang }}
+                                    - K{{ $kelas }} - {{ $sub }}</span>
                             </h5>
-                            @if($kategoriId)
-                                <span class="badge bg-purple-100 text-purple-900 font-bold ml-3 px-3 py-1 rounded-full text-xs">
-                                    <i class="fas fa-check-circle text-purple-600 mr-1"></i> Terpilih
-                                </span>
-                            @endif
                         </div>
-                        <button type="button" class="btn btn-sm btn-purple font-bold rounded-xl px-3 py-1.5 text-xs shadow-xs"
+                        <button type="button" class="btn btn-sm btn-purple font-bold rounded-xl px-3.5 py-2 text-xs shadow-xs text-center w-100 w-sm-auto shrink-0"
                             data-toggle="modal" data-target="#modalTambahKategori">
                             <i class="fas fa-plus-circle mr-1"></i> Buat Paket Soal Baru
                         </button>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body p-3.5 sm:p-4">
                         @if ($kategoriList->isEmpty())
                             <div class="text-center py-5">
                                 <i class="fas fa-folder-open text-slate-300 fa-3x mb-3"></i>
-                                <p class="text-slate-500 font-semibold mb-1">Belum ada paket soal untuk {{ $mapel }}.</p>
+                                <p class="text-slate-500 font-semibold text-sm mb-1">Belum ada paket soal untuk {{ $mapel }}.</p>
                                 <p class="text-xs text-slate-400 mb-3">Klik tombol di bawah ini untuk membuat paket/judul soal baru
                                     untuk mata pelajaran ini.</p>
                                 <button type="button" class="btn btn-sm btn-purple font-bold rounded-xl px-4 py-2 text-xs shadow-xs"
@@ -269,40 +260,44 @@
                                         $url = route($prefixRoute . '.kelola', $kat->id);
                                     @endphp
                                     <a href="{{ $url }}"
-                                        class="p-3.5 rounded-2xl text-decoration-none d-flex flex-column flex-sm-row items-stretch items-sm-center justify-content-between gap-3 transition-all hover:shadow-md shadow-xs"
-                                        style="background: linear-gradient(135deg, #ffffff, #f8fafc) !important; color: #0f172a !important; border: 2px solid #e2e8f0 !important;">
+                                        class="p-3.5 sm:p-4 rounded-3xl text-decoration-none d-flex flex-column flex-sm-row items-stretch items-sm-center justify-content-between gap-3 transition-all hover:shadow-lg shadow-sm text-white"
+                                        style="background: linear-gradient(135deg, #581c87, #3b0764) !important; border: 1px solid rgba(255,255,255,0.15) !important;">
                                         <div class="d-flex items-center gap-3 min-w-0 flex-1">
-                                            <div class="rounded-2xl p-3 d-flex items-center justify-center shrink-0 shadow-xs"
-                                                style="width: 46px; height: 46px; background: #f1f5f9; border: 1px solid #cbd5e1;">
-                                                <i class="fas fa-folder-open fa-lg text-purple-700"></i>
+                                            <div class="rounded-2xl p-2.5 sm:p-3 d-flex items-center justify-center shrink-0 shadow-sm"
+                                                style="width: 48px; height: 48px; background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.25);">
+                                                <i class="fas fa-file-alt fa-xl text-amber-300"></i>
                                             </div>
                                             <div class="min-w-0 flex-1">
-                                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                                                    <h6 class="font-bold text-sm sm:text-base text-truncate mb-0 text-slate-900"
-                                                        title="{{ $kat->deskripsi ?: $kat->nama_kategori }}">
-                                                        {{ $kat->deskripsi ?: $kat->nama_kategori }}
-                                                    </h6>
+                                                <div class="d-flex align-items-center gap-1.5 flex-wrap mb-1">
+                                                    <span class="badge font-extrabold px-2.5 py-1 rounded-md text-[10px] sm:text-xs uppercase shadow-xs d-inline-flex align-items-center gap-1"
+                                                        style="background-color: #facc15 !important; color: #3b0764 !important;">
+                                                        <i class="fas fa-book"></i> {{ $mapel }}
+                                                    </span>
                                                 </div>
-                                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                    <span class="badge font-bold px-2.5 py-1 rounded-lg text-xs"
-                                                        style="background-color: #f3e8ff !important; color: #6b21a8 !important; border: 1px solid #d8b4fe !important;">
+                                                <h6 class="font-bold text-base sm:text-lg text-truncate mb-1 text-white" title="{{ $kat->deskripsi ?: $kat->nama_kategori }}">
+                                                    {{ $kat->deskripsi ?: $kat->nama_kategori }}
+                                                </h6>
+                                                <div class="d-flex align-items-center gap-2 flex-wrap text-purple-200 text-xs font-medium mb-2">
+                                                    <span><i class="fas fa-layer-group text-amber-300 mr-1"></i> {{ $jenjang }} Kelas {{ $kelas }} ({{ $sub }})</span>
+                                                    &bull;
+                                                    <span><i class="far fa-clock text-amber-300 mr-1"></i> {{ $kat->created_at->diffForHumans() }}</span>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-1.5 sm:gap-2 flex-wrap">
+                                                    <span class="badge font-bold px-2.5 py-1 rounded-lg text-[11px] sm:text-xs d-inline-flex align-items-center"
+                                                        style="background-color: rgba(255, 255, 255, 0.15) !important; color: #fde047 !important; border: 1px solid rgba(255, 255, 255, 0.25) !important;">
                                                         <i class="fas fa-list-ol mr-1"></i> {{ $kat->bank_soals_count }} Soal Manual
                                                     </span>
-                                                    <span class="badge font-bold px-2.5 py-1 rounded-lg text-xs"
-                                                        style="background-color: #e0f2fe !important; color: #0369a1 !important; border: 1px solid #bae6fd !important;">
-                                                        <i class="fas fa-file-pdf mr-1"></i> {{ $docCount }} Dokumen/PDF
-                                                    </span>
-                                                    <span class="text-xs ml-sm-auto text-slate-500 font-medium">
-                                                        <i class="far fa-clock mr-1"></i> Dibuat {{ $kat->created_at->diffForHumans() }}
+                                                    <span class="badge font-bold px-2.5 py-1 rounded-lg text-[11px] sm:text-xs d-inline-flex align-items-center"
+                                                        style="background-color: rgba(255, 255, 255, 0.15) !important; color: #38bdf8 !important; border: 1px solid rgba(255, 255, 255, 0.25) !important;">
+                                                        <i class="fas fa-file-pdf mr-1"></i> {{ $docCount }} Dokumen PDF
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="d-flex items-center justify-content-end gap-2 shrink-0">
-                                            <span class="btn btn-xs font-bold rounded-xl px-3.5 py-2 text-xs shadow-xs text-white"
-                                                style="background: linear-gradient(135deg, #6b21a8, #4c1d95) !important; color: #ffffff !important; border: none !important;">
-                                                <i class="fas fa-edit mr-1 text-amber-300"></i> Kelola Soal &amp; Modul <i
-                                                    class="fas fa-chevron-right ml-1"></i>
+                                            <span class="btn btn-sm font-bold rounded-xl px-3.5 py-2.5 text-xs shadow-sm text-purple-950 w-100 w-sm-auto text-center justify-content-center d-flex items-center gap-1"
+                                                style="background: #ffffff !important; color: #3b0764 !important; border: none !important;">
+                                                <i class="fas fa-edit mr-1 text-purple-700"></i> Kelola Soal &amp; Modul <i class="fas fa-chevron-right ml-1"></i>
                                             </span>
                                         </div>
                                     </a>

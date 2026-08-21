@@ -18,22 +18,22 @@
     <!-- Content Header -->
     <div class="content-header py-3">
         <div class="container-fluid">
-            <div class="row align-items-center">
-                <div class="col-sm-7">
+            <div class="row align-items-center g-2">
+                <div class="col-12 col-sm-7 mb-2 mb-sm-0">
                     <div class="mb-2">
-                        <a href="{{ $backRoute }}" class="btn btn-sm btn-purple font-bold rounded-xl px-3 py-1.5 text-xs shadow-xs">
+                        <a href="{{ $backRoute }}" class="btn btn-sm btn-purple font-bold rounded-xl px-3.5 py-2 text-xs shadow-xs d-inline-flex align-items-center justify-content-center w-100 w-sm-auto">
                             <i class="fas fa-arrow-left mr-1.5"></i> Kembali ke Daftar Paket Soal
                         </a>
                     </div>
-                    <h1 class="m-0 font-weight-bold text-purple-950 d-flex align-items-center text-xl sm:text-2xl">
-                        <i class="fas fa-folder-open text-purple-600 mr-2.5"></i> Kelola Soal: {{ $selectedCategory->deskripsi ?: $selectedCategory->nama_kategori }}
+                    <h1 class="m-0 font-weight-bold text-purple-950 d-flex align-items-center text-lg sm:text-2xl">
+                        <i class="fas fa-folder-open text-purple-600 mr-2.5 shrink-0"></i> <span class="text-truncate">Kelola Soal: {{ $selectedCategory->deskripsi ?: $selectedCategory->nama_kategori }}</span>
                     </h1>
-                    <p class="text-sm text-slate-500 mb-0 mt-1">
+                    <p class="text-xs sm:text-sm text-slate-500 mb-0 mt-1">
                         {{ $mapel }} &bull; Jenjang {{ $jenjang }} &bull; Kelas {{ $kelas }} &bull; {{ $sub }}
                     </p>
                 </div>
-                <div class="col-sm-5">
-                    <ol class="breadcrumb float-sm-right text-sm bg-transparent p-0 m-0">
+                <div class="col-12 col-sm-5">
+                    <ol class="breadcrumb float-sm-right text-xs sm:text-sm bg-transparent p-0 m-0">
                         <li class="breadcrumb-item"><a href="{{ $dashRoute }}" class="text-purple-600 font-semibold">Dashboard</a></li>
                         <li class="breadcrumb-item"><a href="{{ $backRoute }}" class="text-purple-600 font-semibold">Input Soal</a></li>
                         <li class="breadcrumb-item active text-slate-500">Kelola Paket</li>
@@ -48,31 +48,31 @@
         <div class="container-fluid">
 
             <!-- Active Combo Detail Header Card -->
-            <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-gradient-to-r from-purple-900 to-indigo-900 text-white">
-                <div class="card-body p-4">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge bg-purple-500/30 text-purple-200 border border-purple-400/30 px-2.5 py-1 rounded-md text-xs font-bold uppercase">
+            <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-gradient-to-r from-purple-900 to-indigo-900 text-white overflow-hidden">
+                <div class="card-body p-3.5 sm:p-4 md:p-5">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
+                        <div class="min-w-0">
+                            <div class="d-flex align-items-center gap-1.5 flex-wrap mb-1.5">
+                                <span class="badge bg-purple-500/30 text-purple-200 border border-purple-400/30 px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-bold uppercase">
                                     Jenjang {{ $jenjang }}
                                 </span>
-                                <span class="badge bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2.5 py-1 rounded-md text-xs font-bold">
+                                <span class="badge bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-bold">
                                     Kelas {{ $kelas }}
                                 </span>
-                                <span class="badge bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-md text-xs font-bold">
+                                <span class="badge bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-2.5 py-1 rounded-md text-[10px] sm:text-xs font-bold">
                                     {{ $sub }}
                                 </span>
                             </div>
-                            <h3 class="font-bold text-xl mb-0">
+                            <h3 class="font-bold text-lg sm:text-xl text-white mb-0 text-truncate" title="{{ $selectedCategory->deskripsi ?: $selectedCategory->nama_kategori }}">
                                 {{ $selectedCategory->deskripsi ?: $selectedCategory->nama_kategori }}
                             </h3>
                         </div>
                         <form action="{{ route($prefixRoute . '.kategori.delete', $selectedCategory->id) }}" method="POST"
-                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua soal ini?');">
+                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus semua soal ini?');" class="shrink-0">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-xs btn-outline-light font-bold rounded-lg px-2.5 py-1.5">
-                                <i class="fas fa-trash-alt mr-1"></i> Hapus Semua Soal Ini
+                            <button type="submit" class="btn btn-xs btn-outline-light font-bold rounded-lg px-3 py-2 text-xs w-100 w-sm-auto text-center">
+                                <i class="fas fa-trash-alt mr-1"></i> Hapus Paket Soal Ini
                             </button>
                         </form>
                     </div>
@@ -83,28 +83,27 @@
             @if (session('import_preview_soals'))
                 <div class="card border-0 shadow-lg rounded-2xl mb-4 bg-white overflow-hidden"
                     style="border-left: 5px solid #10b981;">
-                    <div class="card-header bg-emerald-50/80 py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <h5 class="card-title font-bold text-emerald-950 mb-0 d-flex align-items-center text-base">
-                            <i class="fas fa-file-excel text-emerald-600 mr-2 fa-lg"></i> Pratinjau Impor Soal dari Excel
-                            ({{ count(session('import_preview_soals')) }} Soal)
+                    <div class="card-header bg-emerald-50/80 py-3 px-3.5 sm:px-4 d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2.5">
+                        <h5 class="card-title font-bold text-emerald-950 mb-0 d-flex align-items-center text-sm sm:text-base">
+                            <i class="fas fa-file-excel text-emerald-600 mr-2 fa-lg shrink-0"></i> Pratinjau Impor Soal ({{ count(session('import_preview_soals')) }} Soal)
                         </h5>
                         <div class="d-flex align-items-center gap-2">
-                            <form action="{{ route($prefixRoute . '.import.cancel') }}" method="POST" class="d-inline">
+                            <form action="{{ route($prefixRoute . '.import.cancel') }}" method="POST" class="d-inline flex-1 flex-sm-none">
                                 @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-danger font-bold rounded-xl px-3 py-1.5 text-xs">
+                                <button type="submit" class="btn btn-sm btn-outline-danger font-bold rounded-xl px-3 py-1.5 text-xs w-100">
                                     <i class="fas fa-times mr-1"></i> Batal
                                 </button>
                             </form>
-                            <form action="{{ route($prefixRoute . '.import.confirm') }}" method="POST" class="d-inline">
+                            <form action="{{ route($prefixRoute . '.import.confirm') }}" method="POST" class="d-inline flex-1 flex-sm-none">
                                 @csrf
-                                <button type="submit" class="btn btn-sm btn-success font-bold rounded-xl px-4 py-1.5 text-xs shadow-sm"
+                                <button type="submit" class="btn btn-sm btn-success font-bold rounded-xl px-4 py-1.5 text-xs shadow-sm w-100"
                                     style="background-color: #059669; border-color: #059669;">
-                                    <i class="fas fa-check-circle mr-1"></i> Konfirmasi & Simpan ke Database
+                                    <i class="fas fa-check-circle mr-1"></i> Simpan
                                 </button>
                             </form>
                         </div>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body p-3 sm:p-4">
                         <div class="table-responsive" style="max-height: 380px;">
                             <table class="table table-hover table-striped table-bordered text-xs mb-0">
                                 <thead class="bg-emerald-100 text-emerald-950 font-bold sticky-top">
@@ -181,52 +180,52 @@
                             }
                         </style>
                         <div class="card-header bg-white p-2 border-bottom">
-                            <ul class="nav nav-pills nav-fill font-bold text-xs gap-2" id="tabMenuBankSoal" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link bank-soal-tab-btn active rounded-xl py-2.5 px-3 d-flex align-items-center justify-center gap-2"
+                            <ul class="nav nav-pills nav-justified w-100 font-bold text-xs gap-1.5 sm:gap-2" id="tabMenuBankSoal" role="tablist">
+                                <li class="nav-item flex-1" role="presentation">
+                                    <button class="nav-link bank-soal-tab-btn active rounded-xl py-2.5 px-2 text-xs sm:text-sm d-flex align-items-center justify-content-center gap-1.5 w-100 text-center"
                                         id="tab-manual-btn" data-toggle="pill" data-target="#tab-manual-content"
                                         type="button" role="tab" aria-controls="tab-manual-content" aria-selected="true">
-                                        <i class="fas fa-edit text-amber-400"></i>
-                                        <span>Buat Soal Manual</span>
+                                        <i class="fas fa-edit text-amber-400 shrink-0"></i>
+                                        <span>Soal Manual</span>
                                     </button>
                                 </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link bank-soal-tab-btn rounded-xl py-2.5 px-3 d-flex align-items-center justify-center gap-2"
+                                <li class="nav-item flex-1" role="presentation">
+                                    <button class="nav-link bank-soal-tab-btn rounded-xl py-2.5 px-2 text-xs sm:text-sm d-flex align-items-center justify-content-center gap-1.5 w-100 text-center"
                                         id="tab-upload-btn" data-toggle="pill" data-target="#tab-upload-content"
                                         type="button" role="tab" aria-controls="tab-upload-content" aria-selected="false">
-                                        <i class="fas fa-file-upload text-purple-700"></i>
-                                        <span>Upload PDF / Word</span>
+                                        <i class="fas fa-file-upload text-purple-700 shrink-0"></i>
+                                        <span>Upload File</span>
                                     </button>
                                 </li>
                             </ul>
                         </div>
 
-                        <div class="card-body p-4 bg-slate-50/40 tab-content" id="tabMenuBankSoalContent">
+                        <div class="card-body p-3.5 sm:p-4 bg-slate-50/40 tab-content" id="tabMenuBankSoalContent">
                             <!-- ══════════════ MENU 1: BUAT SOAL MANUAL ══════════════ -->
                             <div class="tab-pane fade show active" id="tab-manual-content" role="tabpanel" aria-labelledby="tab-manual-btn">
                                 <form action="{{ route($prefixRoute . '.soal.store') }}" method="POST" id="formInputSoalLive">
                                     @csrf
                                     <input type="hidden" name="kategori_soal_id" value="{{ $selectedCategory->id }}">
 
-                                    <div class="row g-3">
-                                        <div class="col-md-4 mb-3">
+                                    <div class="row g-2.5">
+                                        <div class="col-4 col-sm-4 mb-2.5">
                                             <label class="form-label text-xs font-bold text-slate-700 uppercase">No. Soal</label>
                                             <input type="number" name="nomor" id="input_nomor"
-                                                class="form-control rounded-xl font-bold text-sm border-slate-200"
+                                                class="form-control rounded-xl font-bold text-sm border-slate-200 py-2 px-2.5"
                                                 value="{{ old('nomor', $selectedCategory->bankSoals->max('nomor') + 1 ?: 1) }}"
                                                 min="1" required oninput="updateLivePreview()">
                                         </div>
-                                        <div class="col-md-8 mb-3">
-                                            <label class="form-label text-xs font-bold text-slate-700 uppercase mb-2 d-block">Kunci Jawaban</label>
-                                            <div class="d-flex flex-wrap gap-2">
+                                        <div class="col-8 col-sm-8 mb-2.5">
+                                            <label class="form-label text-xs font-bold text-slate-700 uppercase mb-1.5 d-block">Kunci Jawaban</label>
+                                            <div class="d-flex w-100 gap-1 sm:gap-1.5">
                                                 @foreach (['A', 'B', 'C', 'D'] as $kunci)
-                                                    <div class="form-check form-check-inline m-0">
+                                                    <div class="flex-1 text-center m-0">
                                                         <input class="form-check-input d-none" type="radio" name="kunci_jawaban"
                                                             id="input_kunci_{{ $kunci }}" value="{{ $kunci }}" {{ old('kunci_jawaban', 'A') === $kunci ? 'checked' : '' }} required
                                                             onchange="updateLivePreview()">
-                                                        <label class="btn {{ old('kunci_jawaban', 'A') === $kunci ? 'btn-purple text-white shadow-sm' : 'btn-outline-purple' }} text-xs font-bold px-3 py-1.5 rounded-xl cursor-pointer"
+                                                        <label class="btn {{ old('kunci_jawaban', 'A') === $kunci ? 'btn-purple text-white shadow-sm' : 'btn-outline-purple' }} text-xs font-bold px-1.5 sm:px-3 py-2 rounded-xl cursor-pointer w-100 text-center"
                                                             for="input_kunci_{{ $kunci }}">
-                                                            Opsi {{ $kunci }}
+                                                            {{ $kunci }}
                                                         </label>
                                                     </div>
                                                 @endforeach
@@ -342,18 +341,18 @@
                     @if(count($guruCatDocFiles) > 0)
                         <!-- DAFTAR DOKUMEN (PDF / WORD) TERSIMPAN -->
                         <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                            <div class="card-header py-3 px-4 d-flex justify-content-between align-items-center"
+                            <div class="card-header py-3 px-3.5 sm:px-4 d-flex justify-content-between align-items-center gap-2"
                                 style="background: linear-gradient(135deg, #4c1d95, #6b21a8) !important; color: #ffffff !important; border: none !important;">
-                                <h5 class="card-title font-bold text-white mb-0 text-sm d-flex align-items-center" style="color: #ffffff !important;">
-                                    <i class="fas fa-file-pdf text-amber-300 mr-2 fa-lg"></i> Dokumen Soal (PDF / Word) Tersimpan ({{ count($guruCatDocFiles) }} File)
+                                <h5 class="card-title font-bold text-white mb-0 text-xs sm:text-sm d-flex align-items-center" style="color: #ffffff !important;">
+                                    <i class="fas fa-file-pdf text-amber-300 mr-2 fa-lg shrink-0"></i> Dokumen Soal (PDF / Word) ({{ count($guruCatDocFiles) }} File)
                                 </h5>
-                                <span class="badge text-xs px-2.5 py-1 rounded-md font-bold"
+                                <span class="badge text-[10px] sm:text-xs px-2.5 py-1 rounded-md font-bold shrink-0"
                                     style="background-color: rgba(255, 255, 255, 0.2) !important; color: #fef08a !important; border: 1px solid rgba(255, 255, 255, 0.3) !important;">
                                     Server Storage
                                 </span>
                             </div>
-                            <div class="card-body p-2 p-sm-3 bg-slate-50/50">
-                                <div class="d-flex flex-column gap-2">
+                            <div class="card-body p-3.5 sm:p-4 bg-slate-50/50">
+                                <div class="d-flex flex-column gap-2.5">
                                     @foreach($guruCatDocFiles as $gDocIdx => $gDocPath)
                                         @php
                                             $gDocFileName = basename($gDocPath);
@@ -363,24 +362,24 @@
                                             $isPdf = $gDocExt === 'pdf';
                                             $isWord = in_array($gDocExt, ['doc', 'docx']);
                                         @endphp
-                                        <div class="p-3 rounded-xl border bg-white d-flex flex-column flex-sm-row items-stretch items-sm-center justify-content-between gap-2.5 hover:border-purple-300 transition-all shadow-xs">
+                                        <div class="p-3.5 rounded-2xl border bg-white d-flex flex-column flex-sm-row items-stretch items-sm-center justify-content-between gap-2.5 hover:border-purple-300 transition-all shadow-xs">
                                             <div class="d-flex items-center gap-3 min-w-0 flex-1">
                                                 <div class="rounded-xl p-2.5 d-flex items-center justify-center shrink-0 {{ $isPdf ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600' }}">
                                                     <i class="fas {{ $isPdf ? 'fa-file-pdf' : 'fa-file-word' }} fa-lg sm:fa-xl"></i>
                                                 </div>
                                                 <div class="min-w-0 flex-1">
-                                                    <div class="d-flex items-center gap-2 flex-wrap mb-0.5">
+                                                    <div class="d-flex items-center gap-1.5 flex-wrap mb-0.5">
                                                         <h6 class="font-bold text-xs sm:text-sm text-purple-950 text-truncate mb-0" title="{{ $gDocDisplay }}">{{ $gDocDisplay }}</h6>
                                                         <span class="badge {{ $isPdf ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-blue-50 text-blue-700 border-blue-200' }} border px-2 py-0.5 rounded text-[10px] uppercase font-bold">
-                                                            DOKUMEN {{ strtoupper($gDocExt) }}
+                                                            {{ strtoupper($gDocExt) }}
                                                         </span>
                                                     </div>
-                                                    <span class="text-[11px] text-slate-400 d-block text-truncate">File Dokumen Bank Soal</span>
+                                                    <span class="text-[11px] text-slate-400 d-block text-truncate">File Dokumen Modul/Soal</span>
                                                 </div>
                                             </div>
                                             <div class="d-flex items-center gap-2 shrink-0">
                                                 @if($isPdf)
-                                                    <button type="button" class="btn btn-xs font-bold rounded-xl px-3.5 py-2 d-flex items-center justify-center gap-1.5 text-xs text-white shadow-xs" data-toggle="modal" data-target="#modalGuruPreviewDoc_{{ $gDocIdx }}" style="background: linear-gradient(135deg, #6b21a8, #4c1d95) !important; color: #ffffff !important; border: none !important;">
+                                                    <button type="button" class="btn btn-xs font-bold rounded-xl px-3.5 py-2.5 d-flex items-center justify-center gap-1.5 text-xs text-white shadow-xs w-100 w-sm-auto text-center" data-toggle="modal" data-target="#modalGuruPreviewDoc_{{ $gDocIdx }}" style="background: linear-gradient(135deg, #6b21a8, #4c1d95) !important; color: #ffffff !important; border: none !important;">
                                                         <i class="fas fa-book-reader text-amber-300"></i> Baca Dokumen PDF
                                                     </button>
                                                 @endif
@@ -398,13 +397,13 @@
                                                                 <div class="min-w-0">
                                                                     <h5 class="modal-title font-bold text-xs sm:text-sm text-white mb-0 text-truncate" style="max-width: 60vw;">{{ $gDocDisplay }}</h5>
                                                                     <span class="text-[10px] text-amber-300 d-block font-medium">
-                                                                        <i class="fas fa-shield-alt mr-1"></i>Mode Baca Saja (Proteksi Unduh Aktif)
+                                                                        <i class="fas fa-shield-alt mr-1"></i>Mode Baca Saja (Proteksi Unduh)
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                             <div class="d-flex align-items-center gap-1.5 shrink-0">
                                                                 <button type="button" class="btn btn-xs btn-danger font-bold rounded-lg px-3 py-1.5 text-xs shadow-xs" data-dismiss="modal" aria-label="Close">
-                                                                    <i class="fas fa-times mr-1"></i> Tutup Reader
+                                                                    <i class="fas fa-times mr-1"></i> Tutup
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -423,34 +422,31 @@
 
                     <!-- DAFTAR SOAL TERSIMPAN -->
                     <div class="card border-0 shadow-sm rounded-2xl bg-white overflow-hidden">
-                        <div class="card-header bg-white py-3 px-4 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
-                            <h5 class="card-title font-bold text-purple-950 mb-0 d-flex align-items-center text-base">
-                                <i class="fas fa-list-ol text-purple-600 mr-2"></i> Soal Tersimpan
+                        <div class="card-header bg-white py-3 px-3.5 sm:px-4 border-bottom d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-2.5">
+                            <h5 class="card-title font-bold text-purple-950 mb-0 d-flex align-items-center text-sm sm:text-base">
+                                <i class="fas fa-list-ol text-purple-600 mr-2 shrink-0"></i> Soal Tersimpan ({{ $selectedCategory->bankSoals->count() }})
                             </h5>
                             <div class="d-flex align-items-center flex-wrap gap-2">
-                                <span class="badge bg-purple-100 text-purple-900 font-bold px-3 py-1.5 rounded-full text-xs">
-                                    {{ $selectedCategory->bankSoals->count() }} Soal
-                                </span>
-                                <a href="{{ route($prefixRoute . '.template') }}" class="btn btn-sm btn-outline-info font-bold rounded-xl px-3 py-1.5 text-xs shadow-xs">
+                                <a href="{{ route($prefixRoute . '.template') }}" class="btn btn-sm btn-outline-info font-bold rounded-xl px-3 py-1.5 text-xs shadow-xs flex-1 flex-sm-none text-center">
                                     <i class="fas fa-download mr-1"></i> Template Excel
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-success font-bold rounded-xl px-3 py-1.5 text-xs shadow-xs" data-toggle="modal" data-target="#modalImportExcel">
+                                <button type="button" class="btn btn-sm btn-outline-success font-bold rounded-xl px-3 py-1.5 text-xs shadow-xs flex-1 flex-sm-none text-center" data-toggle="modal" data-target="#modalImportExcel">
                                     <i class="fas fa-file-excel mr-1"></i> Import Excel
                                 </button>
                             </div>
                         </div>
-                        <div class="card-body p-4">
+                        <div class="card-body p-3.5 sm:p-4">
                             @if ($selectedCategory->bankSoals->isEmpty())
                                 <div class="text-center py-5">
                                     <i class="fas fa-question-circle text-slate-300 fa-3x mb-3"></i>
-                                    <p class="text-slate-500 font-semibold mb-0">Belum ada soal di dalam kategori ini.</p>
+                                    <p class="text-slate-500 font-semibold mb-0 text-sm">Belum ada soal di dalam paket ini.</p>
                                 </div>
                             @else
                                 <div class="space-y-4">
                                     @foreach ($selectedCategory->bankSoals as $soalItem)
                                         <div class="card border border-slate-200 rounded-xl shadow-xs overflow-hidden transition-all hover:border-purple-300 mb-3">
                                             <div class="card-header bg-slate-50 py-2.5 px-3.5 d-flex justify-content-between align-items-center border-bottom">
-                                                <div class="d-flex align-items-center gap-2">
+                                                <div class="d-flex align-items-center gap-1.5">
                                                     <span class="badge bg-purple-900 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs">
                                                         No. {{ $soalItem->nomor }}
                                                     </span>
@@ -472,18 +468,18 @@
                                                 </div>
                                             </div>
                                             <div class="card-body p-3.5">
-                                                <p class="font-bold text-slate-900 mb-3 text-sm whitespace-pre-line">
+                                                <p class="font-bold text-slate-900 mb-3 text-xs sm:text-sm whitespace-pre-line leading-relaxed">
                                                     {{ $soalItem->soal }}
                                                 </p>
                                                 <div class="row g-2">
                                                     @foreach (['A' => $soalItem->opsi_a, 'B' => $soalItem->opsi_b, 'C' => $soalItem->opsi_c, 'D' => $soalItem->opsi_d] as $optKey => $optVal)
                                                         @php $isCorrect = $soalItem->kunci_jawaban === $optKey; @endphp
-                                                        <div class="col-md-6 mb-2">
+                                                        <div class="col-12 col-md-6 mb-1.5">
                                                             <div class="p-2.5 rounded-xl border text-xs font-semibold d-flex align-items-start {{ $isCorrect ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold' : 'bg-slate-50 border-slate-200 text-slate-700' }}">
-                                                                <span class="badge {{ $isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' }} mr-2 px-2 py-1 rounded-md text-xs font-bold">{{ $optKey }}</span>
-                                                                <span class="flex-1 mt-0.5">{{ $optVal }}</span>
+                                                                <span class="badge {{ $isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700' }} mr-2 px-2 py-1 rounded-md text-xs font-bold shrink-0">{{ $optKey }}</span>
+                                                                <span class="flex-1 mt-0.5 whitespace-pre-line leading-snug">{{ $optVal }}</span>
                                                                 @if ($isCorrect)
-                                                                    <i class="fas fa-check-circle text-emerald-600 ml-1.5 mt-0.5"></i>
+                                                                    <i class="fas fa-check-circle text-emerald-600 ml-1.5 mt-0.5 shrink-0"></i>
                                                                 @endif
                                                             </div>
                                                         </div>
