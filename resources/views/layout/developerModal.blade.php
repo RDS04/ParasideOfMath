@@ -268,7 +268,7 @@
                     var currentTime = new Date().getTime();
                     
                     // Reset hitungan jika tidak ada guncangan beruntun dalam 600ms
-                    if (currentTime - lastShakeResetTime > 300) {
+                    if (currentTime - lastShakeResetTime > 1000) {
                         shakeCount = 0;
                     }
 
