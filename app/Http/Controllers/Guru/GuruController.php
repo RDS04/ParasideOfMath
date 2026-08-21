@@ -685,6 +685,31 @@ class GuruController extends Controller
     }
 
     /**
+     * Halaman Terpisah Kelola Soal & Modul untuk Paket Soal tertentu (Guru).
+     */
+    public function kelolaBankSoal(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user || (! $user->isGuru() && ! $user->isAdmin())) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+        }
+
+        $selectedCategory = KategoriSoal::with('bankSoals')->findOrFail($id);
+
+        $jenjang = $selectedCategory->jenjang;
+        $kelas   = $selectedCategory->kelas;
+        $sub     = $selectedCategory->sub_kategori;
+        $mapel   = $selectedCategory->nama_kategori;
+        $kategoriId = $selectedCategory->id;
+
+        $prefixRoute = $user->isAdmin() ? 'admin.bank-soal' : 'guru.bank-soal';
+
+        return view('guru.kelolaBankSoal', compact(
+            'selectedCategory', 'jenjang', 'kelas', 'sub', 'mapel', 'kategoriId', 'prefixRoute'
+        ));
+    }
+
+    /**
      * Simpan Kategori Soal Baru.
      */
     public function storeKategoriSoal(Request $request)
@@ -708,12 +733,8 @@ class GuruController extends Controller
 
         $kategori = KategoriSoal::create($validated);
 
-        return redirect()->route('guru.bank-soal.index', [
-            'jenjang'      => $kategori->jenjang,
-            'kelas'        => $kategori->kelas,
-            'sub_kategori' => $kategori->sub_kategori,
-            'kategori_id'  => $kategori->id,
-        ])->with('success', 'Kategori Soal berhasil ditambahkan!');
+        return redirect()->route('guru.bank-soal.kelola', $kategori->id)
+            ->with('success', 'Paket soal "' . ($kategori->deskripsi ?: $kategori->nama_kategori) . '" berhasil dibuat! Silakan buat soal manual atau upload dokumen PDF/Word.');
     }
 
     /**

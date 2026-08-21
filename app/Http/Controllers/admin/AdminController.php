@@ -1787,6 +1787,30 @@ class AdminController extends Controller
     }
 
     /**
+     * Halaman Terpisah Kelola Soal & Modul untuk Paket Soal tertentu (Admin).
+     */
+    public function kelolaBankSoalAdmin(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $selectedCategory = KategoriSoal::with('bankSoals')->findOrFail($id);
+
+        $jenjang = $selectedCategory->jenjang;
+        $kelas   = $selectedCategory->kelas;
+        $sub     = $selectedCategory->sub_kategori;
+        $mapel   = $selectedCategory->nama_kategori;
+        $kategoriId = $selectedCategory->id;
+
+        $prefixRoute = 'admin.bank-soal';
+
+        return view('guru.kelolaBankSoal', compact(
+            'selectedCategory', 'jenjang', 'kelas', 'sub', 'mapel', 'kategoriId', 'prefixRoute'
+        ));
+    }
+
+    /**
      * Hapus Kategori Soal (beserta semua soal di dalamnya) untuk kombinasi tertentu.
      */
     public function deleteKategoriSoalAdmin($id)
@@ -1921,13 +1945,8 @@ class AdminController extends Controller
 
         $kategori = KategoriSoal::create($validated);
 
-        return redirect()->route('admin.bank-soal.index', [
-            'jenjang'      => $kategori->jenjang,
-            'kelas'        => $kategori->kelas,
-            'sub_kategori' => $kategori->sub_kategori,
-            'mapel'        => $kategori->nama_kategori,
-            'kategori_id'  => $kategori->id,
-        ])->with('success', 'Paket soal "' . $kategori->deskripsi . '" berhasil dibuat!');
+        return redirect()->route('admin.bank-soal.kelola', $kategori->id)
+            ->with('success', 'Paket soal "' . ($kategori->deskripsi ?: $kategori->nama_kategori) . '" berhasil dibuat! Silakan buat soal manual atau upload dokumen PDF/Word.');
     }
 
     /**

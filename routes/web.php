@@ -97,6 +97,7 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::delete('/ujian/unassign', 'unassignUjianGuru')->name('guru.ujian.unassign');
 
     Route::get('/bank-soal', 'bankSoal')->name('guru.bank-soal.index');
+    Route::get('/bank-soal/kelola/{id}', 'kelolaBankSoal')->name('guru.bank-soal.kelola');
     Route::get('/list-soal', 'listSoal')->name('guru.list-soal.index');
     Route::get('/list-soal/detail/{id}', 'detailListSoal')->name('guru.list-soal.detail');
     Route::post('/bank-soal/kategori', 'storeKategoriSoal')->name('guru.bank-soal.kategori.store');
@@ -167,6 +168,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/notifications/read', 'markNotificationsRead')->name('admin.notifications.read');
 
     Route::get('/admin/bank-soal', 'bankSoal')->name('admin.bank-soal.index');
+    Route::get('/admin/bank-soal/kelola/{id}', 'kelolaBankSoalAdmin')->name('admin.bank-soal.kelola');
     Route::post('/admin/bank-soal/kategori', 'storeKategoriSoalAdmin')->name('admin.bank-soal.kategori.store');
     Route::put('/admin/bank-soal/kategori/{id}', 'updateKategoriSoalAdmin')->name('admin.bank-soal.kategori.update');
     Route::delete('/admin/bank-soal/kategori/{id}', 'deleteKategoriSoalAdmin')->name('admin.bank-soal.kategori.delete');

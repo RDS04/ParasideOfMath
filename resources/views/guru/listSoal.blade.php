@@ -261,29 +261,29 @@
                                                 $detailUrl = route('guru.list-soal.detail', $kat->id);
                                             @endphp
                                             <a href="{{ $detailUrl }}"
-                                                class="card border border-purple-200 rounded-2xl shadow-xs overflow-hidden text-decoration-none transition-all hover:shadow-md soal-card-item">
+                                                class="card border border-slate-200 rounded-2xl shadow-xs overflow-hidden text-decoration-none transition-all hover:shadow-md soal-card-item">
                                                 <div class="card-body p-3.5 d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3"
-                                                    style="background: linear-gradient(135deg, #4c1d95, #6b21a8) !important; color: #ffffff !important;">
+                                                    style="background: linear-gradient(135deg, #ffffff, #f8fafc) !important; color: #0f172a !important;">
                                                     
                                                     <div class="d-flex items-center gap-3 min-w-0 flex-1">
                                                         <div class="rounded-2xl p-2.5 d-flex items-center justify-center shrink-0 shadow-xs"
-                                                            style="width: 44px; height: 44px; background: rgba(255,255,255,0.2);">
-                                                            <i class="fas fa-folder-open fa-lg text-amber-300"></i>
+                                                            style="width: 44px; height: 44px; background: #f1f5f9; border: 1px solid #cbd5e1;">
+                                                            <i class="fas fa-folder-open fa-lg text-purple-700"></i>
                                                         </div>
                                                         <div class="min-w-0 flex-1">
                                                             <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
-                                                                <span class="badge font-bold px-2.5 py-1 rounded-md text-[11px] uppercase shadow-xs" style="background-color: rgba(255,255,255,0.2) !important; color: #fef08a !important;">
+                                                                <span class="badge font-bold px-2.5 py-1 rounded-md text-[11px] uppercase shadow-xs" style="background-color: #f3e8ff !important; color: #6b21a8 !important; border: 1px solid #d8b4fe !important;">
                                                                     <i class="fas fa-book mr-1"></i> {{ $mapel }}
                                                                 </span>
-                                                                <h6 class="font-bold text-sm sm:text-base text-truncate mb-0 text-white" title="{{ $kat->deskripsi ?: $kat->nama_kategori }}">
+                                                                <h6 class="font-bold text-sm sm:text-base text-truncate mb-0 text-slate-900" title="{{ $kat->deskripsi ?: $kat->nama_kategori }}">
                                                                     {{ $kat->deskripsi ?: $kat->nama_kategori }}
                                                                 </h6>
                                                             </div>
                                                             <div class="d-flex align-items-center gap-2 flex-wrap">
-                                                                <span class="badge font-bold px-2.5 py-1 rounded-lg text-xs" style="background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important;">
+                                                                <span class="badge font-bold px-2.5 py-1 rounded-lg text-xs" style="background-color: #f3e8ff !important; color: #6b21a8 !important; border: 1px solid #d8b4fe !important;">
                                                                     <i class="fas fa-list-ol mr-1"></i> {{ $soalCount }} Soal Manual
                                                                 </span>
-                                                                <span class="text-xs text-purple-200">
+                                                                <span class="text-xs text-slate-500 font-medium">
                                                                     <i class="far fa-clock mr-1"></i> Dibuat {{ $kat->created_at->diffForHumans() }}
                                                                 </span>
                                                             </div>
@@ -291,8 +291,8 @@
                                                     </div>
 
                                                     <div class="d-flex items-center justify-content-end gap-2 shrink-0">
-                                                        <span class="btn btn-xs font-bold rounded-xl px-3.5 py-2 text-xs shadow-xs" style="background-color: #facc15 !important; color: #3b0764 !important; border: none !important;">
-                                                            <i class="fas fa-external-link-alt mr-1"></i> Buka Soal &amp; Modul <i class="fas fa-chevron-right ml-1"></i>
+                                                        <span class="btn btn-xs font-bold rounded-xl px-3.5 py-2 text-xs shadow-xs text-white" style="background: linear-gradient(135deg, #6b21a8, #4c1d95) !important; color: #ffffff !important; border: none !important;">
+                                                            <i class="fas fa-external-link-alt mr-1 text-amber-300"></i> Buka Soal &amp; Modul <i class="fas fa-chevron-right ml-1"></i>
                                                         </span>
                                                     </div>
                                                 </div>
