@@ -46,13 +46,26 @@
             style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruUjianActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
               style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruUjianActive ? 'scale(1.08)' : 'scale(1)' }};">
-              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+              <path
+                d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
             </svg>
           </div>
           <span
             style="font-size: 10px; font-weight: {{ $isGuruUjianActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Ujian</span>
         </a>
-
+        <a href="{{ route('guru.jadwal') }}"
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          <div
+            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruJadwalActive ? 'scale(1.08)' : 'scale(1)' }};">
+              <path
+                d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
+            </svg>
+          </div>
+          <span
+            style="font-size: 10px; font-weight: {{ $isGuruJadwalActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Jadwal</span>
+        </a>
         <!-- Chat -->
         <a href="{{ route('guru.chat.index') }}"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isChatActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
@@ -68,22 +81,6 @@
           <span
             style="font-size: 10px; font-weight: {{ $isChatActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Chat</span>
         </a>
-
-        <!-- Jadwal Bimbingan -->
-        <a href="{{ route('guru.jadwal') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
-          <div
-            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruJadwalActive ? 'scale(1.08)' : 'scale(1)' }};">
-              <path
-                d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
-            </svg>
-          </div>
-          <span
-            style="font-size: 10px; font-weight: {{ $isGuruJadwalActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Jadwal</span>
-        </a>
-
         <!-- Keluar / Logout -->
         <form action="{{ route('logout') }}" method="POST" id="mobileGuruLogoutForm" style="display: inline;">
           @csrf

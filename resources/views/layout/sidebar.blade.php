@@ -95,12 +95,12 @@
                     <!-- ══════ ADMIN NAVIGATION ══════ -->
                     <li class="nav-header">AKADEMIK</li>
 
-                    <li class="nav-item {{ Route::is('admin.siswa.*') ? 'menu-open' : '' }}">
+                    <li class="nav-item has-treeview {{ Route::is('admin.siswa.*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Route::is('admin.siswa.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-user-graduate text-purple-400"></i>
                             <p>Data Siswa <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.siswa.*') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview" style="{{ Route::is('admin.siswa.*') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.siswa.daftar.index') }}"
                                     class="nav-link {{ Route::is('admin.siswa.daftar.index') ? 'active' : '' }}">
@@ -125,12 +125,12 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item {{ Route::is('admin.guru.*') ? 'menu-open' : '' }}">
+                    <li class="nav-item has-treeview {{ Route::is('admin.guru.*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Route::is('admin.guru.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chalkboard-teacher text-amber-400"></i>
                             <p>Tutor <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.guru.*') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview" style="{{ Route::is('admin.guru.*') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.guru.daftar.index') }}"
                                     class="nav-link {{ Route::is('admin.guru.daftar.index') ? 'active' : '' }}">
@@ -141,12 +141,12 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item {{ Route::is('admin.kalender') ? 'menu-open' : '' }}">
+                    <li class="nav-item has-treeview {{ Route::is('admin.kalender') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Route::is('admin.kalender') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-alt text-teal-400"></i>
                             <p>Jadwal Les <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.kalender') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview" style="{{ Route::is('admin.kalender') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.kalender') }}"
                                     class="nav-link {{ Route::is('admin.kalender') ? 'active' : '' }}">
@@ -157,12 +157,12 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item {{ Route::is('admin.bank-soal.*') ? 'menu-open' : '' }}">
+                    <li class="nav-item has-treeview {{ Route::is('admin.bank-soal.*') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Route::is('admin.bank-soal.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-open text-info"></i>
                             <p>Materi &amp; Soal <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.bank-soal.*') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview" style="{{ Route::is('admin.bank-soal.*') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.bank-soal.index') }}"
                                     class="nav-link {{ Route::is('admin.bank-soal.*') ? 'active' : '' }}">
@@ -175,13 +175,13 @@
 
                     <li class="nav-header">KEUANGAN</li>
 
-                    <li class="nav-item {{ Route::is('admin.riwayat-pembayaran') ? 'menu-open' : '' }}">
+                    <li class="nav-item has-treeview {{ Route::is('admin.riwayat-pembayaran') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-wallet text-emerald-400"></i>
                             <p>Pembayaran <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview"
-                            style="{{ Route::is('admin.riwayat-pembayaran') ? 'display: block;' : '' }}">
+                            style="{{ Route::is('admin.riwayat-pembayaran') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.riwayat-pembayaran') }}"
                                     class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
@@ -192,13 +192,13 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item {{ Route::is('admin.laporan-pendapatan') ? 'menu-open' : '' }}">
+                    <li class="nav-item has-treeview {{ Route::is('admin.laporan-pendapatan') ? 'menu-open' : '' }}">
                         <a href="#" class="nav-link {{ Route::is('admin.laporan-pendapatan') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-chart-line text-rose-400"></i>
                             <p>Laporan <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview"
-                            style="{{ Route::is('admin.laporan-pendapatan') ? 'display: block;' : '' }}">
+                            style="{{ Route::is('admin.laporan-pendapatan') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.laporan-pendapatan') }}"
                                     class="nav-link {{ Route::is('admin.laporan-pendapatan') ? 'active' : '' }}">
@@ -211,14 +211,14 @@
 
                     <li class="nav-header">PENGELOLAAN HARGA & KONTEN</li>
                     <li
-                        class="nav-item {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'menu-open' : '' }}">
+                        class="nav-item has-treeview {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'menu-open' : '' }}">
                         <a href="#"
                             class="nav-link {{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-images text-rose-400"></i>
                             <p>Kelola Foto <i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview"
-                            style="{{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'display: block;' : '' }}">
+                            style="{{ Route::is('admin.foto.*') || Route::is('admin.galeri.*') || Route::is('admin.foto-guru.*') || Route::is('admin.link') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.foto.index') }}"
                                     class="nav-link {{ Route::is('admin.foto.index') ? 'active' : '' }}">
@@ -301,18 +301,21 @@
                         <a href="{{ route('guru.ujian.index') }}"
                             class="nav-link {{ Route::is('guru.ujian.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-signature text-purple-400"></i>
-                            <p>Penugasan Ujian Siswa</p>
+                            <p>Ujian Siswa</p>
                         </a>
                     </li>
-                    <li class="nav-item {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'active' : '' }}">
+                    <li
+                        class="nav-item has-treeview {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                            class="nav-link {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-reader text-rose-400"></i>
                             <p>
                                 Modul
                                 <i class="right fas fa-angle-left"></i>
                             </p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'display: block;' : '' }}">
+                        <ul class="nav nav-treeview"
+                            style="{{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('guru.bank-soal.index') }}"
                                     class="nav-link {{ Route::is('guru.bank-soal.*') ? 'active' : '' }}">
@@ -358,9 +361,126 @@
     </div>
 </aside>
 
-<!-- ══════ STYLE UNTUK SUB-MENU MENJOROK KE DALAM ══════ -->
+<!-- ══════ STYLE UNTUK SUB-MENU & ANIMASI ROTASI PANAH ══════ -->
 <style>
     .nav-sidebar .nav-treeview {
         padding-left: 15px !important;
     }
+    .nav-sidebar .nav-link .right,
+    .nav-sidebar .has-treeview > .nav-link .right {
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transform: rotate(0deg) !important;
+    }
+    .nav-sidebar .menu-open > .nav-link .right,
+    .nav-sidebar .menu-is-opening > .nav-link .right,
+    .nav-sidebar .has-treeview.menu-open > .nav-link .right,
+    .nav-sidebar .has-treeview.menu-is-opening > .nav-link .right {
+        transform: rotate(-90deg) !important;
+    }
 </style>
+
+<!-- ══════ TOGGLE TREEVIEW DROPDOWN (DETERMINISTIC CLICK TO TOGGLE) ══════ -->
+<script>
+    (function() {
+        function slideDown(target, duration) {
+            duration = duration || 220;
+            target.style.removeProperty('display');
+            var display = window.getComputedStyle(target).display;
+            if (display === 'none') display = 'block';
+            target.style.display = display;
+
+            var height = target.offsetHeight;
+            target.style.overflow = 'hidden';
+            target.style.height = '0px';
+            target.style.paddingTop = '0px';
+            target.style.paddingBottom = '0px';
+            target.style.marginTop = '0px';
+            target.style.marginBottom = '0px';
+            target.offsetHeight; // Force reflow
+
+            target.style.transitionProperty = "height, margin, padding";
+            target.style.transitionDuration = duration + 'ms';
+            target.style.transitionTimingFunction = 'cubic-bezier(0.4, 0, 0.2, 1)';
+            target.style.height = height + 'px';
+            target.style.removeProperty('padding-top');
+            target.style.removeProperty('padding-bottom');
+            target.style.removeProperty('margin-top');
+            target.style.removeProperty('margin-bottom');
+
+            window.setTimeout(function() {
+                target.style.removeProperty('height');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+                target.style.removeProperty('transition-timing-function');
+            }, duration);
+        }
+
+        function slideUp(target, duration) {
+            duration = duration || 220;
+            target.style.height = target.offsetHeight + 'px';
+            target.style.transitionProperty = "height, margin, padding";
+            target.style.transitionDuration = duration + 'ms';
+            target.style.transitionTimingFunction = 'cubic-bezier(0.4, 0, 0.2, 1)';
+            target.offsetHeight; // Force reflow
+
+            target.style.overflow = 'hidden';
+            target.style.height = '0px';
+            target.style.paddingTop = '0px';
+            target.style.paddingBottom = '0px';
+            target.style.marginTop = '0px';
+            target.style.marginBottom = '0px';
+
+            window.setTimeout(function() {
+                target.style.display = 'none';
+                target.style.removeProperty('height');
+                target.style.removeProperty('padding-top');
+                target.style.removeProperty('padding-bottom');
+                target.style.removeProperty('margin-top');
+                target.style.removeProperty('margin-bottom');
+                target.style.removeProperty('overflow');
+                target.style.removeProperty('transition-duration');
+                target.style.removeProperty('transition-property');
+                target.style.removeProperty('transition-timing-function');
+            }, duration);
+        }
+
+        function initSidebarToggle() {
+            // Use capture phase (true) to intercept clicks before any duplicate listeners
+            document.addEventListener('click', function(e) {
+                var navLink = e.target.closest('.nav-sidebar .has-treeview > .nav-link, .nav-sidebar .nav-item > .nav-link');
+                if (!navLink) return;
+
+                var parentLi = navLink.closest('.nav-item');
+                if (!parentLi) return;
+
+                var treeview = parentLi.querySelector('.nav-treeview');
+                if (!treeview) return; // Only process items that actually have sub-menus
+
+                var href = navLink.getAttribute('href');
+                if (!href || href === '#' || href === '' || href === 'javascript:void(0);') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.stopImmediatePropagation) {
+                        e.stopImmediatePropagation();
+                    }
+
+                    var isOpen = parentLi.classList.contains('menu-open') || parentLi.classList.contains('menu-is-opening');
+                    if (isOpen) {
+                        parentLi.classList.remove('menu-open', 'menu-is-opening');
+                        slideUp(treeview, 220);
+                    } else {
+                        parentLi.classList.add('menu-open');
+                        slideDown(treeview, 220);
+                    }
+                }
+            }, true);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initSidebarToggle);
+        } else {
+            initSidebarToggle();
+        }
+    })();
+</script>

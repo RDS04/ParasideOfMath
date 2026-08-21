@@ -47,50 +47,50 @@
             @endif
 
             <!-- Ringkasan Statistik -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-3 col-6">
-                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-3 d-flex flex-row align-items-center">
-                        <div class="p-3 rounded-2xl bg-purple-50 text-purple-600 mr-3">
-                            <i class="fas fa-users fa-2x"></i>
+            <div class="row g-2.5 sm:g-3 mb-4">
+                <div class="col-6 col-md-3 mb-2 mb-md-0">
+                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-2.5 sm:p-3 d-flex flex-row align-items-center h-100">
+                        <div class="rounded-xl sm:rounded-2xl bg-purple-50 text-purple-600 mr-2 sm:mr-3 d-flex align-items-center justify-content-center shrink-0" style="width: 42px; height: 42px;">
+                            <i class="fas fa-users text-base sm:text-2xl"></i>
                         </div>
-                        <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase">Siswa Bimbingan</div>
-                            <div class="text-xl font-bold text-purple-950">{{ count($assignedStudents) }} Siswa</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase text-truncate">Siswa Bimbingan</div>
+                            <div class="text-xs sm:text-lg font-bold text-purple-950 text-truncate">{{ count($assignedStudents) }} Siswa</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
-                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-3 d-flex flex-row align-items-center">
-                        <div class="p-3 rounded-2xl bg-amber-50 text-amber-600 mr-3">
-                            <i class="fas fa-user-check fa-2x"></i>
+                <div class="col-6 col-md-3 mb-2 mb-md-0">
+                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-2.5 sm:p-3 d-flex flex-row align-items-center h-100">
+                        <div class="rounded-xl sm:rounded-2xl bg-amber-50 text-amber-600 mr-2 sm:mr-3 d-flex align-items-center justify-content-center shrink-0" style="width: 42px; height: 42px;">
+                            <i class="fas fa-user-check text-base sm:text-2xl"></i>
                         </div>
-                        <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase">Siswa Terpilih</div>
-                            <div class="text-sm font-bold text-slate-800 text-truncate" style="max-width: 140px;">
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase text-truncate">Siswa Terpilih</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-800 text-truncate" title="{{ $selectedSiswa ? $selectedSiswa->name : 'Belum Ada' }}">
                                 {{ $selectedSiswa ? $selectedSiswa->name : 'Belum Ada' }}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
-                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-3 d-flex flex-row align-items-center">
-                        <div class="p-3 rounded-2xl bg-teal-50 text-teal-600 mr-3">
-                            <i class="fas fa-file-signature fa-2x"></i>
+                <div class="col-6 col-md-3 mb-2 mb-md-0">
+                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-2.5 sm:p-3 d-flex flex-row align-items-center h-100">
+                        <div class="rounded-xl sm:rounded-2xl bg-teal-50 text-teal-600 mr-2 sm:mr-3 d-flex align-items-center justify-content-center shrink-0" style="width: 42px; height: 42px;">
+                            <i class="fas fa-file-signature text-base sm:text-2xl"></i>
                         </div>
-                        <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase">Ujian Ditugaskan</div>
-                            <div class="text-xl font-bold text-teal-950">{{ count($assignedExams) }} Paket</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase text-truncate">Ujian Ditugaskan</div>
+                            <div class="text-xs sm:text-lg font-bold text-teal-950 text-truncate">{{ count($assignedExams) }} Paket</div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
-                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-3 d-flex flex-row align-items-center">
-                        <div class="p-3 rounded-2xl bg-emerald-50 text-emerald-600 mr-3">
-                            <i class="fas fa-trophy fa-2x"></i>
+                <div class="col-6 col-md-3 mb-2 mb-md-0">
+                    <div class="card border-0 shadow-sm rounded-2xl bg-white p-2.5 sm:p-3 d-flex flex-row align-items-center h-100">
+                        <div class="rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 mr-2 sm:mr-3 d-flex align-items-center justify-content-center shrink-0" style="width: 42px; height: 42px;">
+                            <i class="fas fa-trophy text-base sm:text-2xl"></i>
                         </div>
-                        <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase">Ujian Selesai</div>
-                            <div class="text-xl font-bold text-emerald-950">{{ $hasilUjians->count() }} Hasil</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase text-truncate">Ujian Selesai</div>
+                            <div class="text-xs sm:text-lg font-bold text-emerald-950 text-truncate">{{ $hasilUjians->count() }} Hasil</div>
                         </div>
                     </div>
                 </div>
@@ -477,8 +477,8 @@
                 const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
                 items.forEach(item => {
-                    const itemJenjang = item.getAttribute('data-jenjang');
-                    const searchData = item.getAttribute('data-search');
+                    const itemJenjang = item.getAttribute('data-jenjang') || '';
+                    const searchData = (item.getAttribute('data-search') || '').toLowerCase();
 
                     const matchSearch = searchData.includes(query);
                     const matchJenjang = currentJenjang === 'ALL' || itemJenjang === currentJenjang;

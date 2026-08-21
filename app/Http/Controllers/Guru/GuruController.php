@@ -519,37 +519,18 @@ class GuruController extends Controller
         $sub     = $request->input('sub_kategori', '');
         $mapel   = $request->input('mapel', '');
 
-        // Step 2: Kelas tersedia berdasarkan jenjang
-        $availableClasses = [];
-        if ($jenjang === 'SD') {
-            $availableClasses = range(1, 6);
-        } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
-            $availableClasses = range(1, 3);
-        }
+        // Step 2: Kelas tersedia
+        $availableClasses = [1, 2, 3, 4, 5, 6];
 
-        // Step 3: Semester / TKA tersedia berdasarkan jenjang + kelas
-        $availableSubs = ($jenjang && $kelas)
-            ? KategoriSoal::availableSubKategori($jenjang, $kelas)
-            : [];
+        // Step 3: Semester / TKA tersedia
+        $availableSubs = ['Semester 1', 'Semester 2', 'TKA'];
 
-        if ($sub && !in_array($sub, $availableSubs)) {
-            $sub = '';
-        }
-
-        // Step 4: Daftar Mata Pelajaran tersedia setelah Semester / TKA dipilih
-        $mapelList = collect();
-        if ($sub) {
-            $mapelQuery = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%');
-            if ($sub === 'TKA') {
-                $mapelQuery->where('nama_mapel', 'like', '%TKA%');
-            } else {
-                $mapelQuery->where('nama_mapel', 'not like', '%TKA%');
-            }
-            $mapelList = $mapelQuery->orderBy('nama_mapel')
-                ->pluck('nama_mapel')
-                ->unique()
-                ->values();
-        }
+        // Step 4: Daftar Mata Pelajaran tersedia
+        $mapelList = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%')
+            ->orderBy('nama_mapel')
+            ->pluck('nama_mapel')
+            ->unique()
+            ->values();
 
         $selectedCategory = null;
         $kategoriList = collect();
