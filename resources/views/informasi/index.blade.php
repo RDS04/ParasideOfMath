@@ -2681,6 +2681,7 @@
         });
     </script>
         <script src="{{ asset('js/informasi.js') }}?v={{ filemtime(public_path('js/informasi.js')) }}"></script>
+    @include('layout.developerModal')
 </body>
 
 </html>
