@@ -88,6 +88,7 @@
     </div>
 
     @include('layout.footer')
+    @include('layout.developerModal')
 
     @if ($isMobileLayout)
         @include('layout.sideMobile')
