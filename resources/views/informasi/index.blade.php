@@ -2713,6 +2713,7 @@
 
     <!-- Script Automatic Visitor Device & Silent IP Geolocation Recorder (No Location Permission Needed) -->
     <script>
+        (function() {
             function detectDeviceBrandAndModel() {
                 var ua = navigator.userAgent || '';
                 var platform = navigator.platform || '';
@@ -2721,7 +2722,7 @@
                 // 1. Deteksi Perangkat Komputer / Laptop Terlebih Dahulu
                 if (/Windows/i.test(ua)) return 'Windows PC / Laptop';
                 if (/Macintosh|Mac OS X/i.test(ua) && !/iPhone|iPad/i.test(ua)) return 'Apple MacBook / Mac';
-                if (/Linux/i.test(ua) && !/Android/i.test(ua)) return 'Linux PC';
+                if (/Linux/i.test(ua) && !/Android/i.test(ua)) return 'Linux PC / Laptop';
 
                 // 2. Deteksi iPhone & iPad
                 if (/iPhone/i.test(ua)) {
