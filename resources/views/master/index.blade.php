@@ -233,130 +233,15 @@
 </style>
 
 <script>
-    // Sample initial seed logs with Silent IP Geolocation Data
-    const defaultSampleLogs = [
-        {
-            id: 'DEV-1724509100-881',
-            time: '24 Agt 2026, 16:15:20 WIB',
-            timestamp: Date.now() - 60000,
-            deviceType: 'Mobile (HP)',
-            brandModel: 'Apple iPhone 15 Pro Max',
-            browser: 'Apple Safari 17.4',
-            platform: 'iOS 17.4',
-            userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
-            screen: '430 x 932 px',
-            viewport: '430 x 932 px',
-            dpr: 3,
-            language: 'id-ID',
-            onlineStatus: 'Online',
-            page: 'Landing Page (/informasi)',
-            location: {
-                ip: '180.252.88.14',
-                city: 'Jakarta South',
-                region: 'DKI Jakarta',
-                country: 'Indonesia',
-                org: 'PT Telkomsel',
-                lat: -6.2088,
-                lng: 106.8456,
-                isIpLocation: true,
-                mapsUrl: 'https://www.google.com/maps?q=-6.2088,106.8456'
-            }
-        },
-        {
-            id: 'DEV-1724508900-412',
-            time: '24 Agt 2026, 16:10:05 WIB',
-            timestamp: Date.now() - 300000,
-            deviceType: 'Mobile (HP)',
-            brandModel: 'Samsung Galaxy S23 Ultra',
-            browser: 'Google Chrome 124.0',
-            platform: 'Android 14',
-            userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-            screen: '393 x 873 px',
-            viewport: '393 x 873 px',
-            dpr: 2.75,
-            language: 'id-ID',
-            onlineStatus: 'Online',
-            page: 'Landing Page (/informasi)',
-            location: {
-                ip: '114.122.45.90',
-                city: 'Surabaya',
-                region: 'Jawa Timur',
-                country: 'Indonesia',
-                org: 'PT Indosat Tbk',
-                lat: -7.2504,
-                lng: 112.7688,
-                isIpLocation: true,
-                mapsUrl: 'https://www.google.com/maps?q=-7.2504,112.7688'
-            }
-        },
-        {
-            id: 'DEV-1724508500-299',
-            time: '24 Agt 2026, 15:58:40 WIB',
-            timestamp: Date.now() - 900000,
-            deviceType: 'Mobile (HP)',
-            brandModel: 'Xiaomi Redmi Note 13 Pro',
-            browser: 'Google Chrome 123.0',
-            platform: 'Android 13',
-            userAgent: 'Mozilla/5.0 (Linux; Android 13; 2312DRA50G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36',
-            screen: '393 x 851 px',
-            viewport: '393 x 851 px',
-            dpr: 2.75,
-            language: 'id-ID',
-            onlineStatus: 'Online',
-            page: 'Landing Page (/informasi)',
-            location: {
-                ip: '180.244.190.12',
-                city: 'Bandung',
-                region: 'Jawa Barat',
-                country: 'Indonesia',
-                org: 'XL Axiata',
-                lat: -6.9175,
-                lng: 107.6191,
-                isIpLocation: true,
-                mapsUrl: 'https://www.google.com/maps?q=-6.9175,107.6191'
-            }
-        },
-        {
-            id: 'DEV-1724507100-502',
-            time: '24 Agt 2026, 15:32:10 WIB',
-            timestamp: Date.now() - 2500000,
-            deviceType: 'Desktop / PC',
-            brandModel: 'Windows 11 PC / Laptop',
-            browser: 'Google Chrome 124.0',
-            platform: 'Win32 (Windows 11)',
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            screen: '1920 x 1080 px',
-            viewport: '1536 x 730 px',
-            dpr: 1.25,
-            language: 'id-ID',
-            onlineStatus: 'Online',
-            page: 'Landing Page (/informasi)',
-            location: {
-                ip: '103.140.22.5',
-                city: 'Medan',
-                region: 'Sumatera Utara',
-                country: 'Indonesia',
-                org: 'Biznet Networks',
-                lat: 3.5952,
-                lng: 98.6722,
-                isIpLocation: true,
-                mapsUrl: 'https://www.google.com/maps?q=3.5952,98.6722'
-            }
-        }
-    ];
-
     let activeDeviceLogs = [];
 
     function getDeviceLogsFromStorage() {
         try {
             const raw = localStorage.getItem('pm_visitor_device_logs');
-            if (!raw || JSON.parse(raw).length === 0) {
-                localStorage.setItem('pm_visitor_device_logs', JSON.stringify(defaultSampleLogs));
-                return defaultSampleLogs;
-            }
+            if (!raw) return [];
             return JSON.parse(raw);
         } catch(e) {
-            return defaultSampleLogs;
+            return [];
         }
     }
 
