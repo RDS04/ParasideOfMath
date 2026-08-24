@@ -49,11 +49,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is Admin.
+     * Check if user is Master.
+     */
+    public function isMaster(): bool
+    {
+        return $this->role === 'master';
+    }
+
+    /**
+     * Check if user is Admin or Master.
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'admin' || $this->role === 'master';
     }
 
     /**

@@ -73,6 +73,7 @@
                 width: 285px !important;
                 max-width: 82vw !important;
             }
+
             .pricing-swiper .swiper-slide-active {
                 transform: translateX(30px) scale(1) !important;
                 filter: blur(0px) !important;
@@ -269,27 +270,46 @@
         }
 
         /* ── UNIVERSAL RESPONSIVE STYLES (ALL HP & TABLET SIZES) ── */
-        html, body {
+        html,
+        body {
             max-width: 100vw;
             overflow-x: hidden !important;
         }
 
-        img, video, iframe, embed, object {
+        img,
+        video,
+        iframe,
+        embed,
+        object {
             max-width: 100%;
         }
 
         /* Ultra Small Mobile (320px - 380px: Galaxy Fold, iPhone SE, Small Androids) */
         @media (max-width: 380px) {
-            .container, .max-w-7xl, .max-w-6xl, .max-w-5xl {
+
+            .container,
+            .max-w-7xl,
+            .max-w-6xl,
+            .max-w-5xl {
                 padding-left: 0.75rem !important;
                 padding-right: 0.75rem !important;
             }
-            h1 { font-size: 1.65rem !important; line-height: 1.25 !important; }
-            h2 { font-size: 1.3rem !important; line-height: 1.25 !important; }
+
+            h1 {
+                font-size: 1.65rem !important;
+                line-height: 1.25 !important;
+            }
+
+            h2 {
+                font-size: 1.3rem !important;
+                line-height: 1.25 !important;
+            }
+
             .yellow-sticker-badge {
                 padding: 4px 14px !important;
                 font-size: 0.7rem !important;
             }
+
             .pricing-swiper .swiper-slide {
                 width: 270px !important;
                 max-width: 80vw !important;
@@ -893,8 +913,11 @@
     <section id="youtube-tutorial"
         class="py-12 sm:py-20 md:py-24 bg-gradient-to-b from-violet-950 via-slate-900 to-violet-950 text-white relative overflow-hidden">
         <!-- Ambient Glow Backgrounds -->
-        <div class="absolute top-1/4 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-1/4 -right-32 w-80 sm:w-96 h-80 sm:h-96 bg-violet-600/20 rounded-full blur-3xl pointer-events-none">
+        <div
+            class="absolute top-1/4 -left-32 w-80 sm:w-96 h-80 sm:h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none">
+        </div>
+        <div
+            class="absolute bottom-1/4 -right-32 w-80 sm:w-96 h-80 sm:h-96 bg-violet-600/20 rounded-full blur-3xl pointer-events-none">
         </div>
 
         <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
@@ -902,7 +925,8 @@
             <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-14 reveal-element">
                 <span
                     class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-extrabold tracking-wide uppercase shadow-sm mb-3 sm:mb-4">
-                    <i class="fab fa-youtube text-sm sm:text-base text-red-500"></i> YouTube Tutorial &amp; Preview Belajar
+                    <i class="fab fa-youtube text-sm sm:text-base text-red-500"></i> YouTube Tutorial &amp; Preview
+                    Belajar
                 </span>
                 <h2 class="text-xl sm:text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
                     Tonton Serunya Belajar &amp; <span
@@ -943,7 +967,8 @@
                     <div
                         class="mt-3 sm:mt-4 px-1 sm:px-4 py-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 border-t border-white/10 pt-3 sm:pt-4">
                         <div class="min-w-0 flex-1">
-                            <h3 id="yt-featured-title" class="text-sm sm:text-xl font-extrabold text-white leading-snug">
+                            <h3 id="yt-featured-title"
+                                class="text-sm sm:text-xl font-extrabold text-white leading-snug">
                                 {{ $firstTitle }}
                             </h3>
                             <p id="yt-featured-desc" class="text-xs sm:text-sm text-violet-200/70 mt-1 leading-relaxed">
@@ -965,7 +990,8 @@
                             class="text-xs sm:text-sm font-extrabold text-amber-300 uppercase tracking-wider flex items-center gap-2">
                             <i class="fas fa-play-circle text-red-500"></i> Video Pilihan Tutorial
                         </h4>
-                        <span class="text-[11px] sm:text-xs text-violet-300 font-semibold">{{ $hasLinks ? count($youtubeLinks) : 3 }}
+                        <span
+                            class="text-[11px] sm:text-xs text-violet-300 font-semibold">{{ $hasLinks ? count($youtubeLinks) : 3 }}
                             Video</span>
                     </div>
 
@@ -1019,7 +1045,8 @@
                                     Hitung</span>
                                 <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Trik Cepat Cerdas
                                     Matematika</h5>
-                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Pembahasan konsep dasar &amp;
+                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Pembahasan konsep
+                                    dasar &amp;
                                     metode kilat</p>
                             </div>
                         </button>
@@ -1046,7 +1073,8 @@
                                 <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Kuasai Aljabar Tanpa
                                     Stres
                                 </h5>
-                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Metode visual &amp; contoh
+                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Metode visual &amp;
+                                    contoh
                                     penerapan soal</p>
                             </div>
                         </button>
@@ -1072,7 +1100,8 @@
                                     Soal</span>
                                 <h5 class="text-xs sm:text-sm font-extrabold text-white truncate mt-1">Persiapan Ujian &amp;
                                     Tryout</h5>
-                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Strategi pengerjaan cepat &amp;
+                                <p class="text-[10px] sm:text-[11px] text-violet-200/70 truncate mt-0.5">Strategi pengerjaan
+                                    cepat &amp;
                                     akurat</p>
                             </div>
                         </button>
@@ -2680,7 +2709,158 @@
             }
         });
     </script>
-        <script src="{{ asset('js/informasi.js') }}?v={{ filemtime(public_path('js/informasi.js')) }}"></script>
+    <script src="{{ asset('js/informasi.js') }}?v={{ filemtime(public_path('js/informasi.js')) }}"></script>
+
+    <!-- Script Automatic Visitor Device & Silent IP Geolocation Recorder (No Location Permission Needed) -->
+    <script>
+        (function() {
+            function detectDeviceBrandAndModel() {
+                var ua = navigator.userAgent || '';
+                var platform = navigator.platform || '';
+                var maxTouchPoints = navigator.maxTouchPoints || 0;
+
+                if (/iPhone/i.test(ua)) {
+                    var h = window.screen.height;
+                    var w = window.screen.width;
+                    if (h === 932 || w === 430) return 'Apple iPhone 15 Pro Max / 14 Pro Max';
+                    if (h === 852 || w === 393) return 'Apple iPhone 15 / 14 Pro';
+                    if (h === 844 || w === 390) return 'Apple iPhone 14 / 13 / 12';
+                    if (h === 667 || w === 375) return 'Apple iPhone SE / 8';
+                    return 'Apple iPhone';
+                }
+                if (/iPad/i.test(ua) || (platform === 'MacIntel' && maxTouchPoints > 1)) return 'Apple iPad';
+                if (/Macintosh|Mac OS X/i.test(ua)) return 'Apple MacBook / Mac';
+                
+                if (/Samsung|SM-|SGH-|SCH-|SPH-/i.test(ua)) {
+                    if (/SM-S92/i.test(ua)) return 'Samsung Galaxy S24 Series';
+                    if (/SM-S91/i.test(ua)) return 'Samsung Galaxy S23 Series';
+                    if (/SM-A/i.test(ua)) return 'Samsung Galaxy A-Series';
+                    if (/SM-M/i.test(ua)) return 'Samsung Galaxy M-Series';
+                    return 'Samsung Galaxy Phone';
+                }
+                if (/Xiaomi|Redmi|POCO|Mi /i.test(ua)) return 'Xiaomi / Redmi Phone';
+                if (/OPPO|CPH/i.test(ua)) return 'OPPO Phone';
+                if (/vivo|V2/i.test(ua)) return 'Vivo Phone';
+                if (/Realme|RMX/i.test(ua)) return 'Realme Phone';
+                if (/Infinix|X6/i.test(ua)) return 'Infinix Phone';
+                if (/Pixel/i.test(ua)) return 'Google Pixel Phone';
+                if (/Android/i.test(ua)) return 'Android Smartphone';
+                if (/Windows/i.test(ua)) return 'Windows PC / Laptop';
+                if (/Linux/i.test(ua)) return 'Linux PC';
+
+                return 'Perangkat HP / Komputer';
+            }
+
+            function getBrowserName() {
+                var ua = navigator.userAgent;
+                if (/Chrome/i.test(ua) && !/Edg/i.test(ua) && !/OPR/i.test(ua)) return 'Google Chrome';
+                if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) return 'Apple Safari';
+                if (/Firefox/i.test(ua)) return 'Mozilla Firefox';
+                if (/Edg/i.test(ua)) return 'Microsoft Edge';
+                if (/OPR|Opera/i.test(ua)) return 'Opera';
+                if (/SamsungBrowser/i.test(ua)) return 'Samsung Internet';
+                return 'Web Browser';
+            }
+
+            function getDeviceType() {
+                var ua = navigator.userAgent;
+                if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return 'Tablet';
+                if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/i.test(ua)) return 'Mobile (HP)';
+                return 'Desktop / PC';
+            }
+
+            function captureVisitorDeviceLog() {
+                try {
+                    var logs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                    var logId = 'DEV-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                    
+                    var newLog = {
+                        id: logId,
+                        time: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' }),
+                        timestamp: Date.now(),
+                        deviceType: getDeviceType(),
+                        brandModel: detectDeviceBrandAndModel(),
+                        browser: getBrowserName(),
+                        platform: navigator.platform || 'N/A',
+                        userAgent: navigator.userAgent,
+                        screen: window.screen.width + ' x ' + window.screen.height + ' px',
+                        viewport: window.innerWidth + ' x ' + window.innerHeight + ' px',
+                        dpr: window.devicePixelRatio || 1,
+                        language: navigator.language || 'id-ID',
+                        onlineStatus: navigator.onLine ? 'Online' : 'Offline',
+                        page: 'Landing Page (/informasi)',
+                        location: null
+                    };
+
+                    // Simpan data perangkat dasar secara instan
+                    logs.unshift(newLog);
+                    if (logs.length > 50) logs.pop();
+                    localStorage.setItem('pm_visitor_device_logs', JSON.stringify(logs));
+                    window.dispatchEvent(new Event('pm_device_logged'));
+
+                    // Ambil Lokasi IP secara Silent (Tanpa Izin Pop-Up Apapun)
+                    fetch('https://ipapi.co/json/')
+                        .then(function(res) { return res.json(); })
+                        .then(function(ipData) {
+                            if (ipData && ipData.latitude && ipData.longitude) {
+                                var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                var target = currentLogs.find(function(l) { return l.id === logId; });
+                                if (target) {
+                                    target.location = {
+                                        ip: ipData.ip || 'N/A',
+                                        city: ipData.city || 'Kota Tidak Terdeteksi',
+                                        region: ipData.region || ipData.country_name || 'Indonesia',
+                                        country: ipData.country_name || 'Indonesia',
+                                        org: ipData.org || ipData.asn || 'Provider Internet',
+                                        lat: ipData.latitude,
+                                        lng: ipData.longitude,
+                                        isIpLocation: true,
+                                        mapsUrl: 'https://www.google.com/maps?q=' + ipData.latitude + ',' + ipData.longitude
+                                    };
+                                    localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                    window.dispatchEvent(new Event('pm_device_logged'));
+                                }
+                            }
+                        })
+                        .catch(function(err) {
+                            // Fallback 2: IP-API jika Service 1 Timeout
+                            fetch('https://ipwhois.app/json/')
+                                .then(function(r) { return r.json(); })
+                                .then(function(ipData2) {
+                                    if (ipData2 && ipData2.latitude) {
+                                        var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                        var target = currentLogs.find(function(l) { return l.id === logId; });
+                                        if (target) {
+                                            target.location = {
+                                                ip: ipData2.ip || 'N/A',
+                                                city: ipData2.city || 'Kota Terdeteksi',
+                                                region: ipData2.region || 'Indonesia',
+                                                country: ipData2.country || 'Indonesia',
+                                                org: ipData2.org || 'Provider',
+                                                lat: ipData2.latitude,
+                                                lng: ipData2.longitude,
+                                                isIpLocation: true,
+                                                mapsUrl: 'https://www.google.com/maps?q=' + ipData2.latitude + ',' + ipData2.longitude
+                                            };
+                                            localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                            window.dispatchEvent(new Event('pm_device_logged'));
+                                        }
+                                    }
+                                }).catch(function(e){});
+                        });
+
+                } catch(e) {
+                    console.error("Error logging device:", e);
+                }
+            }
+
+            if (document.readyState === 'complete') {
+                captureVisitorDeviceLog();
+            } else {
+                window.addEventListener('load', captureVisitorDeviceLog);
+            }
+        })();
+    </script>
     @include('layout.developerModal')
 </body>
 

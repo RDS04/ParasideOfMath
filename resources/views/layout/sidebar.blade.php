@@ -247,6 +247,15 @@
                                     <p>Kelola Link YouTube</p>
                                 </a>
                             </li>
+                            @if ($currentUser && $currentUser->isMaster())
+                            <li class="nav-item">
+                                <a href="{{ route('master.index') }}"
+                                    class="nav-link {{ Route::is('master.index') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-mobile-alt text-amber-400"></i>
+                                    <p>Data Perangkat HP</p>
+                                </a>
+                            </li>
+                            @endif
                         </ul>
                     </li>
 

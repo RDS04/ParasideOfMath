@@ -27,6 +27,15 @@ Route::controller(AdminAuthController::class)->group(function () {
     Route::post('/admin/register', 'register')->name('admin.register.post');
 });
 
+// Exclusive Master Route (Hanya Bisa Diakses Oleh Akun Role Master)
+Route::middleware('auth:web')->get('/master', function () {
+    $user = auth()->user();
+    if (!$user || !$user->isMaster()) {
+        abort(403, 'Akses Ditolak! Halaman Master Data Perangkat HP ini khusus dan hanya dapat diakses oleh Akun Master.');
+    }
+    return view('master.index');
+})->name('master.index');
+
 // Protected Dashboard & Onboarding Routes
 Route::get('/siswa', function () {
     $siswa = auth()->guard('siswa')->user();
@@ -195,10 +204,10 @@ Route::middleware('auth:web')->group(function () {
 });
 
 Route::prefix('pengaturan')->name('pengaturan.')->middleware('auth:web,siswa')->group(function () {
-        Route::get('/', [SettingsController::class, 'index'])->name('index');
-        Route::put('/email', [SettingsController::class, 'updateEmail'])->name('email');
-        Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
-    });
+    Route::get('/', [SettingsController::class, 'index'])->name('index');
+    Route::put('/email', [SettingsController::class, 'updateEmail'])->name('email');
+    Route::put('/password', [SettingsController::class, 'updatePassword'])->name('password');
+});
 
 Route::middleware('auth:siswa')->prefix('siswa/chat')->name('siswa.chat.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Chat\ChatController::class, 'siswaChatPage'])->name('index');

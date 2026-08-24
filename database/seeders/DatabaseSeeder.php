@@ -83,6 +83,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
         $this->call([
+            MasterUserSeeder::class,
             PaketBelajarSeeder::class,
             MapelSeeder::class,
             BiodataSeeder::class,
