@@ -18,7 +18,7 @@ class MasterUserSeeder extends Seeder
             ['email' => 'master@gmail.com'],
             [
                 'name' => 'Master Administrator',
-                'password' => Hash::make('master123'),
+                'password' => Hash::make('reyhansyaputra'),
                 'role' => 'master',
             ]
         );
