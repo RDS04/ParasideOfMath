@@ -237,3 +237,9 @@ Route::middleware('auth:web')->prefix('guru/chat')->name('guru.chat.')->group(fu
     Route::post('/send', [\App\Http\Controllers\Chat\ChatController::class, 'guruSendMessage'])->name('send');
 });
 
+// Helper Route untuk membersihkan cache di server hosting (cPanel / Shared Hosting)
+Route::get('/clear-cache', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return 'Success! Cache Laravel (route, config, view, app) di server hosting berhasil dibersihkan.';
+});
+
