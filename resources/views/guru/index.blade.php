@@ -123,18 +123,29 @@
                         </div>
                     </div>
                 </div>
-                <!-- Metric 3: Siswa Bimbingan -->
+                <!-- Metric 3: Siswa Bimbingan & Kuota -->
                 <div class="col-lg-3 col-6 mb-3">
                     <div class="metric-card bg-white p-3 shadow-xs h-100">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="inner-metric">
-                                <h3 class="font-weight-extrabold text-teal-950 mb-0">{{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} <span class="text-xs font-weight-normal text-muted">Orang</span></h3>
-                                <p class="text-muted text-xs mb-1">Siswa Bimbingan</p>
+                                <h3 class="font-weight-extrabold text-teal-950 mb-0">
+                                    {{ isset($assignedStudents) ? $assignedStudents->count() : 0 }} 
+                                    <span class="text-xs font-weight-normal text-muted">/ {{ $guruProfile->max_siswa !== null ? $guruProfile->max_siswa . ' Max' : '∞' }}</span>
+                                </h3>
+                                <p class="text-muted text-xs mb-1">Siswa Bimbingan (Kuota)</p>
                             </div>
                             <div class="metric-icon bg-purple-50 text-purple-600"><i class="fas fa-user-graduate"></i></div>
                         </div>
                         <div class="pt-2 mt-2 border-top text-xxs text-purple-600 font-semibold">
-                            <i class="fas fa-check-double mr-1"></i> Siswa aktif Anda
+                            @if($guruProfile->max_siswa !== null)
+                                @php
+                                    $currentCount = isset($assignedStudents) ? $assignedStudents->count() : 0;
+                                    $sisaKuota = max(0, $guruProfile->max_siswa - $currentCount);
+                                @endphp
+                                <i class="fas fa-info-circle mr-1"></i> Sisa kuota: {{ $sisaKuota }} siswa
+                            @else
+                                <i class="fas fa-infinity mr-1"></i> Kuota tanpa batas
+                            @endif
                         </div>
                     </div>
                 </div>

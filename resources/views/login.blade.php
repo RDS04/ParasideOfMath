@@ -363,6 +363,12 @@
                 </div>
             @endif
 
+            @if (session('info'))
+                <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-amber-50 border-amber-200 text-amber-900" role="alert">
+                    <i class="fas fa-exclamation-triangle mr-1"></i> {{ session('info') }}
+                </div>
+            @endif
+
             @if (session('error'))
                 <div class="mb-5 p-4 rounded-xl text-sm font-medium border bg-rose-50 border-rose-200 text-rose-800" role="alert">
                     {{ session('error') }}

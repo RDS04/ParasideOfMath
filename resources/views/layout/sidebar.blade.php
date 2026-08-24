@@ -153,6 +153,21 @@
                                     <p>Daftar Tutor</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.guru.approve.index') }}"
+                                    class="nav-link {{ Route::is('admin.guru.approve.index') ? 'active' : '' }}">
+                                    <i class="fas fa-user-check nav-icon text-warning"></i>
+                                    <p>
+                                        Approve Guru
+                                        @php
+                                            $pendingGuruCount = \App\Models\Guru::where('status', 'pending')->count();
+                                        @endphp
+                                        @if($pendingGuruCount > 0)
+                                            <span class="badge badge-warning right">{{ $pendingGuruCount }}</span>
+                                        @endif
+                                    </p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 

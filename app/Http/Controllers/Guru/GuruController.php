@@ -24,6 +24,14 @@ class GuruController extends Controller
         }
 
         $guruProfile = $user->getOrCreateGuruProfile();
+        if (strtolower($guruProfile->status ?? 'aktif') === 'pending') {
+            Auth::guard('web')->logout();
+            return redirect()->route('guru.pending')->with('info', 'Akun Guru Anda masih dalam proses peninjauan (pending approval) oleh Admin.');
+        } elseif (strtolower($guruProfile->status ?? 'aktif') === 'ditolak') {
+            Auth::guard('web')->logout();
+            return redirect()->route('login')->with('error', 'Maaf, pendaftaran akun Guru Anda ditolak oleh Admin.');
+        }
+
         $isBiodataComplete = $guruProfile->isComplete();
         $guruNameNorm = strtolower(trim($user->name));
 

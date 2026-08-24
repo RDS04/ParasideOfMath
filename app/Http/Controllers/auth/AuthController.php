@@ -77,9 +77,23 @@ class AuthController extends Controller
         // 2. Coba login sebagai Guru atau Admin (tabel users)
         if (Auth::guard('web')->attempt($credentials, $remember)) {
             $request->session()->regenerate();
+            $user = Auth::guard('web')->user();
 
-            return $this->redirectUserBasedOnRole(Auth::guard('web')->user())
-                ->with('success', 'Selamat datang kembali, ' . Auth::guard('web')->user()->name . '!');
+            if ($user && $user->isGuru()) {
+                $guruProfile = $user->getOrCreateGuruProfile();
+                if (strtolower($guruProfile->status) === 'pending') {
+                    Auth::guard('web')->logout();
+                    return redirect()->route('guru.pending')
+                        ->with('info', 'Akun Guru Anda (' . $user->name . ') saat ini masih dalam proses peninjauan dan menunggu persetujuan (approval) dari Admin.');
+                } elseif (strtolower($guruProfile->status) === 'ditolak') {
+                    Auth::guard('web')->logout();
+                    return redirect()->route('login')
+                        ->with('error', 'Maaf, pendaftaran akun Guru Anda (' . $user->name . ') ditolak oleh Admin.');
+                }
+            }
+
+            return $this->redirectUserBasedOnRole($user)
+                ->with('success', 'Selamat datang kembali, ' . $user->name . '!');
         }
 
         return back()
@@ -160,17 +174,22 @@ class AuthController extends Controller
             'role' => 'guru',
         ]);
 
-        // Buat profil guru di tabel gurus
+        // Buat profil guru di tabel gurus dengan status pending (memerlukan approval Admin)
         \App\Models\Guru::create([
             'user_id' => $user->id,
-            'status' => 'aktif',
+            'status' => 'pending',
         ]);
 
-        // Login as newly registered guru using web guard
-        Auth::guard('web')->login($user);
+        return redirect()->route('guru.pending')
+            ->with('success', 'Pendaftaran Akun Guru berhasil! Akun Anda (' . $user->name . ') sedang dalam proses peninjauan dan menunggu persetujuan (approval) dari Admin.');
+    }
 
-        return redirect()->route('guru.dashboard')
-            ->with('success', 'Akun Guru berhasil dibuat! Selamat datang di dashboard Anda.');
+    /**
+     * Tampilkan halaman tunggu peninjauan (Pending) untuk Guru.
+     */
+    public function showGuruPending()
+    {
+        return view('guru.pending');
     }
 
     /**
@@ -196,6 +215,16 @@ class AuthController extends Controller
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->isGuru()) {
+            $guruProfile = $user->getOrCreateGuruProfile();
+            if (strtolower($guruProfile->status) === 'pending') {
+                Auth::guard('web')->logout();
+                return redirect()->route('guru.pending')
+                    ->with('info', 'Akun Guru Anda (' . $user->name . ') masih dalam proses peninjauan oleh Admin.');
+            } elseif (strtolower($guruProfile->status) === 'ditolak') {
+                Auth::guard('web')->logout();
+                return redirect()->route('login')
+                    ->with('error', 'Maaf, pendaftaran akun Guru Anda (' . $user->name . ') ditolak oleh Admin.');
+            }
             return redirect()->route('guru.dashboard');
         }
 

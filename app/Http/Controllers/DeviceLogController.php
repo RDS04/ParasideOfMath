@@ -51,7 +51,6 @@ class DeviceLogController extends Controller
                     }
                 } catch (\Throwable $e) {}
             }
-            }
 
             $logCode = $request->input('logCode') ?: ($request->input('id') ?: ('DEV-' . time() . '-' . rand(100, 999)));
 

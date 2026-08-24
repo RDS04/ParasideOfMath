@@ -21,6 +21,7 @@ class Guru extends Model
         'pengalaman_mengajar',
         'bio_singkat',
         'status',
+        'max_siswa',
     ];
 
     public function user()

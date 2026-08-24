@@ -549,7 +549,31 @@ class AdminController extends Controller
             'tipe_paket' => $siswa->tipe_paket,
         ]);
 
-        return back()->with('success', 'Guru pendamping untuk ' . $siswa->name . ' berhasil diatur: ' . $tutorsStr);
+        $quotaWarning = [];
+        $uniqueAssignedNames = array_unique($tutorNamesFlat);
+        foreach ($uniqueAssignedNames as $tName) {
+            $gObj = Guru::whereHas('user', function($q) use ($tName) {
+                $q->where('name', $tName);
+            })->first();
+            if ($gObj && $gObj->max_siswa !== null) {
+                $countCurrent = Siswa::where('status', 'active')
+                    ->where(function($q) use ($tName) {
+                        $q->where('tipe_paket', 'LIKE', '%' . $tName . '%')
+                          ->orWhereJsonContains('biodata->tutor_names', $tName)
+                          ->orWhereJsonContains('biodata->tutor_per_mapel', $tName);
+                    })->count();
+                if ($countCurrent > $gObj->max_siswa) {
+                    $quotaWarning[] = $tName . ' (' . $countCurrent . '/' . $gObj->max_siswa . ' Siswa)';
+                }
+            }
+        }
+
+        $msg = 'Guru pendamping untuk ' . $siswa->name . ' berhasil diatur: ' . $tutorsStr;
+        if (!empty($quotaWarning)) {
+            $msg .= '. (Perhatian: Guru ' . implode(', ', $quotaWarning) . ' telah melebihi batas kuota siswa!)';
+        }
+
+        return back()->with('success', $msg);
     }
 
     /**
@@ -837,6 +861,39 @@ class AdminController extends Controller
         $gurus = Guru::with('user')->orderBy('created_at', 'desc')->get();
         $guruRegisterEnabled = Setting::get('guru_register_enabled', '1') !== '0';
 
+        $allActiveSiswa = Siswa::where('status', 'active')->get();
+
+        foreach ($gurus as $guru) {
+            $gName = $guru->user->name ?? '';
+            $gNameNorm = strtolower(trim($gName));
+            if ($gNameNorm) {
+                $guru->total_siswa_bimbingan = $allActiveSiswa->filter(function($siswa) use ($gNameNorm) {
+                    $tpe = strtolower($siswa->tipe_paket ?? '');
+                    if (str_contains($tpe, $gNameNorm)) {
+                        return true;
+                    }
+                    $biodata = $siswa->biodata ?? [];
+                    if (isset($biodata['tutor_names']) && is_array($biodata['tutor_names'])) {
+                        foreach ($biodata['tutor_names'] as $tn) {
+                            if (strtolower(trim($tn)) === $gNameNorm) {
+                                return true;
+                            }
+                        }
+                    }
+                    if (isset($biodata['tutor_per_mapel']) && is_array($biodata['tutor_per_mapel'])) {
+                        foreach ($biodata['tutor_per_mapel'] as $tn) {
+                            if (strtolower(trim($tn)) === $gNameNorm) {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                })->count();
+            } else {
+                $guru->total_siswa_bimbingan = 0;
+            }
+        }
+
         return view('admin.daftarGuru', compact('gurus', 'guruRegisterEnabled'));
     }
 
@@ -858,6 +915,97 @@ class AdminController extends Controller
             : 'Tampilan link pendaftaran guru ("Ingin bergabung sebagai pengajar? Daftar sebagai Guru") berhasil DINONAKTIFKAN.';
 
         return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Update batas maksimal siswa yang bisa diajar oleh guru.
+     */
+    public function updateMaxSiswa(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'max_siswa' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $guru = Guru::findOrFail($id);
+        $guru->max_siswa = $request->filled('max_siswa') && $request->max_siswa !== '' ? (int)$request->max_siswa : null;
+        $guru->save();
+
+        return redirect()->back()->with('success', 'Batas maksimal siswa untuk ' . ($guru->user->name ?? 'Guru') . ' berhasil diperbarui!');
+    }
+
+    /**
+     * Setujui (Approve) pendaftaran akun guru.
+     */
+    public function approveGuru($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $guru = Guru::with('user')->findOrFail($id);
+        $guru->status = 'aktif';
+        $guru->save();
+
+        return redirect()->back()->with('success', 'Akun Guru ' . ($guru->user->name ?? '') . ' berhasil DISETUJUI (AKTIF). Guru tersebut dapat login kembali sekarang.');
+    }
+
+    /**
+     * Tolak (Reject) pendaftaran akun guru.
+     */
+    public function rejectGuru($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $guru = Guru::with('user')->findOrFail($id);
+        $guru->status = 'ditolak';
+        $guru->save();
+
+        return redirect()->back()->with('success', 'Pendaftaran akun Guru ' . ($guru->user->name ?? '') . ' telah DITOLAK.');
+    }
+
+    /**
+     * Hapus Akun Guru & User Terkait.
+     */
+    public function deleteGuru($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $guru = Guru::with('user')->findOrFail($id);
+        $name = $guru->user->name ?? 'Guru';
+
+        if ($guru->user) {
+            $guru->user->delete();
+        } else {
+            $guru->delete();
+        }
+
+        return redirect()->route('admin.guru.daftar.index')->with('success', 'Akun Guru ' . $name . ' berhasil dihapus secara permanen.');
+    }
+
+    /**
+     * Tampilkan Halaman Persetujuan (Approval) Pendaftaran Guru.
+     */
+    public function approvGuru()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        // Hanya ambil data guru yang berstatus 'pending' (menunggu approval)
+        $pendingGurus = Guru::with('user')
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('admin.approvGuru', compact('pendingGurus'));
     }
 
     /**

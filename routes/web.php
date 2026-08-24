@@ -97,6 +97,7 @@ Route::controller(SiswaController::class)->group(function () {
 Route::controller(AuthController::class)->prefix('guru')->group(function () {
     Route::get('/register', 'showGuruRegisterForm')->name('guru.register');
     Route::post('/register', 'registerGuru')->name('guru.register.post');
+    Route::get('/pending', 'showGuruPending')->name('guru.pending');
 });
 
 Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)->group(function () {
@@ -173,8 +174,13 @@ Route::controller(AdminController::class)->group(function () {
     Route::delete('/admin/link/{id}', 'deleteYoutubeLink')->name('admin.link.delete');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
+    Route::get('/admin/guru/approve', 'approvGuru')->name('admin.guru.approve.index');
     Route::post('/admin/guru/toggle-register', 'toggleGuruRegisterStatus')->name('admin.guru.toggle-register');
     Route::get('/admin/guru/detail/{id}', 'detailGuru')->name('admin.guru.detail');
+    Route::post('/admin/guru/update-max-siswa/{id}', 'updateMaxSiswa')->name('admin.guru.update-max-siswa');
+    Route::post('/admin/guru/approve/{id}', 'approveGuru')->name('admin.guru.approve');
+    Route::post('/admin/guru/reject/{id}', 'rejectGuru')->name('admin.guru.reject');
+    Route::delete('/admin/guru/delete/{id}', 'deleteGuru')->name('admin.guru.delete');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
     Route::get('/admin/riwayat-pembayaran', 'allRiwayatPayment')->name('admin.riwayat-pembayaran');
     Route::get('/admin/laporan-pendapatan', 'laporanPendapatan')->name('admin.laporan-pendapatan');
