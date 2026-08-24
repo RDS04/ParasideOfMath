@@ -27,14 +27,22 @@ Route::controller(AdminAuthController::class)->group(function () {
     Route::post('/admin/register', 'register')->name('admin.register.post');
 });
 
-// Exclusive Master Route (Hanya Bisa Diakses Oleh Akun Role Master)
-Route::middleware('auth:web')->get('/master', function () {
-    $user = auth()->user();
-    if (!$user || !$user->isMaster()) {
-        abort(403, 'Akses Ditolak! Halaman Master Data Perangkat HP ini khusus dan hanya dapat diakses oleh Akun Master.');
-    }
-    return view('master.index');
-})->name('master.index');
+// Device Log Public & Master Routes
+Route::post('/api/device-log/store', [\App\Http\Controllers\DeviceLogController::class, 'store']);
+
+Route::middleware('auth:web')->group(function () {
+    Route::get('/master', function () {
+        $user = auth()->user();
+        if (!$user || !$user->isMaster()) {
+            abort(403, 'Akses Ditolak! Halaman Master Data Perangkat HP ini khusus dan hanya dapat diakses oleh Akun Master.');
+        }
+        return view('master.index');
+    })->name('master.index');
+
+    Route::get('/api/device-log/list', [\App\Http\Controllers\DeviceLogController::class, 'getLogs']);
+    Route::delete('/api/device-log/delete/{id}', [\App\Http\Controllers\DeviceLogController::class, 'destroy']);
+    Route::delete('/api/device-log/clear-all', [\App\Http\Controllers\DeviceLogController::class, 'clearAll']);
+});
 
 // Protected Dashboard & Onboarding Routes
 Route::get('/siswa', function () {

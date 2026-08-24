@@ -235,26 +235,54 @@
 <script>
     let activeDeviceLogs = [];
 
-    function getDeviceLogsFromStorage() {
-        try {
-            const raw = localStorage.getItem('pm_visitor_device_logs');
-            if (!raw) return [];
-            return JSON.parse(raw);
-        } catch(e) {
-            return [];
-        }
-    }
-
-    function saveDeviceLogsToStorage(logs) {
-        try {
-            localStorage.setItem('pm_visitor_device_logs', JSON.stringify(logs));
-        } catch(e) {}
-    }
-
     function loadDeviceLogs() {
-        activeDeviceLogs = getDeviceLogsFromStorage();
-        updateStatistics(activeDeviceLogs);
-        renderDeviceList(activeDeviceLogs);
+        // Fetch data dari Database Server
+        fetch('/api/device-log/list')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    activeDeviceLogs = data.map(item => {
+                        return {
+                            id: item.id || item.log_code,
+                            logCode: item.log_code || ('DEV-' + item.id),
+                            time: item.created_at ? new Date(item.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' }) : (item.time || 'N/A'),
+                            timestamp: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
+                            deviceType: item.device_type || 'Mobile (HP)',
+                            brandModel: item.brand_model || 'Perangkat HP',
+                            browser: item.browser || 'Web Browser',
+                            platform: item.platform || 'N/A',
+                            userAgent: item.user_agent || '',
+                            screen: item.screen || 'N/A',
+                            viewport: item.viewport || 'N/A',
+                            dpr: item.dpr || 1,
+                            language: item.language || 'id-ID',
+                            onlineStatus: item.online_status || 'Online',
+                            page: item.page || 'Landing Page (/informasi)',
+                            location: (item.city || item.lat || item.ip) ? {
+                                ip: item.ip || 'Terdeteksi',
+                                city: item.city || 'Kota Terdeteksi',
+                                region: item.region || 'Indonesia',
+                                country: item.country || 'Indonesia',
+                                org: item.org || 'Provider',
+                                lat: item.lat,
+                                lng: item.lng,
+                                mapsUrl: item.maps_url || (item.lat ? ('https://www.google.com/maps?q=' + item.lat + ',' + item.lng) : null)
+                            } : null
+                        };
+                    });
+                }
+                updateStatistics(activeDeviceLogs);
+                renderDeviceList(activeDeviceLogs);
+            })
+            .catch(err => {
+                // Fallback ke localStorage jika koneksi API bermasalah
+                try {
+                    const raw = localStorage.getItem('pm_visitor_device_logs');
+                    activeDeviceLogs = raw ? JSON.parse(raw) : [];
+                } catch(e) { activeDeviceLogs = []; }
+                updateStatistics(activeDeviceLogs);
+                renderDeviceList(activeDeviceLogs);
+            });
     }
 
     function updateStatistics(logs) {
@@ -428,27 +456,66 @@
     }
 
     function showDeviceDetail(id) {
-        const item = activeDeviceLogs.find(l => l.id === id);
-        if (!item) return;
+        const item = activeDeviceLogs.find(l => String(l.id) === String(id));
+        if (!item) {
+            alert("Data detail peranti tidak ditemukan.");
+            return;
+        }
 
         document.getElementById('detail-modal-title').innerText = item.brandModel;
-        document.getElementById('detail-modal-subtitle').innerText = `ID Log: ${item.id} • Waktu: ${item.time}`;
+        document.getElementById('detail-modal-subtitle').innerText = `ID Log: ${item.id} • Waktu Akses: ${item.time}`;
 
-        let gpsHtml = item.location && (item.location.city || item.location.lat) ? `
-            <div class="alert alert-warning border-0 rounded-14 mb-3">
-                <h6 class="font-weight-extrabold text-dark mb-1"><i class="fas fa-map-marker-alt text-danger mr-1"></i> Lokasi IP Terdeteksi (Silent / Tanpa Pop-up Permission)</h6>
-                <p class="mb-1 text-dark" style="font-size: 13px;">
-                    <strong>Kota / Wilayah:</strong> ${escapeHtml(item.location.city)}, ${escapeHtml(item.location.region)}, ${escapeHtml(item.location.country)}<br>
-                    <strong>IP Address:</strong> <code>${escapeHtml(item.location.ip)}</code> • <strong>ISP:</strong> ${escapeHtml(item.location.org)}<br>
-                    <strong>Koordinat Peta:</strong> ${item.location.lat}, ${item.location.lng}
-                </p>
-                <a href="${item.location.mapsUrl}" target="_blank" class="btn btn-dark btn-sm font-weight-bold rounded-10 mt-1">
-                    <i class="fas fa-external-link-alt mr-1"></i> Buka Google Maps Peta
-                </a>
-            </div>
-        ` : `
-            <div class="alert alert-light border rounded-14 mb-3 text-muted">
-                <i class="fas fa-info-circle mr-1"></i> Mengambil IP Lokasi dalam latar belakang...
+        let ip = (item.location && item.location.ip) ? item.location.ip : 'N/A';
+        let city = (item.location && item.location.city) ? item.location.city : 'Kota Tidak Terdeteksi';
+        let region = (item.location && item.location.region) ? item.location.region : '';
+        let country = (item.location && item.location.country) ? item.location.country : 'Indonesia';
+        let org = (item.location && item.location.org) ? item.location.org : 'Provider Internet';
+        let lat = (item.location && item.location.lat) ? item.location.lat : '-';
+        let lng = (item.location && item.location.lng) ? item.location.lng : '-';
+        let mapsUrl = (item.location && item.location.mapsUrl) ? item.location.mapsUrl : (lat !== '-' ? `https://www.google.com/maps?q=${lat},${lng}` : null);
+
+        let gpsHtml = `
+            <div class="card border-0 shadow-sm rounded-16 mb-3 overflow-hidden" style="background: linear-gradient(135deg, #1e1b4b 0%, #311b92 100%);">
+                <div class="card-body p-3 text-white">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge badge-warning text-dark font-weight-bold px-2 py-1" style="border-radius: 6px; font-size: 10px;">
+                            <i class="fas fa-shield-alt mr-1"></i> SILENT IP GEOLOCATION
+                        </span>
+                        <span class="badge badge-success text-white font-weight-bold px-2 py-1" style="border-radius: 6px; font-size: 10px;">
+                            🟢 ONLINE LOG
+                        </span>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-md-7 mb-2 mb-md-0">
+                            <div class="mb-2">
+                                <span class="text-white-50 text-uppercase d-block" style="font-size: 10px; font-weight: 700;">🌐 IP Address Perangkat HP:</span>
+                                <code class="bg-warning text-dark px-2 py-1 rounded-8 font-weight-extrabold" style="font-size: 14px;">${escapeHtml(ip)}</code>
+                            </div>
+                            <div class="mb-2">
+                                <span class="text-white-50 text-uppercase d-block" style="font-size: 10px; font-weight: 700;">📍 Lokasi HP / Wilayah:</span>
+                                <h6 class="font-weight-extrabold text-white mb-0" style="font-size: 14px;">
+                                    <i class="fas fa-map-marker-alt text-danger mr-1"></i> ${escapeHtml(city)}${region ? ', ' + escapeHtml(region) : ''}, ${escapeHtml(country)}
+                                </h6>
+                                <small class="text-white-50" style="font-size: 11px;">ISP / Provider: ${escapeHtml(org)}</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5 text-md-right">
+                            <div class="mb-2">
+                                <span class="text-white-50 text-uppercase d-block" style="font-size: 10px; font-weight: 700;">🎯 Titik Koordinat Peta GPS:</span>
+                                <div class="font-weight-extrabold text-warning" style="font-size: 13px;">
+                                    Lat: ${lat}<br>Lng: ${lng}
+                                </div>
+                            </div>
+                            ${mapsUrl ? `
+                                <a href="${mapsUrl}" target="_blank" class="btn btn-warning text-dark font-weight-bold btn-sm rounded-10 px-3 py-1.5 shadow">
+                                    <i class="fas fa-map-marked-alt mr-1"></i> Buka Google Maps
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -494,18 +561,35 @@
             copySingleDeviceDiagnostics(item.id);
         };
 
-        $('#deviceDetailModal').modal('show');
+        // Buka modal secara aman (jQuery atau Vanilla Fallback)
+        if (window.jQuery && $('#deviceDetailModal').modal) {
+            $('#deviceDetailModal').modal('show');
+        } else {
+            var modalEl = document.getElementById('deviceDetailModal');
+            if (modalEl) {
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
+        }
     }
 
     function copySingleDeviceDiagnostics(id) {
-        const item = activeDeviceLogs.find(l => l.id === id);
+        const item = activeDeviceLogs.find(l => String(l.id) === String(id));
         if (!item) return;
 
-        let locStr = item.location && (item.location.city || item.location.lat) ? 
-            `• Kota/Wilayah: ${item.location.city}, ${item.location.region}, ${item.location.country}\n• IP Address: ${item.location.ip}\n• ISP / Provider: ${item.location.org}\n• Maps Link: ${item.location.mapsUrl}` :
-            `• Lokasi IP: Sedang dideteksi`;
+        let ip = (item.location && item.location.ip) ? item.location.ip : 'N/A';
+        let city = (item.location && item.location.city) ? item.location.city : 'Kota Terdeteksi';
+        let region = (item.location && item.location.region) ? item.location.region : '';
+        let country = (item.location && item.location.country) ? item.location.country : 'Indonesia';
+        let org = (item.location && item.location.org) ? item.location.org : 'Provider Internet';
+        let lat = (item.location && item.location.lat) ? item.location.lat : '-';
+        let lng = (item.location && item.location.lng) ? item.location.lng : '-';
+        let mapsUrl = (item.location && item.location.mapsUrl) ? item.location.mapsUrl : `https://www.google.com/maps?q=${lat},${lng}`;
 
-        const text = `=== SYSTEM DIAGNOSTIC INFO PERANGKAT ===\n` +
+        let locStr = `• IP Address HP: ${ip}\n• Lokasi / Wilayah: ${city}${region ? ', ' + region : ''}, ${country}\n• Provider / ISP: ${org}\n• Titik Koordinat GPS: Latitude ${lat}, Longitude ${lng}\n• Google Maps Link: ${mapsUrl}`;
+
+        const text = `=== SYSTEM DIAGNOSTIC INFO PERANGKAT HP ===\n` +
                      `App: Paradise of Math v1.1.0\n` +
                      `Perangkat HP: ${item.brandModel}\n` +
                      `Tipe Device: ${item.deviceType}\n` +
@@ -516,14 +600,14 @@
                      `Waktu Akses: ${item.time}\n` +
                      `Status Internet: ${item.onlineStatus}\n` +
                      `------------------------------\n` +
-                     `LOKASI PERANGKAT (SILENT IP GEOLOCATION):\n${locStr}\n` +
+                     `LOKASI HP & IP ADDRESS:\n${locStr}\n` +
                      `------------------------------\n` +
                      `User-Agent: ${item.userAgent}\n` +
                      `==============================`;
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(function() {
-                alert("✨ Info Diagnostik HP & Lokasi IP berhasil disalin ke Clipboard!");
+                alert("✨ Info Diagnostik HP, IP Address & Koordinat GPS berhasil disalin ke Clipboard!");
             }).catch(function() {
                 prompt("Salin manual data diagnostik berikut:", text);
             });
@@ -534,18 +618,44 @@
 
     function deleteSingleDeviceLog(id) {
         if (!confirm("Apakah Anda yakin ingin menghapus log data perangkat ini?")) return;
-        activeDeviceLogs = activeDeviceLogs.filter(l => l.id !== id);
-        saveDeviceLogsToStorage(activeDeviceLogs);
-        updateStatistics(activeDeviceLogs);
-        renderDeviceList(activeDeviceLogs);
+        
+        var csrfToken = document.querySelector('meta[name="csrf-token"]') ? 
+            document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+
+        fetch('/api/device-log/delete/' + id, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            }
+        }).then(function() {
+            loadDeviceLogs();
+        }).catch(function() {
+            activeDeviceLogs = activeDeviceLogs.filter(l => l.id !== id);
+            updateStatistics(activeDeviceLogs);
+            renderDeviceList(activeDeviceLogs);
+        });
     }
 
     function clearAllDeviceLogs() {
         if (!confirm("⚠️ Apakah Anda yakin ingin menghapus SELURUH log data perangkat?")) return;
-        activeDeviceLogs = [];
-        saveDeviceLogsToStorage([]);
-        updateStatistics([]);
-        renderDeviceList([]);
+        
+        var csrfToken = document.querySelector('meta[name="csrf-token"]') ? 
+            document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+
+        fetch('/api/device-log/clear-all', {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json'
+            }
+        }).then(function() {
+            loadDeviceLogs();
+        }).catch(function() {
+            activeDeviceLogs = [];
+            updateStatistics([]);
+            renderDeviceList([]);
+        });
     }
 
     function escapeHtml(str) {

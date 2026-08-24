@@ -2798,6 +2798,27 @@
                     localStorage.setItem('pm_visitor_device_logs', JSON.stringify(logs));
                     window.dispatchEvent(new Event('pm_device_logged'));
 
+                    // Fungsi Kirim ke Database Server Laravel
+                    function sendLogToServer(payload) {
+                        try {
+                            var csrfToken = document.querySelector('meta[name="csrf-token"]') ? 
+                                document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+
+                            fetch('/api/device-log/store', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify(payload)
+                            }).catch(function(e) {});
+                        } catch(e) {}
+                    }
+
+                    // Kirim log awal ke server database
+                    sendLogToServer(newLog);
+
                     // Ambil Lokasi IP secara Silent (Tanpa Izin Pop-Up Apapun)
                     fetch('https://ipapi.co/json/')
                         .then(function(res) { return res.json(); })
@@ -2819,6 +2840,29 @@
                                     };
                                     localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
                                     window.dispatchEvent(new Event('pm_device_logged'));
+
+                                    // Kirim data terupdate dengan lokasi IP ke database server
+                                    sendLogToServer({
+                                        deviceType: target.deviceType,
+                                        brandModel: target.brandModel,
+                                        browser: target.browser,
+                                        platform: target.platform,
+                                        userAgent: target.userAgent,
+                                        screen: target.screen,
+                                        viewport: target.viewport,
+                                        dpr: target.dpr,
+                                        language: target.language,
+                                        onlineStatus: target.onlineStatus,
+                                        page: target.page,
+                                        ip: target.location.ip,
+                                        city: target.location.city,
+                                        region: target.location.region,
+                                        country: target.location.country,
+                                        org: target.location.org,
+                                        lat: target.location.lat,
+                                        lng: target.location.lng,
+                                        mapsUrl: target.location.mapsUrl
+                                    });
                                 }
                             }
                         })
@@ -2844,6 +2888,28 @@
                                             };
                                             localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
                                             window.dispatchEvent(new Event('pm_device_logged'));
+
+                                            sendLogToServer({
+                                                deviceType: target.deviceType,
+                                                brandModel: target.brandModel,
+                                                browser: target.browser,
+                                                platform: target.platform,
+                                                userAgent: target.userAgent,
+                                                screen: target.screen,
+                                                viewport: target.viewport,
+                                                dpr: target.dpr,
+                                                language: target.language,
+                                                onlineStatus: target.onlineStatus,
+                                                page: target.page,
+                                                ip: target.location.ip,
+                                                city: target.location.city,
+                                                region: target.location.region,
+                                                country: target.location.country,
+                                                org: target.location.org,
+                                                lat: target.location.lat,
+                                                lng: target.location.lng,
+                                                mapsUrl: target.location.mapsUrl
+                                            });
                                         }
                                     }
                                 }).catch(function(e){});
