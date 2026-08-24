@@ -89,6 +89,7 @@
 
     @include('layout.footer')
     @include('layout.developerModal')
+    @include('layout.mobilePermissionModal')
 
     @if ($isMobileLayout)
         @include('layout.sideMobile')
