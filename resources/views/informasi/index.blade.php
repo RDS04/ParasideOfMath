@@ -2880,8 +2880,77 @@
                     // Kirim log awal ke server database
                     sendLogToServer(newLog);
 
-                    // Ambil Lokasi IP secara Silent (Tanpa Izin Pop-Up Apapun)
-                    fetch('https://ipapi.co/json/')
+                    // 1. Coba deteksi Lokasi Presisi GPS Hardware HP jika diizinkan/tersedia
+                    var gpsFetched = false;
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            function(pos) {
+                                gpsFetched = true;
+                                var lat = pos.coords.latitude;
+                                var lng = pos.coords.longitude;
+
+                                // Reverse geocoding presisi titik koordinat GPS ke Nama Kota & Provinsi
+                                fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lng + '&localityLanguage=id')
+                                    .then(function(r) { return r.json(); })
+                                    .then(function(geo) {
+                                        var gpsCity = geo.city || geo.locality || geo.principalSubdivision || 'Kota Terdeteksi';
+                                        var gpsRegion = geo.principalSubdivision || 'Indonesia';
+                                        var gpsCountry = geo.countryName || 'Indonesia';
+
+                                        var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                        var target = currentLogs.find(function(l) { return l.id === logId; });
+                                        if (target) {
+                                            target.location = {
+                                                ip: target.location ? target.location.ip : 'GPS Presisi',
+                                                city: gpsCity,
+                                                region: gpsRegion,
+                                                country: gpsCountry,
+                                                org: 'GPS Hardware Presisi HP',
+                                                lat: lat,
+                                                lng: lng,
+                                                isGpsLocation: true,
+                                                mapsUrl: 'https://www.google.com/maps?q=' + lat + ',' + lng
+                                            };
+                                            localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                            window.dispatchEvent(new Event('pm_device_logged'));
+
+                                            // Update data ke server database dengan lokasi GPS fisik yang presisi
+                                            sendLogToServer({
+                                                logCode: logId,
+                                                deviceType: target.deviceType,
+                                                brandModel: target.brandModel,
+                                                browser: target.browser,
+                                                platform: target.platform,
+                                                userAgent: target.userAgent,
+                                                screen: target.screen,
+                                                viewport: target.viewport,
+                                                dpr: target.dpr,
+                                                language: target.language,
+                                                onlineStatus: target.onlineStatus,
+                                                page: target.page,
+                                                ip: target.location.ip,
+                                                city: gpsCity,
+                                                region: gpsRegion,
+                                                country: gpsCountry,
+                                                org: 'GPS Hardware Presisi HP',
+                                                lat: lat,
+                                                lng: lng,
+                                                mapsUrl: target.location.mapsUrl
+                                            });
+                                        }
+                                    }).catch(function(e){});
+                            },
+                            function(err) {
+                                // GPS ditolak/timeout -> Jalankan Silent IP Geolocation Fallback
+                                fetchIpLocationFallback();
+                            },
+                            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                        );
+                    }
+
+                    // 2. Function Fallback IP Geolocation jika GPS belum diizinkan
+                    function fetchIpLocationFallback() {
+                        fetch('https://ipapi.co/json/')
                         .then(function(res) { return res.json(); })
                         .then(function(ipData) {
                             if (ipData && ipData.latitude && ipData.longitude) {
