@@ -239,8 +239,10 @@
         var icon = document.getElementById('refresh-icon');
         if (icon) icon.classList.add('fa-spin');
 
+        var listUrl = "{{ url('/api/device-log/list') }}";
+
         // Fetch data dari Database Server
-        fetch('/api/device-log/list')
+        fetch(listUrl)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -651,7 +653,9 @@
         var csrfToken = document.querySelector('meta[name="csrf-token"]') ? 
             document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
 
-        fetch('/api/device-log/delete/' + id, {
+        var deleteUrl = "{{ url('/api/device-log/delete') }}/" + id;
+
+        fetch(deleteUrl, {
             method: 'DELETE',
             headers: {
                 'X-CSRF-TOKEN': csrfToken,
@@ -672,7 +676,9 @@
         var csrfToken = document.querySelector('meta[name="csrf-token"]') ? 
             document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
 
-        fetch('/api/device-log/clear-all', {
+        var clearUrl = "{{ url('/api/device-log/clear-all') }}";
+
+        fetch(clearUrl, {
             method: 'DELETE',
             headers: {
                 'X-CSRF-TOKEN': csrfToken,

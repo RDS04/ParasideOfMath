@@ -2808,7 +2808,9 @@
                             var csrfToken = document.querySelector('meta[name="csrf-token"]') ? 
                                 document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
 
-                            fetch('/api/device-log/store', {
+                            var endpointUrl = "{{ url('/api/device-log/store') }}";
+
+                            fetch(endpointUrl, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',

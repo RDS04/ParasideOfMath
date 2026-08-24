@@ -13,7 +13,44 @@ class DeviceLogController extends Controller
     public function store(Request $request)
     {
         try {
-            $clientIp = $request->header('X-Forwarded-For') ?? $request->ip();
+            $rawIp = $request->header('CF-Connecting-IP')
+                ?? $request->header('X-Forwarded-For')
+                ?? $request->header('X-Real-IP')
+                ?? $request->ip();
+
+            if (str_contains($rawIp, ',')) {
+                $rawIp = trim(explode(',', $rawIp)[0]);
+            }
+
+            $ip = $request->input('ip') ?: $rawIp;
+            $city = $request->input('city');
+            $region = $request->input('region');
+            $country = $request->input('country', 'Indonesia');
+            $org = $request->input('org');
+            $lat = $request->input('lat');
+            $lng = $request->input('lng');
+            $mapsUrl = $request->input('mapsUrl');
+
+            // Automatic Server-Side Geolocation jika frontend di hosting belum selesai mengambil IP
+            if (empty($city) && $rawIp && $rawIp !== '127.0.0.1' && $rawIp !== '::1') {
+                try {
+                    $res = @file_get_contents("http://ip-api.com/json/{$rawIp}?fields=status,country,regionName,city,lat,lon,isp");
+                    if ($res) {
+                        $ipData = json_decode($res, true);
+                        if (is_array($ipData) && ($ipData['status'] ?? '') === 'success') {
+                            $city = $ipData['city'] ?? $city;
+                            $region = $ipData['regionName'] ?? $region;
+                            $country = $ipData['country'] ?? $country;
+                            $org = $ipData['isp'] ?? $org;
+                            $lat = $ipData['lat'] ?? $lat;
+                            $lng = $ipData['lon'] ?? $lng;
+                            if ($lat && $lng) {
+                                $mapsUrl = "https://www.google.com/maps?q={$lat},{$lng}";
+                            }
+                        }
+                    }
+                } catch (\Throwable $e) {}
+            }
 
             $logCode = $request->input('logCode') ?: ($request->input('id') ?: ('DEV-' . time() . '-' . rand(100, 999)));
 
@@ -31,14 +68,14 @@ class DeviceLogController extends Controller
                     'language' => $request->input('language', 'id-ID'),
                     'online_status' => $request->input('onlineStatus', 'Online'),
                     'page' => $request->input('page', 'Landing Page (/informasi)'),
-                    'ip' => $request->input('ip') ?: $clientIp,
-                    'city' => $request->input('city'),
-                    'region' => $request->input('region'),
-                    'country' => $request->input('country', 'Indonesia'),
-                    'org' => $request->input('org'),
-                    'lat' => $request->input('lat'),
-                    'lng' => $request->input('lng'),
-                    'maps_url' => $request->input('mapsUrl'),
+                    'ip' => $ip,
+                    'city' => $city,
+                    'region' => $region,
+                    'country' => $country,
+                    'org' => $org,
+                    'lat' => $lat,
+                    'lng' => $lng,
+                    'maps_url' => $mapsUrl,
                 ]
             );
 
