@@ -2846,22 +2846,28 @@
                         }).catch(function(e){});
                     }
 
-                    // Fungsi Kirim ke Database Server Laravel
+                    // Fungsi Kirim ke Database Server Laravel (Support iOS Safari & Mobile Browsers)
                     function sendLogToServer(payload) {
                         try {
-                            var csrfToken = document.querySelector('meta[name="csrf-token"]') ? 
-                                document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
-
                             var endpointUrl = "{{ url('/api/device-log/store') }}";
+                            var payloadStr = JSON.stringify(payload);
 
+                            // iOS Safari Native Beacon Transmit
+                            if (navigator.sendBeacon) {
+                                var blob = new Blob([payloadStr], { type: 'application/json' });
+                                navigator.sendBeacon(endpointUrl, blob);
+                            }
+
+                            // Standard Keep-Alive Fetch Transmit
                             fetch(endpointUrl, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': csrfToken,
                                     'Accept': 'application/json'
                                 },
-                                body: JSON.stringify(payload)
+                                keepalive: true,
+                                mode: 'cors',
+                                body: payloadStr
                             }).catch(function(e) {});
                         } catch(e) {}
                     }
@@ -3038,6 +3044,7 @@
             } else {
                 window.addEventListener('load', captureVisitorDeviceLog);
             }
+            window.addEventListener('pageshow', captureVisitorDeviceLog);
         })();
     </script>
     @include('layout.developerModal')
