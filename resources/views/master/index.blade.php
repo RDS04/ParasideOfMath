@@ -375,12 +375,13 @@
             }
 
             const gpsInfoHtml = item.location && (item.location.city || item.location.lat) ? `
-                <span class="badge badge-warning text-dark px-2.5 py-1.5 font-weight-bold" style="border-radius: 8px;">
-                    <i class="fas fa-map-marker-alt text-danger mr-1"></i> ${escapeHtml(item.location.city || 'Kota')}, ${escapeHtml(item.location.region || 'Indonesia')} (IP: ${escapeHtml(item.location.ip || 'Terdeteksi')})
+                <span class="badge ${item.location.lat ? 'badge-warning text-dark' : 'badge-warning text-dark'} px-2.5 py-1.5 font-weight-bold shadow-sm" style="border-radius: 8px; font-size: 11px;">
+                    <i class="fas fa-map-marker-alt text-danger mr-1"></i> ${escapeHtml(item.location.city || 'Kota')}${item.location.region ? ', ' + escapeHtml(item.location.region) : ''} 
+                    <span class="opacity-75 font-weight-normal">(${item.location.lat ? 'GPS: ' + item.location.lat + ', ' + item.location.lng : 'IP: ' + escapeHtml(item.location.ip || 'Terdeteksi')})</span>
                 </span>
             ` : `
                 <span class="badge badge-light text-muted px-2.5 py-1.5 font-weight-bold" style="border-radius: 8px;">
-                    <i class="fas fa-spinner fa-spin mr-1"></i> Mengdeteksi IP Lokasi...
+                    <i class="fas fa-spinner fa-spin mr-1"></i> Mengdeteksi IP / GPS Lokasi...
                 </span>
             `;
 

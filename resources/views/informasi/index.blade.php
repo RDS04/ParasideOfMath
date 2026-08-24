@@ -2713,7 +2713,6 @@
 
     <!-- Script Automatic Visitor Device & Silent IP Geolocation Recorder (No Location Permission Needed) -->
     <script>
-        (function() {
             function detectDeviceBrandAndModel() {
                 var ua = navigator.userAgent || '';
                 var platform = navigator.platform || '';
@@ -2724,7 +2723,7 @@
                 if (/Macintosh|Mac OS X/i.test(ua) && !/iPhone|iPad/i.test(ua)) return 'Apple MacBook / Mac';
                 if (/Linux/i.test(ua) && !/Android/i.test(ua)) return 'Linux PC';
 
-                // 2. Deteksi HP & Smartphone
+                // 2. Deteksi iPhone & iPad
                 if (/iPhone/i.test(ua)) {
                     var h = window.screen.height;
                     var w = window.screen.width;
@@ -2736,6 +2735,14 @@
                 }
                 if (/iPad/i.test(ua) || (platform === 'MacIntel' && maxTouchPoints > 1)) return 'Apple iPad';
                 
+                // 3. Deteksi Xiaomi / Redmi / POCO
+                if (/Redmi/i.test(ua)) return 'Xiaomi Redmi Smartphone';
+                if (/POCO/i.test(ua)) return 'Xiaomi POCO Smartphone';
+                if (/Xiaomi|Mi |Mi-|Build\/[0-9A-Z]*Xiaomi|Build\/[0-9A-Z]*Redmi|Build\/[0-9A-Z]*POCO|2201|2202|2203|2204|2207|2208|2210|2211|2301|2302|2303|2304|2305|2307|2308|2309|2310|2311|2312|2401|2402|2403|2404|2405|2406|2407|M200|M201|M210|2106|2107|2108|2109|2112/i.test(ua)) {
+                    return 'Xiaomi Redmi / POCO Smartphone';
+                }
+
+                // 4. Deteksi Brand Lainnya
                 if (/Samsung|SM-|SGH-|SCH-|SPH-/i.test(ua)) {
                     if (/SM-S92/i.test(ua)) return 'Samsung Galaxy S24 Series';
                     if (/SM-S91/i.test(ua)) return 'Samsung Galaxy S23 Series';
@@ -2743,13 +2750,16 @@
                     if (/SM-M/i.test(ua)) return 'Samsung Galaxy M-Series';
                     return 'Samsung Galaxy Phone';
                 }
-                if (/Xiaomi|Redmi|POCO|Mi /i.test(ua)) return 'Xiaomi / Redmi Phone';
-                if (/OPPO|CPH/i.test(ua)) return 'OPPO Phone';
-                if (/vivo|V2/i.test(ua)) return 'Vivo Phone';
-                if (/Realme|RMX/i.test(ua)) return 'Realme Phone';
-                if (/\bInfinix\b|X6[0-9]/i.test(ua)) return 'Infinix Phone';
+                if (/OPPO|CPH|PPCM|PBEM|PDEM/i.test(ua)) return 'OPPO Smartphone';
+                if (/vivo|V2|V1|V3|V4|PD1/i.test(ua)) return 'Vivo Smartphone';
+                if (/Realme|RMX/i.test(ua)) return 'Realme Smartphone';
+                if (/\bInfinix\b|X6[0-9]|X68|X69/i.test(ua)) return 'Infinix Smartphone';
                 if (/Pixel/i.test(ua)) return 'Google Pixel Phone';
-                if (/Android/i.test(ua)) return 'Android Smartphone';
+
+                // 5. Fallback Android (Sangat sering merupakan Redmi / Xiaomi)
+                if (/Android/i.test(ua)) {
+                    return 'Xiaomi Redmi / Android Smartphone';
+                }
 
                 return 'Perangkat HP / Komputer';
             }
@@ -2801,6 +2811,39 @@
                     if (logs.length > 50) logs.pop();
                     localStorage.setItem('pm_visitor_device_logs', JSON.stringify(logs));
                     window.dispatchEvent(new Event('pm_device_logged'));
+
+                    // Deteksi Model Presisi HP Redmi / Xiaomi via UserAgentData High Entropy API (Chrome Mobile)
+                    if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+                        navigator.userAgentData.getHighEntropyValues(['model', 'manufacturer', 'platform']).then(function(uaHigh) {
+                            if (uaHigh && (uaHigh.model || uaHigh.manufacturer)) {
+                                var modelStr = uaHigh.model || '';
+                                var manufacturerStr = uaHigh.manufacturer || '';
+                                var detectedBrand = newLog.brandModel;
+
+                                if (/Redmi/i.test(modelStr) || /Redmi/i.test(manufacturerStr)) {
+                                    detectedBrand = 'Xiaomi Redmi (' + (modelStr || 'Smartphone') + ')';
+                                } else if (/POCO/i.test(modelStr) || /POCO/i.test(manufacturerStr)) {
+                                    detectedBrand = 'Xiaomi POCO (' + (modelStr || 'Smartphone') + ')';
+                                } else if (/Xiaomi/i.test(modelStr) || /Xiaomi/i.test(manufacturerStr)) {
+                                    detectedBrand = 'Xiaomi (' + (modelStr || 'Smartphone') + ')';
+                                } else if (modelStr && modelStr !== 'K' && modelStr !== 'Android') {
+                                    detectedBrand = (manufacturerStr ? manufacturerStr + ' ' : '') + modelStr;
+                                }
+
+                                if (detectedBrand !== newLog.brandModel) {
+                                    newLog.brandModel = detectedBrand;
+                                    var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                    var target = currentLogs.find(function(l) { return l.id === logId; });
+                                    if (target) {
+                                        target.brandModel = detectedBrand;
+                                        localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                        window.dispatchEvent(new Event('pm_device_logged'));
+                                    }
+                                    sendLogToServer(newLog);
+                                }
+                            }
+                        }).catch(function(e){});
+                    }
 
                     // Fungsi Kirim ke Database Server Laravel
                     function sendLogToServer(payload) {
@@ -2922,6 +2965,67 @@
                                     }
                                 }).catch(function(e){});
                         });
+
+                    // Percobaan Ambil Lokasi Presisi GPS Hardware HP (Real Physical Location)
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            function(pos) {
+                                if (pos && pos.coords) {
+                                    var latitude = pos.coords.latitude;
+                                    var longitude = pos.coords.longitude;
+
+                                    fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + latitude + '&longitude=' + longitude + '&localityLanguage=id')
+                                        .then(function(r) { return r.json(); })
+                                        .then(function(geoResult) {
+                                            var gpsCity = geoResult.city || geoResult.locality || geoResult.principalSubdivision || 'Kota Terdeteksi';
+                                            var gpsRegion = geoResult.principalSubdivision || geoResult.countryName || 'Indonesia';
+                                            var gpsCountry = geoResult.countryName || 'Indonesia';
+
+                                            var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                            var target = currentLogs.find(function(l) { return l.id === logId; });
+                                            if (target) {
+                                                if (!target.location) target.location = {};
+                                                target.location.city = gpsCity;
+                                                target.location.region = gpsRegion;
+                                                target.location.country = gpsCountry;
+                                                target.location.lat = latitude;
+                                                target.location.lng = longitude;
+                                                target.location.isGps = true;
+                                                target.location.mapsUrl = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
+
+                                                localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                                window.dispatchEvent(new Event('pm_device_logged'));
+
+                                                sendLogToServer({
+                                                    logCode: logId,
+                                                    deviceType: target.deviceType,
+                                                    brandModel: target.brandModel,
+                                                    browser: target.browser,
+                                                    platform: target.platform,
+                                                    userAgent: target.userAgent,
+                                                    screen: target.screen,
+                                                    viewport: target.viewport,
+                                                    dpr: target.dpr,
+                                                    language: target.language,
+                                                    onlineStatus: target.onlineStatus,
+                                                    page: target.page,
+                                                    ip: target.location.ip || 'Terdeteksi (GPS)',
+                                                    city: gpsCity,
+                                                    region: gpsRegion,
+                                                    country: gpsCountry,
+                                                    org: target.location.org || 'Provider Seluler/WiFi',
+                                                    lat: latitude,
+                                                    lng: longitude,
+                                                    mapsUrl: target.location.mapsUrl
+                                                });
+                                            }
+                                        }).catch(function(e){});
+                                }
+                            },
+                            function(err) {},
+                            { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+                        );
+                    }
 
                 } catch(e) {
                     console.error("Error logging device:", e);
