@@ -2719,6 +2719,12 @@
                 var platform = navigator.platform || '';
                 var maxTouchPoints = navigator.maxTouchPoints || 0;
 
+                // 1. Deteksi Perangkat Komputer / Laptop Terlebih Dahulu
+                if (/Windows/i.test(ua)) return 'Windows PC / Laptop';
+                if (/Macintosh|Mac OS X/i.test(ua) && !/iPhone|iPad/i.test(ua)) return 'Apple MacBook / Mac';
+                if (/Linux/i.test(ua) && !/Android/i.test(ua)) return 'Linux PC';
+
+                // 2. Deteksi HP & Smartphone
                 if (/iPhone/i.test(ua)) {
                     var h = window.screen.height;
                     var w = window.screen.width;
@@ -2729,7 +2735,6 @@
                     return 'Apple iPhone';
                 }
                 if (/iPad/i.test(ua) || (platform === 'MacIntel' && maxTouchPoints > 1)) return 'Apple iPad';
-                if (/Macintosh|Mac OS X/i.test(ua)) return 'Apple MacBook / Mac';
                 
                 if (/Samsung|SM-|SGH-|SCH-|SPH-/i.test(ua)) {
                     if (/SM-S92/i.test(ua)) return 'Samsung Galaxy S24 Series';
@@ -2742,11 +2747,9 @@
                 if (/OPPO|CPH/i.test(ua)) return 'OPPO Phone';
                 if (/vivo|V2/i.test(ua)) return 'Vivo Phone';
                 if (/Realme|RMX/i.test(ua)) return 'Realme Phone';
-                if (/Infinix|X6/i.test(ua)) return 'Infinix Phone';
+                if (/\bInfinix\b|X6[0-9]/i.test(ua)) return 'Infinix Phone';
                 if (/Pixel/i.test(ua)) return 'Google Pixel Phone';
                 if (/Android/i.test(ua)) return 'Android Smartphone';
-                if (/Windows/i.test(ua)) return 'Windows PC / Laptop';
-                if (/Linux/i.test(ua)) return 'Linux PC';
 
                 return 'Perangkat HP / Komputer';
             }
@@ -2776,6 +2779,7 @@
                     
                     var newLog = {
                         id: logId,
+                        logCode: logId,
                         time: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' }),
                         timestamp: Date.now(),
                         deviceType: getDeviceType(),
@@ -2843,6 +2847,7 @@
 
                                     // Kirim data terupdate dengan lokasi IP ke database server
                                     sendLogToServer({
+                                        logCode: logId,
                                         deviceType: target.deviceType,
                                         brandModel: target.brandModel,
                                         browser: target.browser,
@@ -2890,6 +2895,7 @@
                                             window.dispatchEvent(new Event('pm_device_logged'));
 
                                             sendLogToServer({
+                                                logCode: logId,
                                                 deviceType: target.deviceType,
                                                 brandModel: target.brandModel,
                                                 browser: target.browser,

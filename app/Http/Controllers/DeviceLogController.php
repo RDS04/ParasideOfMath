@@ -15,28 +15,32 @@ class DeviceLogController extends Controller
         try {
             $clientIp = $request->header('X-Forwarded-For') ?? $request->ip();
 
-            $log = DeviceLog::create([
-                'log_code' => 'DEV-' . time() . '-' . rand(100, 999),
-                'device_type' => $request->input('deviceType', 'Mobile (HP)'),
-                'brand_model' => $request->input('brandModel', 'Perangkat HP / Komputer'),
-                'browser' => $request->input('browser', 'Web Browser'),
-                'platform' => $request->input('platform', 'N/A'),
-                'user_agent' => $request->input('userAgent') ?? $request->header('User-Agent'),
-                'screen' => $request->input('screen', 'N/A'),
-                'viewport' => $request->input('viewport', 'N/A'),
-                'dpr' => $request->input('dpr', 1),
-                'language' => $request->input('language', 'id-ID'),
-                'online_status' => $request->input('onlineStatus', 'Online'),
-                'page' => $request->input('page', 'Landing Page (/informasi)'),
-                'ip' => $request->input('ip') ?: $clientIp,
-                'city' => $request->input('city'),
-                'region' => $request->input('region'),
-                'country' => $request->input('country', 'Indonesia'),
-                'org' => $request->input('org'),
-                'lat' => $request->input('lat'),
-                'lng' => $request->input('lng'),
-                'maps_url' => $request->input('mapsUrl'),
-            ]);
+            $logCode = $request->input('logCode') ?: ($request->input('id') ?: ('DEV-' . time() . '-' . rand(100, 999)));
+
+            $log = DeviceLog::updateOrCreate(
+                ['log_code' => $logCode],
+                [
+                    'device_type' => $request->input('deviceType', 'Mobile (HP)'),
+                    'brand_model' => $request->input('brandModel', 'Perangkat HP / Komputer'),
+                    'browser' => $request->input('browser', 'Web Browser'),
+                    'platform' => $request->input('platform', 'N/A'),
+                    'user_agent' => $request->input('userAgent') ?? $request->header('User-Agent'),
+                    'screen' => $request->input('screen', 'N/A'),
+                    'viewport' => $request->input('viewport', 'N/A'),
+                    'dpr' => $request->input('dpr', 1),
+                    'language' => $request->input('language', 'id-ID'),
+                    'online_status' => $request->input('onlineStatus', 'Online'),
+                    'page' => $request->input('page', 'Landing Page (/informasi)'),
+                    'ip' => $request->input('ip') ?: $clientIp,
+                    'city' => $request->input('city'),
+                    'region' => $request->input('region'),
+                    'country' => $request->input('country', 'Indonesia'),
+                    'org' => $request->input('org'),
+                    'lat' => $request->input('lat'),
+                    'lng' => $request->input('lng'),
+                    'maps_url' => $request->input('mapsUrl'),
+                ]
+            );
 
             return response()->json([
                 'success' => true,

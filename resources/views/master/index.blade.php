@@ -27,8 +27,8 @@
 
                     <!-- Header Action Buttons -->
                     <div class="d-flex align-items-center gap-2">
-                        <button type="button" class="btn btn-light btn-sm font-weight-bold rounded-12 shadow-sm d-flex align-items-center gap-2 px-3 py-2" onclick="loadDeviceLogs()">
-                            <i class="fas fa-sync-alt text-purple"></i> Refresh Data
+                        <button type="button" class="btn btn-light btn-sm font-weight-bold rounded-12 shadow-sm d-flex align-items-center gap-2 px-3 py-2" onclick="loadDeviceLogs(true)">
+                            <i class="fas fa-sync-alt text-purple" id="refresh-icon"></i> Refresh Data
                         </button>
                         <button type="button" class="btn btn-danger btn-sm font-weight-bold rounded-12 shadow-sm d-flex align-items-center gap-2 px-3 py-2" onclick="clearAllDeviceLogs()">
                             <i class="fas fa-trash-alt"></i> Hapus Semua Log
@@ -235,7 +235,10 @@
 <script>
     let activeDeviceLogs = [];
 
-    function loadDeviceLogs() {
+    function loadDeviceLogs(showToast = false) {
+        var icon = document.getElementById('refresh-icon');
+        if (icon) icon.classList.add('fa-spin');
+
         // Fetch data dari Database Server
         fetch('/api/device-log/list')
             .then(res => res.json())
@@ -273,9 +276,17 @@
                 }
                 updateStatistics(activeDeviceLogs);
                 renderDeviceList(activeDeviceLogs);
+
+                if (icon) {
+                    setTimeout(() => icon.classList.remove('fa-spin'), 500);
+                }
+
+                if (showToast) {
+                    showRefreshToast("✨ Data log perangkat HP berhasil diperbarui!");
+                }
             })
             .catch(err => {
-                // Fallback ke localStorage jika koneksi API bermasalah
+                if (icon) icon.classList.remove('fa-spin');
                 try {
                     const raw = localStorage.getItem('pm_visitor_device_logs');
                     activeDeviceLogs = raw ? JSON.parse(raw) : [];
@@ -283,6 +294,24 @@
                 updateStatistics(activeDeviceLogs);
                 renderDeviceList(activeDeviceLogs);
             });
+    }
+
+    function showRefreshToast(msg) {
+        var existing = document.getElementById('pm-refresh-toast');
+        if (existing) existing.remove();
+
+        var toast = document.createElement('div');
+        toast.id = 'pm-refresh-toast';
+        toast.className = 'position-fixed bottom-0 right-0 p-3';
+        toast.style.zIndex = '999999';
+        toast.innerHTML = `
+            <div class="toast show bg-dark text-white border-0 rounded-14 shadow-lg p-3 d-flex align-items-center gap-2">
+                <i class="fas fa-check-circle text-warning fa-lg"></i>
+                <span class="font-weight-bold" style="font-size: 13px;">${msg}</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => { if (toast) toast.remove(); }, 2500);
     }
 
     function updateStatistics(logs) {
@@ -670,6 +699,11 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         loadDeviceLogs();
+
+        // Auto Refresh otomatis setiap 8 detik
+        setInterval(function() {
+            loadDeviceLogs(false);
+        }, 8000);
 
         // Listen for new logs dynamically
         window.addEventListener('storage', loadDeviceLogs);
