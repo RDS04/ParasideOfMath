@@ -92,6 +92,21 @@
                     </li>
 
                 @elseif ($currentUser && $currentUser->isAdmin())
+                    <!-- ══════ MASTER CONTROL SECTION (KHUSUS MASTER) ══════ -->
+                    @if ($currentUser && $currentUser->isMaster())
+                        <li class="nav-header">MASTER CONTROL</li>
+                        <li class="nav-item">
+                            <a href="{{ route('master.index') }}"
+                                class="nav-link {{ Route::is('master.index') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-mobile-alt text-amber-400"></i>
+                                <p>
+                                    Data Perangkat HP
+                                    <span class="badge badge-warning text-dark font-weight-bold right">PRO</span>
+                                </p>
+                            </a>
+                        </li>
+                    @endif
+
                     <!-- ══════ ADMIN NAVIGATION ══════ -->
                     <li class="nav-header">AKADEMIK</li>
 
@@ -247,15 +262,6 @@
                                     <p>Kelola Link YouTube</p>
                                 </a>
                             </li>
-                            @if ($currentUser && $currentUser->isMaster())
-                            <li class="nav-item">
-                                <a href="{{ route('master.index') }}"
-                                    class="nav-link {{ Route::is('master.index') ? 'active' : '' }}">
-                                    <i class="nav-icon fas fa-mobile-alt text-amber-400"></i>
-                                    <p>Data Perangkat HP</p>
-                                </a>
-                            </li>
-                            @endif
                         </ul>
                     </li>
 
