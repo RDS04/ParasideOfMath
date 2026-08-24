@@ -14,6 +14,7 @@ use App\Models\BankSoal;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Validation\Rule;
 use App\Models\RiwayatPembayaran;
@@ -970,7 +971,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Hapus Akun Guru & User Terkait.
+     * Hapus Akun Guru & User Terkait secara Permanen.
      */
     public function deleteGuru($id)
     {
@@ -978,16 +979,28 @@ class AdminController extends Controller
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $guru = Guru::with('user')->findOrFail($id);
-        $name = $guru->user->name ?? 'Guru';
+        try {
+            $name = 'Guru';
+            DB::transaction(function () use ($id, &$name) {
+                $guru = Guru::with('user')->findOrFail($id);
+                $user = $guru->user;
+                $name = $user->name ?? 'Guru';
 
-        if ($guru->user) {
-            $guru->user->delete();
-        } else {
-            $guru->delete();
+                // Hapus profil guru dahulu
+                $guru->delete();
+
+                // Hapus akun user autentikasi jika ada
+                if ($user) {
+                    $user->delete();
+                }
+            });
+
+            return redirect()->route('admin.guru.daftar.index')
+                ->with('success', 'Akun Guru (' . $name . ') berhasil dihapus secara permanen dari sistem.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus akun guru: ' . $e->getMessage());
         }
-
-        return redirect()->route('admin.guru.daftar.index')->with('success', 'Akun Guru ' . $name . ' berhasil dihapus secara permanen.');
     }
 
     /**
