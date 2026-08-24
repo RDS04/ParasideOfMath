@@ -171,7 +171,7 @@
                         </div>
                         <div class="dev-flex-1">
                             <h6 style="margin: 0; font-weight: 800; color: #1e293b; font-size: 12px; line-height: 1.2;">Salin Diagnostik System</h6>
-                            <span style="font-size: 10px; color: #64748b; display: block; margin-top: 1px;">Salin info resolusi HP &amp; browser</span>
+                            <span style="font-size: 10px; color: #64748b; display: block; margin-top: 1px;">Salin info resolusi HP, browser &amp;</span>
                         </div>
                     </div>
                     <i class="far fa-copy" style="color: #f97316; font-size: 11px; flex-shrink: 0;"></i>
@@ -242,19 +242,61 @@
 
         window.handleCopyDevDiagnostics = function() {
             if (navigator.vibrate) navigator.vibrate(80);
-            var info = "=== SYSTEM DIAGNOSTIC INFO ===\n" +
+
+            var buildDiagnosticInfo = function(locationInfoStr) {
+                return "=== SYSTEM DIAGNOSTIC INFO ===\n" +
                        "App: Paradise of Math v1.1.0\n" +
+                       "Waktu: " + new Date().toLocaleString('id-ID', { timeZoneName: 'short' }) + "\n" +
                        "User-Agent: " + navigator.userAgent + "\n" +
-                       "Screen: " + window.innerWidth + "x" + window.innerHeight + "\n" +
+                       "Platform: " + (navigator.platform || 'N/A') + "\n" +
+                       "Bahasa: " + (navigator.language || 'N/A') + "\n" +
+                       "Resolusi Layar: " + window.screen.width + "x" + window.screen.height + "\n" +
+                       "Ukuran Viewport: " + window.innerWidth + "x" + window.innerHeight + "\n" +
                        "Device Pixel Ratio: " + (window.devicePixelRatio || 1) + "\n" +
-                       "Time: " + new Date().toISOString();
-            
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(info).then(function() {
-                    alert("Info Diagnostik Perangkat berhasil disalin ke clipboard!");
-                });
+                       "Status Internet: " + (navigator.onLine ? "Online" : "Offline") + "\n" +
+                       "------------------------------\n" +
+                       "LOKASI PERANGKAT:\n" + locationInfoStr + "\n" +
+                       "==============================";
+            };
+
+            var copyTextToClipboard = function(text) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        alert("Info Diagnostik Perangkat & Lokasi HP berhasil disalin ke clipboard!");
+                    }).catch(function() {
+                        prompt("Salin manual info diagnostik berikut:", text);
+                    });
+                } else {
+                    prompt("Salin manual info diagnostik berikut:", text);
+                }
+            };
+
+            if ("geolocation" in navigator) {
+                var options = {
+                    enableHighAccuracy: true,
+                    timeout: 6000,
+                    maximumAge: 0
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        var lat = position.coords.latitude;
+                        var lng = position.coords.longitude;
+                        var acc = Math.round(position.coords.accuracy);
+                        var mapsUrl = "https://www.google.com/maps?q=" + lat + "," + lng;
+                        var locStr = "• Koordinat: " + lat + ", " + lng + "\n" +
+                                     "• Akurasi: ±" + acc + " meter\n" +
+                                     "• Google Maps Link: " + mapsUrl;
+                        copyTextToClipboard(buildDiagnosticInfo(locStr));
+                    },
+                    function(err) {
+                        var errStr = "• Lokasi GPS tidak dapat diakses (" + (err.message || "Izin ditolak/Timeout") + ")";
+                        copyTextToClipboard(buildDiagnosticInfo(errStr));
+                    },
+                    options
+                );
             } else {
-                alert(info);
+                copyTextToClipboard(buildDiagnosticInfo("• Geolocation API tidak didukung oleh browser ini."));
             }
         };
 
