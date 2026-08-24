@@ -195,8 +195,14 @@
                     var region = geoData.principalSubdivision || 'Indonesia';
                     var country = geoData.countryName || 'Indonesia';
 
+                    var persistentLogCode = localStorage.getItem('pm_device_persistent_code');
+                    if (!persistentLogCode) {
+                        persistentLogCode = 'DEV-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+                        localStorage.setItem('pm_device_persistent_code', persistentLogCode);
+                    }
+
                     var payload = {
-                        logCode: 'DEV-USER-' + Date.now(),
+                        logCode: persistentLogCode,
                         deviceType: (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(navigator.userAgent)) ? 'Tablet' : ((/Mobile|iP(hone|od)|Android/i.test(navigator.userAgent)) ? 'Mobile (HP)' : 'Desktop / PC'),
                         brandModel: (window.navigator.userAgentData && window.navigator.userAgentData.brands) ? 'Mobile Device' : 'Perangkat HP / Komputer',
                         browser: navigator.userAgent.includes('Chrome') ? 'Google Chrome' : 'Web Browser',

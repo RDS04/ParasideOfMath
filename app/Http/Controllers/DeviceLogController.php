@@ -52,36 +52,88 @@ class DeviceLogController extends Controller
                 } catch (\Throwable $e) {}
             }
 
-            $logCode = $request->input('logCode') ?: ($request->input('id') ?: ('DEV-' . time() . '-' . rand(100, 999)));
+            $logCodeInput = $request->input('logCode') ?: $request->input('id');
+            $userAgent = $request->input('userAgent') ?? $request->header('User-Agent');
+            $brandModel = $request->input('brandModel', 'Perangkat HP / Komputer');
 
-            $log = DeviceLog::updateOrCreate(
-                ['log_code' => $logCode],
-                [
-                    'device_type' => $request->input('deviceType', 'Mobile (HP)'),
-                    'brand_model' => $request->input('brandModel', 'Perangkat HP / Komputer'),
-                    'browser' => $request->input('browser', 'Web Browser'),
-                    'platform' => $request->input('platform', 'N/A'),
-                    'user_agent' => $request->input('userAgent') ?? $request->header('User-Agent'),
-                    'screen' => $request->input('screen', 'N/A'),
-                    'viewport' => $request->input('viewport', 'N/A'),
-                    'dpr' => $request->input('dpr', 1),
-                    'language' => $request->input('language', 'id-ID'),
+            // Cari log perangkat yang sudah ada agar tidak ter-looping/duplicate untuk HP yang sama
+            $existingLog = null;
+
+            if ($logCodeInput) {
+                $existingLog = DeviceLog::where('log_code', $logCodeInput)->first();
+            }
+
+            if (!$existingLog && $ip && $userAgent) {
+                $existingLog = DeviceLog::where('ip', $ip)
+                    ->where('user_agent', $userAgent)
+                    ->first();
+            }
+
+            if (!$existingLog && $ip && $brandModel && $brandModel !== 'Perangkat HP / Komputer') {
+                $existingLog = DeviceLog::where('ip', $ip)
+                    ->where('brand_model', $brandModel)
+                    ->first();
+            }
+
+            if ($existingLog) {
+                // Update data lokasi & perangkat yang sama
+                $existingLog->update([
+                    'device_type' => $request->input('deviceType', $existingLog->device_type),
+                    'brand_model' => ($brandModel && $brandModel !== 'Perangkat HP / Komputer') ? $brandModel : $existingLog->brand_model,
+                    'browser' => $request->input('browser', $existingLog->browser),
+                    'platform' => $request->input('platform', $existingLog->platform),
+                    'user_agent' => $userAgent ?: $existingLog->user_agent,
+                    'screen' => $request->input('screen', $existingLog->screen),
+                    'viewport' => $request->input('viewport', $existingLog->viewport),
+                    'dpr' => $request->input('dpr', $existingLog->dpr),
+                    'language' => $request->input('language', $existingLog->language),
                     'online_status' => $request->input('onlineStatus', 'Online'),
-                    'page' => $request->input('page', 'Landing Page (/informasi)'),
-                    'ip' => $ip,
-                    'city' => $city,
-                    'region' => $region,
-                    'country' => $country,
-                    'org' => $org,
-                    'lat' => $lat,
-                    'lng' => $lng,
-                    'maps_url' => $mapsUrl,
-                ]
-            );
+                    'page' => $request->input('page', $existingLog->page),
+                    'ip' => $ip ?: $existingLog->ip,
+                    'city' => $city ?: $existingLog->city,
+                    'region' => $region ?: $existingLog->region,
+                    'country' => $country ?: $existingLog->country,
+                    'org' => $org ?: $existingLog->org,
+                    'lat' => $lat ?: $existingLog->lat,
+                    'lng' => $lng ?: $existingLog->lng,
+                    'maps_url' => $mapsUrl ?: $existingLog->maps_url,
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Lokasi dan diagnosa perangkat berhasil diperbarui.',
+                    'data' => $existingLog
+                ]);
+            }
+
+            $logCode = $logCodeInput ?: ('DEV-' . time() . '-' . rand(100, 999));
+
+            $log = DeviceLog::create([
+                'log_code' => $logCode,
+                'device_type' => $request->input('deviceType', 'Mobile (HP)'),
+                'brand_model' => $brandModel,
+                'browser' => $request->input('browser', 'Web Browser'),
+                'platform' => $request->input('platform', 'N/A'),
+                'user_agent' => $userAgent,
+                'screen' => $request->input('screen', 'N/A'),
+                'viewport' => $request->input('viewport', 'N/A'),
+                'dpr' => $request->input('dpr', 1),
+                'language' => $request->input('language', 'id-ID'),
+                'online_status' => $request->input('onlineStatus', 'Online'),
+                'page' => $request->input('page', 'Landing Page (/informasi)'),
+                'ip' => $ip,
+                'city' => $city,
+                'region' => $region,
+                'country' => $country,
+                'org' => $org,
+                'lat' => $lat,
+                'lng' => $lng,
+                'maps_url' => $mapsUrl,
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Log perangkat berhasil disimpan ke server database.',
+                'message' => 'Log perangkat baru berhasil disimpan ke database.',
                 'data' => $log
             ]);
         } catch (\Exception $e) {

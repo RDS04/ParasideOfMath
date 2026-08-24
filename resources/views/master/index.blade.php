@@ -246,12 +246,29 @@
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
-                    activeDeviceLogs = data.map(item => {
+                    // Deduplicate per perangkat unik (1 HP/Perangkat = 1 Card yang selalu ter-update lokasinya)
+                    const uniqueMap = new Map();
+                    data.forEach(item => {
+                        const key = item.log_code || ((item.ip || 'no-ip') + '_' + (item.user_agent || item.brand_model));
+                        if (!uniqueMap.has(key)) {
+                            uniqueMap.set(key, item);
+                        } else {
+                            const existing = uniqueMap.get(key);
+                            const newTime = new Date(item.updated_at || item.created_at || 0).getTime();
+                            const oldTime = new Date(existing.updated_at || existing.created_at || 0).getTime();
+                            if (newTime >= oldTime) {
+                                uniqueMap.set(key, item);
+                            }
+                        }
+                    });
+
+                    activeDeviceLogs = Array.from(uniqueMap.values()).map(item => {
+                        const lastTime = item.updated_at || item.created_at;
                         return {
                             id: item.id || item.log_code,
                             logCode: item.log_code || ('DEV-' + item.id),
-                            time: item.created_at ? new Date(item.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' }) : (item.time || 'N/A'),
-                            timestamp: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
+                            time: lastTime ? new Date(lastTime).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'medium' }) : (item.time || 'N/A'),
+                            timestamp: lastTime ? new Date(lastTime).getTime() : Date.now(),
                             deviceType: item.device_type || 'Mobile (HP)',
                             brandModel: item.brand_model || 'Perangkat HP',
                             browser: item.browser || 'Web Browser',

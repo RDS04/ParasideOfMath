@@ -2786,7 +2786,12 @@
             function captureVisitorDeviceLog() {
                 try {
                     var logs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
-                    var logId = 'DEV-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                    var persistentLogCode = localStorage.getItem('pm_device_persistent_code');
+                    if (!persistentLogCode) {
+                        persistentLogCode = 'DEV-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+                        localStorage.setItem('pm_device_persistent_code', persistentLogCode);
+                    }
+                    var logId = persistentLogCode;
                     
                     var newLog = {
                         id: logId,
