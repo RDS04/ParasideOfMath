@@ -1672,12 +1672,12 @@
             </div>
             <div
                 class="reveal-element delay-300 rounded-3xl bg-gradient-to-r from-violet-950 via-violet-900 to-violet-950 text-white p-6 sm:p-8 shadow-2xl border border-violet-800">
-                <div class="grid md:grid-cols-2 gap-6 items-center">
+                <div class="grid md:grid-cols-5 gap-6 items-center">
 
                     <!-- Social Media Links -->
-                    <div class="flex flex-wrap items-center gap-4">
+                    <div class="md:col-span-3 flex flex-wrap items-center gap-3 sm:gap-4">
                         <a href="https://www.instagram.com/paradiseofmath/" target="_blank" rel="noopener noreferrer"
-                            class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-pink-400/50 hover:scale-105 transition-all duration-300 group">
+                            class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-3.5 sm:px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-pink-400/50 hover:scale-105 transition-all duration-300 group whitespace-nowrap">
                             <span
                                 class="w-5 h-5 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"
@@ -1691,7 +1691,7 @@
                         </a>
                         <a href="https://www.tiktok.com/@paradiseofmath?is_from_webapp=1&sender_device=pc"
                             target="_blank" rel="noopener noreferrer"
-                            class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-cyan-400/50 hover:scale-105 transition-all duration-300 group">
+                            class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-3.5 sm:px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-cyan-400/50 hover:scale-105 transition-all duration-300 group whitespace-nowrap">
                             <span
                                 class="w-5 h-5 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
                                 <svg class="w-4.5 h-4.5 fill-current" viewBox="0 0 24 24"
@@ -1703,17 +1703,30 @@
                             <span
                                 class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">@paradiseofmath</span>
                         </a>
+                        <a href="https://wa.me/6289675053537" target="_blank" rel="noopener noreferrer"
+                            title="Chat WhatsApp Admin"
+                            class="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-3.5 sm:px-4 py-2 rounded-xl border border-white/15 hover:bg-white/20 hover:border-emerald-400/50 hover:scale-105 transition-all duration-300 group whitespace-nowrap">
+                            <span
+                                class="w-5 h-5 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                <i class="fab fa-whatsapp text-lg"></i>
+                            </span>
+                            <span
+                                class="text-xs sm:text-sm font-extrabold text-amber-300 group-hover:text-white transition-colors">WhatsApp</span>
+                        </a>
                     </div>
 
                     <!-- Contact & Address -->
-                    <div class="space-y-2 text-xs sm:text-sm text-violet-100">
+                    <div class="md:col-span-2 space-y-2 text-xs sm:text-sm text-violet-100">
                         <div class="flex items-start gap-2">
                             <span class="text-amber-400 font-bold shrink-0">📍 Alamat:</span>
                             <span>Jln. Jati I No.19 RT/RW 002/001 Sawahan, Padang Timur, Sumatera Barat, 25121</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-amber-400 font-bold shrink-0">📞 WhatsApp / Kontak:</span>
-                            <span class="font-extrabold text-white">08116612050 (Pimpinan - Kak Ika)</span>
+                        <div class="flex items-start gap-2">
+                            <span class="text-amber-400 font-bold shrink-0">📞 WhatsApp:</span>
+                            <div class="font-extrabold text-white flex flex-col gap-0.5">
+                                <span>08116612050 (Pimpinan - Kak Ika)</span>
+                                <span>089675053537 (Admin)</span>
+                            </div>
                         </div>
                     </div>
 
