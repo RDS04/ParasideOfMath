@@ -118,6 +118,10 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::get('/bank-soal/kelola/{id}', 'kelolaBankSoal')->name('guru.bank-soal.kelola');
     Route::get('/list-soal', 'listSoal')->name('guru.list-soal.index');
     Route::get('/list-soal/detail/{id}', 'detailListSoal')->name('guru.list-soal.detail');
+
+    Route::get('/list-soal/ajax/sub-kategori', 'ajaxSubKategoriSoal')->name('guru.list-soal.ajax.sub');
+    Route::get('/list-soal/ajax/mapel', 'ajaxMapelSoal')->name('guru.list-soal.ajax.mapel');
+
     Route::post('/bank-soal/kategori', 'storeKategoriSoal')->name('guru.bank-soal.kategori.store');
     Route::put('/bank-soal/kategori/{id}', 'updateKategoriSoal')->name('guru.bank-soal.kategori.update');
     Route::delete('/bank-soal/kategori/{id}', 'deleteKategoriSoal')->name('guru.bank-soal.kategori.delete');
@@ -202,6 +206,9 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/bank-soal/import/confirm', 'confirmImportSoalAdmin')->name('admin.bank-soal.import.confirm');
     Route::post('/admin/bank-soal/import/cancel', 'cancelImportSoalAdmin')->name('admin.bank-soal.import.cancel');
     Route::get('/admin/bank-soal/template', 'downloadTemplateSoalAdmin')->name('admin.bank-soal.template');
+
+    Route::get('/admin/bank-soal/ajax/sub-kategori', 'ajaxSubKategoriSoal')->name('admin.bank-soal.ajax.sub');
+    Route::get('/admin/bank-soal/ajax/mapel', 'ajaxMapelSoal')->name('admin.bank-soal.ajax.mapel');
 
     Route::post('/admin/siswa/toggle-status/{id}', 'toggleStatusSiswa')->name('admin.siswa.toggle-status');
 })->middleware('auth:web');

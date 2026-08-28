@@ -2552,5 +2552,49 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Foto profil untuk ' . ($guru->user ? $guru->user->name : 'Guru') . ' berhasil diperbarui!');
     }
+
+    /**
+     * AJAX: Ambil daftar Semester/TKA berdasarkan Jenjang & Kelas (tanpa reload halaman).
+     */
+    public function ajaxSubKategoriSoal(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return response()->json(['error' => 'Akses ditolak.'], 403);
+        }
+
+        $jenjang = strtoupper($request->input('jenjang', ''));
+        $kelas   = $request->input('kelas', '');
+
+        $subs = ($jenjang && $kelas)
+            ? KategoriSoal::availableSubKategori($jenjang, $kelas)
+            : [];
+
+        return response()->json(['subs' => array_values($subs)]);
+    }
+
+    /**
+     * AJAX: Ambil daftar Mata Pelajaran berdasarkan Semester/TKA (tanpa reload halaman).
+     */
+    public function ajaxMapelSoal(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return response()->json(['error' => 'Akses ditolak.'], 403);
+        }
+
+        $sub = $request->input('sub_kategori', '');
+        $mapelList = collect();
+
+        if ($sub) {
+            $mapelQuery = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%');
+            if ($sub === 'TKA') {
+                $mapelQuery->where('nama_mapel', 'like', '%TKA%');
+            } else {
+                $mapelQuery->where('nama_mapel', 'not like', '%TKA%');
+            }
+            $mapelList = $mapelQuery->orderBy('nama_mapel')->pluck('nama_mapel')->unique()->values();
+        }
+
+        return response()->json(['mapel' => $mapelList]);
+    }
 }
 

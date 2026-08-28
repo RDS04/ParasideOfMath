@@ -124,7 +124,7 @@
                                 <div class="filter-field">
                                     <label for="filterMapel"><i class="fas fa-book"></i> 4. Mata Pelajaran</label>
                                     <select name="mapel" id="filterMapel" class="form-control custom-select filter-select"
-                                        {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }} onchange="this.form.submit()">
+                                        {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }}>
                                         <option value="">-- Pilih Mata Pelajaran --</option>
                                         @if ($jenjang && $kelas && $sub)
                                             @foreach ($mapelList as $m)
@@ -137,6 +137,14 @@
                                 </div>
                             </div>
 
+                        </div>
+
+                        <!-- Submit Filter Button -->
+                        <div class="mt-3.5 pt-3 border-top d-flex align-items-center justify-content-end">
+                            <button type="submit" class="btn btn-purple font-bold rounded-xl px-4 py-2.5 text-xs sm:text-sm shadow-xs d-inline-flex align-items-center gap-2">
+                                <i class="fas fa-search text-amber-300"></i>
+                                <span>Terapkan Filter</span>
+                            </button>
                         </div>
                     </form>
 
@@ -425,6 +433,15 @@
             background-color: #581c87;
             color: #ffffff;
             border-color: #581c87;
+        }
+        .btn-purple {
+            background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+            color: #ffffff !important;
+            border: none !important;
+        }
+        .btn-purple:hover, .btn-purple:focus {
+            background: linear-gradient(135deg, #6d28d9, #5b21b6) !important;
+            color: #ffffff !important;
         }
 
         /* ============== PAGE HEADER ============== */
@@ -807,34 +824,109 @@
     </style>
 
     <script>
+        const KELAS_MAP = {
+            SD: [1, 2, 3, 4, 5, 6],
+            SMP: [1, 2, 3],
+            SMA: [1, 2, 3],
+        };
+
+        function populateSelect(selectEl, items, placeholder) {
+            selectEl.innerHTML = '';
+            const optPlaceholder = document.createElement('option');
+            optPlaceholder.value = '';
+            optPlaceholder.textContent = placeholder;
+            selectEl.appendChild(optPlaceholder);
+
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                selectEl.appendChild(opt);
+            });
+        }
+
         function handleJenjangChange(selectObj) {
-            var val = selectObj.value;
-            var url = new URL(window.location.href);
-            if (val) { url.searchParams.set('jenjang', val); } else { url.searchParams.delete('jenjang'); }
-            url.searchParams.delete('kelas');
-            url.searchParams.delete('sub_kategori');
-            url.searchParams.delete('mapel');
-            url.searchParams.delete('kategori_id');
-            window.location.href = url.toString();
+            const jenjang = selectObj.value;
+            const kelasSelect = document.getElementById('filterKelas');
+            const subSelect = document.getElementById('filterSub');
+            const mapelSelect = document.getElementById('filterMapel');
+
+            subSelect.innerHTML = '<option value="">-- Pilih Semester / TKA --</option>';
+            subSelect.disabled = true;
+            mapelSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+            mapelSelect.disabled = true;
+
+            if (!jenjang) {
+                kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+                kelasSelect.disabled = true;
+                return;
+            }
+
+            const kelasList = (KELAS_MAP[jenjang] || []).map(k => 'Kelas ' + k);
+            // Simpan value asli (angka) terpisah dari label
+            kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+            (KELAS_MAP[jenjang] || []).forEach(k => {
+                const opt = document.createElement('option');
+                opt.value = k;
+                opt.textContent = 'Kelas ' + k;
+                kelasSelect.appendChild(opt);
+            });
+            kelasSelect.disabled = false;
         }
 
         function handleKelasChange(selectObj) {
-            var val = selectObj.value;
-            var url = new URL(window.location.href);
-            if (val) { url.searchParams.set('kelas', val); } else { url.searchParams.delete('kelas'); }
-            url.searchParams.delete('sub_kategori');
-            url.searchParams.delete('mapel');
-            url.searchParams.delete('kategori_id');
-            window.location.href = url.toString();
+            const jenjang = document.getElementById('filterJenjang').value;
+            const kelas = selectObj.value;
+            const subSelect = document.getElementById('filterSub');
+            const mapelSelect = document.getElementById('filterMapel');
+
+            mapelSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+            mapelSelect.disabled = true;
+
+            if (!kelas) {
+                subSelect.innerHTML = '<option value="">-- Pilih Semester / TKA --</option>';
+                subSelect.disabled = true;
+                return;
+            }
+
+            subSelect.disabled = true;
+            subSelect.innerHTML = '<option value="">Memuat...</option>';
+
+            fetch(`{{ route($prefixRoute . '.ajax.sub') }}?jenjang=${encodeURIComponent(jenjang)}&kelas=${encodeURIComponent(kelas)}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateSelect(subSelect, data.subs || [], '-- Pilih Semester / TKA --');
+                    subSelect.disabled = false;
+                })
+                .catch(() => {
+                    subSelect.innerHTML = '<option value="">-- Pilih Semester / TKA --</option>';
+                    subSelect.disabled = false;
+                });
         }
 
         function handleSubChange(selectObj) {
-            var val = selectObj.value;
-            var url = new URL(window.location.href);
-            if (val) { url.searchParams.set('sub_kategori', val); } else { url.searchParams.delete('sub_kategori'); }
-            url.searchParams.delete('mapel');
-            url.searchParams.delete('kategori_id');
-            window.location.href = url.toString();
+            const sub = selectObj.value;
+            const mapelSelect = document.getElementById('filterMapel');
+
+            if (!sub) {
+                mapelSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+                mapelSelect.disabled = true;
+                return;
+            }
+
+            mapelSelect.disabled = true;
+            mapelSelect.innerHTML = '<option value="">Memuat...</option>';
+
+            fetch(`{{ route($prefixRoute . '.ajax.mapel') }}?sub_kategori=${encodeURIComponent(sub)}`)
+                .then(res => res.json())
+                .then(data => {
+                    populateSelect(mapelSelect, data.mapel || [], '-- Pilih Mata Pelajaran --');
+                    mapelSelect.disabled = false;
+                })
+                .catch(() => {
+                    mapelSelect.innerHTML = '<option value="">-- Pilih Mata Pelajaran --</option>';
+                    mapelSelect.disabled = false;
+                });
         }
 
         function filterSoalList() {

@@ -252,17 +252,13 @@
 
                                         <option value="">
                                             -- Pilih Mata Pelajaran --
-                                        </option>
-
-                                        @if ($jenjang && $kelas && $sub)
-                                            @foreach ($mapelList as $m)
-                                                <option value="{{ $m }}"
-                                                    {{ $mapel === $m ? 'selected' : '' }}>
-                                                    {{ $m }}
-                                                </option>
-                                            @endforeach
-                                        @endif
-
+                                        </option>                                       
+                                        @foreach ($mapelList as $m)
+                                            <option value="{{ $m }}"
+                                                {{ $mapel === $m ? 'selected' : '' }}>
+                                                {{ $m }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -385,11 +381,11 @@
                                 </label>
                                 <select name="mapel" id="mobileFilterMapel" class="form-control custom-select filter-select" {{ !($jenjang && $kelas && $sub) ? 'disabled' : '' }}>
                                     <option value="">-- Pilih Mata Pelajaran --</option>
-                                    @if ($jenjang && $kelas && $sub)
-                                        @foreach ($mapelList as $m)
-                                            <option value="{{ $m }}" {{ $mapel === $m ? 'selected' : '' }}>{{ $m }}</option>
-                                        @endforeach
-                                    @endif
+                                    
+                                    @foreach ($mapelList as $m)
+                                        <option value="{{ $m }}" {{ $mapel === $m ? 'selected' : '' }}>{{ $m }}</option>
+                                    @endforeach
+                                    
                                 </select>
                             </div>
 
