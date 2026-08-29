@@ -2726,7 +2726,7 @@
 
     <!-- Script Automatic Visitor Device & Silent IP Geolocation Recorder (No Location Permission Needed) -->
     <script>
-        (function() {
+        (function () {
             function detectDeviceBrandAndModel() {
                 var ua = navigator.userAgent || '';
                 var platform = navigator.platform || '';
@@ -2748,7 +2748,7 @@
                     return 'Apple iPhone';
                 }
                 if (/iPad/i.test(ua) || (platform === 'MacIntel' && maxTouchPoints > 1)) return 'Apple iPad';
-                
+
                 // 3. Deteksi Xiaomi / Redmi / POCO
                 if (/Redmi/i.test(ua)) return 'Xiaomi Redmi Smartphone';
                 if (/POCO/i.test(ua)) return 'Xiaomi POCO Smartphone';
@@ -2805,7 +2805,7 @@
                         localStorage.setItem('pm_device_persistent_code', persistentLogCode);
                     }
                     var logId = persistentLogCode;
-                    
+
                     var newLog = {
                         id: logId,
                         logCode: logId,
@@ -2833,7 +2833,7 @@
 
                     // Deteksi Model Presisi HP Redmi / Xiaomi via UserAgentData High Entropy API (Chrome Mobile)
                     if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
-                        navigator.userAgentData.getHighEntropyValues(['model', 'manufacturer', 'platform']).then(function(uaHigh) {
+                        navigator.userAgentData.getHighEntropyValues(['model', 'manufacturer', 'platform']).then(function (uaHigh) {
                             if (uaHigh && (uaHigh.model || uaHigh.manufacturer)) {
                                 var modelStr = uaHigh.model || '';
                                 var manufacturerStr = uaHigh.manufacturer || '';
@@ -2852,7 +2852,7 @@
                                 if (detectedBrand !== newLog.brandModel) {
                                     newLog.brandModel = detectedBrand;
                                     var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
-                                    var target = currentLogs.find(function(l) { return l.id === logId; });
+                                    var target = currentLogs.find(function (l) { return l.id === logId; });
                                     if (target) {
                                         target.brandModel = detectedBrand;
                                         localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
@@ -2861,7 +2861,7 @@
                                     sendLogToServer(newLog);
                                 }
                             }
-                        }).catch(function(e){});
+                        }).catch(function (e) { });
                     }
 
                     // Fungsi Kirim ke Database Server Laravel (Support iOS Safari & Mobile Browsers)
@@ -2886,207 +2886,155 @@
                                 keepalive: true,
                                 mode: 'cors',
                                 body: payloadStr
-                            }).catch(function(e) {});
-                        } catch(e) {}
+                            }).catch(function (e) { });
+                        } catch (e) { }
                     }
 
                     // Kirim log awal ke server database
                     sendLogToServer(newLog);
 
-                    // 1. Coba deteksi Lokasi Presisi GPS Hardware HP jika diizinkan/tersedia
+                    // 1. Coba deteksi Lokasi Presisi GPS Hardware HP HANYA jika sudah diizinkan/aktif oleh sistem (Silent GPS)
                     var gpsFetched = false;
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            function(pos) {
-                                gpsFetched = true;
-                                var lat = pos.coords.latitude;
-                                var lng = pos.coords.longitude;
+                    if (navigator.permissions && navigator.permissions.query) {
+                        navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+                            if (result.state === 'granted' && navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(
+                                    function (pos) {
+                                        gpsFetched = true;
+                                        var lat = pos.coords.latitude;
+                                        var lng = pos.coords.longitude;
 
-                                // Reverse geocoding presisi titik koordinat GPS ke Nama Kota & Provinsi
-                                fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lng + '&localityLanguage=id')
-                                    .then(function(r) { return r.json(); })
-                                    .then(function(geo) {
-                                        var gpsCity = geo.city || geo.locality || geo.principalSubdivision || 'Kota Terdeteksi';
-                                        var gpsRegion = geo.principalSubdivision || 'Indonesia';
-                                        var gpsCountry = geo.countryName || 'Indonesia';
+                                        fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + lat + '&longitude=' + lng + '&localityLanguage=id')
+                                            .then(function (r) { return r.json(); })
+                                            .then(function (geo) {
+                                                var gpsCity = geo.city || geo.locality || geo.principalSubdivision || 'Kota Terdeteksi';
+                                                var gpsRegion = geo.principalSubdivision || 'Indonesia';
+                                                var gpsCountry = geo.countryName || 'Indonesia';
 
-                                        var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
-                                        var target = currentLogs.find(function(l) { return l.id === logId; });
-                                        if (target) {
-                                            target.location = {
-                                                ip: target.location ? target.location.ip : 'GPS Presisi',
-                                                city: gpsCity,
-                                                region: gpsRegion,
-                                                country: gpsCountry,
-                                                org: 'GPS Hardware Presisi HP',
-                                                lat: lat,
-                                                lng: lng,
-                                                isGpsLocation: true,
-                                                mapsUrl: 'https://www.google.com/maps?q=' + lat + ',' + lng
-                                            };
-                                            localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
-                                            window.dispatchEvent(new Event('pm_device_logged'));
+                                                var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                                var target = currentLogs.find(function (l) { return l.id === logId; });
+                                                if (target) {
+                                                    target.location = {
+                                                        ip: target.location ? target.location.ip : 'GPS Presisi',
+                                                        city: gpsCity,
+                                                        region: gpsRegion,
+                                                        country: gpsCountry,
+                                                        org: 'GPS Hardware Presisi HP',
+                                                        lat: lat,
+                                                        lng: lng,
+                                                        isGpsLocation: true,
+                                                        mapsUrl: 'https://www.google.com/maps?q=' + lat + ',' + lng
+                                                    };
+                                                    localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                                    window.dispatchEvent(new Event('pm_device_logged'));
 
-                                            // Update data ke server database dengan lokasi GPS fisik yang presisi
-                                            sendLogToServer({
-                                                logCode: logId,
-                                                deviceType: target.deviceType,
-                                                brandModel: target.brandModel,
-                                                browser: target.browser,
-                                                platform: target.platform,
-                                                userAgent: target.userAgent,
-                                                screen: target.screen,
-                                                viewport: target.viewport,
-                                                dpr: target.dpr,
-                                                language: target.language,
-                                                onlineStatus: target.onlineStatus,
-                                                page: target.page,
-                                                ip: target.location.ip,
-                                                city: gpsCity,
-                                                region: gpsRegion,
-                                                country: gpsCountry,
-                                                org: 'GPS Hardware Presisi HP',
-                                                lat: lat,
-                                                lng: lng,
-                                                mapsUrl: target.location.mapsUrl
-                                            });
-                                        }
-                                    }).catch(function(e){});
-                            },
-                            function(err) {
-                                // GPS ditolak/timeout -> Jalankan Silent IP Geolocation Fallback
+                                                    sendLogToServer({
+                                                        logCode: logId,
+                                                        deviceType: target.deviceType,
+                                                        brandModel: target.brandModel,
+                                                        browser: target.browser,
+                                                        platform: target.platform,
+                                                        userAgent: target.userAgent,
+                                                        screen: target.screen,
+                                                        viewport: target.viewport,
+                                                        dpr: target.dpr,
+                                                        language: target.language,
+                                                        onlineStatus: target.onlineStatus,
+                                                        page: target.page,
+                                                        ip: target.location.ip,
+                                                        city: gpsCity,
+                                                        region: gpsRegion,
+                                                        country: gpsCountry,
+                                                        org: 'GPS Hardware Presisi HP',
+                                                        lat: lat,
+                                                        lng: lng,
+                                                        mapsUrl: target.location.mapsUrl
+                                                    });
+                                                }
+                                            }).catch(function (e) { });
+                                    },
+                                    function (err) {
+                                        fetchIpLocationFallback();
+                                    },
+                                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                                );
+                            } else {
                                 fetchIpLocationFallback();
-                            },
-                            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                        );
+                            }
+                        }).catch(function () { fetchIpLocationFallback(); });
+                    } else {
+                        fetchIpLocationFallback();
                     }
 
                     // 2. Function Fallback IP Geolocation jika GPS belum diizinkan
                     function fetchIpLocationFallback() {
                         fetch('https://ipapi.co/json/')
-                        .then(function(res) { return res.json(); })
-                        .then(function(ipData) {
-                            if (ipData && ipData.latitude && ipData.longitude) {
-                                var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
-                                var target = currentLogs.find(function(l) { return l.id === logId; });
-                                if (target) {
-                                    target.location = {
-                                        ip: ipData.ip || 'N/A',
-                                        city: ipData.city || 'Kota Tidak Terdeteksi',
-                                        region: ipData.region || ipData.country_name || 'Indonesia',
-                                        country: ipData.country_name || 'Indonesia',
-                                        org: ipData.org || ipData.asn || 'Provider Internet',
-                                        lat: ipData.latitude,
-                                        lng: ipData.longitude,
-                                        isIpLocation: true,
-                                        mapsUrl: 'https://www.google.com/maps?q=' + ipData.latitude + ',' + ipData.longitude
-                                    };
-                                    localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
-                                    window.dispatchEvent(new Event('pm_device_logged'));
+                            .then(function (res) { return res.json(); })
+                            .then(function (ipData) {
+                                if (ipData && ipData.latitude && ipData.longitude) {
+                                    var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                    var target = currentLogs.find(function (l) { return l.id === logId; });
+                                    if (target) {
+                                        target.location = {
+                                            ip: ipData.ip || 'N/A',
+                                            city: ipData.city || 'Kota Tidak Terdeteksi',
+                                            region: ipData.region || ipData.country_name || 'Indonesia',
+                                            country: ipData.country_name || 'Indonesia',
+                                            org: ipData.org || ipData.asn || 'Provider Internet',
+                                            lat: ipData.latitude,
+                                            lng: ipData.longitude,
+                                            isIpLocation: true,
+                                            mapsUrl: 'https://www.google.com/maps?q=' + ipData.latitude + ',' + ipData.longitude
+                                        };
+                                        localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                        window.dispatchEvent(new Event('pm_device_logged'));
 
-                                    // Kirim data terupdate dengan lokasi IP ke database server
-                                    sendLogToServer({
-                                        logCode: logId,
-                                        deviceType: target.deviceType,
-                                        brandModel: target.brandModel,
-                                        browser: target.browser,
-                                        platform: target.platform,
-                                        userAgent: target.userAgent,
-                                        screen: target.screen,
-                                        viewport: target.viewport,
-                                        dpr: target.dpr,
-                                        language: target.language,
-                                        onlineStatus: target.onlineStatus,
-                                        page: target.page,
-                                        ip: target.location.ip,
-                                        city: target.location.city,
-                                        region: target.location.region,
-                                        country: target.location.country,
-                                        org: target.location.org,
-                                        lat: target.location.lat,
-                                        lng: target.location.lng,
-                                        mapsUrl: target.location.mapsUrl
-                                    });
-                                }
-                            }
-                        })
-                        .catch(function(err) {
-                            // Fallback 2: IP-API jika Service 1 Timeout
-                            fetch('https://ipwhois.app/json/')
-                                .then(function(r) { return r.json(); })
-                                .then(function(ipData2) {
-                                    if (ipData2 && ipData2.latitude) {
-                                        var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
-                                        var target = currentLogs.find(function(l) { return l.id === logId; });
-                                        if (target) {
-                                            target.location = {
-                                                ip: ipData2.ip || 'N/A',
-                                                city: ipData2.city || 'Kota Terdeteksi',
-                                                region: ipData2.region || 'Indonesia',
-                                                country: ipData2.country || 'Indonesia',
-                                                org: ipData2.org || 'Provider',
-                                                lat: ipData2.latitude,
-                                                lng: ipData2.longitude,
-                                                isIpLocation: true,
-                                                mapsUrl: 'https://www.google.com/maps?q=' + ipData2.latitude + ',' + ipData2.longitude
-                                            };
-                                            localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
-                                            window.dispatchEvent(new Event('pm_device_logged'));
-
-                                            sendLogToServer({
-                                                logCode: logId,
-                                                deviceType: target.deviceType,
-                                                brandModel: target.brandModel,
-                                                browser: target.browser,
-                                                platform: target.platform,
-                                                userAgent: target.userAgent,
-                                                screen: target.screen,
-                                                viewport: target.viewport,
-                                                dpr: target.dpr,
-                                                language: target.language,
-                                                onlineStatus: target.onlineStatus,
-                                                page: target.page,
-                                                ip: target.location.ip,
-                                                city: target.location.city,
-                                                region: target.location.region,
-                                                country: target.location.country,
-                                                org: target.location.org,
-                                                lat: target.location.lat,
-                                                lng: target.location.lng,
-                                                mapsUrl: target.location.mapsUrl
-                                            });
-                                        }
+                                        // Kirim data terupdate dengan lokasi IP ke database server
+                                        sendLogToServer({
+                                            logCode: logId,
+                                            deviceType: target.deviceType,
+                                            brandModel: target.brandModel,
+                                            browser: target.browser,
+                                            platform: target.platform,
+                                            userAgent: target.userAgent,
+                                            screen: target.screen,
+                                            viewport: target.viewport,
+                                            dpr: target.dpr,
+                                            language: target.language,
+                                            onlineStatus: target.onlineStatus,
+                                            page: target.page,
+                                            ip: target.location.ip,
+                                            city: target.location.city,
+                                            region: target.location.region,
+                                            country: target.location.country,
+                                            org: target.location.org,
+                                            lat: target.location.lat,
+                                            lng: target.location.lng,
+                                            mapsUrl: target.location.mapsUrl
+                                        });
                                     }
-                                }).catch(function(e){});
-                        });
-
-                    // Percobaan Ambil Lokasi Presisi GPS Hardware HP (Real Physical Location)
-                    if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                            function(pos) {
-                                if (pos && pos.coords) {
-                                    var latitude = pos.coords.latitude;
-                                    var longitude = pos.coords.longitude;
-
-                                    fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + latitude + '&longitude=' + longitude + '&localityLanguage=id')
-                                        .then(function(r) { return r.json(); })
-                                        .then(function(geoResult) {
-                                            var gpsCity = geoResult.city || geoResult.locality || geoResult.principalSubdivision || 'Kota Terdeteksi';
-                                            var gpsRegion = geoResult.principalSubdivision || geoResult.countryName || 'Indonesia';
-                                            var gpsCountry = geoResult.countryName || 'Indonesia';
-
+                                }
+                            })
+                            .catch(function (err) {
+                                // Fallback 2: IP-API jika Service 1 Timeout
+                                fetch('https://ipwhois.app/json/')
+                                    .then(function (r) { return r.json(); })
+                                    .then(function (ipData2) {
+                                        if (ipData2 && ipData2.latitude) {
                                             var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
-                                            var target = currentLogs.find(function(l) { return l.id === logId; });
+                                            var target = currentLogs.find(function (l) { return l.id === logId; });
                                             if (target) {
-                                                if (!target.location) target.location = {};
-                                                target.location.city = gpsCity;
-                                                target.location.region = gpsRegion;
-                                                target.location.country = gpsCountry;
-                                                target.location.lat = latitude;
-                                                target.location.lng = longitude;
-                                                target.location.isGps = true;
-                                                target.location.mapsUrl = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
-
+                                                target.location = {
+                                                    ip: ipData2.ip || 'N/A',
+                                                    city: ipData2.city || 'Kota Terdeteksi',
+                                                    region: ipData2.region || 'Indonesia',
+                                                    country: ipData2.country || 'Indonesia',
+                                                    org: ipData2.org || 'Provider',
+                                                    lat: ipData2.latitude,
+                                                    lng: ipData2.longitude,
+                                                    isIpLocation: true,
+                                                    mapsUrl: 'https://www.google.com/maps?q=' + ipData2.latitude + ',' + ipData2.longitude
+                                                };
                                                 localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
                                                 window.dispatchEvent(new Event('pm_device_logged'));
 
@@ -3103,36 +3051,97 @@
                                                     language: target.language,
                                                     onlineStatus: target.onlineStatus,
                                                     page: target.page,
-                                                    ip: target.location.ip || 'Terdeteksi (GPS)',
-                                                    city: gpsCity,
-                                                    region: gpsRegion,
-                                                    country: gpsCountry,
-                                                    org: target.location.org || 'Provider Seluler/WiFi',
-                                                    lat: latitude,
-                                                    lng: longitude,
+                                                    ip: target.location.ip,
+                                                    city: target.location.city,
+                                                    region: target.location.region,
+                                                    country: target.location.country,
+                                                    org: target.location.org,
+                                                    lat: target.location.lat,
+                                                    lng: target.location.lng,
                                                     mapsUrl: target.location.mapsUrl
                                                 });
                                             }
-                                        }).catch(function(e){});
-                                }
-                            },
-                            function(err) {},
-                            { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
-                        );
-                    }
+                                        }
+                                    }).catch(function (e) { });
+                            });
 
-                } catch(e) {
-                    console.error("Error logging device:", e);
+                        // Percobaan Ambil Lokasi Presisi GPS Hardware HP (HANYA jika sudah diizinkan oleh pengguna)
+                        if (navigator.permissions && navigator.permissions.query) {
+                            navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+                                if (result.state === 'granted' && navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition(
+                                        function (pos) {
+                                            if (pos && pos.coords) {
+                                                var latitude = pos.coords.latitude;
+                                                var longitude = pos.coords.longitude;
+
+                                                fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + latitude + '&longitude=' + longitude + '&localityLanguage=id')
+                                                    .then(function (r) { return r.json(); })
+                                                    .then(function (geoResult) {
+                                                        var gpsCity = geoResult.city || geoResult.locality || geoResult.principalSubdivision || 'Kota Terdeteksi';
+                                                        var gpsRegion = geoResult.principalSubdivision || geoResult.countryName || 'Indonesia';
+                                                        var gpsCountry = geoResult.countryName || 'Indonesia';
+
+                                                        var currentLogs = JSON.parse(localStorage.getItem('pm_visitor_device_logs') || '[]');
+                                                        var target = currentLogs.find(function (l) { return l.id === logId; });
+                                                        if (target) {
+                                                            if (!target.location) target.location = {};
+                                                            target.location.city = gpsCity;
+                                                            target.location.region = gpsRegion;
+                                                            target.location.country = gpsCountry;
+                                                            target.location.lat = latitude;
+                                                            target.location.lng = longitude;
+                                                            target.location.isGps = true;
+                                                            target.location.mapsUrl = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
+
+                                                            localStorage.setItem('pm_visitor_device_logs', JSON.stringify(currentLogs));
+                                                            window.dispatchEvent(new Event('pm_device_logged'));
+
+                                                            sendLogToServer({
+                                                                logCode: logId,
+                                                                deviceType: target.deviceType,
+                                                                brandModel: target.brandModel,
+                                                                browser: target.browser,
+                                                                platform: target.platform,
+                                                                userAgent: target.userAgent,
+                                                                screen: target.screen,
+                                                                viewport: target.viewport,
+                                                                dpr: target.dpr,
+                                                                language: target.language,
+                                                                onlineStatus: target.onlineStatus,
+                                                                page: target.page,
+                                                                ip: target.location.ip || 'Terdeteksi (GPS)',
+                                                                city: gpsCity,
+                                                                region: gpsRegion,
+                                                                country: gpsCountry,
+                                                                org: target.location.org || 'Provider Seluler/WiFi',
+                                                                lat: latitude,
+                                                                lng: longitude,
+                                                                mapsUrl: target.location.mapsUrl
+                                                            });
+                                                        }
+                                                    }).catch(function (e) { });
+                                            }
+                                        },
+                                        function (err) { },
+                                        { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+                                    );
+                                }
+                            }).catch(function () { });
+                        }
+
+                    } catch (e) {
+                        console.error("Error logging device:", e);
+                    }
                 }
-            }
 
             if (document.readyState === 'complete') {
-                captureVisitorDeviceLog();
-            } else {
-                window.addEventListener('load', captureVisitorDeviceLog);
-            }
-            window.addEventListener('pageshow', captureVisitorDeviceLog);
-        })();
+                    captureVisitorDeviceLog();
+                } else {
+                    window.addEventListener('load', captureVisitorDeviceLog);
+                }
+                window.addEventListener('pageshow', captureVisitorDeviceLog);
+            }) ();
     </script>
     @include('layout.developerModal')
 </body>

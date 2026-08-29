@@ -528,11 +528,6 @@
             </form>
 
             <div class="mt-8 pt-5 border-t border-gray-100 text-center">
-                @if(\App\Models\Setting::get('guru_register_enabled', '1') !== '0')
-                    <p class="text-xs text-gray-500 mb-2">
-                        Ingin bergabung sebagai pengajar? <a href="{{ route('guru.register') }}" class="link-purple">Daftar sebagai Guru</a>
-                    </p>
-                @endif
                 <p class="text-xs text-gray-400 tracking-wide">
                     &copy; {{ date('Y') }} · Paradise of Math — Hak Cipta Dilindungi.<br/>
                     <span class="text-[11px] text-gray-500 font-medium mt-0.5 inline-block">Dikelola &amp; Dikembangkan oleh <strong>Reyhan &amp; Rizky</strong> (Universitas Metamedia)</span>
