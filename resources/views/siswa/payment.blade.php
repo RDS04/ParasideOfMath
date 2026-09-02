@@ -265,8 +265,8 @@
                     </div>
 
                     <!-- Title -->
-                    <h3 class="text-2xl font-bold text-violet-950 mb-2">Rincian Tagihan</h3>
-                    <p class="text-slate-500 text-xs mb-6">Ulasan tagihan transaksi Anda yang sah dan tercatat.</p>
+                    <h3 class="text-2xl font-bold text-violet-950 mb-2">Perkiraan Biaya Bimbingan</h3>
+                    <p class="text-slate-500 text-xs mb-6">Hitung estimasi perkiraan biaya bimbingan belajar berdasarkan paket dan sesi Anda.</p>
 
                     <!-- Details List -->
                     <div class="space-y-4 text-sm text-slate-600 mb-6">
@@ -275,7 +275,7 @@
                                 <span class="d-block font-bold text-violet-950">Bimbel {{ $paket->nama_paket }}</span>
                                 <small class="text-slate-400 text-xxs block mt-0.5">({{ explode(':', $detailString)[0] }})</small>
                             </div>
-                            <span class="font-bold text-violet-950">Rp {{ number_format($harga, 0, ',', '.') }} <span class="text-xs text-slate-400 font-normal">/ sesi</span></span>
+                            <span class="font-bold text-violet-950">Rp {{ number_format($harga, 0, ',', '.') }} <span class="text-xs text-slate-400 font-normal">/ sesi (est.)</span></span>
                         </div>
                         {{-- ── Ringkasan Jadwal per Mapel ── --}}
                         @if(!empty($mapelJadwal))
@@ -283,7 +283,7 @@
                                 <span class="block font-bold text-slate-700 text-xs uppercase tracking-wider mb-2">Jadwal Belajar per Mapel</span>
                                 @foreach($mapelJadwal as $idx => $namaMapel)
                                     @php
-                                        $sesiIdx  = $sesiPerMapel[$idx] ?? 0;
+                                        $sesiIdx  = !empty($sesiPerMapel[$idx]) ? $sesiPerMapel[$idx] : 1;
                                         $hariListMapel = $hariPerMapel[$idx] ?? [];
                                         $hariDisplay = !empty($hariListMapel) ? implode(' & ', array_filter($hariListMapel)) : '-';
                                         $tgl      = $tanggalArr[$idx] ?? null;
@@ -296,8 +296,6 @@
                                             <span class="text-[11px] font-semibold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200">{{ $sesiIdx }}x sesi</span>
                                         </div>
                                         <div class="text-[11px] text-slate-500 space-y-0.5">
-                                            <div><i class="fas fa-calendar-week mr-1 text-purple-400"></i>Hari: <strong class="text-slate-700">{{ $hariDisplay }}</strong></div>
-                                            <div><i class="fas fa-calendar-alt mr-1 text-purple-400"></i>Mulai: <strong class="text-slate-700">{{ $tglStr }}</strong></div>
                                             <div class="text-right font-semibold text-purple-700 mt-1">
                                                 Rp {{ number_format($harga, 0, ',', '.') }} × {{ $sesiIdx }} = Rp {{ number_format($hargaMapel, 0, ',', '.') }}
                                             </div>
@@ -324,20 +322,19 @@
 
                     <div class="border-t border-dashed border-slate-100 my-4"></div>
 
-                    <!-- Total Tagihan -->
+                    <!-- Total Tagihan (Perkiraan) -->
                     <div class="space-y-2 mb-6">
                         <div class="flex justify-between text-xs text-slate-500">
-                            <span>Harga per sesi</span>
+                            <span>Harga per sesi (est.)</span>
                             <span class="font-semibold text-slate-700">Rp {{ number_format($harga, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between text-xs text-slate-500">
-                            <span>Total sesi</span>
+                            <span>Total estimasi sesi</span>
                             <span class="font-semibold text-slate-700">{{ $totalSesi ?? 1 }}x</span>
                         </div>
                         <div class="flex justify-between items-baseline pt-2 border-t border-slate-100">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tagihan</span>
-                            <span class="text-3xl font-black text-violet-950">Rp
-                                {{ number_format($total, 0, ',', '.') }}</span>
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Perkiraan Total Biaya</span>
+                            <span class="text-3xl font-black text-violet-950">Rp {{ number_format($total, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
@@ -345,13 +342,13 @@
                 <!-- Submit Button Area -->
                 <div>
                     <button type="submit" id="btnBayar" class="btn-brand font-bold text-md mb-4 border-0">
-                        Konfirmasi &amp; Bayar <i class="fas fa-lock ml-1.5"></i>
+                        Konfirmasi &amp; Kirim Bukti <i class="fas fa-arrow-right ml-1.5"></i>
                     </button>
 
                     <div class="p-3 bg-violet-50/50 rounded-2xl border border-violet-100/50 flex items-start gap-2.5">
-                        <i class="fas fa-shield-alt text-violet-600 mt-0.5 text-xs"></i>
+                        <i class="fas fa-calculator text-violet-600 mt-0.5 text-xs"></i>
                         <p class="text-[10px] text-violet-950 mb-0 leading-relaxed font-medium">
-                            Semua transaksi terenkripsi dengan aman secara otomatis. Hubungi CS jika Anda butuh bantuan.
+                            <strong class="text-violet-700">Catatan Perkiraan Harga:</strong> Nominal di atas merupakan estimasi perkiraan biaya bimbingan. Tarif akhir akan dikonfirmasi kembali oleh Admin / Tutor.
                         </p>
                     </div>
                 </div>

@@ -191,11 +191,14 @@
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach($availableMapels as $mapel)
+                                    @php
+                                        $sesiDefault = $isTambahMode ? ($mapel->shift ?? 1) : 4;
+                                    @endphp
                                     <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
                                         <input type="checkbox" name="mapel[]"
-                                            value="{{ $mapel->nama_mapel }} {{ $mapel->shift }}x"
+                                            value="{{ $mapel->nama_mapel }} {{ $sesiDefault }}x"
                                             class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-                                        <span>{{ $mapel->nama_mapel }} {{ $mapel->shift }}x</span>
+                                        <span>{{ $mapel->nama_mapel }} {{ $sesiDefault }}x</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -259,15 +262,6 @@
                                 </label>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- STEP 3 — JADWAL & FREKUENSI BELAJAR per Mapel -->
-                    <div class="step-panel space-y-5" data-step="3">
-                        <!-- Ringkasan mapel yang dipilih -->
-                        <div class="p-3 rounded-xl bg-purple-50 border border-purple-100 text-xs text-purple-800 font-medium" id="step3MapelSummary"></div>
-
-                        <!-- Schedule cards per mapel — diisi oleh JS -->
-                        <div id="mapelScheduleContainer" class="space-y-6"></div>
                     </div>
 
                     <!-- Navigation Action Buttons -->
@@ -492,15 +486,10 @@
                     btnNext.classList.remove('hidden');
                     btnSubmit.classList.add('hidden');
                 } else if (currentStep === 2) {
-                    btnBack.classList.remove('hidden');
-                    btnNext.classList.remove('hidden');
-                    btnSubmit.classList.add('hidden');
-                } else if (currentStep === 3) {
-                    btnBack.classList.remove('hidden');
+                    // Step 2 sekarang jadi langkah terakhir
+                    btnBack.classList.toggle('hidden', @json($isTambahMode));
                     btnNext.classList.add('hidden');
                     btnSubmit.classList.remove('hidden');
-                    // Build per-mapel schedule cards
-                    generateMapelScheduleCards();
                 }
             }
 
@@ -550,11 +539,6 @@
                         currentStep = 2;
                         renderSteps();
                     }
-                } else if (currentStep === 2) {
-                    if (validateStep(2)) {
-                        currentStep = 3;
-                        renderSteps();
-                    }
                 }
             });
 
@@ -573,69 +557,14 @@
                         renderSteps();
                     }
                 } else if (currentStep === 2) {
-                    e.preventDefault();
-                    if (validateStep(2)) {
-                        currentStep = 3;
-                        renderSteps(); // renderSteps calls generateMapelScheduleCards internally
-                    }
-                } else if (currentStep === 3) {
-                    if (!validateStep3Dynamic()) {
+                    // Step terakhir: validasi mapel dipilih, lalu biarkan form submit GET ke siswa.payment
+                    if (!validateStep(2)) {
                         e.preventDefault();
                     }
                 }
             });
 
-            // Validate the dynamically-generated Step 3 cards
-            function validateStep3Dynamic() {
-                if (!scheduleContainer) return true;
-                let valid = true;
 
-                // Check each mapel card has: sesi selected, hari 1, hari 2, tanggal_mulai
-                const cards = scheduleContainer.querySelectorAll('.bg-white.rounded-2xl');
-                if (cards.length === 0) {
-                    alert('Belum ada mapel yang dipilih. Silakan kembali dan pilih mata pelajaran terlebih dahulu.');
-                    return false;
-                }
-
-                cards.forEach(card => {
-                    // Check sesi radio
-                    const sesiRadios = card.querySelectorAll('input[type="radio"]');
-                    const sesiChecked = Array.from(sesiRadios).some(r => r.checked);
-                    const errorMsg = card.querySelector('.error-msg');
-                    if (!sesiChecked) {
-                        valid = false;
-                        if (errorMsg) { errorMsg.classList.remove('hidden'); }
-                    } else {
-                        if (errorMsg) { errorMsg.classList.add('hidden'); }
-                    }
-
-                    // Check hari selects
-                    card.querySelectorAll('select').forEach(sel => {
-                        if (!sel.value) {
-                            valid = false;
-                            sel.classList.add('border-red-400');
-                        } else {
-                            sel.classList.remove('border-red-400');
-                        }
-                    });
-
-                    // Check tanggal_mulai
-                    const dateInput = card.querySelector('input[type="date"]');
-                    if (dateInput && !dateInput.value) {
-                        valid = false;
-                        dateInput.classList.add('border-red-400');
-                    } else if (dateInput) {
-                        dateInput.classList.remove('border-red-400');
-                    }
-                });
-
-                if (!valid) {
-                    const firstInvalid = scheduleContainer.querySelector('.border-red-400, .error-msg:not(.hidden)');
-                    if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-
-                return valid;
-            }
 
             // Generic function to check if a field is filled
             function isFieldFilled(field) {
@@ -714,126 +643,7 @@
 
             updateTeacherContainers();
 
-            // ─── Per-Mapel Schedule Logic ──────────────────────────────────────
-            const scheduleContainer = document.getElementById('mapelScheduleContainer');
-            const step3Summary      = document.getElementById('step3MapelSummary');
-
-            // Get list of selected mapel names from checkboxes
-            function getSelectedMapelList() {
-                const list = [];
-                const seen = new Set();
-                checkboxes.forEach(cb => {
-                    if (cb.checked && cb.value) {
-                        const match = cb.value.match(/^(.+?)\s+(\d+)x$/);
-                        const name  = match ? match[1].trim() : cb.value.trim();
-                        const shift = match ? parseInt(match[2], 10) : 2;
-                        if (!seen.has(name)) { seen.add(name); list.push({ name, shift }); }
-                    }
-                });
-                return list;
-            }
-
-            // Build per-mapel schedule cards when entering Step 3
-            function generateMapelScheduleCards() {
-                const mapels = getSelectedMapelList();
-                const now    = new Date();
-                const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-
-                if (step3Summary) {
-                    if (mapels.length) {
-                        const names = mapels.map(m => m.name).join(', ');
-                        step3Summary.innerHTML = `<i class="fas fa-book-open mr-2 text-purple-500"></i>
-                            Jadwal untuk <strong>${mapels.length} mata pelajaran</strong>: ${names}`;
-                        step3Summary.classList.remove('hidden');
-                    } else {
-                        step3Summary.innerHTML = '<i class="fas fa-exclamation-circle mr-2 text-amber-500"></i> Belum ada mapel yang dipilih. Kembali ke langkah sebelumnya.';
-                    }
-                }
-
-                if (!scheduleContainer) return;
-                scheduleContainer.innerHTML = '';
-
-                mapels.forEach((item, idx) => {
-                    const mapel = item.name;
-                    const shift = item.shift || 2;
-                    const slug  = mapel.toLowerCase().replace(/\s+/g, '_');
-
-                    // Bangun dropdown hari sebanyak jumlah shift
-                    let hariSelectsHtml = '';
-                    for (let p = 1; p <= shift; p++) {
-                        hariSelectsHtml += `
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                                    Hari — ${mapel} (Pertemuan ${p}) <span class="text-amber-600">*</span>
-                                </label>
-                                <select name="hari[${idx}][${p}]" class="form-input text-sm cursor-pointer" required>
-                                    <option value="">Pilih hari</option>
-                                    <option>Senin</option><option>Selasa</option><option>Rabu</option>
-                                    <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
-                                </select>
-                            </div>`;
-                    }
-                    const hariGridClass = shift > 1 ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3';
-
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-2xl border border-purple-100 shadow-sm overflow-hidden';
-                    card.innerHTML = `
-                        <div class="flex items-center gap-3 px-5 py-3.5 bg-gradient-to-r from-purple-600 to-violet-600 text-white">
-                            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-xs font-black">${idx+1}</div>
-                            <div>
-                                <div class="text-[11px] font-semibold uppercase tracking-wider opacity-70">Jadwal Belajar (${shift}x / minggu)</div>
-                                <div class="font-bold text-base leading-tight">${mapel}</div>
-                            </div>
-                        </div>
-
-                        <div class="p-5 space-y-4">
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">
-                                    Jumlah Pertemuan / Sesi <span class="text-amber-600">*</span>
-                                </label>
-                                <div class="grid grid-cols-5 gap-2" id="pertemuan-grid-${slug}">
-                                    ${[1,2,3,4,5,6,7,8,9,10].map(n => `
-                                        <label class="pertemuan-label flex items-center justify-center p-2.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950 font-bold"
-                                            id="lbl-pt-${slug}-${n}"
-                                            onclick="selectPertemuan('${slug}', ${n}, this)">
-                                            <input type="radio" name="sesi[${idx}]" value="${n}" class="sr-only" data-mapel-idx="${idx}">
-                                            <span>${n}x</span>
-                                        </label>`).join('')}
-                                </div>
-                                <div class="error-msg hidden text-red-500 text-xs mt-1">Pilih jumlah pertemuan untuk ${mapel}.</div>
-                            </div>
-
-                            <div class="${hariGridClass}">
-                                ${hariSelectsHtml}
-                            </div>
-
-                            <div>
-                                <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                                    Tanggal Mulai Les — ${mapel} <span class="text-amber-600">*</span>
-                                </label>
-                                <input type="date" name="tanggal_mulai[${idx}]" class="form-input text-sm cursor-pointer" required min="${todayStr}">
-                            </div>
-
-                            <input type="hidden" name="mapel_jadwal[${idx}]" value="${mapel}">
-                        </div>
-                    `;
-                    scheduleContainer.appendChild(card);
-                });
-            }
-
-            // Handle pertemuan radio highlight
-            window.selectPertemuan = function(slug, val, clickedLabel) {
-                const grid = document.getElementById(`pertemuan-grid-${slug}`);
-                if (!grid) return;
-                grid.querySelectorAll('.pertemuan-label').forEach(lbl => {
-                    lbl.classList.remove('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
-                    lbl.classList.add('bg-slate-50', 'border-purple-100');
-                });
-                clickedLabel.classList.add('border-purple-600', 'bg-purple-50', 'ring-2', 'ring-purple-600/20');
-                clickedLabel.classList.remove('bg-slate-50', 'border-purple-100');
-                const radio = clickedLabel.querySelector('input[type="radio"]');
-                if (radio) radio.checked = true;
-            };
+            
 
             // Update Step 3 cards when step changes to 3
             checkboxes.forEach(cb => {

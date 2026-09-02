@@ -208,31 +208,50 @@ class SiswaController extends Controller
 
         // ── Hitung total sesi dari field baru: sesi[0], sesi[1], … ──
         $sesiPerMapel = $request->input('sesi', []);  // array indexed by mapel
+        $isTambahMode = $siswa && $siswa->status === 'active';
+
+        if (empty($sesiPerMapel)) {
+            $mapels = $request->input('mapel', []);
+            if (is_array($mapels) && !empty($mapels)) {
+                foreach ($mapels as $m) {
+                    if (is_string($m) && preg_match('/(\d+)x/i', $m, $matches)) {
+                        $sesiPerMapel[] = (int) $matches[1];
+                    } else {
+                        $sesiPerMapel[] = $isTambahMode ? 1 : 4;
+                    }
+                }
+            }
+        }
+        if (empty($sesiPerMapel) && isset($siswa->biodata['pending_sesi_per_mapel'])) {
+            $sesiPerMapel = $siswa->biodata['pending_sesi_per_mapel'];
+        }
+        if (empty($sesiPerMapel) && isset($siswa->biodata['sesi_per_mapel'])) {
+            $sesiPerMapel = $siswa->biodata['sesi_per_mapel'];
+        }
+
         $totalSesi = 0;
         if (is_array($sesiPerMapel)) {
             foreach ($sesiPerMapel as $s) {
                 $totalSesi += (int) $s;
             }
         }
-
-        // Fallback: jika sesi[] kosong, hitung dari jumlah mapel yang dikirim
-        if ($totalSesi === 0) {
-            $mapels = $request->input('mapel', []);
-            if (is_array($mapels)) {
-                foreach ($mapels as $m) {
-                    if (is_string($m) && preg_match('/(\d+)x/i', $m, $matches)) {
-                        $totalSesi += (int) $matches[1];
-                    }
-                }
-            }
-            $totalSesi = $totalSesi > 0 ? $totalSesi : 1;
-        }
+        $totalSesi = $totalSesi > 0 ? $totalSesi : 1;
 
         // Total harga = harga_per_sesi × total_sesi
         $total = $harga * $totalSesi;
 
         // Kumpulkan data mapel-jadwal untuk ditampilkan di payment review
         $mapelJadwal  = $request->input('mapel_jadwal', []);   // ['Fisika', 'Biologi', …]
+        if (empty($mapelJadwal)) {
+            foreach ((array) $request->input('mapel', []) as $rm) {
+                if (is_string($rm) && trim($rm) !== '') {
+                    $clean = trim(preg_replace('/\s+\d+x$/i', '', $rm));
+                    if ($clean !== '') {
+                        $mapelJadwal[] = $clean;
+                    }
+                }
+            }
+        }
         if (empty($mapelJadwal) && isset($siswa->biodata['pending_mapel_jadwal'])) {
             $mapelJadwal = $siswa->biodata['pending_mapel_jadwal'];
         }
@@ -250,16 +269,17 @@ class SiswaController extends Controller
 
             $mergedPendingMapels = [];
             $mergedPendingSesi   = [];
+            $defaultSesi = $isTambahMode ? 8 : 4;
 
             foreach ($existingPendingMapels as $index => $name) {
                 $mergedPendingMapels[] = $name;
-                $mergedPendingSesi[]   = isset($existingPendingSesi[$index]) ? (int) $existingPendingSesi[$index] : 8;
+                $mergedPendingSesi[]   = isset($existingPendingSesi[$index]) ? (int) $existingPendingSesi[$index] : $defaultSesi;
             }
 
             foreach ((array) $mapelJadwal as $index => $name) {
                 if (!in_array($name, $mergedPendingMapels, true)) {
                     $mergedPendingMapels[] = $name;
-                    $mergedPendingSesi[]   = isset($sesiPerMapel[$index]) ? (int) $sesiPerMapel[$index] : 8;
+                    $mergedPendingSesi[]   = isset($sesiPerMapel[$index]) ? (int) $sesiPerMapel[$index] : $defaultSesi;
                 }
             }
 
@@ -569,6 +589,16 @@ class SiswaController extends Controller
         }
 
         $mapelJadwal  = $request->input('mapel_jadwal', []);
+        if (empty($mapelJadwal)) {
+            foreach ((array) $request->input('mapel', []) as $rm) {
+                if (is_string($rm) && trim($rm) !== '') {
+                    $clean = trim(preg_replace('/\s+\d+x$/i', '', $rm));
+                    if ($clean !== '') {
+                        $mapelJadwal[] = $clean;
+                    }
+                }
+            }
+        }
         $pilihanGuru        = $request->input('pilihan_guru');
         $pilihanGuruInggris = $request->input('pilihan_guru_inggris');
         $stripLabel = fn ($v) => trim(preg_replace('/\s*\(.*?\)\s*$/', '', $v ?? ''));
