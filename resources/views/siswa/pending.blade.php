@@ -82,7 +82,7 @@
             <p class="text-sm text-slate-500 leading-relaxed mb-6">
                 Mohon maaf, akun belajar Anda saat ini <strong>dinonaktifkan oleh Admin</strong> dan tidak dapat mengakses fitur belajar untuk sementara. Jika Anda merasa ini adalah kesalahan, silakan hubungi Admin melalui tombol di bawah ini.
             </p>
-        @else
+        @elseif (!empty($sudahUploadBukti))
             <!-- Top decorative border color -->
             <div class="absolute top-0 left-0 w-full h-2 bg-amber-400"></div>
 
@@ -94,6 +94,32 @@
             <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Pembayaran Ditinjau</h1>
             <p class="text-sm text-slate-500 leading-relaxed mb-6">
                 Terima kasih! Bukti transfer Anda telah kami terima dan saat ini sedang dalam proses verifikasi oleh Admin. Akun belajar Anda akan aktif otomatis maksimal dalam waktu 1x24 jam.
+            </p>
+        @elseif (!empty($hariSudahDitentukan))
+            <!-- Top decorative border color -->
+            <div class="absolute top-0 left-0 w-full h-2 bg-emerald-500"></div>
+
+            <!-- Card status icon -->
+            <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-6 border border-emerald-100 shadow-sm">
+                <i class="fas fa-calendar-check text-3xl"></i>
+            </div>
+
+            <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Jadwal Ditentukan</h1>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Hari bimbingan Anda telah selesai ditentukan oleh Admin! Silakan lakukan pembayaran dengan menekan tombol <strong>"Bayar"</strong> di bawah ini untuk menyelesaikan pendaftaran.
+            </p>
+        @else
+            <!-- Top decorative border color -->
+            <div class="absolute top-0 left-0 w-full h-2 bg-purple-500"></div>
+
+            <!-- Discussion icon -->
+            <div class="w-16 h-16 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-6 border border-purple-100">
+                <i class="fas fa-comments text-3xl"></i>
+            </div>
+
+            <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Diskusi Penentuan Jadwal</h1>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                Pendaftaran berhasil! <strong>Mohon datang ke lokasi untuk diskusi</strong> dan penentuan jadwal hari belajar Anda bersama Admin lembaga bimbingan belajar Paradise of Math.
             </p>
         @endif
 
@@ -109,13 +135,17 @@
                     <span class="px-2.5 py-0.5 bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
                         Nonaktif
                     </span>
-                    @elseif ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer))
+                    @elseif (!empty($sudahUploadBukti))
                     <span class="px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
                         Menunggu Konfirmasi
                     </span>
+                    @elseif (!empty($hariSudahDitentukan))
+                    <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                        Siap Bayar
+                    </span>
                     @else
                     <span class="px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold rounded-full uppercase tracking-wider">
-                        Pending
+                        Menunggu Diskusi Jadwal
                     </span>
                     @endif
                 </div>
@@ -124,8 +154,16 @@
 
         <!-- Call to actions -->
         <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            @if (!empty($hariSudahDitentukan) && empty($sudahUploadBukti) && $siswa->status !== 'nonaktif')
+                <!-- Tombol Bayar (Ditampilkan ketika hari sudah ditentukan oleh Admin) -->
+                <a href="{{ route('siswa.bukti-bayar') }}" 
+                   class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-md shadow-purple-600/20 flex items-center justify-center gap-2">
+                    <i class="fas fa-credit-card"></i> Bayar
+                </a>
+            @endif
+
             <a href="{{ $waUrl }}" 
-            target="_blank" class="btn-wa justify-center">
+               target="_blank" class="btn-wa justify-center">
                 <i class="fab fa-whatsapp text-lg"></i> Hubungi Admin
             </a>
             

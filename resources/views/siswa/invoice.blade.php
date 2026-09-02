@@ -6,12 +6,28 @@
 <div class="content-header no-print">
     <div class="container-fluid">
         <div class="row mb-3 align-items-center">
-            <div class="col-sm-6">
+            <div class="col-sm-5">
                 <h1 class="m-0 font-weight-bold text-purple-950">Invoice Pembayaran</h1>
                 <p class="text-sm text-muted mb-0">Tinjau dan cetak bukti pembayaran bimbingan belajar Anda.</p>
             </div>
-            <div class="col-sm-6 text-sm-right mt-2 mt-sm-0">
-                <button onclick="window.print()" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3 mr-2" style="background-color: #7c3aed; border-color: #7c3aed;">
+            <div class="col-sm-7 text-sm-right mt-2 mt-sm-0 d-flex align-items-center justify-content-sm-end gap-2">
+                <form action="{{ route('siswa.invoice') }}" method="GET" class="d-inline-flex align-items-center gap-1 mr-2">
+                    <select name="month" class="form-control form-control-sm font-weight-bold text-xs rounded-lg" style="height: 34px; border-color: #c4b5fd;" onchange="this.form.submit()">
+                        @foreach(range(1, 12) as $mNum)
+                            <option value="{{ $mNum }}" {{ $mNum == ($month ?? date('n')) ? 'selected' : '' }}>
+                                {{ \Carbon\Carbon::create(2026, $mNum, 1)->locale('id')->isoFormat('MMMM') }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <select name="year" class="form-control form-control-sm font-weight-bold text-xs rounded-lg" style="height: 34px; border-color: #c4b5fd;" onchange="this.form.submit()">
+                        @foreach(range(date('Y') - 1, date('Y') + 2) as $yNum)
+                            <option value="{{ $yNum }}" {{ $yNum == ($year ?? date('Y')) ? 'selected' : '' }}>
+                                {{ $yNum }}
+                            </option>
+                        @endforeach
+                    </select>
+                </form>
+                <button onclick="window.print()" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">
                     <i class="fas fa-print mr-1.5"></i> Cetak / Simpan PDF
                 </button>
                 <a href="{{ route('siswa.dashboard') }}" class="btn btn-sm btn-light border rounded-lg font-weight-bold text-purple-950 px-3">
@@ -60,7 +76,7 @@
                         <tr>
                             <td class="p-1 text-muted" style="border: 1px solid #cbd5e1; font-size: 9px;">PERIODE :</td>
                             <td class="p-1 font-weight-bold text-uppercase" style="border: 1px solid #cbd5e1;">
-                                {{ $tanggalMulai ? strtoupper(date('M\'y', strtotime($tanggalMulai))) : strtoupper(date('M\'y')) }}
+                                {{ $periodeText ?? strtoupper(date('M\'y')) }}
                             </td>
                         </tr>
                     </table>
@@ -87,30 +103,16 @@
                             $listGurus = count($gurus) > 0 ? $gurus : ['YULIA'];
                             $numMapels = count($listMapels);
 
-                            // Gunakan sesi ASLI per mapel jika tersedia (bukan dibagi rata)
-                            $sessionsPerMapel = [];
-                            if (!empty($sesiPerMapel) && count($sesiPerMapel) === $numMapels) {
-                                foreach ($sesiPerMapel as $idx => $sVal) {
-                                    $sessionsPerMapel[$idx] = (int) $sVal;
-                                }
-                            } else {
-                                // Fallback lama: bagi rata (hanya dipakai kalau data sesi_per_mapel tidak tersedia/tidak sinkron)
-                                $totalSesi = $jumlahPertemuan ?: 9;
-                                $baseSesi = floor($totalSesi / $numMapels);
-                                $remainder = $totalSesi % $numMapels;
-                                for ($i = 0; $i < $numMapels; $i++) {
-                                    $sessionsPerMapel[$i] = $baseSesi + ($i < $remainder ? 1 : 0);
-                                }
-                            }
+                            // Gunakan sesi full bulan dari controller
+                            $sessionsPerMapel = $sesiPerMapelBulanIni ?? [];
                         @endphp
 
                         @for($i = 0; $i < $numMapels; $i++)
                             @php
                                 $mapelName = strtoupper($listMapels[$i]);
-                                // Strip subjects prefix from guru names
                                 $guruName = isset($listGurus[$i]) ? preg_replace('/^(math|english|ipa|ips):\s*/i', '', $listGurus[$i]) : (isset($listGurus[0]) ? preg_replace('/^(math|english|ipa|ips):\s*/i', '', $listGurus[0]) : 'TUTOR');
                                 $guruName = strtoupper($guruName);
-                                $sesiCount = $sessionsPerMapel[$i];
+                                $sesiCount = $sessionsPerMapel[$i] ?? 4;
                                 $subtotal = $hargaPerSesi * $sesiCount;
 
                                 // Format hari khusus mapel ini jika ada per-mapel data

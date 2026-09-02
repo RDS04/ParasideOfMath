@@ -649,6 +649,38 @@ class AdminController extends Controller
     }
 
     /**
+     * Update tanggal mulai bimbel siswa per mata pelajaran.
+     */
+    public function updateTanggalMulai(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'tanggal_mulai_per_mapel' => ['nullable', 'array'],
+            'tanggal_mulai_per_mapel.*' => ['nullable', 'date'],
+        ]);
+
+        $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+
+        $tanggalInput = $request->input('tanggal_mulai_per_mapel', []);
+        $biodata['tanggal_mulai_per_mapel'] = $tanggalInput;
+
+        $filtered = array_filter($tanggalInput);
+        if (!empty($filtered)) {
+            $biodata['tanggal_mulai'] = min($filtered);
+        }
+
+        $siswa->update([
+            'biodata' => $biodata,
+        ]);
+
+        return back()->with('success', 'Tanggal mulai bimbingan per mata pelajaran untuk ' . $siswa->name . ' berhasil diperbarui!');
+    }
+
+    /**
      * Tampilkan Halaman Kalender Master Admin untuk seluruh jadwal siswa.
      */
     public function showKalender()

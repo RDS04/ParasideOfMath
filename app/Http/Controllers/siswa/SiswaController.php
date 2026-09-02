@@ -132,13 +132,29 @@ class SiswaController extends Controller
                 return redirect()->route('siswa.biodata')
                     ->with('error', 'Pendaftaran Anda sebelumnya ditolak oleh Admin. Seluruh data registrasi & biodata telah dibersihkan. Silakan isi kembali biodata Anda dari awal.');
             }
-            // Siswa nonaktif tetap harus mendarat di halaman ini, apapun kondisi biodata/bukti_transfer-nya
-            if ($siswa->status !== 'nonaktif' && (empty($siswa->biodata) || empty($siswa->bukti_transfer))) {
+            // Siswa nonaktif tetap harus mendarat di halaman ini, apapun kondisi biodatanya
+            if ($siswa->status !== 'nonaktif' && empty($siswa->biodata)) {
                 return redirect()->route('siswa.biodata');
             }
         }
 
         $paket = $siswa ? PaketBelajar::find($siswa->paket_id) : null;
+        $biodata = $siswa->biodata ?? [];
+
+        // Cek apakah Admin sudah menentukan hari bimbingan
+        $hariPerMapel = $biodata['hari_per_mapel'] ?? [];
+        $hariSudahDitentukan = false;
+
+        if (!empty($hariPerMapel) && is_array($hariPerMapel)) {
+            foreach ($hariPerMapel as $mIdx => $hList) {
+                if (is_array($hList) && count(array_filter($hList)) > 0) {
+                    $hariSudahDitentukan = true;
+                    break;
+                }
+            }
+        }
+
+        $sudahUploadBukti = ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer));
 
         if ($siswa && $siswa->status === 'nonaktif') {
             $waMessage = "Halo Admin Paradise of Math,\n\nSaya ingin menanyakan terkait akun belajar saya yang saat ini berstatus *nonaktif*. Berikut data diri saya:\n\n";
@@ -149,7 +165,7 @@ class SiswaController extends Controller
             }
             $waMessage .= "\nMohon informasi terkait alasan penonaktifan dan apakah akun saya bisa diaktifkan kembali. Terima kasih!";
         } else {
-            $waMessage = "Halo Admin Paradise of Math,\n\nSaya telah mengunggah bukti transfer pembayaran pendaftaran bimbingan belajar. Berikut adalah rincian data diri saya:\n\n";
+            $waMessage = "Halo Admin Paradise of Math,\n\nSaya telah melakukan pendaftaran bimbingan belajar. Berikut adalah rincian data diri saya:\n\n";
             if ($siswa) {
                 $waMessage .= "• Nama: " . $siswa->name . "\n";
                 $waMessage .= "• Email: " . $siswa->email . "\n";
@@ -160,12 +176,12 @@ class SiswaController extends Controller
             if ($siswa && $siswa->tipe_paket) {
                 $waMessage .= "• Pilihan Kelas: " . $siswa->tipe_paket . "\n";
             }
-            $waMessage .= "\nMohon bantuan untuk melakukan verifikasi bukti transfer dan aktivasi akun belajar saya. Terima kasih!";
+            $waMessage .= "\nMohon informasi terkait penentuan jadwal bimbingan belajar saya. Terima kasih!";
         }
 
         $waUrl = "https://wa.me/6289675053537?text=" . rawurlencode($waMessage);
 
-        return view('siswa.pending', compact('siswa', 'paket', 'waUrl'));
+        return view('siswa.pending', compact('siswa', 'paket', 'waUrl', 'hariSudahDitentukan', 'sudahUploadBukti'));
     }
 
     /**
@@ -515,65 +531,13 @@ class SiswaController extends Controller
     }
 
     /**
-     * Proses Submission Pembayaran Siswa (Rekening / Tunai).
+     * Konfirmasi Pendaftaran Paket & Mapel Siswa (Lanjut ke Status Pending untuk Diskusi).
      */
     public function submitPayment(Request $request)
     {
         $siswa = auth()->guard('siswa')->user();
         if (!$siswa) {
             return redirect()->route('login')->with('error', 'Silakan masuk terlebih dahulu.');
-        }
-
-        // Cegah submit ganda untuk request tambah mapel yang masih diproses admin
-        if ($siswa->status === 'active') {
-            $adaPending = RiwayatPembayaran::where('siswa_id', $siswa->id)
-                ->where('status', 'under_review')
-                ->exists();
-
-            if ($adaPending) {
-                return redirect()->route('siswa.tambah-pelajaran')
-                    ->with('error', 'Anda masih memiliki pengajuan tambah mapel yang sedang menunggu persetujuan Admin. Mohon tunggu hingga diproses sebelum mengajukan lagi.');
-            }
-        }
-        
-        $paymentMethod = $request->input('payment_method', 'bank');
-
-        $rules = [
-            'paket_id'       => ['nullable'],
-            'tipe_paket'     => ['nullable'],
-            'payment_method' => ['required', 'in:bank,ewallet,tunai'],
-        ];
-
-
-        if ($paymentMethod !== 'tunai') {
-            $rules['bukti_transfer'] = ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'];
-        } else {
-            $rules['bukti_transfer'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'];
-        }
-
-        $request->validate($rules, [
-            'bukti_transfer.required' => 'Bukti transfer pembayaran wajib diunggah untuk metode transfer.',
-            'bukti_transfer.file'     => 'Bukti transfer harus berupa file valid.',
-            'bukti_transfer.mimes'    => 'Format file bukti transfer harus berupa JPG, PNG, atau PDF.',
-            'bukti_transfer.max'      => 'Ukuran file bukti transfer maksimal adalah 2MB.',
-        ]);
-
-        $siswa = auth()->guard('siswa')->user();
-        if (!$siswa) {
-            return redirect()->route('login')->with('error', 'Silakan masuk terlebih dahulu.');
-        }
-
-        $buktiPath = 'TUNAI_CASH_PAYMENT';
-
-        if ($request->hasFile('bukti_transfer')) {
-            $file     = $request->file('bukti_transfer');
-            $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
-
-            if (!file_exists(public_path('uploads/bukti_transfer'))) {
-                mkdir(public_path('uploads/bukti_transfer'), 0777, true);
-            }
-            $file->move(public_path('uploads/bukti_transfer'), $filename);
-            $buktiPath = 'uploads/bukti_transfer/' . $filename;
         }
 
         $paketId = $request->paket_id ?: ($siswa->paket_id ?: 1);
@@ -604,111 +568,238 @@ class SiswaController extends Controller
         $stripLabel = fn ($v) => trim(preg_replace('/\s*\(.*?\)\s*$/', '', $v ?? ''));
 
         $sesiPerMapel = $request->input('sesi', []);
-        $hariPerMapel = $request->input('hari', []);           // ← tambahkan
-        $tanggalPerMapel = $request->input('tanggal_mulai', []); // ← tambahkan
+        if (empty($sesiPerMapel) && !empty($request->input('mapel', []))) {
+            foreach ((array) $request->input('mapel', []) as $idx => $rm) {
+                if (is_string($rm) && preg_match('/(\d+)x$/i', trim($rm), $matches)) {
+                    $sesiPerMapel[$idx] = ((int) $matches[1]) * 4;
+                } else {
+                    $mNameClean = trim(preg_replace('/\s+\d+x$/i', '', $rm));
+                    $mObj = \App\Models\Mapel::where('nama_mapel', $mNameClean)->first();
+                    $shift = $mObj ? ($mObj->shift ?? 1) : 1;
+                    $sesiPerMapel[$idx] = $shift * 4;
+                }
+            }
+        }
+        if (empty($sesiPerMapel) && !empty($mapelJadwal)) {
+            foreach ($mapelJadwal as $idx => $mName) {
+                $mObj = \App\Models\Mapel::where('nama_mapel', $mName)->first();
+                $shift = $mObj ? ($mObj->shift ?? 1) : 1;
+                $sesiPerMapel[$idx] = $shift * 4;
+            }
+        }
 
         if (empty($mapelJadwal) && isset($siswa->biodata['pending_mapel_jadwal'])) {
             $mapelJadwal = $siswa->biodata['pending_mapel_jadwal'];
         }
-        if (empty($sesiPerMapel) && isset($siswa->biodata['pending_sesi_per_mapel'])) {
-            $sesiPerMapel = $siswa->biodata['pending_sesi_per_mapel'];
-        }
-
-        if (empty($mapelJadwal) && $siswa->status !== 'active' && isset($siswa->biodata['mapel_jadwal'])) {
+        if (empty($mapelJadwal) && isset($siswa->biodata['mapel_jadwal'])) {
             $mapelJadwal = $siswa->biodata['mapel_jadwal'];
-        }
-        if (empty($sesiPerMapel) && $siswa->status !== 'active' && isset($siswa->biodata['sesi_per_mapel'])) {
-            $sesiPerMapel = $siswa->biodata['sesi_per_mapel'];
         }
 
         if (!is_array($mapelJadwal))  $mapelJadwal  = [];
         if (!is_array($sesiPerMapel)) $sesiPerMapel = [];
 
-        $totalSesi = array_sum(array_map('intval', $sesiPerMapel));
-        if ($totalSesi === 0) $totalSesi = 1;
-
-        $extraDetails = [];
-        if (!empty($mapelJadwal)) {
-            $extraDetails[] = 'Mapel: ' . implode(', ', $mapelJadwal);
-        }
-        $extraDetails[] = 'Total Sesi: ' . $totalSesi . 'x';
-        $extraDetails[] = 'Metode: ' . strtoupper($paymentMethod);
-
-        $finalTipePaket = $detailString;
-        if (!empty($extraDetails)) {
-            $finalTipePaket .= ' (' . implode(' | ', $extraDetails) . ')';
-        }
-
         $biodata = $siswa->biodata ?? [];
-
-        if ($siswa->status === 'active') {
-            $biodata['pending_mapel_jadwal'] = array_values($mapelJadwal);
-            $biodata['pending_sesi_per_mapel'] = array_map('intval', $sesiPerMapel);
-            $biodata['pending_jumlah_pertemuan'] = $totalSesi;
-            $biodata['pending_hari_per_mapel'] = $hariPerMapel;             // ← tambahkan
-            $biodata['pending_tanggal_mulai_per_mapel'] = $tanggalPerMapel; // ← tambahkan
-        } else {
-            $biodata['mapel_jadwal'] = array_values($mapelJadwal);
-            $biodata['sesi_per_mapel'] = array_map('intval', $sesiPerMapel);
-            $biodata['jumlah_pertemuan'] = $totalSesi;
-            $biodata['hari_per_mapel'] = $hariPerMapel;             // ← tambahkan
-            $biodata['tanggal_mulai_per_mapel'] = $tanggalPerMapel; // ← tambahkan
-        }
+        $biodata['mapel_jadwal'] = array_values($mapelJadwal);
+        $biodata['sesi_per_mapel'] = array_values($sesiPerMapel);
+        $biodata['jumlah_pertemuan'] = array_sum($sesiPerMapel) ?: 4;
 
         $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
-
-        $mapelNamesToCheck = !empty($mapelJadwal) ? $mapelJadwal : [];
-
-        foreach ($mapelNamesToCheck as $mName) {
+        foreach ($mapelJadwal as $mName) {
             $mNameLower = strtolower($mName);
-
             if ($pilihanGuru && $pilihanGuru !== 'Karyawan' && str_contains($mNameLower, 'matematika')) {
                 $cleanName = $stripLabel($pilihanGuru);
-                $guruExists = \App\Models\User::where('name', $cleanName)->where('role', 'guru')->exists();
-                if ($guruExists) {
+                if (\App\Models\User::where('name', $cleanName)->where('role', 'guru')->exists()) {
                     $tutorPerMapel[$mName] = $cleanName;
                 }
             }
-
             if ($pilihanGuruInggris && $pilihanGuruInggris !== 'Karyawan' && str_contains($mNameLower, 'inggris')) {
                 $cleanName = $stripLabel($pilihanGuruInggris);
-                $guruExists = \App\Models\User::where('name', $cleanName)->where('role', 'guru')->exists();
-                if ($guruExists) {
+                if (\App\Models\User::where('name', $cleanName)->where('role', 'guru')->exists()) {
                     $tutorPerMapel[$mName] = $cleanName;
                 }
             }
         }
-
         if (!empty($tutorPerMapel)) {
             $biodata['tutor_per_mapel'] = $tutorPerMapel;
         }
 
-        $biodata['payment_method']   = $paymentMethod;
+        $siswa->update([
+            'paket_id'   => $paketId,
+            'tipe_paket' => $detailString,
+            'status'     => $siswa->status === 'active' ? 'active' : 'pending',
+            'biodata'    => $biodata,
+        ]);
+
+        return redirect()->route('siswa.pending')
+            ->with('info', 'Pendaftaran Anda berhasil dicatat! Silakan datang ke lokasi bimbingan untuk diskusi penentuan jadwal.');
+    }
+
+    /**
+     * Tampilkan Halaman Baru Bukti Bayar Siswa (Dengan Pilihan Metode & Perhitungan Dinamis).
+     */
+    public function showBuktiBayar()
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login');
+        }
+        if ($siswa->status === 'active') {
+            return redirect()->route('siswa.dashboard');
+        }
+
+        $biodata = $siswa->biodata ?? [];
+        $hariPerMapel = $biodata['hari_per_mapel'] ?? [];
+
+        // Cek apakah Admin sudah menentukan hari
+        $hariSudahDitentukan = false;
+        if (!empty($hariPerMapel) && is_array($hariPerMapel)) {
+            foreach ($hariPerMapel as $mIdx => $hList) {
+                if (is_array($hList) && count(array_filter($hList)) > 0) {
+                    $hariSudahDitentukan = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$hariSudahDitentukan) {
+            return redirect()->route('siswa.pending')->with('error', 'Hari bimbingan Anda belum ditentukan oleh Admin.');
+        }
+
+        $paket = PaketBelajar::find($siswa->paket_id) ?? PaketBelajar::first();
+        $detailString = $siswa->tipe_paket ?? ($paket ? $paket->detail_1 : '');
+        $harga = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
+
+        $mapelJadwal = $biodata['mapel_jadwal'] ?? [];
+
+        // Hitung kemunculan hari bimbingan dalam bulan berjalan
+        $currentMonth = \Carbon\Carbon::now();
+        $startOfMonth = $currentMonth->copy()->startOfMonth();
+        $endOfMonth   = $currentMonth->copy()->endOfMonth();
+
+        $dayMap = [
+            'senin' => 1, 'selasa' => 2, 'rabu' => 3, 'kamis' => 4,
+            'jumat' => 5, 'sabtu' => 6, 'minggu' => 0
+        ];
+
+        $rincianMapel = [];
+        $totalSesiBulanIni = 0;
+
+        foreach ($mapelJadwal as $idx => $namaMapel) {
+            $assignedDays = $hariPerMapel[$idx] ?? [];
+            if (!is_array($assignedDays)) {
+                $assignedDays = [$assignedDays];
+            }
+            $assignedDaysClean = array_values(array_filter($assignedDays));
+
+            // Hitung berapa kali hari-hari ini muncul dalam bulan berjalan
+            $countMapelInMonth = 0;
+            $period = \Carbon\CarbonPeriod::create($startOfMonth, $endOfMonth);
+
+            foreach ($period as $date) {
+                $dayOfWeek = $date->dayOfWeek; // 0 (Sun) - 6 (Sat)
+                foreach ($assignedDaysClean as $h) {
+                    $hLower = strtolower(trim($h));
+                    if (isset($dayMap[$hLower]) && $dayMap[$hLower] === $dayOfWeek) {
+                        $countMapelInMonth++;
+                    }
+                }
+            }
+
+            if ($countMapelInMonth === 0) {
+                $countMapelInMonth = 1;
+            }
+
+            $subtotalMapel = $harga * $countMapelInMonth;
+            $totalSesiBulanIni += $countMapelInMonth;
+
+            $rincianMapel[] = [
+                'nama_mapel'  => $namaMapel,
+                'hari_list'   => implode(', ', $assignedDaysClean),
+                'jumlah_sesi' => $countMapelInMonth,
+                'subtotal'    => $subtotalMapel,
+            ];
+        }
+
+        if ($totalSesiBulanIni === 0) {
+            $totalSesiBulanIni = 1;
+        }
+
+        $totalBiayaBulanIni = $harga * $totalSesiBulanIni;
+
+        $banks    = \App\Models\Rekening::where('tipe', 'bank')->get();
+        $ewallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
+
+        return view('siswa.bukti_bayar', compact(
+            'siswa', 'paket', 'harga', 'rincianMapel',
+            'totalSesiBulanIni', 'totalBiayaBulanIni',
+            'banks', 'ewallets', 'currentMonth'
+        ));
+    }
+
+    /**
+     * Submit Bukti Bayar Siswa.
+     */
+    public function submitBuktiBayar(Request $request)
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login')->with('error', 'Silakan masuk terlebih dahulu.');
+        }
+
+        $request->validate([
+            'payment_method' => ['required', 'in:bank,ewallet,tunai'],
+            'bukti_transfer' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+        ], [
+            'bukti_transfer.required' => 'Bukti transfer pembayaran wajib diunggah.',
+            'bukti_transfer.file'     => 'Bukti transfer harus berupa file valid.',
+            'bukti_transfer.mimes'    => 'Format file bukti transfer harus berupa JPG, PNG, atau PDF.',
+            'bukti_transfer.max'      => 'Ukuran file bukti transfer maksimal adalah 2MB.',
+        ]);
+
+        $paymentMethod = $request->input('payment_method', 'bank');
+        $buktiPath = '';
+
+        if ($request->hasFile('bukti_transfer')) {
+            $file     = $request->file('bukti_transfer');
+            $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+
+            if (!file_exists(public_path('uploads/bukti_transfer'))) {
+                mkdir(public_path('uploads/bukti_transfer'), 0777, true);
+            }
+            $file->move(public_path('uploads/bukti_transfer'), $filename);
+            $buktiPath = 'uploads/bukti_transfer/' . $filename;
+        }
+
+        $paketId = $siswa->paket_id ?: 1;
+        $paket   = PaketBelajar::find($paketId);
+        $harga   = $this->extractPrice($siswa->tipe_paket, $paket ? $paket->harga_max : 450000);
+
+        $biodata = $siswa->biodata ?? [];
+        $totalSesi  = (int) $request->input('total_sesi', 4);
+        $totalHarga = (int) $request->input('total_harga', $harga * $totalSesi);
+
+        $biodata['payment_method'] = $paymentMethod;
 
         $siswa->update([
-            'paket_id'       => $paketId,
-            'tipe_paket'     => $finalTipePaket,
             'bukti_transfer' => $buktiPath,
-            'status'         => $siswa->status === 'active' ? 'active' : 'under_review',
+            'status'         => 'under_review',
             'biodata'        => $biodata,
         ]);
 
         RiwayatPembayaran::create([
             'siswa_id'            => $siswa->id,
             'paket_id'            => $paketId,
-            'tipe_paket_snapshot' => $finalTipePaket,
+            'tipe_paket_snapshot' => $siswa->tipe_paket ?? 'Bimbingan Belajar',
             'bukti_transfer'      => $buktiPath,
             'payment_method'      => $paymentMethod,
             'jumlah_sesi'         => $totalSesi,
-            'total_harga'         => $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000) * $totalSesi,
+            'total_harga'         => $totalHarga,
             'status'              => 'under_review',
         ]);
 
-        $title   = "Pemberitahuan Pembayaran Siswa";
-        $message = "Siswa " . $siswa->name . " telah mengajukan pembayaran via " . strtoupper($paymentMethod) . " untuk bimbingan belajar.";
-        $link    = $siswa->status === 'active'
-            ? route('admin.siswa.requests.index')
-            : route('admin.siswa.approve.index');
+        $title   = "Pemberitahuan Bukti Transfer Siswa";
+        $message = "Siswa " . $siswa->name . " telah mengunggah bukti transfer pembayaran via " . strtoupper($paymentMethod) . ".";
+        $link    = route('admin.siswa.detail', $siswa->id);
 
         \Illuminate\Support\Facades\DB::table('notifications')->insert([
             'title'      => $title,
@@ -726,13 +817,8 @@ class SiswaController extends Controller
             \Illuminate\Support\Facades\Log::error("Gagal mengirim FCM: " . $e->getMessage());
         }
 
-        if ($siswa->status === 'active') {
-            return redirect()->route('siswa.tambah-pelajaran')
-                ->with('success', 'Pembayaran (' . strtoupper($paymentMethod) . ') telah berhasil dikirim! Verifikasi admin akan dilakukan dalam 1x24 jam.');
-        }
-
         return redirect()->route('siswa.pending')
-            ->with('success', 'Pembayaran (' . strtoupper($paymentMethod) . ') telah berhasil dikirim! Verifikasi admin akan dilakukan dalam 1x24 jam.');
+            ->with('success', 'Bukti transfer pembayaran berhasil dikirim! Menunggu verifikasi dari Admin.');
     }
 
     /**
@@ -867,9 +953,26 @@ class SiswaController extends Controller
             $hariPertemuan = array_unique($hariPertemuan);
         }
 
+        // Pastikan sesiPerMapel & jumlahPertemuan terisi jika kosong
+        if (!empty($mapelJadwal) && is_array($mapelJadwal)) {
+            foreach ($mapelJadwal as $idx => $namaMapel) {
+                if (empty($sesiPerMapel[$idx]) || (int)$sesiPerMapel[$idx] <= 0) {
+                    $mObj = \App\Models\Mapel::where('nama_mapel', $namaMapel)->first();
+                    $shift = $mObj ? ($mObj->shift ?? 1) : 1;
+                    $sesiPerMapel[$idx] = $shift * 4;
+                }
+            }
+        }
+        if (empty($jumlahPertemuan) || (int)$jumlahPertemuan <= 0) {
+            $jumlahPertemuan = !empty($sesiPerMapel) ? array_sum(array_map('intval', $sesiPerMapel)) : 4;
+        }
+
         // Tanggal mulai fallback: ambil yang terlama dari per-mapel
         if (!$tanggalMulai && !empty($tanggalPerMapel)) {
-            $tanggalMulai = min(array_filter($tanggalPerMapel));
+            $filteredDates = array_filter($tanggalPerMapel);
+            if (!empty($filteredDates)) {
+                $tanggalMulai = min($filteredDates);
+            }
         }
 
         if (!$tanggalMulai) {
@@ -928,7 +1031,7 @@ class SiswaController extends Controller
     /**
      * Tampilkan Halaman Invoice Belajar Siswa.
      */
-    public function showInvoice()
+    public function showInvoice(Request $request)
     {
         $siswa = auth()->guard('siswa')->user();
         if ($redirect = $this->checkActiveStatus($siswa)) {
@@ -938,16 +1041,62 @@ class SiswaController extends Controller
         $paket = $siswa->paket;
         $biodata = $siswa->biodata ?? [];
 
-        // Parse details for invoice
+        // Dynamic Month & Year selection (default: current month)
+        $month = (int) $request->input('month', date('n'));
+        $year  = (int) $request->input('year', date('Y'));
+
+        $month = max(1, min(12, $month));
+        $year  = max(2020, min(2050, $year));
+
+        $startOfMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endOfMonth   = $startOfMonth->copy()->endOfMonth();
+
         $hariPertemuan   = $biodata['hari_pertemuan'] ?? [];
         $hariPerMapel    = $biodata['hari_per_mapel'] ?? [];
-        $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
         $tanggalMulai    = $biodata['tanggal_mulai'] ?? null;
-        $sesiPerMapel    = $biodata['sesi_per_mapel'] ?? [];   // ← TAMBAHAN: sesi asli per mapel
+        $mapelJadwal     = $biodata['mapel_jadwal'] ?? [];
 
-        // ... (bagian fallback parsing dari tipe_paket tetap sama) ...
+        $mapels = [];
+        if (!empty($mapelJadwal)) {
+            $mapels = $mapelJadwal;
+        } elseif ($siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+            $mapels = array_map('trim', explode(',', $matches[1]));
+        }
 
-        // Get single session price
+        $dayMap = [
+            'senin' => 1, 'selasa' => 2, 'rabu' => 3, 'kamis' => 4,
+            'jumat' => 5, 'sabtu' => 6, 'minggu' => 0
+        ];
+
+        // Hitung total sesi PER MAPEL untuk 1 bulan penuh kalender (Full Month)
+        $sesiPerMapelBulanIni = [];
+        foreach ($mapels as $idx => $mapelName) {
+            $assignedDays = $hariPerMapel[$idx] ?? [];
+            if (empty($assignedDays) && !empty($hariPertemuan)) {
+                $assignedDays = $hariPertemuan;
+            }
+            if (!is_array($assignedDays)) {
+                $assignedDays = [$assignedDays];
+            }
+            $assignedDaysClean = array_values(array_filter($assignedDays));
+
+            $countMapelInMonth = 0;
+            if (!empty($assignedDaysClean)) {
+                $period = \Carbon\CarbonPeriod::create($startOfMonth, $endOfMonth);
+                foreach ($period as $date) {
+                    $dayOfWeek = $date->dayOfWeek; // 0 (Sun) - 6 (Sat)
+                    foreach ($assignedDaysClean as $h) {
+                        $hLower = strtolower(trim($h));
+                        if (isset($dayMap[$hLower]) && $dayMap[$hLower] === $dayOfWeek) {
+                            $countMapelInMonth++;
+                        }
+                    }
+                }
+            }
+            $sesiPerMapelBulanIni[$idx] = $countMapelInMonth > 0 ? $countMapelInMonth : 4;
+        }
+
+        // Single session price
         $detailString = '';
         if ($siswa->tipe_paket) {
             if ($paket) {
@@ -959,45 +1108,23 @@ class SiswaController extends Controller
         }
         $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
 
-        // Total price
-        $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
+        // Total sesi & harga bulan terpilih
+        $totalSesiBulanIni = array_sum($sesiPerMapelBulanIni);
+        $totalHarga = $hargaPerSesi * $totalSesiBulanIni;
 
-        // Get mapel
-        $mapels = [];
-        if (!empty($biodata['mapel_jadwal'])) {
-            $mapels = $biodata['mapel_jadwal'];
-        } elseif ($siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-            $mapels = array_map('trim', explode(',', $matches[1]));
-        }
-
-        // Get guru (versi yang sudah diperbaiki sebelumnya, per-mapel dari tutor_per_mapel)
+        // Guru
         $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
-        $guruFallbackMap = [];
-        if ($siswa->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $siswa->tipe_paket, $m)) {
-            $guruParts = array_map('trim', explode(',', $m[1]));
-            foreach ($guruParts as $part) {
-                if (str_contains($part, ':')) {
-                    [$pMapel, $pGuru] = array_map('trim', explode(':', $part, 2));
-                    $guruFallbackMap[$pMapel] = $pGuru;
-                }
-            }
-        }
-
         $gurus = [];
         foreach ($mapels as $idx => $mapelName) {
-            if (!empty($tutorPerMapel[$mapelName])) {
-                $gurus[$idx] = $tutorPerMapel[$mapelName];
-            } elseif (!empty($guruFallbackMap[$mapelName])) {
-                $gurus[$idx] = $guruFallbackMap[$mapelName];
-            } else {
-                $gurus[$idx] = 'Belum Ditentukan';
-            }
+            $gurus[$idx] = $tutorPerMapel[$mapelName] ?? 'Belum Ditentukan';
         }
 
+        $periodeText = strtoupper($startOfMonth->locale('id')->isoFormat('MMM\'YY'));
+
         return view('siswa.invoice', compact(
-            'siswa', 'paket', 'hariPertemuan', 'hariPerMapel', 'jumlahPertemuan',
-            'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'mapels', 'gurus',
-            'sesiPerMapel' // ← TAMBAHAN
+            'siswa', 'paket', 'hariPertemuan', 'hariPerMapel', 'hargaPerSesi',
+            'totalHarga', 'mapels', 'gurus', 'sesiPerMapelBulanIni', 'totalSesiBulanIni',
+            'month', 'year', 'periodeText', 'tanggalMulai'
         ));
     }
 

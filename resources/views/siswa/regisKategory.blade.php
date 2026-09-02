@@ -192,7 +192,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach($availableMapels as $mapel)
                                     @php
-                                        $sesiDefault = $isTambahMode ? ($mapel->shift ?? 1) : 4;
+                                        $sesiDefault = $mapel->shift ?? 1;
                                     @endphp
                                     <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
                                         <input type="checkbox" name="mapel[]"

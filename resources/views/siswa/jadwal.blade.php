@@ -158,7 +158,7 @@
                                 </div>
                                 <div class="mt-2">
                                     <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Total Sesi</span>
-                                    <span class="font-bold text-sm">{{ $jumlahPertemuan ?? '-' }}x Pertemuan</span>
+                                    <span class="font-bold text-sm total-sesi-val">{{ $jumlahPertemuan ?? '-' }}x Pertemuan</span>
                                 </div>
                                 <div class="mt-2">
                                     <span class="text-purple-300 font-semibold block uppercase tracking-wider text-[10px]">Sesi Berakhir</span>
@@ -177,7 +177,7 @@
                     <!-- Agenda Sesi Belajar -->
                     <div class="card border-0 shadow-sm" style="border-radius: 20px;">
                         <div class="card-header bg-white border-0 py-3">
-                            <h6 class="card-title font-weight-bold text-purple-950 mb-0">Agenda Semua Sesi Belajar ({{ $jumlahPertemuan ?: 0 }} Sesi)</h6>
+                            <h6 id="agendaHeaderTitle" class="card-title font-weight-bold text-purple-950 mb-0">Agenda Semua Sesi Belajar ({{ $jumlahPertemuan ?: 0 }} Sesi)</h6>
                         </div>
                         <div class="card-body p-0 max-h-[300px] overflow-y-auto" id="agendaListContainer" style="max-height: 300px; overflow-y: auto;">
                             <!-- Agenda sessions rendered dynamically here -->
@@ -412,71 +412,69 @@
             return cleaned.join(', ') || 'Belum ditentukan oleh Admin';
         }
 
-        // ── Build scheduledDates dari per-mapel atau fallback ──
-        const scheduledDates = []; // { dateStr, sessionIndex, dayName, dateObj, mapelName, mapelIdx, totalSesi }
+        // ── Dynamic Ongoing Monthly Schedule Generator ──
+        function getScheduledDatesForMonth(viewMonth, viewYear) {
+            const results = [];
+            const totalDaysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+            const mapelList = mapelJadwal.length > 0 ? mapelJadwal : ['Bimbingan'];
 
-        function buildSchedule(days, startStr, limitSesi, mapelName, mapelIdx) {
-            const scheduledDayNums = days.map(d => dayMap[d] ?? -1).filter(n => n >= 0);
-            const startDate = new Date(startStr);
-            startDate.setHours(0,0,0,0);
-            if (isNaN(startDate.getTime()) || scheduledDayNums.length === 0 || limitSesi === 0) return;
-
-            let count = 0;
-            let tempDate = new Date(startDate);
-            for (let d = 0; d < 730 && count < limitSesi; d++) {
-                if (scheduledDayNums.includes(tempDate.getDay())) {
-                    const y = tempDate.getFullYear();
-                    const m = String(tempDate.getMonth()+1).padStart(2,'0');
-                    const dd = String(tempDate.getDate()).padStart(2,'0');
-                    scheduledDates.push({
-                        dateStr: `${y}-${m}-${dd}`,
-                        sessionIndex: ++count,
-                        dayName: dayNames[tempDate.getDay()],
-                        dateObj: new Date(tempDate),
-                        mapelName: mapelName,
-                        mapelIdx: mapelIdx,
-                        totalSesi: limitSesi
-                    });
+            mapelList.forEach((mapel, idx) => {
+                let days = [];
+                if (mapelJadwal.length > 0) {
+                    const hariRaw = hariPerMapelRaw[idx] ?? {};
+                    days = Array.isArray(hariRaw) ? hariRaw : Object.values(hariRaw).filter(h => h);
+                } else {
+                    days = legacyDays;
                 }
-                tempDate.setDate(tempDate.getDate() + 1);
-            }
-        }
+                const scheduledDayNums = days.map(d => dayMap[d] ?? -1).filter(n => n >= 0);
+                if (scheduledDayNums.length === 0) return;
 
-        if (mapelJadwal.length > 0) {
-            // Mode per-mapel baru
-            mapelJadwal.forEach((mapel, idx) => {
-                const hariRaw  = hariPerMapelRaw[idx] ?? {};
-                const days     = Array.isArray(hariRaw) ? hariRaw : Object.values(hariRaw).filter(h => h);
-                const startStr = tanggalPerMapel[idx] ?? legacyStart;
-                const limit    = parseInt(sesiPerMapel[idx] ?? 0);
-                buildSchedule(days, startStr, limit, mapel, idx);
+                const startStr = (mapelJadwal.length > 0 ? (tanggalPerMapel[idx] ?? legacyStart) : legacyStart);
+                const startDate = new Date(startStr);
+                startDate.setHours(0,0,0,0);
+
+                // Pass 1: Total Sesi di bulan (viewMonth, viewYear)
+                let totalSesiInMonth = 0;
+                for (let d = 1; d <= totalDaysInMonth; d++) {
+                    const currentDate = new Date(viewYear, viewMonth, d);
+                    currentDate.setHours(0,0,0,0);
+                    if (!isNaN(startDate.getTime()) && currentDate < startDate) continue;
+                    if (scheduledDayNums.includes(currentDate.getDay())) {
+                        totalSesiInMonth++;
+                    }
+                }
+
+                if (totalSesiInMonth === 0) {
+                    totalSesiInMonth = parseInt(sesiPerMapel[idx] ?? 4) || 4;
+                }
+
+                // Pass 2: Push sesi
+                let sessionCount = 0;
+                for (let d = 1; d <= totalDaysInMonth; d++) {
+                    const currentDate = new Date(viewYear, viewMonth, d);
+                    currentDate.setHours(0,0,0,0);
+                    if (!isNaN(startDate.getTime()) && currentDate < startDate) continue;
+
+                    if (scheduledDayNums.includes(currentDate.getDay())) {
+                        sessionCount++;
+                        const y = currentDate.getFullYear();
+                        const m = String(currentDate.getMonth()+1).padStart(2,'0');
+                        const dd = String(currentDate.getDate()).padStart(2,'0');
+                        results.push({
+                            dateStr: `${y}-${m}-${dd}`,
+                            sessionIndex: sessionCount,
+                            dayName: dayNames[currentDate.getDay()],
+                            dateObj: new Date(currentDate),
+                            mapelName: mapel,
+                            mapelIdx: idx,
+                            totalSesi: totalSesiInMonth
+                        });
+                    }
+                }
             });
-        } else {
-            // Fallback: mode lama (satu jadwal flat)
-            buildSchedule(legacyDays, legacyStart, legacyLimit, 'Bimbingan', 0);
-        }
 
-        // Sort semua sesi berdasarkan tanggal
-        scheduledDates.sort((a,b) => a.dateObj - b.dateObj);
-
-        // Set Sesi Berakhir
-        if (scheduledDates.length > 0) {
-            const last = scheduledDates[scheduledDates.length - 1];
-            const endEl = document.getElementById('sessionEndDateVal');
-            if (endEl) endEl.textContent = last.dateObj.toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
-
-            // Notif sesi pertama
-            const first = scheduledDates[0];
-            const today = new Date(); today.setHours(0,0,0,0);
-            const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-            if (first.dateStr === todayStr) {
-                const banner = document.getElementById('sessionNotificationBanner');
-                const bannerText = document.getElementById('sessionNotificationText');
-                if (banner && bannerText) {
-                    bannerText.innerHTML = `Hari ini adalah <strong>Sesi 1 (${first.mapelName})</strong> Bimbingan Belajar Anda! Sesi dimulai pukul <strong>${jamMulai} - ${jamSelesai}</strong>. Selamat belajar!`;
-                    banner.classList.remove('d-none');
-                }
-            }
+            results.sort((a,b) => a.dateObj - b.dateObj);
+            return results;
         }
 
         // ── Render Kalender ──
@@ -549,6 +547,26 @@
         function renderCalendar(month, year) {
             grid.innerHTML = '';
             monthYearLabel.textContent = `${monthNames[month]} ${year}`;
+
+            const scheduledDates = getScheduledDatesForMonth(month, year);
+
+            // Update Sesi Berakhir & Total Sesi di Right Panel
+            const endEl = document.getElementById('sessionEndDateVal');
+            if (scheduledDates.length > 0) {
+                const last = scheduledDates[scheduledDates.length - 1];
+                if (endEl) endEl.textContent = last.dateObj.toLocaleDateString('id-ID', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+            } else {
+                if (endEl) endEl.textContent = '-';
+            }
+
+            const totalSesiEl = document.querySelectorAll('.total-sesi-val');
+            totalSesiEl.forEach(el => {
+                el.textContent = scheduledDates.length + 'x Pertemuan';
+            });
+            const agendaTitleEl = document.getElementById('agendaHeaderTitle');
+            if (agendaTitleEl) {
+                agendaTitleEl.textContent = `Agenda Semua Sesi Belajar (${scheduledDates.length} Sesi)`;
+            }
 
             const firstDayIndex  = new Date(year, month, 1).getDay();
             const totalDays      = new Date(year, month+1, 0).getDate();

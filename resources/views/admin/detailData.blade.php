@@ -202,6 +202,41 @@
                                                     </div>
                                                     <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editJamBimbelModal" style="border-color: #cbd5e1; color: #475569;">
                                                         <i class="fas fa-clock mr-0.5 text-purple-600"></i> Atur
+                                        </tr>
+                                        <tr class="border-top border-light">
+                                            <td class="text-muted py-2">Tanggal Mulai</td>
+                                            <td class="py-2">
+                                                <div class="d-flex align-items-start justify-content-between">
+                                                    <div class="text-xs mr-1">
+                                                        @php
+                                                            $tglPerMapel = $bio['tanggal_mulai_per_mapel'] ?? [];
+                                                            $mapelForTgl  = $bio['mapel_jadwal'] ?? [];
+                                                            if (empty($mapelForTgl) && $student->tipe_paket) {
+                                                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                                                    $mapelForTgl = array_map('trim', explode(',', $matches[1]));
+                                                                }
+                                                            }
+                                                        @endphp
+                                                        @if(!empty($mapelForTgl))
+                                                            @foreach($mapelForTgl as $idx => $namaMapelTgl)
+                                                                @php
+                                                                    $tglVal = $tglPerMapel[$idx] ?? null;
+                                                                    $tglStr = $tglVal ? date('d M Y', strtotime($tglVal)) : '-';
+                                                                @endphp
+                                                                <div class="mb-1 d-flex align-items-center gap-1">
+                                                                    <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $namaMapelTgl }}:</span>
+                                                                    <span class="text-slate-700 font-weight-bold text-xs">
+                                                                        <i class="far fa-calendar-alt text-purple-500 mr-0.5"></i>
+                                                                        {{ $tglStr }}
+                                                                    </span>
+                                                                </div>
+                                                            @endforeach
+                                                        @else
+                                                            <span class="text-muted font-italic text-xs">Belum diatur</span>
+                                                        @endif
+                                                    </div>
+                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editTanggalMulaiModal" style="border-color: #cbd5e1; color: #475569;">
+                                                        <i class="fas fa-calendar mr-0.5 text-purple-600"></i> Atur
                                                     </button>
                                                 </div>
                                             </td>
@@ -864,6 +899,79 @@
                         <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">
                             <i class="fas fa-save mr-1"></i>Simpan Jam Bimbel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit Tanggal Mulai Bimbel Siswa -->
+    <div class="modal fade" id="editTanggalMulaiModal" tabindex="-1" role="dialog" aria-labelledby="editTanggalMulaiModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+                <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                    <h5 class="modal-title font-weight-bold text-md text-white" id="editTanggalMulaiModalLabel" style="color: #fff;">
+                        <i class="fas fa-calendar-alt mr-2"></i>Atur Tanggal Mulai Bimbel Siswa
+                    </h5>
+                    <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('admin.siswa.update-tanggal-mulai', $student->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body p-4 bg-white">
+                        @php
+                            $mapelForTglModal = $bio['mapel_jadwal'] ?? [];
+                            if (empty($mapelForTglModal) && $student->tipe_paket) {
+                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                    $mapelForTglModal = array_map('trim', explode(',', $matches[1]));
+                                }
+                            }
+                            $tglPerMapelModal = $bio['tanggal_mulai_per_mapel'] ?? [];
+                        @endphp
+
+                        @if(!empty($mapelForTglModal))
+                            <div class="p-3 bg-purple-50 rounded-xl border border-purple-100 mb-4">
+                                <p class="text-xs mb-0 text-purple-900 font-medium">
+                                    <i class="fas fa-info-circle mr-1 text-purple-600"></i>
+                                    Pilih <strong>Tanggal Mulai Bimbingan</strong> untuk masing-masing mata pelajaran siswa ini.
+                                </p>
+                            </div>
+
+                            @foreach($mapelForTglModal as $idx => $namaMapelModal)
+                            @php
+                                $tglValModal = $tglPerMapelModal[$idx] ?? '';
+                            @endphp
+                            <div class="p-3 mb-3 rounded-xl border" style="border-color: #ddd6fe; background-color: #faf9fd;">
+                                <label class="font-weight-bold text-purple-950 text-xs d-flex align-items-center mb-2">
+                                    <i class="fas fa-book-open text-purple-600 mr-1.5"></i>
+                                    Mata Pelajaran:
+                                    <span class="badge bg-purple-600 text-white font-bold px-2.5 py-1 text-xs rounded-full ml-2">{{ $namaMapelModal }}</span>
+                                </label>
+                                <div>
+                                    <label class="text-xs text-muted font-weight-bold mb-1 d-block">Tanggal Mulai Belajar</label>
+                                    <input
+                                        type="date"
+                                        name="tanggal_mulai_per_mapel[{{ $idx }}]"
+                                        value="{{ $tglValModal }}"
+                                        class="form-control text-sm font-weight-bold"
+                                        style="height: 40px; border-color: #c4b5fd; border-radius: 10px;"
+                                    >
+                                </div>
+                            </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-4">
+                                <i class="fas fa-book-open text-slate-300 fa-2x mb-2"></i>
+                                <p class="text-xs text-muted mb-0">Siswa ini belum memiliki data mata pelajaran terdaftar.</p>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">
+                            <i class="fas fa-save mr-1"></i>Simpan Tanggal Mulai
                         </button>
                     </div>
                 </form>

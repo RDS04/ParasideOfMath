@@ -83,6 +83,8 @@ Route::controller(SiswaController::class)->group(function () {
     Route::put('/siswa/tambah-mapel', 'editMapel')->middleware('auth:siswa')->name('siswa.edit-mapel');
     Route::delete('/siswa/tambah-mapel', 'hapusMapel')->middleware('auth:siswa')->name('siswa.hapus-mapel');
     Route::get('/siswa/payment', 'showPayment')->middleware('auth:siswa')->name('siswa.payment');
+    Route::get('/siswa/bukti-bayar', 'showBuktiBayar')->middleware('auth:siswa')->name('siswa.bukti-bayar');
+    Route::post('/siswa/bukti-bayar', 'submitBuktiBayar')->middleware('auth:siswa')->name('siswa.bukti-bayar.submit');
     Route::post('/siswa/payment', 'submitPayment')->middleware('auth:siswa')->name('siswa.payment.submit');
     Route::get('/siswa/pending', 'showPending')->middleware('auth:siswa')->name('siswa.pending');
     Route::get('/siswa/jadwal', 'showJadwal')->middleware('auth:siswa')->name('siswa.jadwal');
@@ -155,6 +157,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
     Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
     Route::post('/admin/siswa/update-jam-bimbel/{id}', 'updateJamBimbel')->name('admin.siswa.update-jam-bimbel');
+    Route::post('/admin/siswa/update-tanggal-mulai/{id}', 'updateTanggalMulai')->name('admin.siswa.update-tanggal-mulai');
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
     Route::get('/admin/kalender', 'showKalender')->name('admin.kalender');
     Route::get('/admin/foto', 'showFotoMenu')->name('admin.foto.index');

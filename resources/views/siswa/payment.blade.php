@@ -106,7 +106,7 @@
             <input type="hidden" name="pilihan_guru_inggris" value="{{ request('pilihan_guru_inggris') }}">
         @endif
 
-        <!-- ══════════════ LEFT COLUMN: PAYMENT METHODS (7 COLS) ══════════════ -->
+        <!-- ══════════════ LEFT COLUMN: REGISTRATION CONFIRMATION (7 COLS) ══════════════ -->
         <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between scrollable-left">
             <div>
                 <!-- Brand Header -->
@@ -116,8 +116,8 @@
                             class="text-amber-500">of Math</span></span>
                 </div>
 
-                <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950 mb-2">Metode Pembayaran</h1>
-                <p class="text-sm text-slate-500 mb-8">Pilih opsi transfer dan unggah bukti transaksi Anda di bawah ini.
+                <h1 class="font-display text-2xl sm:text-3xl font-bold text-purple-950 mb-2">Konfirmasi Pendaftaran</h1>
+                <p class="text-sm text-slate-500 mb-8">Periksa kembali ringkasan estimasi biaya dan mata pelajaran pilihan Anda sebelum melanjutkan.
                 </p>
 
                 <!-- ERROR / VALIDATION ALERTS -->
@@ -132,121 +132,51 @@
                     </div>
                 @endif
 
-                <!-- PAYMENT SELECTION GRID -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6" id="paymentMethods">
-                    <!-- Bank Transfer Option -->
-                    <div class="payment-option-card active-card border-2 border-slate-100 rounded-2xl p-4 flex flex-col justify-between min-h-[110px]"
-                        data-method="bank">
-                        <span class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Transfer
-                            Bank</span>
-                        <div class="flex flex-wrap gap-1 mt-auto">
-                            @foreach ($banks as $bank)
-                                <span
-                                    class="text-[9px] font-black bg-white border border-slate-200 rounded px-1.5 py-0.5 text-blue-700 uppercase">{{ $bank->nama_bank }}</span>
-                            @endforeach
+                <!-- INFO BOX ALUR PENDAFTARAN -->
+                <div class="p-5 bg-gradient-to-r from-purple-50 via-violet-50 to-purple-50 border border-purple-100 rounded-2xl mb-6">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold shrink-0 shadow-md">
+                            <i class="fas fa-map-signs text-lg"></i>
                         </div>
-                    </div>
-
-                    <!-- E-Wallet Option -->
-                    <div class="payment-option-card border-2 border-slate-100 rounded-2xl p-4 flex flex-col justify-between min-h-[110px]"
-                        data-method="ewallet">
-                        <span
-                            class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">E-Wallet</span>
-                        <div class="flex flex-wrap gap-1 mt-auto">
-                            @foreach ($ewallets as $ewallet)
-                                <span
-                                    class="text-[9px] font-black bg-white border border-slate-200 rounded px-1.5 py-0.5 text-emerald-600 uppercase">{{ $ewallet->nama_bank }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-                <input type="hidden" name="payment_method" id="selectedMethod" value="bank">
-                <!-- PAYMENT INSTRUCTIONS PANEL -->
-                <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl instruction-box mb-6">
-
-                    <!-- Bank Instructions -->
-                    <div id="inst-bank" class="instruction-content">
-                        <h6 class="text-sm font-bold text-violet-950 mb-3"><i
-                                class="fas fa-university mr-2 text-violet-600"></i> Transfer Bank Resmi</h6>
-                        <p class="text-xs text-slate-500 mb-3">Silakan kirimkan pembayaran Anda ke salah satu rekening
-                            resmi berikut:</p>
-
-                        <div class="space-y-2.5 mb-2">
-                            @foreach ($banks as $bank)
-                                <div
-                                    class="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between shadow-sm">
-                                    <div class="flex items-center gap-2.5">
-                                        <span
-                                            class="text-[9px] font-black bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100 uppercase">{{ $bank->nama_bank }}</span>
-                                        <div>
-                                            <span
-                                                class="d-block font-mono text-xs font-bold text-slate-800">{{ $bank->nomor_rekening }}</span>
-                                            <small class="text-slate-400 text-[10px] d-block mt-0.5">a/n
-                                                {{ $bank->atas_nama }}</small>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 rounded px-2.5 py-1 text-[10px] font-bold border-0 transition-all copy-btn"
-                                        data-clipboard="{{ str_replace('-', '', $bank->nomor_rekening) }}">
-                                        Salin
-                                    </button>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    <!-- E-Wallet Instructions -->
-                    <div id="inst-ewallet" class="instruction-content d-none">
-                        <h6 class="text-sm font-bold text-violet-950 mb-3"><i
-                                class="fas fa-mobile-alt mr-2 text-violet-600"></i> E-Wallet Provider</h6>
-                        <p class="text-xs text-slate-500 mb-3">Silakan kirimkan pembayaran Anda ke akun e-wallet
-                            berikut:</p>
-
-                        <div class="space-y-2.5 mb-2">
-                            @foreach ($ewallets as $ewallet)
-                                <div
-                                    class="p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between shadow-sm">
-                                    <div class="flex items-center gap-2.5">
-                                        <span
-                                            class="text-[9px] font-black bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-100 uppercase">{{ $ewallet->nama_bank }}</span>
-                                        <div>
-                                            <span
-                                                class="d-block font-mono text-xs font-bold text-slate-800">{{ $ewallet->nomor_rekening }}</span>
-                                            <small class="text-slate-400 text-[10px] d-block mt-0.5">a/n
-                                                {{ $ewallet->atas_nama }}</small>
-                                        </div>
-                                    </div>
-                                    <button type="button"
-                                        class="bg-slate-100 hover:bg-slate-200 text-slate-600 rounded px-2.5 py-1 text-[10px] font-bold border-0 transition-all copy-btn"
-                                        data-clipboard="{{ str_replace('-', '', $ewallet->nomor_rekening) }}">
-                                        Salin
-                                    </button>
-                                </div>
-                            @endforeach
+                        <div>
+                            <h5 class="text-sm font-bold text-purple-950 mb-1">Tahap Selanjutnya: Diskusi &amp; Penentuan Jadwal</h5>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Setelah Anda menekan tombol <strong>"Selanjutnya"</strong>, pendaftaran Anda akan langsung tercatat. Selanjutnya Anda dipersilakan berkunjung ke lokasi bimbingan untuk berdiskusi dengan Admin dalam menentukan jadwal hari belajar.
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- ══════ FILE UPLOAD DRAG-AND-DROP AREA ══════ -->
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Upload Bukti
-                        Transfer</label>
-                    <div class="relative border-2 border-dashed border-slate-200 hover:border-purple-400 rounded-2xl p-6 text-center cursor-pointer transition-all bg-slate-50"
-                        id="dropzone">
-                        <input type="file" name="bukti_transfer" id="fileInput" accept=".jpg,.jpeg,.png,.pdf"
-                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required>
-                        <i class="fas fa-cloud-upload-alt text-slate-400 text-3xl mb-2" id="uploadIcon"></i>
-                        <p class="text-xs font-bold text-slate-700 mb-1" id="uploadText">Klik atau seret file bukti
-                            transfer Anda ke sini</p>
-                        <p class="text-[10px] text-slate-400">Mendukung format JPG, PNG, atau PDF (Maks. 2MB)</p>
-                    </div>
+                <!-- CARA BERGABUNG / INSTRUKSI -->
+                <div class="p-5 bg-slate-50 border border-slate-100 rounded-2xl space-y-3 mb-6">
+                    <h6 class="text-xs font-bold text-purple-950 uppercase tracking-wider mb-2">
+                        <i class="fas fa-list-check text-purple-600 mr-1.5"></i> Langkah Pendaftaran Siswa Baru:
+                    </h6>
+                    <ul class="text-xs text-slate-600 space-y-2.5">
+                        <li class="flex items-start gap-2">
+                            <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                            <span>Konfirmasi pilihan paket bimbel dan mata pelajaran Anda pada halaman ini.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                            <span>Klik tombol <strong>"Selanjutnya"</strong> untuk masuk ke status menunggu penentuan hari.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                            <span>Datang ke lokasi bimbingan belajar Paradise of Math untuk berdiskusi &amp; menentukan jadwal hari bimbingan bersama Admin.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">4</span>
+                            <span>Setelah hari ditentukan oleh Admin, tombol pembayaran akan muncul di halaman pending Anda.</span>
+                        </li>
+                    </ul>
                 </div>
 
             </div>
 
             <!-- Footer Copy -->
             <div class="mt-8 pt-4 border-t border-slate-100 text-center sm:text-left text-xs text-slate-400">
-                &copy; 2026 · Paradise of Math — Sistem Transaksi Aman Siswa
+                &copy; 2026 · Paradise of Math — Sistem Manajemen Registrasi Siswa
             </div>
         </div>
 
@@ -342,7 +272,7 @@
                 <!-- Submit Button Area -->
                 <div>
                     <button type="submit" id="btnBayar" class="btn-brand font-bold text-md mb-4 border-0">
-                        Konfirmasi &amp; Kirim Bukti <i class="fas fa-arrow-right ml-1.5"></i>
+                        Selanjutnya <i class="fas fa-arrow-right ml-1.5"></i>
                     </button>
 
                     <div class="p-3 bg-violet-50/50 rounded-2xl border border-violet-100/50 flex items-start gap-2.5">

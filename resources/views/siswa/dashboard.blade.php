@@ -69,7 +69,10 @@
         }
 
         if (!$tanggalMulai && !empty($tanggalPerMapel)) {
-            $tanggalMulai = min(array_filter($tanggalPerMapel));
+            $filteredDates = array_filter($tanggalPerMapel);
+            if (!empty($filteredDates)) {
+                $tanggalMulai = min($filteredDates);
+            }
         }
         if (!$tanggalMulai) {
             $tanggalMulai = $siswa->created_at ? $siswa->created_at->format('Y-m-d') : date('Y-m-d');
