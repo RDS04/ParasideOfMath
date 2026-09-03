@@ -18,6 +18,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login')->name('login.post');
     Route::get('/register', 'showLoginForm')->name('register');
     Route::post('/register', 'register')->name('register.post');
+    Route::get('/verify-otp', 'showVerifyOtp')->name('verify.otp');
+    Route::post('/verify-otp', 'verifyOtp')->name('verify.otp.post');
+    Route::post('/resend-otp', 'resendOtp')->name('resend.otp');
     Route::post('/logout', 'logout')->name('logout');
 });
 
