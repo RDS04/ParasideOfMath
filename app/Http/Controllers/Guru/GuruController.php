@@ -240,7 +240,7 @@ class GuruController extends Controller
             fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm)
         );
 
-        $sessions = [];
+        $scheduleConfigs = [];
         $dayMap = [
             'minggu' => 0,
             'senin' => 1,
@@ -372,50 +372,35 @@ class GuruController extends Controller
                     $tglMulai = $siswa->created_at->format('Y-m-d');
                 }
 
-                // Convert day names to day numbers
+                // Convert day names to day numbers (supports compound strings like "Senin & Selasa")
                 $scheduledDayNums = [];
                 foreach ($hariList as $h) {
-                    $normH = strtolower(trim($h));
-                    if (isset($dayMap[$normH])) {
-                        $scheduledDayNums[] = $dayMap[$normH];
+                    $parts = preg_split('/[\s,&+]+/', strtolower(trim($h)));
+                    foreach ($parts as $part) {
+                        $normH = trim($part);
+                        if (isset($dayMap[$normH])) {
+                            $scheduledDayNums[] = $dayMap[$normH];
+                        }
                     }
                 }
+                $scheduledDayNums = array_values(array_unique($scheduledDayNums));
 
-                if ($limitSesi > 0 && !empty($scheduledDayNums) && $tglMulai) {
-                    try {
-                        $startDate = \Carbon\Carbon::parse($tglMulai);
-                        $tempDate = $startDate->copy();
-                        $studentSessionCount = 0;
-
-                        for ($d = 0; $d < 730; $d++) {
-                            if ($studentSessionCount >= $limitSesi) {
-                                break;
-                            }
-                            $dayOfWeek = $tempDate->dayOfWeek;
-                            if (in_array($dayOfWeek, $scheduledDayNums)) {
-                                $studentSessionCount++;
-                                $dateStr = $tempDate->format('Y-m-d');
-                                $sessions[] = [
-                                    'dateStr' => $dateStr,
-                                    'student_name' => $siswa->name,
-                                    'subject' => $mapelName,
-                                    'time' => $jamMulaiItem . ' - ' . $jamSelesaiItem,
-                                    'whatsapp' => $siswa->whatsapp,
-                                    'sekolah' => $siswa->sekolah,
-                                    'session_index' => $studentSessionCount,
-                                    'total_sessions' => $limitSesi,
-                                ];
-                            }
-                            $tempDate->addDay();
-                        }
-                    } catch (\Exception $e) {
-                        // Ignore errors
-                    }
+                if (!empty($scheduledDayNums)) {
+                    $scheduleConfigs[] = [
+                        'student_name' => $siswa->name,
+                        'subject' => $mapelName,
+                        'time' => $jamMulaiItem . ' - ' . $jamSelesaiItem,
+                        'whatsapp' => $siswa->whatsapp,
+                        'sekolah' => $siswa->sekolah,
+                        'scheduledDayNums' => $scheduledDayNums,
+                        'tglMulai' => $tglMulai,
+                        'limitSesi' => $limitSesi,
+                    ];
                 }
             }
         }
 
-        return view('guru.jadwal', compact('sessions', 'assignedStudents'));
+        return view('guru.jadwal', compact('scheduleConfigs', 'assignedStudents'));
     }
 
     /**
@@ -528,10 +513,12 @@ class GuruController extends Controller
         $mapel   = $request->input('mapel', '');
 
         // Step 2: Kelas tersedia
-        $availableClasses = [1, 2, 3, 4, 5, 6];
+        $availableClasses = $jenjang ? KategoriSoal::availableClasses($jenjang) : [];
 
         // Step 3: Semester / TKA tersedia
-        $availableSubs = ['Semester 1', 'Semester 2', 'TKA'];
+        $availableSubs = ($jenjang && $kelas)
+            ? KategoriSoal::availableSubKategori($jenjang, $kelas)
+            : [];
 
         // Step 4: Daftar Mata Pelajaran tersedia
         $mapelList = Mapel::where('nama_mapel', 'not like', '%Wajib + Lanjut%')
@@ -587,12 +574,7 @@ class GuruController extends Controller
         $mapel   = $request->input('mapel', '');
 
         // Step 2: Kelas tersedia berdasarkan jenjang
-        $availableClasses = [];
-        if ($jenjang === 'SD') {
-            $availableClasses = range(1, 6);
-        } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
-            $availableClasses = range(1, 3);
-        }
+        $availableClasses = $jenjang ? KategoriSoal::availableClasses($jenjang) : [];
 
         // Step 3: Semester / TKA tersedia berdasarkan jenjang + kelas
         $availableSubs = ($jenjang && $kelas)
@@ -714,7 +696,7 @@ class GuruController extends Controller
 
         $validated = $request->validate([
             'jenjang'       => 'required|in:SD,SMP,SMA',
-            'kelas'         => 'required|integer|min:1|max:6',
+            'kelas'         => 'required|string',
             'sub_kategori'  => ['required', 'string', Rule::in($allowedSub)],
             'nama_kategori' => 'required|string|max:255',
             'deskripsi'     => 'required|string|max:255',
@@ -1095,10 +1077,8 @@ class GuruController extends Controller
 
         $guruNameNorm = strtolower(trim($user->name));
 
-        // Fetch active students assigned to this Guru
-        $assignedStudents = \App\Models\Siswa::with('paket')->where('status', 'active')->get()->filter(
-            fn ($siswa) => $this->isSiswaAssignedToGuru($siswa, $guruNameNorm)
-        )->values();
+        // Fetch ALL active students for exam assignment
+        $assignedStudents = \App\Models\Siswa::with('paket')->where('status', 'active')->orderBy('name', 'asc')->get();
 
         // Selected student ID or first student
         $selectedSiswaId = $request->input('siswa_id');

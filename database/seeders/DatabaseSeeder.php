@@ -66,7 +66,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Tetap pertahankan 1 akun guru generik buat testing lama
-        if (User::where('email', 'ica@gmail.com')->doesntExist()) {
+        if (User::where('email', 'ica@gmail.com.com')->doesntExist()) {
             $guruUser = User::create([
                 'name' => 'Guru Test',
                 'email' => 'ica@gmail.com.com',
@@ -82,12 +82,48 @@ class DatabaseSeeder extends Seeder
                 'status' => 'aktif',
             ]);
         }
+
         $this->call([
             MasterUserSeeder::class,
             PaketBelajarSeeder::class,
             MapelSeeder::class,
             BiodataSeeder::class,
         ]);
+
+        $firstPaketId = \App\Models\PaketBelajar::first()?->id;
+
+        // 3. Seed / Update Akun Dummy Siswa (Siswa table) untuk kemudahan Testing Lokal
+        $dummySiswa = \App\Models\Siswa::where('email', 'siswa@example.com')->first();
+        if (!$dummySiswa) {
+            \App\Models\Siswa::create([
+                'name' => 'Siswa Test',
+                'email' => 'siswa@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'whatsapp' => '081234567890',
+                'sekolah' => 'SMA Negeri 1',
+                'status' => 'active',
+                'paket_id' => $firstPaketId,
+                'tipe_paket' => 'Privat 1 on 1 | Mapel: Matematika | Hari: Senin,Kamis | Sesi: 8x | Guru: Kak Ika',
+                'biodata' => [
+                    'mapel_jadwal' => ['Matematika'],
+                    'sesi_per_mapel' => [8],
+                    'hari_per_mapel' => [
+                        ['Senin', 'Kamis']
+                    ],
+                    'tanggal_mulai_per_mapel' => [date('Y-m-01')],
+                    'jam_per_mapel' => [
+                        ['jam_mulai' => '15:30', 'jam_selesai' => '17:00']
+                    ],
+                    'tutor_per_mapel' => ['Matematika' => 'Kak Ika'],
+                    'tanggal_mulai' => date('Y-m-01'),
+                    'jumlah_pertemuan' => 8,
+                    'hari_pertemuan' => ['Senin', 'Kamis']
+                ]
+            ]);
+        } else if (!$dummySiswa->paket_id && $firstPaketId) {
+            $dummySiswa->paket_id = $firstPaketId;
+            $dummySiswa->save();
+        }
 
         if (\App\Models\Rekening::count() == 0) {
             \App\Models\Rekening::create([

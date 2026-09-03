@@ -134,7 +134,7 @@
                                     @if ($jenjang)
                                         @foreach ($availableClasses as $cls)
                                             <option value="{{ $cls }}" {{ (string) $kelas === (string) $cls ? 'selected' : '' }}>
-                                                Kelas {{ $cls }}
+                                                {{ is_numeric($cls) ? 'Kelas ' . $cls : $cls }}
                                             </option>
                                         @endforeach
                                     @endif
@@ -204,7 +204,7 @@
                             @if($kelas)
                                 <span
                                     class="badge bg-purple-100 text-purple-900 border border-purple-200 font-bold px-3 py-1.5 rounded-lg text-xs d-inline-flex align-items-center">
-                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> Kelas {{ $kelas }}
+                                    <i class="fas fa-users text-purple-600 mr-1.5"></i> {{ is_numeric($kelas) ? 'Kelas ' . $kelas : $kelas }}
                                 </span>
                             @endif
 
@@ -1298,9 +1298,9 @@
 
     <script>
         const KELAS_MAP = {
-            SD: [1, 2, 3, 4, 5, 6],
-            SMP: [1, 2, 3],
-            SMA: [1, 2, 3],
+            SD: [1, 2, 3, 4, 5, 6, 'Olimpiade', 'Tes Masuk SMP'],
+            SMP: [1, 2, 3, 'Olimpiade', 'Tes Masuk SMA'],
+            SMA: [1, 2, 3, 'Olimpiade', 'UTBK'],
         };
 
         function populateSelect(selectEl, items, placeholder) {
@@ -1335,7 +1335,10 @@
                 return;
             }
 
-            const kelasList = (KELAS_MAP[jenjang] || []).map(k => ({ value: k, label: 'Kelas ' + k }));
+            const kelasList = (KELAS_MAP[jenjang] || []).map(k => ({
+                value: k,
+                label: (typeof k === 'number' || !isNaN(k)) ? 'Kelas ' + k : k
+            }));
             populateSelect(kelasSelect, kelasList, '-- Pilih Kelas --');
             kelasSelect.disabled = false;
         }
@@ -1352,6 +1355,15 @@
             if (!kelas) {
                 subSelect.innerHTML = '<option value="">-- Pilih Semester / TKA --</option>';
                 subSelect.disabled = true;
+                return;
+            }
+
+            const isSpecialKelas = ['Olimpiade', 'Tes Masuk SMP', 'Tes Masuk SMA', 'UTBK'].includes(kelas);
+            if (isSpecialKelas) {
+                subSelect.innerHTML = '<option value="-">-</option>';
+                subSelect.value = '-';
+                subSelect.disabled = false;
+                handleSubChange(subSelect);
                 return;
             }
 

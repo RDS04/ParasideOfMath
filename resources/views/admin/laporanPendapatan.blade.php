@@ -122,12 +122,52 @@
 								</table>
 							</div>
 						</div>
+			<div class="row mt-4">
+				<div class="col-12">
+					<div class="card shadow-sm border-0 rounded-xl overflow-hidden">
+						<div class="card-header bg-white py-3">
+							<h5 class="mb-0 font-weight-bold text-purple-950">Rincian Transaksi Pembayaran Lunas (Terverifikasi)</h5>
+						</div>
+						<div class="card-body p-0">
+							<div class="table-responsive">
+								<table class="table table-hover align-middle mb-0 text-xs">
+									<thead class="bg-light">
+										<tr>
+											<th class="py-2.5 px-3">No. Transaksi</th>
+											<th class="py-2.5 px-3">Nama Siswa</th>
+											<th class="py-2.5 px-3">Periode / Keterangan</th>
+											<th class="py-2.5 px-3">Metode Bayar</th>
+											<th class="py-2.5 px-3 text-center">Tanggal Disetujui</th>
+											<th class="py-2.5 px-3 text-end">Total Nominal</th>
+										</tr>
+									</thead>
+									<tbody>
+										@if(isset($riwayatPayments) && count($riwayatPayments) > 0)
+											@foreach($riwayatPayments as $rp)
+												@php
+													$sUser = $rp->siswa ?? null;
+													$rDate = $rp->approved_at ?? $rp->created_at;
+												@endphp
+												<tr>
+													<td class="px-3 py-2 font-mono font-weight-semibold text-purple-900">POM-TRX-{{ str_pad($rp->id, 5, '0', STR_PAD_LEFT) }}</td>
+													<td class="px-3 py-2 font-weight-bold text-purple-950">{{ $sUser ? $sUser->name : '(Siswa)' }}</td>
+													<td class="px-3 py-2">{{ $rp->tipe_paket_snapshot ?: ($rp->paket ? $rp->paket->nama_paket : 'Pendaftaran Bimbel') }}</td>
+													<td class="px-3 py-2"><span class="badge bg-purple-100 text-purple-800 text-[10px]">{{ strtoupper($rp->payment_method ?? 'Bank') }}</span></td>
+													<td class="px-3 py-2 text-center">{{ $rDate ? \Carbon\Carbon::parse($rDate)->format('d M Y H:i') : '-' }}</td>
+													<td class="px-3 py-2 text-end font-weight-bold text-emerald-700">Rp {{ number_format($rp->total_harga, 0, ',', '.') }}</td>
+												</tr>
+											@endforeach
+										@else
+											<tr>
+												<td colspan="6" class="text-center py-4 text-muted">Belum ada data transaksi lunas pada periode ini.</td>
+											</tr>
+										@endif
+									</tbody>
+								</table>
+							</div>
+						</div>
 					</div>
 				</div>
-			</div>
-
-			<div class="mt-3 text-muted small">
-				Catatan: ini contoh tampilan laporan pendapatan, data diambil dari siswa yang berstatus aktif dan memiliki bukti transfer.
 			</div>
 
 		</div>

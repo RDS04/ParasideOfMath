@@ -180,6 +180,20 @@
                                             <!-- Actions -->
                                             <td class="px-4 py-3.5 text-center align-middle no-print">
                                                 <div class="d-flex justify-content-center align-items-center gap-1.5">
+                                                    @if($pay->status === 'under_review')
+                                                        <form action="{{ route('admin.riwayat-pembayaran.approve', $pay->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Setujui pembayaran ini?')">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-xs btn-success text-xs font-weight-bold rounded-lg px-2.5 py-1.5 shadow-xs" title="Setujui Pembayaran">
+                                                                <i class="fas fa-check mr-1"></i> Setujui
+                                                            </button>
+                                                        </form>
+                                                        <form action="{{ route('admin.riwayat-pembayaran.reject', $pay->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tolak pembayaran ini?')">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-xs btn-danger text-xs font-weight-bold rounded-lg px-2.5 py-1.5 shadow-xs" title="Tolak Pembayaran">
+                                                                <i class="fas fa-times mr-1"></i> Tolak
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                     <button type="button" class="btn btn-xs btn-purple text-xs font-weight-bold rounded-lg px-2.5 py-1.5"
                                                         onclick="showPaymentDetail(this)"
                                                         data-id="POM-PAY-{{ str_pad($pay->id, 4, '0', STR_PAD_LEFT) }}"

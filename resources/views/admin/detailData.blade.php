@@ -1,5 +1,11 @@
 @extends('layout.app')
 
+@php
+    $currentGurus = $currentGurus ?? [];
+    $mapelJadwal = $mapelJadwal ?? [];
+    $tutorPerMapel = $tutorPerMapel ?? [];
+@endphp
+
 @section('title', 'Detail Registrasi Siswa · Paradise of Math')
 
 @section('content')
@@ -164,129 +170,224 @@
                                             <td class="text-muted py-2">Paket Bimbel</td>
                                             <td class="font-weight-bold text-purple-950 py-2">{{ $paket->nama_paket }}</td>
                                         </tr>
-                                        <tr>
-                                            <td class="text-muted py-2">Detail Pilihan</td>
-                                            <td class="text-purple-900 font-weight-bold py-2 text-xs">{{ $student->tipe_paket ?? '-' }}</td>
-                                        </tr>
-                                        <tr class="border-top border-light">
-                                            <td class="text-muted py-2">Jam Bimbel</td>
-                                            <td class="py-2">
-                                                <div class="d-flex align-items-start justify-content-between">
-                                                    <div class="text-xs mr-1">
-                                                        @php
-                                                            $jamPerMapel = $bio['jam_per_mapel'] ?? [];
-                                                            $mapelForJam = $bio['mapel_jadwal'] ?? [];
-                                                            if (empty($mapelForJam) && $student->tipe_paket) {
-                                                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
-                                                                    $mapelForJam = array_map('trim', explode(',', $matches[1]));
-                                                                }
-                                                            }
-                                                        @endphp
-                                                        @if(!empty($mapelForJam))
-                                                            @foreach($mapelForJam as $idx => $namaMapelJam)
-                                                                @php
-                                                                    $jamMulai   = $jamPerMapel[$idx]['jam_mulai']   ?? '-';
-                                                                    $jamSelesai = $jamPerMapel[$idx]['jam_selesai'] ?? '-';
-                                                                @endphp
-                                                                <div class="mb-1 d-flex align-items-center gap-1">
-                                                                    <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $namaMapelJam }}:</span>
-                                                                    <span class="text-slate-700 font-weight-bold text-xs">
-                                                                        <i class="far fa-clock text-purple-500 mr-0.5"></i>
-                                                                        {{ $jamMulai }} &ndash; {{ $jamSelesai }}
-                                                                    </span>
-                                                                </div>
-                                                            @endforeach
-                                                        @else
-                                                            <span class="text-muted font-italic text-xs">Belum diatur</span>
-                                                        @endif
-                                                    </div>
-                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editJamBimbelModal" style="border-color: #cbd5e1; color: #475569;">
-                                                        <i class="fas fa-clock mr-0.5 text-purple-600"></i> Atur
-                                        </tr>
-                                        <tr class="border-top border-light">
-                                            <td class="text-muted py-2">Tanggal Mulai</td>
-                                            <td class="py-2">
-                                                <div class="d-flex align-items-start justify-content-between">
-                                                    <div class="text-xs mr-1">
-                                                        @php
-                                                            $tglPerMapel = $bio['tanggal_mulai_per_mapel'] ?? [];
-                                                            $mapelForTgl  = $bio['mapel_jadwal'] ?? [];
-                                                            if (empty($mapelForTgl) && $student->tipe_paket) {
-                                                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
-                                                                    $mapelForTgl = array_map('trim', explode(',', $matches[1]));
-                                                                }
-                                                            }
-                                                        @endphp
-                                                        @if(!empty($mapelForTgl))
-                                                            @foreach($mapelForTgl as $idx => $namaMapelTgl)
-                                                                @php
-                                                                    $tglVal = $tglPerMapel[$idx] ?? null;
-                                                                    $tglStr = $tglVal ? date('d M Y', strtotime($tglVal)) : '-';
-                                                                @endphp
-                                                                <div class="mb-1 d-flex align-items-center gap-1">
-                                                                    <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $namaMapelTgl }}:</span>
-                                                                    <span class="text-slate-700 font-weight-bold text-xs">
-                                                                        <i class="far fa-calendar-alt text-purple-500 mr-0.5"></i>
-                                                                        {{ $tglStr }}
-                                                                    </span>
-                                                                </div>
-                                                            @endforeach
-                                                        @else
-                                                            <span class="text-muted font-italic text-xs">Belum diatur</span>
-                                                        @endif
-                                                    </div>
-                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editTanggalMulaiModal" style="border-color: #cbd5e1; color: #475569;">
-                                                        <i class="fas fa-calendar mr-0.5 text-purple-600"></i> Atur
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr class="border-top border-light">
-                                            <td class="text-muted py-2">Guru Pendamping</td>
-                                            <td class="py-2">
-                                                <div class="d-flex align-items-center justify-content-between">
-                                                    <div class="font-weight-bold text-slate-800 text-xs mr-1">
-                                                        @php
-                                                            $tutorPerMapel = $bio['tutor_per_mapel'] ?? [];
-                                                            $currentGurus = [];
-                                                            if ($student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
-                                                                $currentGurus = array_map('trim', explode(',', $matches[1]));
-                                                            }
-                                                            $mapelJadwal = $bio['mapel_jadwal'] ?? [];
-                                                            if (empty($mapelJadwal) && $student->tipe_paket) {
-                                                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
-                                                                    $mapelJadwal = array_map('trim', explode(',', $matches[1]));
-                                                                }
-                                                            }
-                                                        @endphp
-
-                                                        @if(!empty($tutorPerMapel))
-                                                            @foreach($tutorPerMapel as $mName => $gName)
-                                                                <div class="mb-1 d-flex align-items-center gap-1">
-                                                                    <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $mName }}:</span>
-                                                                    <span class="text-purple-950 font-weight-bold text-xs">{{ $gName }}</span>
-                                                                </div>
-                                                            @endforeach
-                                                        @elseif(!empty($currentGurus))
-                                                            @foreach($currentGurus as $cg)
-                                                                <div class="mb-1 d-flex align-items-center gap-1">
-                                                                    <i class="fas fa-chalkboard-teacher mr-1 text-purple-600"></i>
-                                                                    <span class="text-purple-950 font-weight-bold text-xs">{{ $cg }}</span>
-                                                                </div>
-                                                            @endforeach
-                                                        @else
-                                                            <span class="text-muted font-italic text-xs">Belum ditentukan</span>
-                                                        @endif
-                                                    </div>
-                                                    <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editTutorModal" style="border-color: #cbd5e1; color: #475569;">
-                                                        <i class="fas fa-edit mr-0.5 text-purple-600"></i> Atur
-                                                    </button>
-                                                </div>
-                                            </td>
+                                    @else
+                                        <tr class="border-bottom border-light">
+                                            <td class="text-muted py-2">Paket Bimbel</td>
+                                            <td class="py-2"><span class="badge bg-amber-100 text-amber-800 font-bold text-[10px] px-2 py-0.5">Pendaftaran Kustom / Belum Dipilih</span></td>
                                         </tr>
                                     @endif
+                                    <tr>
+                                        <td class="text-muted py-2">Detail Pilihan</td>
+                                        <td class="text-purple-900 font-weight-bold py-2 text-xs">{{ $student->tipe_paket ?? '-' }}</td>
+                                    </tr>
+                                    <tr class="border-top border-light">
+                                        <td class="text-muted py-2">Jam Bimbel</td>
+                                        <td class="py-2">
+                                            <div class="d-flex align-items-start justify-content-between">
+                                                <div class="text-xs mr-1">
+                                                    @php
+                                                        $jamPerMapel = $bio['jam_per_mapel'] ?? [];
+                                                        $mapelForJam = $bio['mapel_jadwal'] ?? [];
+                                                        if (empty($mapelForJam) && $student->tipe_paket) {
+                                                            if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                                                $mapelForJam = array_map('trim', explode(',', $matches[1]));
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @if(!empty($mapelForJam))
+                                                        @foreach($mapelForJam as $idx => $namaMapelJam)
+                                                            @php
+                                                                $jamMulai   = $jamPerMapel[$idx]['jam_mulai']   ?? '-';
+                                                                $jamSelesai = $jamPerMapel[$idx]['jam_selesai'] ?? '-';
+                                                            @endphp
+                                                            <div class="mb-1 d-flex align-items-center gap-1">
+                                                                <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $namaMapelJam }}:</span>
+                                                                <span class="text-slate-700 font-weight-bold text-xs">
+                                                                    <i class="far fa-clock text-purple-500 mr-0.5"></i>
+                                                                    {{ $jamMulai }} &ndash; {{ $jamSelesai }}
+                                                                </span>
+                                                            </div>
+                                                        @endforeach
+                                                    @else
+                                                        <span class="text-muted font-italic text-xs">Belum diatur</span>
+                                                    @endif
+                                                </div>
+                                                <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editJamBimbelModal" style="border-color: #cbd5e1; color: #475569;">
+                                                    <i class="fas fa-clock mr-0.5 text-purple-600"></i> Atur
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-top border-light">
+                                        <td class="text-muted py-2">Tanggal Mulai</td>
+                                        <td class="py-2">
+                                            <div class="d-flex align-items-start justify-content-between">
+                                                <div class="text-xs mr-1">
+                                                    @php
+                                                        $tglPerMapel = $bio['tanggal_mulai_per_mapel'] ?? [];
+                                                        $mapelForTgl  = $bio['mapel_jadwal'] ?? [];
+                                                        if (empty($mapelForTgl) && $student->tipe_paket) {
+                                                            if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                                                $mapelForTgl = array_map('trim', explode(',', $matches[1]));
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    @if(!empty($mapelForTgl))
+                                                        @foreach($mapelForTgl as $idx => $namaMapelTgl)
+                                                            @php
+                                                                $tglVal = $tglPerMapel[$idx] ?? null;
+                                                                $tglStr = $tglVal ? date('d M Y', strtotime($tglVal)) : '-';
+                                                            @endphp
+                                                            <div class="mb-1 d-flex align-items-center gap-1">
+                                                                <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $namaMapelTgl }}:</span>
+                                                                <span class="text-slate-700 font-weight-bold text-xs">
+                                                                    <i class="far fa-calendar-alt text-purple-500 mr-0.5"></i>
+                                                                    {{ $tglStr }}
+                                                                </span>
+                                                            </div>
+                                                        @endforeach
+                                                    @else
+                                                        <span class="text-muted font-italic text-xs">Belum diatur</span>
+                                                    @endif
+                                                </div>
+                                                <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editTanggalMulaiModal" style="border-color: #cbd5e1; color: #475569;">
+                                                    <i class="fas fa-calendar mr-0.5 text-purple-600"></i> Atur
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-top border-light">
+                                        <td class="text-muted py-2">Guru Pendamping</td>
+                                        <td class="py-2">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="font-weight-bold text-slate-800 text-xs mr-1">
+                                                    @php
+                                                        $tutorPerMapel = $bio['tutor_per_mapel'] ?? [];
+                                                        $currentGurus = $currentGurus ?? [];
+                                                        if (empty($currentGurus) && $student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
+                                                            $currentGurus = array_map('trim', explode(',', $matches[1]));
+                                                        }
+                                                        $mapelJadwal = $bio['mapel_jadwal'] ?? [];
+                                                        if (empty($mapelJadwal) && $student->tipe_paket) {
+                                                            if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                                                $mapelJadwal = array_map('trim', explode(',', $matches[1]));
+                                                            }
+                                                        }
+                                                    @endphp
+
+                                                    @if(!empty($tutorPerMapel))
+                                                        @foreach($tutorPerMapel as $mName => $gName)
+                                                            <div class="mb-1 d-flex align-items-center gap-1">
+                                                                <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $mName }}:</span>
+                                                                <span class="text-purple-950 font-weight-bold text-xs">{{ $gName }}</span>
+                                                            </div>
+                                                        @endforeach
+                                                    @elseif(!empty($currentGurus))
+                                                        @foreach($currentGurus as $cg)
+                                                            <div class="mb-1 d-flex align-items-center gap-1">
+                                                                <i class="fas fa-chalkboard-teacher mr-1 text-purple-600"></i>
+                                                                <span class="text-purple-950 font-weight-bold text-xs">{{ $cg }}</span>
+                                                            </div>
+                                                        @endforeach
+                                                    @else
+                                                        <span class="text-muted font-italic text-xs">Belum ditentukan</span>
+                                                    @endif
+                                                </div>
+                                                <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editTutorModal" style="border-color: #cbd5e1; color: #475569;">
+                                                    <i class="fas fa-edit mr-0.5 text-purple-600"></i> Atur
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Catatan Bon / Biaya Extra Card -->
+                    <div class="card shadow-sm border-light rounded-2xl overflow-hidden mb-4">
+                        <div class="card-header bg-white py-3 d-flex align-items-center justify-content-between">
+                            <h3 class="card-title font-weight-bold text-purple-950 mb-0" style="font-size: 0.95rem;">
+                                <i class="fas fa-receipt text-amber-500 mr-1.5"></i> Catatan Bon / Biaya Extra
+                            </h3>
+                            <button type="button" class="btn btn-xs btn-brand rounded-lg px-2.5 py-1 text-xs font-weight-bold shadow-xs" data-toggle="modal" data-target="#addCatatanBonModal">
+                                <i class="fas fa-plus mr-1"></i> Tambah Catatan Bon
+                            </button>
+                        </div>
+                        <div class="card-body p-3">
+                            @php
+                                $catatanBonList = $bio['catatan_bon'] ?? [];
+                                $monthNamesID = [
+                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                ];
+                            @endphp
+
+                            @if(empty($catatanBonList))
+                                <div class="text-center py-3 text-muted text-xs">
+                                    <i class="fas fa-file-invoice-dollar text-slate-300 fa-2x mb-1 d-block"></i>
+                                    Belum ada catatan bon/biaya extra yang ditambahkan untuk siswa ini.
+                                </div>
+                            @else
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover align-middle mb-0 text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-50 text-slate-600">
+                                                <th class="py-2">Barang / Keterangan</th>
+                                                <th class="py-2">Periode</th>
+                                                <th class="py-2 text-right">Harga (Rp)</th>
+                                                <th class="py-2 text-center" style="width: 40px;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($catatanBonList as $bon)
+                                                @php
+                                                    $bNum = (int)($bon['bulan'] ?? date('n'));
+                                                    $bYear = (int)($bon['tahun'] ?? date('Y'));
+                                                    $bName = $monthNamesID[$bNum] ?? 'Bulan ' . $bNum;
+
+                                                    $isBonPaid = ($bon['status'] ?? '') === 'lunas' || \App\Models\RiwayatPembayaran::where('siswa_id', $student->id)
+                                                        ->where('status', 'approved')
+                                                        ->where(function($q) use ($bName, $bNum, $bYear) {
+                                                            $q->where('tipe_paket_snapshot', 'LIKE', "%{$bName}%{$bYear}%")
+                                                              ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$bNum, $bYear]);
+                                                        })->exists();
+                                                @endphp
+                                                <tr>
+                                                    <td class="font-weight-bold text-purple-950 py-2">{{ $bon['nama_barang'] }}</td>
+                                                    <td class="py-2">
+                                                        <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded-full mr-1">
+                                                            {{ $bName }} {{ $bYear }}
+                                                        </span>
+                                                        @if($isBonPaid)
+                                                            <span class="badge bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                                                <i class="fas fa-check-circle mr-0.5"></i> LUNAS
+                                                            </span>
+                                                        @else
+                                                            <span class="badge bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                                                Belum Bayar
+                                                            </span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-right font-weight-bold text-amber-700 py-2">
+                                                        Rp {{ number_format($bon['harga'] ?? 0) }}
+                                                    </td>
+                                                    <td class="text-center py-2">
+                                                        <form action="{{ route('admin.siswa.delete-catatan-bon', [$student->id, $bon['id']]) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus catatan bon ini?')">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-xs text-danger hover:bg-red-50 p-1 rounded" title="Hapus Bon">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -782,7 +883,7 @@
                                     @if(isset($gurusList) && !$gurusList->isEmpty())
                                         @foreach($gurusList as $g)
                                             @php
-                                                $isChecked = in_array($g->user->name ?? '', $currentGurus);
+                                                $isChecked = in_array($g->user->name ?? '', $currentGurus ?? []);
                                             @endphp
                                             <div class="col-md-6 mb-3 tutor-item-row" data-name="{{ strtolower($g->user->name ?? '') }}" data-spesialisasi="{{ strtolower($g->spesialisasi ?? 'matematika') }}">
                                                 <div class="custom-control custom-checkbox p-2 rounded border" style="background-color: #f8fafc; border-color: #e2e8f0; height: 100%;">
@@ -1092,6 +1193,100 @@
             });
         });
     </script>
+
+    <!-- Modal Tambah Catatan Bon / Biaya Extra -->
+    <div class="modal fade" id="addCatatanBonModal" tabindex="-1" role="dialog" aria-labelledby="addCatatanBonModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                    <h5 class="modal-title font-weight-bold text-md text-white" id="addCatatanBonModalLabel">
+                        <i class="fas fa-plus-circle text-amber-400 mr-1.5"></i> Tambah Catatan Bon / Biaya Extra
+                    </h5>
+                    <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('admin.siswa.add-catatan-bon', $student->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body p-4 text-left">
+                        @php
+                            $mList = [
+                                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                            ];
+                            $cM = (int) date('n');
+                            $cY = (int) date('Y');
+                            $cMName = $mList[$cM] ?? 'Bulan ' . $cM;
+
+                            $isCurMonthPaid = \App\Models\RiwayatPembayaran::where('siswa_id', $student->id)
+                                ->where('status', 'approved')
+                                ->where(function($q) use ($cMName, $cM, $cY) {
+                                    $q->where('tipe_paket_snapshot', 'LIKE', "%{$cMName}%{$cY}%")
+                                      ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$cM, $cY]);
+                                })->exists();
+
+                            $defM = $cM;
+                            $defY = $cY;
+                            if ($isCurMonthPaid) {
+                                if ($defM == 12) {
+                                    $defM = 1;
+                                    $defY += 1;
+                                } else {
+                                    $defM += 1;
+                                }
+                            }
+                        @endphp
+
+                        @if($isCurMonthPaid)
+                            <div class="alert alert-info py-2 px-3 text-xs mb-3 rounded-lg border-0" style="background-color: #e0f2fe; color: #0369a1;">
+                                <i class="fas fa-info-circle mr-1"></i> Pembayaran bulan {{ $cMName }} {{ $cY }} sudah <strong>LUNAS</strong>. Catatan bon ini secara otomatis dialokasikan untuk tagihan bulan <strong>{{ $mList[$defM] ?? '' }} {{ $defY }}</strong>.
+                            </div>
+                        @endif
+
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-xs text-purple-950 mb-1">Nama Barang / Catatan Bon <span class="text-danger">*</span></label>
+                            <input type="text" name="nama_barang" class="form-control form-control-sm rounded-lg" placeholder="Misal: Buku Modul Cetak, Biaya Registrasi, Foto" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-xs text-purple-950 mb-1">Nominal Harga (Rp) <span class="text-danger">*</span></label>
+                            <input type="number" name="harga" class="form-control form-control-sm rounded-lg" placeholder="Misal: 50000" min="0" step="500" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-xs text-purple-950 mb-1">Bulan Berlaku <span class="text-danger">*</span></label>
+                                    <select name="bulan" class="form-control form-control-sm rounded-lg font-weight-bold text-xs" required>
+                                        @foreach($mList as $mV => $mL)
+                                            <option value="{{ $mV }}" {{ $mV == $defM ? 'selected' : '' }}>{{ $mL }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group mb-3">
+                                    <label class="font-weight-bold text-xs text-purple-950 mb-1">Tahun <span class="text-danger">*</span></label>
+                                    <select name="tahun" class="form-control form-control-sm rounded-lg font-weight-bold text-xs" required>
+                                        @foreach(range($defY - 1, $defY + 2) as $yV)
+                                            <option value="{{ $yV }}" {{ $yV == $defY ? 'selected' : '' }}>{{ $yV }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top py-2 px-4 d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-light border rounded-lg font-weight-bold text-xs px-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-brand rounded-lg font-weight-bold text-xs px-4 shadow-sm" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #40206b; border: 0;">
+                            <i class="fas fa-save mr-1"></i> Simpan Catatan Bon
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Custom CSS for purple brand elements -->
     <style>

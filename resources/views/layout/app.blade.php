@@ -164,6 +164,74 @@
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper {{ $isMobileLayout ? 'pb-24 md:pb-0' : '' }}">
+            @if(auth()->guard('siswa')->check())
+                @php
+                    $curSiswa = auth()->guard('siswa')->user();
+                    $curM = (int) date('n');
+                    $curY = (int) date('Y');
+
+                    $mName = \Carbon\Carbon::createFromDate($curY, $curM, 1)->locale('id')->isoFormat('MMMM');
+                    $paidCurrentMonth = \App\Models\RiwayatPembayaran::where('siswa_id', $curSiswa->id)
+                        ->where('status', 'approved')
+                        ->where(function($q) use ($mName, $curM, $curY) {
+                            $q->where('tipe_paket_snapshot', 'LIKE', "%{$mName}%{$curY}%")
+                              ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$curM, $curY]);
+                        })->exists();
+
+                    $riwayatPend = \App\Models\RiwayatPembayaran::where('siswa_id', $curSiswa->id)
+                        ->where('status', 'under_review')
+                        ->where(function($q) use ($mName, $curM, $curY) {
+                            $q->where('tipe_paket_snapshot', 'LIKE', "%{$mName}%{$curY}%")
+                              ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$curM, $curY]);
+                        })->exists();
+
+                    // Cek pembayaran bulan sebelumnya (jika siswa sudah terdaftar sejak bulan lalu)
+                    $prevMonth = \Carbon\Carbon::now()->subMonth();
+                    $prevM = (int) $prevMonth->month;
+                    $prevY = (int) $prevMonth->year;
+                    $prevMName = $prevMonth->locale('id')->isoFormat('MMMM');
+
+                    $paidPrevMonth = \App\Models\RiwayatPembayaran::where('siswa_id', $curSiswa->id)
+                        ->where('status', 'approved')
+                        ->where(function($q) use ($prevMName, $prevM, $prevY) {
+                            $q->where('tipe_paket_snapshot', 'LIKE', "%{$prevMName}%{$prevY}%")
+                              ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$prevM, $prevY]);
+                        })->exists();
+
+                    $isStudentRegisteredInPrevMonth = $curSiswa->created_at ? $curSiswa->created_at->lt($prevMonth->endOfMonth()) : false;
+                    $unpaidPrevMonth = $isStudentRegisteredInPrevMonth && !$paidPrevMonth;
+
+                    // Alert tetap muncul jika menunggak bulan lalu ATAU melewati tgl 10 bulan ini
+                    $isOverdueApp = request()->has('test_late') || $unpaidPrevMonth || (((int) date('j') > 10) && !$paidCurrentMonth && !$riwayatPend);
+                    $overdueMonthName = $unpaidPrevMonth ? $prevMName . ' ' . $prevY : \Carbon\Carbon::now()->locale('id')->isoFormat('MMMM YYYY');
+                @endphp
+
+                @if($isOverdueApp && !request()->is('siswa/invoice*'))
+                    <div class="px-4 py-3 shadow-md no-print" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #2e1065;">
+                        <div class="container-fluid d-flex flex-column flex-md-row align-items-center justify-content-between gap-2">
+                            <div class="d-flex align-items-center gap-2 text-xs font-medium">
+                                <i class="fas fa-exclamation-triangle text-amber-900 mr-2" style="font-size: 1.1rem;"></i>
+                                <span>
+                                    <strong>Peringatan Pembayaran:</strong> Anda memiliki tunggakan tagihan bimbingan belajar periode <strong>{{ $overdueMonthName }}</strong> yang belum dilunasi (Jatuh tempo tanggal 10). Silakan lakukan pembayaran agar pembelajaran tetap lancar.
+                                </span>
+                            </div>
+                            <a href="{{ route('siswa.invoice') }}" class="btn btn-xs font-weight-bold shadow-sm px-3 py-1.5 rounded-lg text-xs" style="background-color: #2e1065; color: #fff; border: 0;">
+                                <i class="fas fa-credit-card mr-1"></i> Bayar Sekarang
+                            </a>
+                        </div>
+                    </div>
+                @elseif($riwayatPend && !request()->is('siswa/invoice*') && !request()->is('siswa/riwayat*'))
+                    <div class="px-4 py-2 shadow-sm no-print" style="background-color: #0f766e; color: #fff;">
+                        <div class="container-fluid d-flex align-items-center justify-content-between text-xs">
+                            <div>
+                                <i class="fas fa-clock mr-1.5"></i> Bukti pembayaran Anda untuk bulan ini sedang diverifikasi oleh Admin.
+                            </div>
+                            <a href="{{ route('siswa.riwayat') }}" class="text-white text-decoration-underline font-weight-bold">Lihat Status</a>
+                        </div>
+                    </div>
+                @endif
+            @endif
+
             @yield('content')
         </div>
 

@@ -131,6 +131,21 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="{{ route('admin.riwayat-pembayaran') }}"
+                                    class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
+                                    <i class="fas fa-file-invoice-dollar nav-icon text-amber-400"></i>
+                                    <p>
+                                        Approve Pembayaran
+                                        @php
+                                            $pendingPaymentCount = \App\Models\RiwayatPembayaran::where('status', 'under_review')->count();
+                                        @endphp
+                                        @if($pendingPaymentCount > 0)
+                                            <span class="badge badge-warning right">{{ $pendingPaymentCount }}</span>
+                                        @endif
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="{{ route('admin.siswa.requests.index') }}"
                                     class="nav-link {{ Route::is('admin.siswa.requests.index') ? 'active' : '' }}">
                                     <i class="fas fa-book-medical nav-icon text-info"></i>
@@ -187,17 +202,24 @@
                         </ul>
                     </li>
 
-                    <li class="nav-item has-treeview {{ Route::is('admin.bank-soal.*') ? 'menu-open' : '' }}">
-                        <a href="#" class="nav-link {{ Route::is('admin.bank-soal.*') ? 'active' : '' }}">
+                    <li class="nav-item has-treeview {{ Route::is('admin.bank-soal.*') || Route::is('admin.ujian.*') ? 'menu-open' : '' }}">
+                        <a href="#" class="nav-link {{ Route::is('admin.bank-soal.*') || Route::is('admin.ujian.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-open text-info"></i>
                             <p>Materi &amp; Soal <i class="right fas fa-angle-left"></i></p>
                         </a>
-                        <ul class="nav nav-treeview" style="{{ Route::is('admin.bank-soal.*') ? 'display: block;' : 'display: none;' }}">
+                        <ul class="nav nav-treeview" style="{{ Route::is('admin.bank-soal.*') || Route::is('admin.ujian.*') ? 'display: block;' : 'display: none;' }}">
                             <li class="nav-item">
                                 <a href="{{ route('admin.bank-soal.index') }}"
                                     class="nav-link {{ Route::is('admin.bank-soal.*') ? 'active' : '' }}">
                                     <i class="fas fa-folder-open nav-icon text-warning"></i>
                                     <p>Bank Soal</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.ujian.index') }}"
+                                    class="nav-link {{ Route::is('admin.ujian.*') ? 'active' : '' }}">
+                                    <i class="fas fa-file-signature nav-icon text-purple-400"></i>
+                                    <p>Penugasan Ujian</p>
                                 </a>
                             </li>
                         </ul>

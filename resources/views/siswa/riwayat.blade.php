@@ -55,50 +55,86 @@
                                         </tr>
                                     </thead>
                                     <tbody class="text-slate-700">
-                                        @if($siswa->bukti_transfer)
-                                            <tr>
-                                                <td class="px-4 py-3.5 align-middle font-mono text-xs font-semibold text-purple-900">
-                                                    POM-PAY-{{ str_pad($siswa->id, 4, '0', STR_PAD_LEFT) }}
-                                                </td>
-                                                <td class="px-4 py-3.5 align-middle text-sm">
-                                                    {{ $siswa->updated_at ? $siswa->updated_at->format('d M Y H:i') : ($siswa->created_at ? $siswa->created_at->format('d M Y H:i') : '-') }}
-                                                </td>
-                                                <td class="px-4 py-3.5 align-middle text-sm font-medium">
-                                                    {{ $paket ? $paket->nama_paket : 'Pendaftaran Bimbel' }}
-                                                </td>
-                                                <td class="px-4 py-3.5 align-middle text-sm font-bold text-purple-950 text-right">
-                                                    Rp {{ number_format($totalHarga, 0, ',', '.') }}
-                                                </td>
-                                                <td class="px-4 py-3.5 align-middle text-center">
-                                                    @if($siswa->status === 'active')
-                                                        <span class="badge badge-success px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm" style="background-color: #10b981;">Lunas</span>
-                                                    @elseif($siswa->status === 'under_review')
-                                                        <span class="badge badge-warning px-2.5 py-1.5 rounded-lg text-xs font-bold text-white shadow-sm" style="background-color: #f59e0b;">Peninjauan</span>
-                                                    @elseif($siswa->status === 'rejected')
-                                                        <span class="badge badge-danger px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm" style="background-color: #ef4444;">Ditolak</span>
-                                                    @else
-                                                        <span class="badge badge-secondary px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm">Pending</span>
-                                                    @endif
-                                                </td>
-                                                <td class="px-4 py-3.5 align-middle text-center">
-                                                    <div class="d-flex justify-content-center align-items-center" style="gap: 6px;">
-                                                        <button type="button" class="btn btn-sm btn-brand py-1.5 px-3 rounded-lg text-xs" data-toggle="modal" data-target="#detailModal">
-                                                            <i class="fas fa-info-circle mr-1"></i> Detail
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-purple py-1.5 px-3 rounded-lg text-xs" data-toggle="modal" data-target="#buktiModal">
-                                                            <i class="fas fa-image mr-1"></i> Bukti
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @else
-                                            <tr>
-                                                <td colspan="6" class="text-center py-5 text-muted text-sm">
-                                                    <i class="fas fa-receipt d-block mb-2 text-purple-300" style="font-size: 2rem;"></i>
-                                                    Belum ada riwayat pembayaran yang diunggah.
-                                                </td>
-                                            </tr>
-                                        @endif
+                                         @if((isset($riwayatList) && $riwayatList->count() > 0) || $siswa->bukti_transfer)
+                                             @if(isset($riwayatList) && $riwayatList->count() > 0)
+                                                 @foreach($riwayatList as $rItem)
+                                                     <tr>
+                                                         <td class="px-4 py-3.5 align-middle font-mono text-xs font-semibold text-purple-900">
+                                                             POM-TRX-{{ str_pad($rItem->id, 5, '0', STR_PAD_LEFT) }}
+                                                         </td>
+                                                         <td class="px-4 py-3.5 align-middle text-xs">
+                                                             {{ $rItem->created_at ? $rItem->created_at->format('d M Y, H:i') : '-' }}
+                                                         </td>
+                                                         <td class="px-4 py-3.5 align-middle text-sm font-semibold text-purple-950">
+                                                             {{ $rItem->tipe_paket_snapshot ?: ($paket ? $paket->nama_paket : 'Pembayaran Bimbingan') }}
+                                                             <span class="d-block text-[11px] text-muted font-normal">{{ strtoupper($rItem->payment_method) }}</span>
+                                                         </td>
+                                                         <td class="px-4 py-3.5 align-middle text-sm font-bold text-purple-950 text-right">
+                                                             Rp {{ number_format($rItem->total_harga, 0, ',', '.') }}
+                                                         </td>
+                                                         <td class="px-4 py-3.5 align-middle text-center">
+                                                             @if($rItem->status === 'approved')
+                                                                 <span class="badge badge-success px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm" style="background-color: #10b981;">Disetujui</span>
+                                                             @elseif($rItem->status === 'rejected')
+                                                                 <span class="badge badge-danger px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm" style="background-color: #ef4444;">Ditolak</span>
+                                                             @else
+                                                                 <span class="badge badge-warning px-2.5 py-1.5 rounded-lg text-xs font-bold text-white shadow-sm" style="background-color: #f59e0b;">Menunggu Verifikasi</span>
+                                                             @endif
+                                                         </td>
+                                                         <td class="px-4 py-3.5 align-middle text-center">
+                                                             <a href="{{ asset($rItem->bukti_transfer) }}" target="_blank" class="btn btn-sm btn-outline-purple py-1 px-2.5 rounded-lg text-xs font-weight-bold">
+                                                                 <i class="fas fa-external-link-alt mr-1"></i> Bukti
+                                                             </a>
+                                                         </td>
+                                                     </tr>
+                                                 @endforeach
+                                             @endif
+
+                                             @if($siswa->bukti_transfer && (!isset($riwayatList) || $riwayatList->isEmpty()))
+                                                 <tr>
+                                                     <td class="px-4 py-3.5 align-middle font-mono text-xs font-semibold text-purple-900">
+                                                         POM-PAY-{{ str_pad($siswa->id, 4, '0', STR_PAD_LEFT) }}
+                                                     </td>
+                                                     <td class="px-4 py-3.5 align-middle text-sm">
+                                                         {{ $siswa->updated_at ? $siswa->updated_at->format('d M Y H:i') : ($siswa->created_at ? $siswa->created_at->format('d M Y H:i') : '-') }}
+                                                     </td>
+                                                     <td class="px-4 py-3.5 align-middle text-sm font-medium">
+                                                         {{ $paket ? $paket->nama_paket : 'Pendaftaran Bimbel' }}
+                                                     </td>
+                                                     <td class="px-4 py-3.5 align-middle text-sm font-bold text-purple-950 text-right">
+                                                         Rp {{ number_format($totalHarga, 0, ',', '.') }}
+                                                     </td>
+                                                     <td class="px-4 py-3.5 align-middle text-center">
+                                                         @if($siswa->status === 'active')
+                                                             <span class="badge badge-success px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm" style="background-color: #10b981;">Lunas</span>
+                                                         @elseif($siswa->status === 'under_review')
+                                                             <span class="badge badge-warning px-2.5 py-1.5 rounded-lg text-xs font-bold text-white shadow-sm" style="background-color: #f59e0b;">Peninjauan</span>
+                                                         @elseif($siswa->status === 'rejected')
+                                                             <span class="badge badge-danger px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm" style="background-color: #ef4444;">Ditolak</span>
+                                                         @else
+                                                             <span class="badge badge-secondary px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm">Pending</span>
+                                                         @endif
+                                                     </td>
+                                                     <td class="px-4 py-3.5 align-middle text-center">
+                                                         <div class="d-flex justify-content-center align-items-center" style="gap: 6px;">
+                                                             <button type="button" class="btn btn-sm btn-brand py-1.5 px-3 rounded-lg text-xs" data-toggle="modal" data-target="#detailModal">
+                                                                 <i class="fas fa-info-circle mr-1"></i> Detail
+                                                             </button>
+                                                             <button type="button" class="btn btn-sm btn-outline-purple py-1.5 px-3 rounded-lg text-xs" data-toggle="modal" data-target="#buktiModal">
+                                                                 <i class="fas fa-image mr-1"></i> Bukti
+                                                             </button>
+                                                         </div>
+                                                     </td>
+                                                 </tr>
+                                             @endif
+                                         @else
+                                             <tr>
+                                                 <td colspan="6" class="text-center py-5 text-muted text-sm">
+                                                     <i class="fas fa-receipt d-block mb-2 text-purple-300" style="font-size: 2rem;"></i>
+                                                     Belum ada riwayat pembayaran yang diunggah.
+                                                 </td>
+                                             </tr>
+                                         @endif
                                     </tbody>
                                 </table>
                             </div>

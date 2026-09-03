@@ -193,7 +193,7 @@
                                             @foreach ($availableClasses as $cls)
                                                 <option value="{{ $cls }}"
                                                     {{ (string) $kelas === (string) $cls ? 'selected' : '' }}>
-                                                    Kelas {{ $cls }}
+                                                    {{ is_numeric($cls) ? 'Kelas ' . $cls : $cls }}
                                                 </option>
                                             @endforeach
                                         @endif
@@ -353,7 +353,7 @@
                                     <option value="">-- Pilih Kelas --</option>
                                     @if ($jenjang)
                                         @foreach ($availableClasses as $cls)
-                                            <option value="{{ $cls }}" {{ (string) $kelas === (string) $cls ? 'selected' : '' }}>Kelas {{ $cls }}</option>
+                                            <option value="{{ $cls }}" {{ (string) $kelas === (string) $cls ? 'selected' : '' }}>{{ is_numeric($cls) ? 'Kelas ' . $cls : $cls }}</option>
                                         @endforeach
                                     @endif
                                 </select>
@@ -917,6 +917,12 @@
     </style>
 
     <script>
+        const KELAS_MAP_GURU = {
+            SD: [1, 2, 3, 4, 5, 6, 'Olimpiade', 'Tes Masuk SMP'],
+            SMP: [1, 2, 3, 'Olimpiade', 'Tes Masuk SMA'],
+            SMA: [1, 2, 3, 'Olimpiade', 'UTBK'],
+        };
+
         function onJenjangChange(selectEl) {
             const form = selectEl.form;
             const jenjangVal = selectEl.value ? selectEl.value.toUpperCase() : '';
@@ -926,15 +932,12 @@
 
             if (kelasSelect) {
                 kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
-                if (jenjangVal === 'SD') {
-                    for (let i = 1; i <= 6; i++) {
-                        kelasSelect.innerHTML += `<option value="${i}">Kelas ${i}</option>`;
-                    }
-                    kelasSelect.disabled = false;
-                } else if (jenjangVal === 'SMP' || jenjangVal === 'SMA') {
-                    for (let i = 1; i <= 3; i++) {
-                        kelasSelect.innerHTML += `<option value="${i}">Kelas ${i}</option>`;
-                    }
+                const list = KELAS_MAP_GURU[jenjangVal] || [];
+                if (list.length > 0) {
+                    list.forEach(k => {
+                        const label = (typeof k === 'number' || !isNaN(k)) ? 'Kelas ' + k : k;
+                        kelasSelect.innerHTML += `<option value="${k}">${label}</option>`;
+                    });
                     kelasSelect.disabled = false;
                 } else {
                     kelasSelect.disabled = true;
@@ -954,13 +957,24 @@
         function onKelasChange(selectEl) {
             const form = selectEl.form;
             const jenjangVal = form.querySelector('select[name="jenjang"]')?.value ? form.querySelector('select[name="jenjang"]').value.toUpperCase() : '';
-            const kelasVal = parseInt(selectEl.value);
+            const rawVal = selectEl.value;
+            const kelasVal = parseInt(rawVal);
             const subSelect = form.querySelector('select[name="sub_kategori"]');
             const mapelSelect = form.querySelector('select[name="mapel"]');
 
+            const isSpecialKelas = ['Olimpiade', 'Tes Masuk SMP', 'Tes Masuk SMA', 'UTBK'].includes(rawVal);
+
             if (subSelect) {
                 subSelect.innerHTML = '<option value="">-- Pilih Semester / TKA --</option>';
-                if (kelasVal) {
+                if (isSpecialKelas) {
+                    subSelect.innerHTML = '<option value="-">-</option>';
+                    subSelect.value = '-';
+                    subSelect.disabled = false;
+                    if (mapelSelect) {
+                        mapelSelect.disabled = false;
+                    }
+                    return;
+                } else if (kelasVal) {
                     subSelect.innerHTML += '<option value="Semester 1">Semester 1</option>';
                     subSelect.innerHTML += '<option value="Semester 2">Semester 2</option>';
 

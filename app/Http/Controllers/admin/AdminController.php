@@ -486,7 +486,20 @@ class AdminController extends Controller
         $paket = PaketBelajar::find($student->paket_id);
         $gurusList = Guru::with('user')->get();
 
-        return view('admin.detailData', compact('student', 'paket', 'gurusList'));
+        $biodata = $student->biodata ?? [];
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+        $currentGurus = $biodata['tutor_names'] ?? [];
+
+        if (empty($currentGurus) && $student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
+            $currentGurus = array_map('trim', explode(',', $matches[1]));
+        }
+
+        $mapelJadwal = $biodata['mapel_jadwal'] ?? [];
+        if (empty($mapelJadwal) && $student->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+            $mapelJadwal = array_map('trim', explode(',', $matches[1]));
+        }
+
+        return view('admin.detailData', compact('student', 'paket', 'gurusList', 'currentGurus', 'mapelJadwal', 'tutorPerMapel'));
     }
 
     /**
@@ -1264,21 +1277,59 @@ class AdminController extends Controller
         $year = (int) $request->input('year', now()->year);
         $year = $year > 0 ? $year : now()->year;
 
-        $paymentsQuery = Siswa::with('paket')
-            ->whereNotNull('bukti_transfer')
-            ->where('bukti_transfer', '!=', '')
-            ->where('status', 'active');
+        // Fetch ALL approved transactions from RiwayatPembayaran
+        $riwayatQuery = \App\Models\RiwayatPembayaran::with(['siswa.paket'])
+            ->where('status', 'approved');
 
-        if ($filter === 'monthly') {
-            $paymentsQuery->whereYear('updated_at', $year);
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $riwayatQuery->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+        } elseif ($filter === 'monthly') {
+            $riwayatQuery->whereYear('created_at', $year);
         }
 
-        $payments = $paymentsQuery->get();
+        $riwayatPayments = $riwayatQuery->orderBy('created_at', 'desc')->get();
 
-        $availableYears = Siswa::whereNotNull('bukti_transfer')
-            ->where('bukti_transfer', '!=', '')
-            ->where('status', 'active')
-            ->selectRaw('YEAR(updated_at) as year')
+        // Fallback: If no records in RiwayatPembayaran, include active Siswa with initial registration proof
+        if ($riwayatPayments->isEmpty()) {
+            $initialSiswa = Siswa::with('paket')
+                ->whereNotNull('bukti_transfer')
+                ->where('bukti_transfer', '!=', '')
+                ->where('status', 'active');
+            if ($filter === 'monthly') {
+                $initialSiswa->whereYear('updated_at', $year);
+            }
+            $activeSiswas = $initialSiswa->get();
+
+            foreach ($activeSiswas as $s) {
+                $p = $s->paket;
+                $bio = $s->biodata ?? [];
+                $jSesi = $bio['jumlah_pertemuan'] ?? 4;
+                $det = '';
+                if ($s->tipe_paket && $p) {
+                    if (str_contains($s->tipe_paket, $p->detail_1)) $det = $p->detail_1;
+                    elseif (str_contains($s->tipe_paket, $p->detail_2)) $det = $p->detail_2;
+                    elseif (str_contains($s->tipe_paket, $p->detail_3)) $det = $p->detail_3;
+                    elseif (str_contains($s->tipe_paket, $p->detail_4)) $det = $p->detail_4;
+                }
+                $hSesi = $this->extractPrice($det, $p ? $p->harga_max : 450000);
+                $tot = $hSesi * ($jSesi ?: 1);
+
+                $riwayatPayments->push((object) [
+                    'id'               => $s->id,
+                    'siswa'            => $s,
+                    'paket'            => $p,
+                    'tipe_paket_snapshot' => $s->tipe_paket ?: 'Pendaftaran Bimbel',
+                    'total_harga'      => $tot,
+                    'jumlah_sesi'      => $jSesi,
+                    'payment_method'   => 'Transfer Bank',
+                    'created_at'       => $s->updated_at ?? $s->created_at,
+                    'approved_at'      => $s->updated_at ?? $s->created_at,
+                ]);
+            }
+        }
+
+        $availableYears = \App\Models\RiwayatPembayaran::where('status', 'approved')
+            ->selectRaw('YEAR(created_at) as year')
             ->distinct()
             ->orderByDesc('year')
             ->pluck('year');
@@ -1294,40 +1345,17 @@ class AdminController extends Controller
         $totalRevenue = 0;
         $paymentCount = 0;
 
-        // Aggregates
-        $packageTotals = []; // name => ['revenue'=>int, 'count'=>int]
-        $tutorTotals = []; // tutor => ['sesi'=>int, 'siswa'=>int, 'revenue'=>int]
+        $packageTotals = [];
+        $tutorTotals = [];
 
-        foreach ($payments as $siswa) {
-            $paket = $siswa->paket;
-            $biodata = $siswa->biodata ?? [];
-            $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
-            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
-            $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+        foreach ($riwayatPayments as $r) {
+            $siswa = $r->siswa;
+            $paket = $r->paket ?? ($siswa ? $siswa->paket : null);
+            $biodata = $siswa ? ($siswa->biodata ?? []) : [];
+            $totalHarga = $r->total_harga;
+            $jumlahSesi = $r->jumlah_sesi ?? 1;
 
-            if (empty($hariPertemuan) && $siswa->tipe_paket) {
-                if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-                    $hariPertemuan = array_map('trim', explode(',', $matches[1]));
-                }
-            }
-            if (!$jumlahPertemuan && $siswa->tipe_paket) {
-                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
-                    $jumlahPertemuan = (int) $matches[1];
-                }
-            }
-
-            $detailString = '';
-            if ($siswa->tipe_paket && $paket) {
-                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
-            }
-
-            $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
-            $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
-
-            $paymentDate = $siswa->updated_at ?? $siswa->created_at;
+            $paymentDate = $r->created_at;
             $monthIndex = $paymentDate ? ((int) $paymentDate->format('n') - 1) : null;
             $paymentYear = $paymentDate ? (int) $paymentDate->format('Y') : now()->year;
 
@@ -1342,17 +1370,17 @@ class AdminController extends Controller
             $totalRevenue += $totalHarga;
             $paymentCount++;
 
-            // package aggregate
-            $pname = $paket ? $paket->nama_paket : 'Umum';
+            // Package aggregate
+            $pname = $paket ? $paket->nama_paket : ($r->tipe_paket_snapshot ?: 'Umum');
             if (!isset($packageTotals[$pname])) {
                 $packageTotals[$pname] = ['revenue' => 0, 'count' => 0];
             }
             $packageTotals[$pname]['revenue'] += $totalHarga;
             $packageTotals[$pname]['count'] += 1;
 
-            // tutor aggregate — try biodata->tutor_names or parse tipe_paket
+            // Tutor aggregate
             $tutors = $biodata['tutor_names'] ?? [];
-            if (empty($tutors) && $siswa->tipe_paket) {
+            if (empty($tutors) && $siswa && $siswa->tipe_paket) {
                 if (preg_match('/Guru:\s*([^|]+)/i', $siswa->tipe_paket, $m)) {
                     $tutors = array_map('trim', explode(',', $m[1]));
                 }
@@ -1366,13 +1394,11 @@ class AdminController extends Controller
                 if (!isset($tutorTotals[$t])) {
                     $tutorTotals[$t] = ['sesi' => 0, 'siswa' => 0, 'revenue' => 0, 'unique_siswa' => []];
                 }
-                $tutorTotals[$t]['sesi'] += ($jumlahPertemuan ?: 1) / $tutorCount;
-                // count unique siswa per tutor
-                if (!in_array($siswa->id, $tutorTotals[$t]['unique_siswa'])) {
+                $tutorTotals[$t]['sesi'] += $jumlahSesi / $tutorCount;
+                if ($siswa && !in_array($siswa->id, $tutorTotals[$t]['unique_siswa'])) {
                     $tutorTotals[$t]['unique_siswa'][] = $siswa->id;
                     $tutorTotals[$t]['siswa'] += 1;
                 }
-                // split revenue evenly among tutors
                 $tutorTotals[$t]['revenue'] += $totalHarga / $tutorCount;
             }
         }
@@ -1418,6 +1444,7 @@ class AdminController extends Controller
                 'targetPercent' => $targetPercent,
                 'packageTotals' => $packageTotals,
                 'tutorTotals' => $tutorTotals,
+                'riwayatPayments' => $riwayatPayments,
             ]
         ));
     }
@@ -1917,12 +1944,7 @@ class AdminController extends Controller
         $mapel   = $request->input('mapel', '');
 
         // Step 2: Kelas tersedia berdasarkan jenjang
-        $availableClasses = [];
-        if ($jenjang === 'SD') {
-            $availableClasses = range(1, 6);
-        } elseif (in_array($jenjang, ['SMP', 'SMA'])) {
-            $availableClasses = range(1, 3);
-        }
+        $availableClasses = $jenjang ? KategoriSoal::availableClasses($jenjang) : [];
 
         // Step 3: Semester / TKA tersedia berdasarkan jenjang + kelas
         $availableSubs = ($jenjang && $kelas)
@@ -2130,7 +2152,7 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'jenjang'       => 'required|in:SD,SMP,SMA',
-            'kelas'         => 'required|integer|min:1|max:6',
+            'kelas'         => 'required|string',
             'sub_kategori'  => ['required', 'string', Rule::in($allowedSub)],
             'nama_kategori' => 'required|string|max:255',
             'deskripsi'     => 'required|string|max:255',
@@ -2627,6 +2649,307 @@ class AdminController extends Controller
         }
 
         return response()->json(['mapel' => $mapelList]);
+    }
+
+    /**
+     * Tampilkan Halaman Penugasan Ujian Siswa oleh Admin.
+     */
+    public function showUjianAdmin(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $user = Auth::user();
+
+        // Fetch ALL active students
+        $assignedStudents = \App\Models\Siswa::with('paket')->where('status', 'active')->orderBy('name', 'asc')->get();
+
+        // Selected student ID or first student
+        $selectedSiswaId = $request->input('siswa_id');
+        $selectedSiswa = $assignedStudents->firstWhere('id', $selectedSiswaId) ?: $assignedStudents->first();
+
+        // All available KategoriSoal (Question Packages) with question count
+        $categoriesQuery = \App\Models\KategoriSoal::withCount('bankSoals');
+
+        if ($request->filled('jenjang')) {
+            $categoriesQuery->where('jenjang', strtoupper($request->jenjang));
+        }
+        if ($request->filled('mapel')) {
+            $categoriesQuery->where('nama_kategori', $request->mapel);
+        }
+
+        $allCategories = $categoriesQuery->orderBy('created_at', 'desc')->get();
+
+        // Existing assigned exams for the selected student
+        $assignedExams = [];
+        $hasilUjians = collect();
+
+        if ($selectedSiswa) {
+            $biodata = $selectedSiswa->biodata ?? [];
+            $assignedExams = $biodata['assigned_ujian'] ?? [];
+
+            $hasilUjians = \App\Models\HasilUjian::where('siswa_id', $selectedSiswa->id)
+                ->with('kategori')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        $prefixRoute = 'admin';
+
+        return view('guru.ujian', compact(
+            'user',
+            'assignedStudents',
+            'selectedSiswa',
+            'allCategories',
+            'assignedExams',
+            'hasilUjians',
+            'prefixRoute'
+        ));
+    }
+
+    /**
+     * Tugaskan Paket Soal Ujian ke Siswa (Admin).
+     */
+    public function assignUjianAdmin(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $user = Auth::user();
+
+        $request->validate([
+            'siswa_id' => 'required|exists:siswa,id',
+            'kategori_soal_id' => 'required|exists:kategori_soals,id',
+            'catatan' => 'nullable|string|max:255',
+            'tgl_deadline' => 'nullable|date',
+        ]);
+
+        $siswa = \App\Models\Siswa::findOrFail($request->siswa_id);
+        $kategori = \App\Models\KategoriSoal::findOrFail($request->kategori_soal_id);
+
+        $biodata = $siswa->biodata ?? [];
+        $assignedExams = $biodata['assigned_ujian'] ?? [];
+
+        $alreadyAssigned = false;
+        foreach ($assignedExams as $item) {
+            if (isset($item['kategori_soal_id']) && $item['kategori_soal_id'] == $kategori->id) {
+                $alreadyAssigned = true;
+                break;
+            }
+        }
+
+        if ($alreadyAssigned) {
+            return redirect()->route('admin.ujian.index', ['siswa_id' => $siswa->id])
+                ->with('error', 'Paket soal "' . ($kategori->deskripsi ?: $kategori->nama_kategori) . '" sudah ditugaskan kepada siswa ' . $siswa->name . '.');
+        }
+
+        $newAssignment = [
+            'id' => uniqid('ex_'),
+            'kategori_soal_id' => $kategori->id,
+            'nama_kategori' => $kategori->nama_kategori,
+            'deskripsi' => $kategori->deskripsi,
+            'jenjang' => $kategori->jenjang,
+            'sub_kategori' => $kategori->sub_kategori,
+            'guru_id' => $user->id,
+            'guru_name' => 'Admin (' . $user->name . ')',
+            'tanggal_ditugaskan' => date('Y-m-d H:i'),
+            'tgl_deadline' => $request->tgl_deadline,
+            'catatan' => $request->catatan ?: 'Silakan dikerjakan dengan jujur & cermat.',
+        ];
+
+        $assignedExams[] = $newAssignment;
+        $biodata['assigned_ujian'] = array_values($assignedExams);
+
+        $siswa->biodata = $biodata;
+        $siswa->save();
+
+        return redirect()->route('admin.ujian.index', ['siswa_id' => $siswa->id])
+            ->with('success', 'Berhasil menugaskan paket soal "' . ($kategori->deskripsi ?: $kategori->nama_kategori) . '" kepada ' . $siswa->name . '!');
+    }
+
+    /**
+     * Batalkan / Hapus Penugasan Ujian Siswa (Admin).
+     */
+    public function unassignUjianAdmin(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'siswa_id' => 'required|exists:siswa,id',
+            'assignment_id' => 'required|string',
+        ]);
+
+        $siswa = \App\Models\Siswa::findOrFail($request->siswa_id);
+        $biodata = $siswa->biodata ?? [];
+        $assignedExams = $biodata['assigned_ujian'] ?? [];
+
+        $filteredExams = array_filter($assignedExams, function ($item) use ($request) {
+            return isset($item['id']) && $item['id'] !== $request->assignment_id;
+        });
+
+        $biodata['assigned_ujian'] = array_values($filteredExams);
+        $siswa->biodata = $biodata;
+        $siswa->save();
+
+        return redirect()->route('admin.ujian.index', ['siswa_id' => $siswa->id])
+            ->with('success', 'Penugasan ujian telah dibatalkan!');
+    }
+
+    /**
+     * Tambah Catatan Bon / Biaya Extra Siswa (Admin).
+     */
+    public function addCatatanBon(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'nama_barang' => 'required|string|max:255',
+            'harga'       => 'required|numeric|min:0',
+            'bulan'       => 'required|integer|between:1,12',
+            'tahun'       => 'required|integer|between:2020,2050',
+        ], [
+            'nama_barang.required' => 'Nama barang / catatan bon wajib diisi.',
+            'harga.required'       => 'Nominal harga wajib diisi.',
+            'bulan.required'       => 'Bulan wajib dipilih.',
+            'tahun.required'       => 'Tahun wajib dipilih.',
+        ]);
+
+        $siswa = \App\Models\Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        $catatanBon = $biodata['catatan_bon'] ?? [];
+
+        $newItem = [
+            'id'          => uniqid('bon_'),
+            'nama_barang' => trim($request->nama_barang),
+            'harga'       => (float) $request->harga,
+            'bulan'       => (int) $request->bulan,
+            'tahun'       => (int) $request->tahun,
+            'created_at'  => now()->toDateTimeString(),
+        ];
+
+        $catatanBon[] = $newItem;
+        $biodata['catatan_bon'] = array_values($catatanBon);
+
+        $siswa->biodata = $biodata;
+        $siswa->save();
+
+        return redirect()->route('admin.siswa.detail', $id)
+            ->with('success', 'Catatan Bon / Biaya Extra "' . $newItem['nama_barang'] . '" (Rp ' . number_format($newItem['harga']) . ') berhasil ditambahkan!');
+    }
+
+    /**
+     * Hapus Catatan Bon / Biaya Extra Siswa (Admin).
+     */
+    public function deleteCatatanBon($id, $itemId)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = \App\Models\Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        $catatanBon = $biodata['catatan_bon'] ?? [];
+
+        $filteredBon = array_filter($catatanBon, function ($item) use ($itemId) {
+            return isset($item['id']) && $item['id'] !== $itemId;
+        });
+
+        $biodata['catatan_bon'] = array_values($filteredBon);
+        $siswa->biodata = $biodata;
+        $siswa->save();
+
+        return redirect()->route('admin.siswa.detail', $id)
+            ->with('success', 'Catatan Bon berhasil dihapus!');
+    }
+
+    /**
+     * Setujui Pembayaran Bulanan / Transaksi Riwayat Pembayaran Siswa.
+     */
+    public function approveRiwayatPembayaran($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $riwayat = \App\Models\RiwayatPembayaran::findOrFail($id);
+        $riwayat->update([
+            'status' => 'approved',
+            'approved_at' => now(),
+        ]);
+
+        // Pastikan status akun siswa juga aktif jika sebelumnya pending/under_review/nonaktif
+        $siswa = $riwayat->siswa;
+        if ($siswa) {
+            if ($siswa->status !== 'active') {
+                $siswa->update(['status' => 'active']);
+            }
+
+            // Tentukan bulan & tahun transaksi dari snapshot atau created_at
+            $monthNamesID = [
+                'Januari' => 1, 'Februari' => 2, 'Maret' => 3, 'April' => 4,
+                'Mei' => 5, 'Juni' => 6, 'Juli' => 7, 'Agustus' => 8,
+                'September' => 9, 'Oktober' => 10, 'November' => 11, 'Desember' => 12
+            ];
+
+            $targetM = (int) $riwayat->created_at->format('n');
+            $targetY = (int) $riwayat->created_at->format('Y');
+
+            if ($riwayat->tipe_paket_snapshot) {
+                foreach ($monthNamesID as $mName => $mVal) {
+                    if (str_contains($riwayat->tipe_paket_snapshot, $mName)) {
+                        $targetM = $mVal;
+                        break;
+                    }
+                }
+                if (preg_match('/20\d{2}/', $riwayat->tipe_paket_snapshot, $yrMatch)) {
+                    $targetY = (int) $yrMatch[0];
+                }
+            }
+
+            // Update catatan bon siswa yang cocok dengan bulan & tahun menjadi LUNAS
+            $biodata = $siswa->biodata ?? [];
+            if (!empty($biodata['catatan_bon']) && is_array($biodata['catatan_bon'])) {
+                $updatedBon = false;
+                foreach ($biodata['catatan_bon'] as &$bon) {
+                    $bM = (int) ($bon['bulan'] ?? 0);
+                    $bY = (int) ($bon['tahun'] ?? 0);
+                    if ($bM === $targetM && $bY === $targetY) {
+                        $bon['status'] = 'lunas';
+                        $bon['paid_at'] = now()->toDateTimeString();
+                        $updatedBon = true;
+                    }
+                }
+                if ($updatedBon) {
+                    $siswa->biodata = $biodata;
+                    $siswa->save();
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Pembayaran "' . $riwayat->tipe_paket_snapshot . '" senilai Rp ' . number_format($riwayat->total_harga) . ' berhasil disetujui!');
+    }
+
+    /**
+     * Tolak Pembayaran Bulanan / Transaksi Riwayat Pembayaran Siswa.
+     */
+    public function rejectRiwayatPembayaran($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $riwayat = \App\Models\RiwayatPembayaran::findOrFail($id);
+        $riwayat->update([
+            'status' => 'rejected',
+        ]);
+
+        return redirect()->back()->with('info', 'Pembayaran "' . $riwayat->tipe_paket_snapshot . '" ditolak oleh Admin.');
     }
 }
 

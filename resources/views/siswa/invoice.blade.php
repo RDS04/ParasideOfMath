@@ -27,8 +27,11 @@
                         @endforeach
                     </select>
                 </form>
+                <button type="button" class="btn btn-sm btn-brand rounded-lg font-weight-bold px-3 shadow-xs" data-toggle="modal" data-target="#modalBayarBulanan" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #40206b; border: 0;">
+                    <i class="fas fa-upload mr-1.5"></i> Bayar / Upload Bukti Transfer
+                </button>
                 <button onclick="window.print()" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">
-                    <i class="fas fa-print mr-1.5"></i> Cetak / Simpan PDF
+                    <i class="fas fa-print mr-1.5"></i> Cetak PDF
                 </button>
                 <a href="{{ route('siswa.dashboard') }}" class="btn btn-sm btn-light border rounded-lg font-weight-bold text-purple-950 px-3">
                     <i class="fas fa-arrow-left mr-1.5"></i> Dashboard
@@ -40,8 +43,41 @@
 
 <section class="content">
     <div class="container-fluid">
-        
-        <!-- Accounting Sheet Container -->
+
+        @if(!empty($isOverdue))
+            <div class="alert alert-warning border-0 rounded-2xl shadow-sm mb-4 p-3 max-w-[900px] mx-auto no-print" style="background-color: #fffbeb; border-left: 5px solid #f59e0b !important; color: #78350f;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="font-weight-bold mb-1"><i class="fas fa-exclamation-circle text-amber-500 mr-1.5"></i> Tagihan Melewati Jatuh Tempo (Tanggal 10)</h6>
+                        <p class="text-xs mb-0">Pembayaran bimbingan belajar bulan <strong>{{ \Carbon\Carbon::create(2026, $month, 1)->locale('id')->isoFormat('MMMM YYYY') }}</strong> belum terverifikasi. Silakan segera lakukan pembayaran agar pembelajaran berjalan lancar.</p>
+                    </div>
+                    <button type="button" class="btn btn-xs btn-warning font-weight-bold rounded-lg px-3 py-1.5 ml-3 flex-shrink-0" data-toggle="modal" data-target="#modalBayarBulanan">
+                        Bayar Sekarang
+                    </button>
+                </div>
+            </div>
+        @elseif(!empty($hasPendingPayment))
+            <div class="alert alert-info border-0 rounded-2xl shadow-sm mb-4 p-3 max-w-[900px] mx-auto no-print" style="background-color: #f0fdfa; border-left: 5px solid #0d9488 !important; color: #115e59;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="font-weight-bold mb-1"><i class="fas fa-clock text-teal-600 mr-1.5"></i> Bukti Pembayaran Sedang Ditinjau</h6>
+                        <p class="text-xs mb-0">Bukti pembayaran Anda untuk bulan <strong>{{ \Carbon\Carbon::create(2026, $month, 1)->locale('id')->isoFormat('MMMM YYYY') }}</strong> sudah berhasil terkirim dan sedang diverifikasi oleh Admin.</p>
+                    </div>
+                    <a href="{{ route('siswa.riwayat') }}" class="btn btn-xs btn-teal text-white font-weight-bold rounded-lg px-3 py-1.5 ml-3 flex-shrink-0" style="background-color: #0f766e;">
+                        Lihat Riwayat
+                    </a>
+                </div>
+            </div>
+        @elseif(!empty($hasPaidCurrentMonth))
+            <div class="alert alert-success border-0 rounded-2xl shadow-sm mb-4 p-3 max-w-[900px] mx-auto no-print" style="background-color: #ecfdf5; border-left: 5px solid #10b981 !important; color: #065f46;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="font-weight-bold mb-1"><i class="fas fa-check-circle text-emerald-600 mr-1.5"></i> Pembayaran Lunas (Terverifikasi)</h6>
+                        <p class="text-xs mb-0">Tagihan bimbingan belajar periode <strong>{{ \Carbon\Carbon::create(2026, $month, 1)->locale('id')->isoFormat('MMMM YYYY') }}</strong> sudah lunas dan diverifikasi oleh Admin.</p>
+                    </div>
+                </div>
+            </div>
+        @endif
         <div class="invoice-container bg-white shadow-sm border p-4 p-md-5 mx-auto rounded-2xl" style="max-width: 900px; font-family: 'Arial', 'Helvetica Neue', Helvetica, sans-serif; color: #000; border-radius: 16px;">
             
             <!-- Top Invoice Header -->
@@ -140,8 +176,28 @@
                             </tr>
                         @endfor
 
+                        @if(!empty($catatanBonFiltered))
+                            @foreach($catatanBonFiltered as $bon)
+                                <tr>
+                                    <td class="py-2 font-weight-bold text-uppercase align-middle text-amber-900" style="border: 1px solid #000; background-color: #fffbeb;">
+                                        {{ $bon['nama_barang'] }}
+                                        @if(!empty($hasPaidCurrentMonth) || ($bon['status'] ?? '') === 'lunas')
+                                            <span class="text-emerald-700 font-bold ml-1" style="font-size: 9px;">[LUNAS]</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-2 align-middle text-muted" style="border: 1px solid #000;">CATATAN BON</td>
+                                    <td class="py-2 align-middle text-muted" style="border: 1px solid #000;">-</td>
+                                    <td class="py-2 font-weight-bold align-middle" style="border: 1px solid #000;">BON</td>
+                                    <td class="py-2 align-middle" style="border: 1px solid #000;">1</td>
+                                    <td class="py-2 text-right pr-2 align-middle" style="border: 1px solid #000; white-space: nowrap;">{{ number_format($bon['harga']) }}</td>
+                                    <td class="py-2 text-right pr-2 align-middle font-weight-semibold" style="border: 1px solid #000; white-space: nowrap;">{{ number_format($bon['harga']) }}</td>
+                                </tr>
+                            @endforeach
+                        @endif
+
                         <!-- Pad remaining blank rows like standard ledger sheets -->
-                        @for($j = $numMapels; $j < 4; $j++)
+                        @php $totalRowsCount = $numMapels + count($catatanBonFiltered ?? []); @endphp
+                        @for($j = $totalRowsCount; $j < 4; $j++)
                             <tr>
                                 <td class="py-2" style="border: 1px solid #000; height: 32px;"></td>
                                 <td class="py-2" style="border: 1px solid #000;"></td>
@@ -158,7 +214,7 @@
                             <td colspan="4" class="border-0"></td>
                             <td colspan="2" class="py-2 font-weight-bold text-center" style="border: 1.5px solid #000; color: #1d4ed8;">TOTAL</td>
                             <td class="py-2 text-right pr-2 font-weight-bold" style="border: 1.5px solid #000; color: #1d4ed8; font-size: 13px; white-space: nowrap;">
-                                {{ number_format($totalHarga) }}
+                                {{ number_format($grandTotal ?? $totalHarga) }}
                             </td>
                         </tr>
                     </tbody>
@@ -198,7 +254,7 @@
                             <div class="d-flex flex-column align-items-end">
                                 <!-- Price Box -->
                                 <div class="px-3 py-1.5 text-center font-weight-bold shadow-xs" style="border: 2px solid #000; background-color: #fff; font-size: 16px; color: #e11d48; min-width: 140px;">
-                                    {{ number_format($totalHarga) }}
+                                    {{ number_format($grandTotal ?? $totalHarga) }}
                                 </div>
                                 <!-- Date Box -->
                                 <div class="px-3 py-0.5 text-center font-weight-bold" style="border: 2px solid #000; border-top: 0; background-color: #fff; font-size: 10px; min-width: 140px;">
@@ -220,6 +276,81 @@
 
     </div>
 </section>
+
+<!-- Modal Upload Bukti Bayar Bulanan -->
+<div class="modal fade no-print" id="modalBayarBulanan" tabindex="-1" role="dialog" aria-labelledby="modalBayarBulananLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                <h5 class="modal-title font-weight-bold text-md text-white" id="modalBayarBulananLabel">
+                    <i class="fas fa-money-check-alt text-amber-400 mr-1.5"></i> Pembayaran Tagihan Bulanan
+                </h5>
+                <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('siswa.invoice.pay') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" name="month" value="{{ $month }}">
+                <input type="hidden" name="year" value="{{ $year }}">
+
+                <div class="modal-body p-4 text-left">
+                    <!-- Info Periode & Total -->
+                    <div class="p-3 mb-3 rounded-xl border text-xs" style="background-color: #faf5ff; border-color: #e9d5ff;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-slate-500">Periode Tagihan:</span>
+                            <span class="font-weight-bold text-purple-950">{{ \Carbon\Carbon::create(2026, $month, 1)->locale('id')->isoFormat('MMMM YYYY') }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-slate-500">Total Tagihan (Termasuk Extra):</span>
+                            <span class="font-weight-bold text-rose-700 text-sm">Rp {{ number_format($grandTotal ?? $totalHarga) }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Rekening Tujuan -->
+                    <div class="mb-3">
+                        <label class="font-weight-bold text-xs text-purple-950 mb-1">Pilih Rekening Tujuan Transfer <span class="text-danger">*</span></label>
+                        <select name="payment_method" class="form-control form-control-sm rounded-lg font-weight-bold text-xs" required>
+                            <option value="" disabled selected>-- Pilih Bank / E-Wallet --</option>
+                            @if(isset($banks) && count($banks) > 0)
+                                <optgroup label="Transfer Bank">
+                                    @foreach($banks as $b)
+                                        <option value="Bank {{ $b->nama_bank }} ({{ $b->no_rekening }} a.n {{ $b->pemilik }})">
+                                            Bank {{ $b->nama_bank }} - {{ $b->no_rekening }} (a.n {{ $b->pemilik }})
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if(isset($ewallets) && count($ewallets) > 0)
+                                <optgroup label="E-Wallet">
+                                    @foreach($ewallets as $ew)
+                                        <option value="{{ $ew->nama_bank }} ({{ $ew->no_rekening }} a.n {{ $ew->pemilik }})">
+                                            {{ $ew->nama_bank }} - {{ $ew->no_rekening }} (a.n {{ $ew->pemilik }})
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            <option value="Tunai / Pembayaran di Tempat">Bayar Tunai di Tempat (Admin PM)</option>
+                        </select>
+                    </div>
+
+                    <!-- Upload File Bukti -->
+                    <div class="form-group mb-2">
+                        <label class="font-weight-bold text-xs text-purple-950 mb-1">Upload File Bukti Transfer (JPG, PNG, PDF max 2MB) <span class="text-danger">*</span></label>
+                        <input type="file" name="bukti_transfer" class="form-control-file form-control-sm border p-1 rounded-lg text-xs" accept="image/*,.pdf" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light border-top py-2 px-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-sm btn-light border rounded-lg font-weight-bold text-xs px-3" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-sm btn-brand rounded-lg font-weight-bold text-xs px-4 shadow-sm" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #40206b; border: 0;">
+                        <i class="fas fa-paper-plane mr-1"></i> Kirim Bukti Pembayaran
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Custom styling for print support and responsive mobile ledger layout -->
 <style>

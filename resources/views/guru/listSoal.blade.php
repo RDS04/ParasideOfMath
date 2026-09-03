@@ -93,7 +93,7 @@
                                         @if ($jenjang)
                                             @foreach ($availableClasses as $cls)
                                                 <option value="{{ $cls }}" {{ (string) $kelas === (string) $cls ? 'selected' : '' }}>
-                                                    Kelas {{ $cls }}
+                                                    {{ is_numeric($cls) ? 'Kelas ' . $cls : $cls }}
                                                 </option>
                                             @endforeach
                                         @endif
@@ -825,9 +825,9 @@
 
     <script>
         const KELAS_MAP = {
-            SD: [1, 2, 3, 4, 5, 6],
-            SMP: [1, 2, 3],
-            SMA: [1, 2, 3],
+            SD: [1, 2, 3, 4, 5, 6, 'Olimpiade', 'Tes Masuk SMP'],
+            SMP: [1, 2, 3, 'Olimpiade', 'Tes Masuk SMA'],
+            SMA: [1, 2, 3, 'Olimpiade', 'UTBK'],
         };
 
         function populateSelect(selectEl, items, placeholder) {
@@ -862,13 +862,11 @@
                 return;
             }
 
-            const kelasList = (KELAS_MAP[jenjang] || []).map(k => 'Kelas ' + k);
-            // Simpan value asli (angka) terpisah dari label
             kelasSelect.innerHTML = '<option value="">-- Pilih Kelas --</option>';
             (KELAS_MAP[jenjang] || []).forEach(k => {
                 const opt = document.createElement('option');
                 opt.value = k;
-                opt.textContent = 'Kelas ' + k;
+                opt.textContent = (typeof k === 'number' || !isNaN(k)) ? 'Kelas ' + k : k;
                 kelasSelect.appendChild(opt);
             });
             kelasSelect.disabled = false;
@@ -886,6 +884,15 @@
             if (!kelas) {
                 subSelect.innerHTML = '<option value="">-- Pilih Semester / TKA --</option>';
                 subSelect.disabled = true;
+                return;
+            }
+
+            const isSpecialKelas = ['Olimpiade', 'Tes Masuk SMP', 'Tes Masuk SMA', 'UTBK'].includes(kelas);
+            if (isSpecialKelas) {
+                subSelect.innerHTML = '<option value="-">-</option>';
+                subSelect.value = '-';
+                subSelect.disabled = false;
+                handleSubChange(subSelect);
                 return;
             }
 

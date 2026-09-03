@@ -3,17 +3,20 @@
 @section('title', 'Penugasan Ujian Siswa · Paradise of Math')
 
 @section('content')
+    @php
+        $routePrefix = $prefixRoute ?? (Route::is('admin.*') ? 'admin' : 'guru');
+    @endphp
     <!-- Content Header -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-3 align-items-center">
                 <div class="col-sm-6">
                     <h1 class="m-0 font-weight-bold text-purple-950 text-2xl tracking-tight">Penugasan Ujian Siswa</h1>
-                    <p class="text-xs text-muted mb-0">Pilih siswa bimbingan Anda dan tentukan paket soal dari Bank Soal yang wajib dikerjakan siswa.</p>
+                    <p class="text-xs text-muted mb-0">Pilih siswa dan tentukan paket soal dari Bank Soal yang wajib dikerjakan siswa.</p>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right text-xs bg-transparent p-0 m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('guru.dashboard') }}" class="text-purple-600 font-semibold"><i class="fas fa-home mr-1"></i> Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route($routePrefix . '.dashboard') }}" class="text-purple-600 font-semibold"><i class="fas fa-home mr-1"></i> Dashboard</a></li>
                         <li class="breadcrumb-item active text-slate-500">Penugasan Ujian</li>
                     </ol>
                 </div>
@@ -54,7 +57,7 @@
                             <i class="fas fa-users text-base sm:text-2xl"></i>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <div class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase text-truncate">Siswa Bimbingan</div>
+                            <div class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase text-truncate">Seluruh Siswa</div>
                             <div class="text-xs sm:text-lg font-bold text-purple-950 text-truncate">{{ count($assignedStudents) }} Siswa</div>
                         </div>
                     </div>
@@ -105,7 +108,7 @@
                     <div class="card border-0 shadow-sm rounded-2xl bg-white mb-4 overflow-hidden">
                         <div class="card-header bg-purple-900 text-white py-3 px-4 d-flex justify-content-between align-items-center">
                             <h5 class="card-title font-bold mb-0 text-base d-flex align-items-center">
-                                <i class="fas fa-user-graduate text-amber-300 mr-2"></i> 1. Pilih Siswa Bimbingan
+                                <i class="fas fa-user-graduate text-amber-300 mr-2"></i> 1. Pilih Siswa
                             </h5>
                             <span class="badge bg-white/20 text-purple-200 text-xs px-2.5 py-1 rounded-md font-bold">
                                 {{ count($assignedStudents) }} Siswa
@@ -115,7 +118,7 @@
                             @if ($assignedStudents->isEmpty())
                                 <div class="text-center py-4 text-slate-400">
                                     <i class="fas fa-user-slash fa-2x mb-2 d-block opacity-40"></i>
-                                    <span class="text-xs font-medium">Belum ada siswa bimbingan yang ditugaskan kepada Anda.</span>
+                                    <span class="text-xs font-medium">Belum ada siswa aktif yang terdaftar.</span>
                                 </div>
                             @else
                                 <div class="space-y-2" style="max-height: 280px; overflow-y: auto;">
@@ -124,7 +127,7 @@
                                             $isSelected = $selectedSiswa && $selectedSiswa->id == $s->id;
                                             $sAssignedExams = $s->biodata['assigned_ujian'] ?? [];
                                         @endphp
-                                        <a href="{{ route('guru.ujian.index', ['siswa_id' => $s->id]) }}" class="d-block text-decoration-none">
+                                        <a href="{{ route($routePrefix . '.ujian.index', ['siswa_id' => $s->id]) }}" class="d-block text-decoration-none">
                                             <div class="p-3 rounded-xl border transition-all d-flex align-items-center justify-content-between {{ $isSelected ? 'bg-purple-100/70 border-purple-400 shadow-sm' : 'bg-white border-slate-200 hover:border-purple-300' }}">
                                                 <div class="d-flex align-items-center">
                                                     <img src="https://ui-avatars.com/api/?name={{ urlencode($s->name) }}&background={{ $isSelected ? '581c87' : 'e9d5ff' }}&color={{ $isSelected ? 'ffffff' : '581c87' }}&bold=true" class="rounded-full mr-3 border border-purple-200" style="width: 38px; height: 38px;" alt="Avatar">
@@ -182,7 +185,7 @@
                                                             {{ $ex['deskripsi'] ?: ($ex['nama_kategori'] ?? 'Paket Soal') }}
                                                         </h6>
                                                     </div>
-                                                    <form action="{{ route('guru.ujian.unassign') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan penugasan ujian ini?');">
+                                                    <form action="{{ route($routePrefix . '.ujian.unassign') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan penugasan ujian ini?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <input type="hidden" name="siswa_id" value="{{ $selectedSiswa->id }}">
@@ -193,7 +196,7 @@
                                                     </form>
                                                 </div>
                                                 <div class="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg mb-2 border border-slate-100">
-                                                    <i class="fas fa-comment-alt text-purple-500 mr-1"></i> Catatan Guru: {{ $ex['catatan'] ?? 'Kerjakan dengan cermat.' }}
+                                                    <i class="fas fa-comment-alt text-purple-500 mr-1"></i> Catatan: {{ $ex['catatan'] ?? 'Kerjakan dengan cermat.' }}
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center text-xxs text-slate-400 font-medium">
                                                     <span><i class="far fa-clock mr-1"></i> Ditugaskan: {{ $ex['tanggal_ditugaskan'] ?? '-' }}</span>
@@ -308,7 +311,7 @@
                                     <i class="fas fa-folder-open text-slate-300 fa-3x mb-3"></i>
                                     <p class="text-slate-500 font-semibold mb-1">Bank Soal Masih Kosong.</p>
                                     <p class="text-xs text-slate-400 mb-3">Buat paket soal dan masukkan soal terlebih dahulu di menu Bank Soal.</p>
-                                    <a href="{{ route('guru.bank-soal.index') }}" class="btn btn-sm btn-purple font-bold rounded-xl px-4 py-2 text-xs shadow-xs">
+                                    <a href="{{ route($routePrefix . '.bank-soal.index') }}" class="btn btn-sm btn-purple font-bold rounded-xl px-4 py-2 text-xs shadow-xs">
                                         <i class="fas fa-plus-circle mr-1"></i> Ke Menu Bank Soal
                                     </a>
                                 </div>
@@ -331,7 +334,7 @@
                                             <div class="card border border-slate-200 rounded-2xl shadow-xs overflow-hidden h-100 bg-white hover:border-purple-400 transition-all">
                                                 <div class="card-header bg-slate-50/80 py-2.5 px-3.5 border-bottom d-flex justify-content-between align-items-center">
                                                     <span class="badge bg-purple-900 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs">
-                                                        {{ $cat->jenjang }} — Kelas {{ $cat->kelas }}
+                                                        {{ $cat->jenjang }} — {{ is_numeric($cat->kelas) ? 'Kelas ' . $cat->kelas : $cat->kelas }}
                                                     </span>
                                                     <span class="badge bg-purple-100 text-purple-900 font-bold px-2 py-0.5 rounded text-[11px]">
                                                         {{ $cat->sub_kategori }}
@@ -386,7 +389,7 @@
                                                                 <span aria-hidden="true">&times;</span>
                                                             </button>
                                                         </div>
-                                                        <form action="{{ route('guru.ujian.assign') }}" method="POST">
+                                                        <form action="{{ route($routePrefix . '.ujian.assign') }}" method="POST">
                                                             @csrf
                                                             <input type="hidden" name="siswa_id" value="{{ $selectedSiswa->id }}">
                                                             <input type="hidden" name="kategori_soal_id" value="{{ $cat->id }}">

@@ -1119,13 +1119,153 @@ class SiswaController extends Controller
             $gurus[$idx] = $tutorPerMapel[$mapelName] ?? 'Belum Ditentukan';
         }
 
+        // Filter Catatan Bon / Biaya Extra khusus bulan & tahun terpilih
+        $allCatatanBon = $biodata['catatan_bon'] ?? [];
+        $catatanBonFiltered = array_values(array_filter($allCatatanBon, function ($item) use ($month, $year) {
+            $b = (int) ($item['bulan'] ?? 0);
+            $y = (int) ($item['tahun'] ?? 0);
+            return $b === $month && $y === $year;
+        }));
+
+        $totalCatatanBon = array_sum(array_column($catatanBonFiltered, 'harga'));
+        $grandTotal = $totalHarga + $totalCatatanBon;
+
+        $banks    = \App\Models\Rekening::where('tipe', 'bank')->get();
+        $ewallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
+
+        // Cek status riwayat pembayaran untuk bulan & tahun terpilih
+        $riwayatBulanIni = \App\Models\RiwayatPembayaran::where('siswa_id', $siswa->id)
+            ->where(function ($q) use ($month, $year) {
+                $monthName = \Carbon\Carbon::createFromDate($year, $month, 1)->locale('id')->isoFormat('MMMM');
+                $q->where('tipe_paket_snapshot', 'LIKE', "%{$monthName}%{$year}%")
+                  ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$month, $year]);
+            })
+            ->get();
+
+        $hasPaidCurrentMonth = $riwayatBulanIni->where('status', 'approved')->isNotEmpty();
+        $hasPendingPayment   = $riwayatBulanIni->where('status', 'under_review')->isNotEmpty();
+
+        // Overdue status: hari ini melewati tgl 10 atau dipicu ?test_late=1
+        $isOverdue = ((int) date('j') > 10 || $request->has('test_late')) && !$hasPaidCurrentMonth && !$hasPendingPayment;
+
         $periodeText = strtoupper($startOfMonth->locale('id')->isoFormat('MMM\'YY'));
 
         return view('siswa.invoice', compact(
             'siswa', 'paket', 'hariPertemuan', 'hariPerMapel', 'hargaPerSesi',
             'totalHarga', 'mapels', 'gurus', 'sesiPerMapelBulanIni', 'totalSesiBulanIni',
-            'month', 'year', 'periodeText', 'tanggalMulai'
+            'month', 'year', 'periodeText', 'tanggalMulai',
+            'catatanBonFiltered', 'totalCatatanBon', 'grandTotal',
+            'banks', 'ewallets', 'hasPaidCurrentMonth', 'hasPendingPayment', 'isOverdue'
         ));
+    }
+
+    /**
+     * Submit Bukti Pembayaran Bulanan Siswa (dari Halaman Invoice).
+     */
+    public function submitInvoicePayment(Request $request)
+    {
+        $siswa = auth()->guard('siswa')->user();
+        if (!$siswa) {
+            return redirect()->route('login')->with('error', 'Silakan masuk terlebih dahulu.');
+        }
+
+        $request->validate([
+            'bukti_transfer' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+            'payment_method' => 'required|string',
+            'month'          => 'required|integer|between:1,12',
+            'year'           => 'required|integer|between:2020,2050',
+        ], [
+            'bukti_transfer.required' => 'Berkas bukti transfer wajib diunggah.',
+            'bukti_transfer.mimes'    => 'Format file harus JPG, PNG, WEBP, atau PDF.',
+            'bukti_transfer.max'      => 'Ukuran file maksimal 2MB.',
+            'payment_method.required' => 'Pilih metode / bank pembayaran.',
+        ]);
+
+        $month = (int) $request->month;
+        $year  = (int) $request->year;
+
+        $monthNamesID = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        $monthName = $monthNamesID[$month] ?? 'Bulan ' . $month;
+        $snapshotName = "Pembayaran Bulanan - " . $monthName . " " . $year;
+
+        $biodata = $siswa->biodata ?? [];
+        $mapelJadwal = $biodata['mapel_jadwal'] ?? [];
+        $hariPerMapel = $biodata['hari_per_mapel'] ?? [];
+        $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
+        $paket = $siswa->paket;
+
+        $mapels = !empty($mapelJadwal) ? $mapelJadwal : (
+            $siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $m)
+                ? array_map('trim', explode(',', $m[1])) : ['Bimbingan']
+        );
+
+        $startOfMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endOfMonth   = $startOfMonth->copy()->endOfMonth();
+        $dayMap       = ['senin' => 1, 'selasa' => 2, 'rabu' => 3, 'kamis' => 4, 'jumat' => 5, 'sabtu' => 6, 'minggu' => 0];
+
+        $sesiPerMapelBulanIni = [];
+        foreach ($mapels as $idx => $mapelName) {
+            $assignedDays = $hariPerMapel[$idx] ?? $hariPertemuan;
+            if (!is_array($assignedDays)) $assignedDays = [$assignedDays];
+            $assignedDaysClean = array_values(array_filter($assignedDays));
+
+            $countMapelInMonth = 0;
+            if (!empty($assignedDaysClean)) {
+                $period = \Carbon\CarbonPeriod::create($startOfMonth, $endOfMonth);
+                foreach ($period as $date) {
+                    foreach ($assignedDaysClean as $h) {
+                        if (isset($dayMap[strtolower(trim($h))]) && $dayMap[strtolower(trim($h))] === $date->dayOfWeek) {
+                            $countMapelInMonth++;
+                        }
+                    }
+                }
+            }
+            $sesiPerMapelBulanIni[$idx] = $countMapelInMonth > 0 ? $countMapelInMonth : 4;
+        }
+
+        $detailString = '';
+        if ($siswa->tipe_paket && $paket) {
+            if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
+            elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
+            elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
+            elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
+        }
+        $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
+        $totalSesiBulanIni = array_sum($sesiPerMapelBulanIni);
+        $totalHarga = $hargaPerSesi * $totalSesiBulanIni;
+
+        $allCatatanBon = $biodata['catatan_bon'] ?? [];
+        $catatanBonFiltered = array_values(array_filter($allCatatanBon, function ($item) use ($month, $year) {
+            return (int)($item['bulan'] ?? 0) === $month && (int)($item['tahun'] ?? 0) === $year;
+        }));
+        $totalCatatanBon = array_sum(array_column($catatanBonFiltered, 'harga'));
+        $grandTotal = $totalHarga + $totalCatatanBon;
+
+        $file = $request->file('bukti_transfer');
+        $fileName = 'invoice_' . $siswa->id . '_' . $year . '_' . sprintf('%02d', $month) . '_' . time() . '.' . $file->getClientOriginalExtension();
+        if (!file_exists(public_path('uploads/bukti_pembayaran'))) {
+            mkdir(public_path('uploads/bukti_pembayaran'), 0777, true);
+        }
+        $file->move(public_path('uploads/bukti_pembayaran'), $fileName);
+        $filePath = 'uploads/bukti_pembayaran/' . $fileName;
+
+        \App\Models\RiwayatPembayaran::create([
+            'siswa_id'             => $siswa->id,
+            'paket_id'             => $siswa->paket_id,
+            'tipe_paket_snapshot' => $snapshotName,
+            'bukti_transfer'       => $filePath,
+            'payment_method'       => $request->payment_method,
+            'jumlah_sesi'          => $totalSesiBulanIni,
+            'total_harga'          => $grandTotal,
+            'status'               => 'under_review',
+        ]);
+
+        return redirect()->route('siswa.riwayat')
+            ->with('success', 'Bukti pembayaran untuk ' . $snapshotName . ' (Rp ' . number_format($grandTotal) . ') berhasil dikirim! Silakan tunggu verifikasi Admin.');
     }
 
     /**
@@ -1173,7 +1313,12 @@ class SiswaController extends Controller
         // Total price
         $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
 
-        return view('siswa.riwayat', compact('siswa', 'paket', 'hariPertemuan', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga'));
+        // Ambill seluruh transaksi riwayat pembayaran siswa
+        $riwayatList = \App\Models\RiwayatPembayaran::where('siswa_id', $siswa->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('siswa.riwayat', compact('siswa', 'paket', 'hariPertemuan', 'jumlahPertemuan', 'tanggalMulai', 'hargaPerSesi', 'totalHarga', 'riwayatList'));
     }
 
     /**

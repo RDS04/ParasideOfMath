@@ -93,6 +93,7 @@ Route::controller(SiswaController::class)->group(function () {
     Route::get('/siswa/jadwal', 'showJadwal')->middleware('auth:siswa')->name('siswa.jadwal');
     Route::get('/siswa/akademik', 'showAkademik')->middleware('auth:siswa')->name('siswa.akademik');
     Route::get('/siswa/invoice', 'showInvoice')->middleware('auth:siswa')->name('siswa.invoice');
+    Route::post('/siswa/invoice/pay', 'submitInvoicePayment')->middleware('auth:siswa')->name('siswa.invoice.pay');
     Route::get('/siswa/riwayat', 'showRiwayat')->middleware('auth:siswa')->name('siswa.riwayat');
     Route::get('/siswa/ujian', 'showUjian')->middleware('auth:siswa')->name('siswa.ujian');
     Route::post('/siswa/ujian/submit', 'submitUjian')->middleware('auth:siswa')->name('siswa.ujian.submit');
@@ -162,6 +163,10 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/siswa/update-jam-bimbel/{id}', 'updateJamBimbel')->name('admin.siswa.update-jam-bimbel');
     Route::post('/admin/siswa/update-tanggal-mulai/{id}', 'updateTanggalMulai')->name('admin.siswa.update-tanggal-mulai');
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
+    Route::post('/admin/siswa/add-catatan-bon/{id}', 'addCatatanBon')->name('admin.siswa.add-catatan-bon');
+    Route::delete('/admin/siswa/delete-catatan-bon/{id}/{itemId}', 'deleteCatatanBon')->name('admin.siswa.delete-catatan-bon');
+    Route::post('/admin/riwayat-pembayaran/approve/{id}', 'approveRiwayatPembayaran')->name('admin.riwayat-pembayaran.approve');
+    Route::post('/admin/riwayat-pembayaran/reject/{id}', 'rejectRiwayatPembayaran')->name('admin.riwayat-pembayaran.reject');
     Route::get('/admin/kalender', 'showKalender')->name('admin.kalender');
     Route::get('/admin/foto', 'showFotoMenu')->name('admin.foto.index');
     Route::post('/admin/foto/hero', 'updateHeroFoto')->name('admin.foto.hero.update');
@@ -215,6 +220,10 @@ Route::controller(AdminController::class)->group(function () {
 
     Route::get('/admin/bank-soal/ajax/sub-kategori', 'ajaxSubKategoriSoal')->name('admin.bank-soal.ajax.sub');
     Route::get('/admin/bank-soal/ajax/mapel', 'ajaxMapelSoal')->name('admin.bank-soal.ajax.mapel');
+
+    Route::get('/admin/ujian', 'showUjianAdmin')->name('admin.ujian.index');
+    Route::post('/admin/ujian/assign', 'assignUjianAdmin')->name('admin.ujian.assign');
+    Route::delete('/admin/ujian/unassign', 'unassignUjianAdmin')->name('admin.ujian.unassign');
 
     Route::post('/admin/siswa/toggle-status/{id}', 'toggleStatusSiswa')->name('admin.siswa.toggle-status');
 })->middleware('auth:web');
