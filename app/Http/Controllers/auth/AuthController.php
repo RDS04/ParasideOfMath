@@ -314,6 +314,7 @@ class AuthController extends Controller
 
             \App\Models\Guru::create([
                 'user_id' => $user->id,
+                'no_telp' => $otpRecord->phone,
                 'status' => 'pending',
             ]);
 

@@ -2697,7 +2697,7 @@ class AdminController extends Controller
 
         $prefixRoute = 'admin';
 
-        return view('guru.ujian', compact(
+        return view('admin.ujian', compact(
             'user',
             'assignedStudents',
             'selectedSiswa',

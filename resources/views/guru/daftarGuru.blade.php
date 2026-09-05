@@ -73,9 +73,10 @@
                                             </td>
                                             <td class="px-4 py-3 text-slate-600">{{ $guru->user->email ?? '-' }}</td>
                                             <td class="px-4 py-3 text-center">
-                                                @if ($guru->no_telp)
-                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $guru->no_telp) }}" target="_blank" class="btn btn-xs btn-outline-success font-weight-bold rounded-lg px-2 py-1 text-xs">
-                                                        <i class="fab fa-whatsapp mr-1 text-emerald-600"></i> Hubungi ({{ $guru->no_telp }})
+                                                @php $phone = $guru->no_telp ?: ($guru->user->phone ?? null); @endphp
+                                                @if ($phone)
+                                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $phone) }}" target="_blank" class="btn btn-xs btn-outline-success font-weight-bold rounded-lg px-2 py-1 text-xs">
+                                                        <i class="fab fa-whatsapp mr-1 text-emerald-600"></i> Hubungi ({{ $phone }})
                                                     </a>
                                                 @else
                                                     <span class="text-xs text-slate-400 font-italic">Belum diisi</span>

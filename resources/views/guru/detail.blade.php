@@ -136,9 +136,10 @@
                                     </div>
                                     <div>
                                         <small class="text-slate-400 d-block text-xxs font-weight-bold uppercase">WhatsApp / No. Telp</small>
-                                        @if($guru->no_telp)
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $guru->no_telp) }}" target="_blank" class="text-slate-800 font-weight-semibold text-sm hover:text-emerald-600 transition-colors">
-                                                {{ $guru->no_telp }} <i class="fas fa-external-link-alt ml-1 text-xs text-muted"></i>
+                                        @php $phone = $guru->no_telp ?: ($guru->user->phone ?? null); @endphp
+                                        @if($phone)
+                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $phone) }}" target="_blank" class="text-slate-800 font-weight-semibold text-sm hover:text-emerald-600 transition-colors">
+                                                {{ $phone }} <i class="fas fa-external-link-alt ml-1 text-xs text-muted"></i>
                                             </a>
                                         @else
                                             <span class="text-slate-500 font-weight-semibold text-sm">-</span>
@@ -288,7 +289,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="text-xs text-slate-400 font-weight-bold uppercase tracking-wider mb-1">No. WhatsApp / HP</label>
                                     <p class="text-sm font-weight-semibold text-slate-800 bg-light p-2.5 rounded-xl border border-slate-100 mb-0">
-                                        {{ $guru->no_telp ?? '-' }}
+                                        {{ ($guru->no_telp ?: ($guru->user->phone ?? null)) ?? '-' }}
                                     </p>
                                 </div>
                                 <div class="col-md-12 mb-3">
