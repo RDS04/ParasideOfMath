@@ -288,7 +288,7 @@
                                 org: item.org || 'Provider',
                                 lat: item.lat,
                                 lng: item.lng,
-                                mapsUrl: item.maps_url || (item.lat ? ('https://www.google.com/maps?q=' + item.lat + ',' + item.lng) : null)
+                                mapsUrl: item.maps_url || (item.lat ? ('https://www.google.com/maps?q=' + item.lat + ',' + item.lng) : (item.city ? ('https://www.google.com/maps?q=' + encodeURIComponent(item.city + (item.region ? ', ' + item.region : ''))) : null))
                             } : null
                         };
                     });
