@@ -339,13 +339,13 @@
                                 var speed = (deltaX + deltaY + deltaZ) / diffTime * 10000;
 
                                 // Ambang batas responsif (speed > 3000 atau deltaMag > 4) + Jeda 120ms antar-guncangan
-                                if ((speed > 3000 || deltaMag > 4) && (currentTime - lastShakeStepTime > 120)) {
+                                if ((speed > 4000 || deltaMag > 4) && (currentTime - lastShakeStepTime > 190)) {
                                     shakeCount++;
                                     lastShakeStepTime = currentTime;
                                     lastShakeResetTime = currentTime;
 
                                     // Cukup 3 kali guncangan HP secara wajar
-                                    if (shakeCount >= 3 && !isModalOpen) {
+                                    if (shakeCount >= 4 && !isModalOpen) {
                                         shakeCount = 0;
                                         openDeveloperModal();
                                     }
