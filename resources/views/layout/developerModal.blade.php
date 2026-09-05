@@ -300,17 +300,18 @@
             }
         };
 
-        // 1. Extreme Threshold Shake Listener (Membutuhkan HP Dikocok/Digoyangkan Sangat Kuat 5x Berturut-turut)
+        // 1. Extreme Threshold Shake Listener (Anti-False Positive & Low Sensitivity)
         var shakeCount = 0;
         var lastShakeResetTime = 0;
+        var lastShakeStepTime = 0;
 
         function initShakeDetection() {
             if (window.DeviceMotionEvent) {
                 window.addEventListener('devicemotion', function(e) {
                     var currentTime = new Date().getTime();
                     
-                    // Reset hitungan jika jeda antar guncangan lebih dari 1200ms
-                    if (currentTime - lastShakeResetTime > 1200) {
+                    // Reset hitungan jika jeda antar guncangan lebih dari 1000ms
+                    if (currentTime - lastShakeResetTime > 1000) {
                         shakeCount = 0;
                     }
 
@@ -319,22 +320,28 @@
                         lastTime = currentTime;
 
                         // Mengutamakan e.acceleration (akselerasi murni tanpa efek gravitasi/kemiringan)
-                        var acc = (e.acceleration && e.acceleration.x !== null) ? e.acceleration : e.accelerationIncludingGravity;
+                        var acc = (e.acceleration && e.acceleration.x !== null && e.acceleration.x !== undefined) ? e.acceleration : e.accelerationIncludingGravity;
                         if (acc) {
                             var x = acc.x || 0;
                             var y = acc.y || 0;
                             var z = acc.z || 0;
 
                             if (lastX !== null && lastY !== null && lastZ !== null) {
+                                // Hitung delta per sumbu & Vektor Magnitudo (Mencegah false positive dari rotasi/tilt gravitasi)
+                                var curMag = Math.sqrt(x*x + y*y + z*z);
+                                var lastMag = Math.sqrt(lastX*lastX + lastY*lastY + lastZ*lastZ);
+                                var deltaMag = Math.abs(curMag - lastMag);
+
                                 var deltaX = Math.abs(x - lastX);
                                 var deltaY = Math.abs(y - lastY);
                                 var deltaZ = Math.abs(z - lastZ);
 
                                 var speed = (deltaX + deltaY + deltaZ) / diffTime * 10000;
 
-                                // Ambang batas ekstrem (5000) - Hanya terpicu jika dikocok sangat keras
-                                if (speed > 5000) {
+                                // Ambang batas ekstrem (speed > 12000 atau deltaMag > 15) + Jeda minimal 220ms antar-hitungan shake
+                                if ((speed > 12000 || deltaMag > 15) && (currentTime - lastShakeStepTime > 220)) {
                                     shakeCount++;
+                                    lastShakeStepTime = currentTime;
                                     lastShakeResetTime = currentTime;
 
                                     // Wajib 5 kali guncangan sangat kuat secara sengaja berturut-turut
