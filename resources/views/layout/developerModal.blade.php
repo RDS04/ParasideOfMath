@@ -300,7 +300,7 @@
             }
         };
 
-        // 1. Extreme Threshold Shake Listener (Anti-False Positive & Low Sensitivity)
+        // 1. Responsive & Balanced Shake Listener (Lebih Sensitif & Responsif)
         var shakeCount = 0;
         var lastShakeResetTime = 0;
         var lastShakeStepTime = 0;
@@ -310,8 +310,8 @@
                 window.addEventListener('devicemotion', function(e) {
                     var currentTime = new Date().getTime();
                     
-                    // Reset hitungan jika jeda antar guncangan lebih dari 1000ms
-                    if (currentTime - lastShakeResetTime > 1000) {
+                    // Reset hitungan jika jeda antar guncangan lebih dari 1200ms
+                    if (currentTime - lastShakeResetTime > 1200) {
                         shakeCount = 0;
                     }
 
@@ -327,7 +327,7 @@
                             var z = acc.z || 0;
 
                             if (lastX !== null && lastY !== null && lastZ !== null) {
-                                // Hitung delta per sumbu & Vektor Magnitudo (Mencegah false positive dari rotasi/tilt gravitasi)
+                                // Hitung delta per sumbu & Vektor Magnitudo
                                 var curMag = Math.sqrt(x*x + y*y + z*z);
                                 var lastMag = Math.sqrt(lastX*lastX + lastY*lastY + lastZ*lastZ);
                                 var deltaMag = Math.abs(curMag - lastMag);
@@ -338,14 +338,14 @@
 
                                 var speed = (deltaX + deltaY + deltaZ) / diffTime * 10000;
 
-                                // Ambang batas ekstrem (speed > 12000 atau deltaMag > 15) + Jeda minimal 220ms antar-hitungan shake
-                                if ((speed > 12000 || deltaMag > 15) && (currentTime - lastShakeStepTime > 220)) {
+                                // Ambang batas responsif (speed > 3000 atau deltaMag > 4) + Jeda 120ms antar-guncangan
+                                if ((speed > 3000 || deltaMag > 4) && (currentTime - lastShakeStepTime > 120)) {
                                     shakeCount++;
                                     lastShakeStepTime = currentTime;
                                     lastShakeResetTime = currentTime;
 
-                                    // Wajib 5 kali guncangan sangat kuat secara sengaja berturut-turut
-                                    if (shakeCount >= 5 && !isModalOpen) {
+                                    // Cukup 3 kali guncangan HP secara wajar
+                                    if (shakeCount >= 3 && !isModalOpen) {
                                         shakeCount = 0;
                                         openDeveloperModal();
                                     }
