@@ -324,6 +324,13 @@
                             <p>Kelola Mata Pelajaran</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.harga-buku') }}"
+                            class="nav-link {{ Route::is('admin.harga-buku') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-book-open text-amber-400"></i>
+                            <p>Kelola Harga Buku</p>
+                        </a>
+                    </li>
 
                     <li class="nav-item">
                         <a href="{{ route('admin.chat') }}" class="nav-link {{ Route::is('admin.chat') ? 'active' : '' }}">

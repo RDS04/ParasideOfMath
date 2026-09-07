@@ -7,6 +7,7 @@ use App\Models\PaketBelajar;
 use App\Models\KategoriSoal;
 use App\Models\BankSoal;
 use App\Models\HasilUjian;
+use App\Models\Mapel;
 use Illuminate\Http\Request;
 use App\Models\RiwayatPembayaran;
 
@@ -185,6 +186,28 @@ class SiswaController extends Controller
     }
 
     /**
+     * Helper untuk mendapatkan harga buku berdasarkan nama mata pelajaran.
+     * Jika mapel 'Matematika Wajib + Lanjut', maka harga bukunya = harga buku Matematika Wajib + harga buku Matematika Lanjut.
+     */
+    public function getHargaBukuMapel($namaMapel)
+    {
+        $cleanName = trim(preg_replace('/\s+\d+x$/i', '', $namaMapel ?? ''));
+        if (empty($cleanName)) return 0;
+
+        if (stripos($cleanName, 'Matematika Wajib + Lanjut') !== false || stripos($cleanName, 'Wajib + Lanjut') !== false) {
+            $hWajib  = Mapel::where('nama_mapel', 'LIKE', '%Matematika Wajib%')
+                ->where('nama_mapel', 'NOT LIKE', '%Lanjut%')
+                ->value('harga_buku') ?? 0;
+            $hLanjut = Mapel::where('nama_mapel', 'LIKE', '%Matematika Lanjut%')
+                ->value('harga_buku') ?? 0;
+            return (int) ($hWajib + $hLanjut);
+        }
+
+        $mapel = Mapel::where('nama_mapel', 'LIKE', '%' . $cleanName . '%')->first();
+        return $mapel ? (int) $mapel->harga_buku : 0;
+    }
+
+    /**
      * Tampilkan Halaman Checkout Pembayaran.
      */
     public function showPayment(Request $request)
@@ -249,8 +272,8 @@ class SiswaController extends Controller
         }
         $totalSesi = $totalSesi > 0 ? $totalSesi : 1;
 
-        // Total harga = harga_per_sesi × total_sesi
-        $total = $harga * $totalSesi;
+        // Total harga sesi = harga_per_sesi × total_sesi
+        $totalSesiHarga = $harga * $totalSesi;
 
         // Kumpulkan data mapel-jadwal untuk ditampilkan di payment review
         $mapelJadwal  = $request->input('mapel_jadwal', []);   // ['Fisika', 'Biologi', …]
@@ -270,6 +293,18 @@ class SiswaController extends Controller
         if (empty($mapelJadwal) && isset($siswa->biodata['mapel_jadwal'])) {
             $mapelJadwal = $siswa->biodata['mapel_jadwal'];
         }
+
+        // ── Hitung rincian harga buku per mapel ──
+        $hargaBukuPerMapel = [];
+        $totalHargaBuku = 0;
+        foreach ((array) $mapelJadwal as $idx => $mName) {
+            $hb = $this->getHargaBukuMapel($mName);
+            $hargaBukuPerMapel[$idx] = $hb;
+            $totalHargaBuku += $hb;
+        }
+
+        // Total perkiraan biaya = total biaya sesi + total harga buku
+        $total = $totalSesiHarga + $totalHargaBuku;
 
         $hariPerMapel = $request->input('hari', []);            // [0 => [1=>'Senin', 2=>'Rabu'], …]
         $tanggalArr   = $request->input('tanggal_mulai', []);   // [0 => '2026-08-10', …]
@@ -298,6 +333,8 @@ class SiswaController extends Controller
             $biodata['pending_mapel_jadwal'] = array_values($mergedPendingMapels);
             $biodata['pending_sesi_per_mapel'] = array_values($mergedPendingSesi);
             $biodata['pending_jumlah_pertemuan'] = array_sum($mergedPendingSesi);
+            $biodata['harga_buku_per_mapel'] = $hargaBukuPerMapel;
+            $biodata['total_harga_buku'] = $totalHargaBuku;
             $siswa->biodata = $biodata;
             $siswa->save();
         }
@@ -311,9 +348,10 @@ class SiswaController extends Controller
         $ewallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
 
         return view('siswa.payment', compact(
-            'paket', 'detailString', 'harga', 'total',
+            'paket', 'detailString', 'harga', 'total', 'totalSesiHarga',
             'banks', 'ewallets', 'totalSesi',
-            'mapelJadwal', 'hariPerMapel', 'tanggalArr', 'sesiPerMapel'
+            'mapelJadwal', 'hariPerMapel', 'tanggalArr', 'sesiPerMapel',
+            'hargaBukuPerMapel', 'totalHargaBuku'
         ));
     }
 
@@ -697,6 +735,7 @@ class SiswaController extends Controller
 
             $rincianMapel = [];
             $totalSesiBulanIni = 0;
+            $totalHargaBuku = 0;
 
             foreach ($pendingMapels as $idx => $namaMapel) {
                 $assignedDays = $pendingHari[$idx] ?? [];
@@ -725,25 +764,30 @@ class SiswaController extends Controller
                 $subtotalMapel = $harga * $countMapelInMonth;
                 $totalSesiBulanIni += $countMapelInMonth;
 
+                $hargaBukuMapel = $this->getHargaBukuMapel($namaMapel);
+                $totalHargaBuku += $hargaBukuMapel;
+
                 $rincianMapel[] = [
                     'nama_mapel'  => $namaMapel,
                     'hari_list'   => !empty($assignedDaysClean) ? implode(', ', $assignedDaysClean) : 'Belum diatur Admin',
                     'jumlah_sesi' => $countMapelInMonth,
                     'subtotal'    => $subtotalMapel,
+                    'harga_buku'  => $hargaBukuMapel,
                 ];
             }
 
             if ($totalSesiBulanIni === 0) {
                 $totalSesiBulanIni = 4;
             }
-            $totalBiayaBulanIni = $harga * $totalSesiBulanIni;
+            $totalBiayaSesi = $harga * $totalSesiBulanIni;
+            $totalBiayaBulanIni = $totalBiayaSesi + $totalHargaBuku;
 
             $banks    = \App\Models\Rekening::where('tipe', 'bank')->get();
             $ewallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
 
             return view('siswa.bukti_bayar', compact(
                 'siswa', 'paket', 'harga', 'rincianMapel',
-                'totalSesiBulanIni', 'totalBiayaBulanIni',
+                'totalSesiBulanIni', 'totalBiayaBulanIni', 'totalHargaBuku', 'totalBiayaSesi',
                 'banks', 'ewallets', 'currentMonth'
             ));
         }
@@ -783,6 +827,7 @@ class SiswaController extends Controller
 
         $rincianMapel = [];
         $totalSesiBulanIni = 0;
+        $totalHargaBuku = 0;
 
         foreach ($mapelJadwal as $idx => $namaMapel) {
             $assignedDays = $hariPerMapel[$idx] ?? [];
@@ -812,11 +857,15 @@ class SiswaController extends Controller
             $subtotalMapel = $harga * $countMapelInMonth;
             $totalSesiBulanIni += $countMapelInMonth;
 
+            $hargaBukuMapel = $this->getHargaBukuMapel($namaMapel);
+            $totalHargaBuku += $hargaBukuMapel;
+
             $rincianMapel[] = [
                 'nama_mapel'  => $namaMapel,
                 'hari_list'   => implode(', ', $assignedDaysClean),
                 'jumlah_sesi' => $countMapelInMonth,
                 'subtotal'    => $subtotalMapel,
+                'harga_buku'  => $hargaBukuMapel,
             ];
         }
 
@@ -824,14 +873,15 @@ class SiswaController extends Controller
             $totalSesiBulanIni = 1;
         }
 
-        $totalBiayaBulanIni = $harga * $totalSesiBulanIni;
+        $totalBiayaSesi = $harga * $totalSesiBulanIni;
+        $totalBiayaBulanIni = $totalBiayaSesi + $totalHargaBuku;
 
         $banks    = \App\Models\Rekening::where('tipe', 'bank')->get();
         $ewallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
 
         return view('siswa.bukti_bayar', compact(
             'siswa', 'paket', 'harga', 'rincianMapel',
-            'totalSesiBulanIni', 'totalBiayaBulanIni',
+            'totalSesiBulanIni', 'totalBiayaBulanIni', 'totalHargaBuku', 'totalBiayaSesi',
             'banks', 'ewallets', 'currentMonth'
         ));
     }

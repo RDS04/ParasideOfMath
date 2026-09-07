@@ -153,6 +153,8 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/mapel', 'storeMapel')->name('admin.mapel.store');
     Route::put('/admin/mapel/{id}', 'updateMapel')->name('admin.mapel.update');
     Route::delete('/admin/mapel/{id}', 'deleteMapel')->name('admin.mapel.delete');
+    Route::get('/admin/harga-buku', 'inputHargaBuku')->name('admin.harga-buku');
+    Route::post('/admin/harga-buku', 'updateHargaBuku')->name('admin.harga-buku.update');
     Route::get('/admin/siswa/approve', 'approvSiswa')->name('admin.siswa.approve.index');
     Route::post('/admin/siswa/approve/{id}', 'submitApprovSiswa')->name('admin.siswa.approve.submit');
     Route::post('/admin/siswa/reject/{id}', 'rejectSiswa')->name('admin.siswa.reject.submit');
@@ -161,6 +163,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/siswa/request/{id}/reject', 'rejectRequestTambahMapel')->name('admin.siswa.requests.reject');
     Route::post('/admin/siswa/set-jadwal-tambah-mapel/{id}', 'setJadwalTambahMapel')->name('admin.siswa.set-jadwal-tambah-mapel');
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
+    Route::post('/admin/siswa/update-jenjang/{id}', 'updateJenjangSiswa')->name('admin.siswa.update-jenjang');
     Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
     Route::post('/admin/siswa/update-jam-bimbel/{id}', 'updateJamBimbel')->name('admin.siswa.update-jam-bimbel');
     Route::post('/admin/siswa/update-tanggal-mulai/{id}', 'updateTanggalMulai')->name('admin.siswa.update-tanggal-mulai');

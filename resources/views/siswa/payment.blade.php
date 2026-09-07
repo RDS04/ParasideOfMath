@@ -182,35 +182,35 @@
 
         <!-- ══════════════ RIGHT COLUMN: BILLING INVOICE DETAILS (5 COLS) ══════════════ -->
         <div
-            class="lg:col-span-5 p-6 sm:p-10 bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col justify-center fixed-right">
+            class="lg:col-span-5 p-4 sm:p-8 bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col justify-center fixed-right">
 
             <div
-                class="bg-white rounded-3xl border border-violet-100 p-8 shadow-lg shadow-violet-100/30 flex flex-col justify-between min-h-[460px] relative">
+                class="bg-white rounded-3xl border border-violet-100 p-5 sm:p-6 shadow-lg shadow-violet-100/30 flex flex-col justify-between relative">
                 <div>
                     <!-- Kategori Badge -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <span class="px-3 py-1 bg-violet-50 text-violet-700 text-xs font-bold uppercase rounded-full">
                             {{ $paket->kategori }}
                         </span>
                     </div>
 
                     <!-- Title -->
-                    <h3 class="text-2xl font-bold text-violet-950 mb-2">Perkiraan Biaya Bimbingan</h3>
-                    <p class="text-slate-500 text-xs mb-6">Hitung estimasi perkiraan biaya bimbingan belajar berdasarkan paket dan sesi Anda.</p>
+                    <h3 class="text-xl sm:text-2xl font-bold text-violet-950 mb-1">Perkiraan Biaya Bimbingan</h3>
+                    <p class="text-slate-500 text-xs mb-4">Hitung estimasi perkiraan biaya bimbingan belajar berdasarkan paket dan sesi Anda.</p>
 
                     <!-- Details List -->
-                    <div class="space-y-4 text-sm text-slate-600 mb-6">
-                        <div class="flex justify-between items-start gap-4">
+                    <div class="space-y-3 text-sm text-slate-600 mb-4">
+                        <div class="flex justify-between items-center gap-2 pb-2 border-b border-slate-100">
                             <div>
-                                <span class="d-block font-bold text-violet-950">Bimbel {{ $paket->nama_paket }}</span>
+                                <span class="block font-bold text-violet-950 text-sm">Bimbel {{ $paket->nama_paket }}</span>
                                 <small class="text-slate-400 text-xxs block mt-0.5">({{ explode(':', $detailString)[0] }})</small>
                             </div>
-                            <span class="font-bold text-violet-950">Rp {{ number_format($harga, 0, ',', '.') }} <span class="text-xs text-slate-400 font-normal">/ sesi (est.)</span></span>
+                            <span class="font-bold text-violet-950 text-xs sm:text-sm">Rp {{ number_format($harga, 0, ',', '.') }} <span class="text-[10px] text-slate-400 font-normal">/ sesi (est.)</span></span>
                         </div>
                         {{-- ── Ringkasan Jadwal per Mapel ── --}}
                         @if(!empty($mapelJadwal))
-                            <div class="pt-2 border-t border-slate-100 space-y-3">
-                                <span class="block font-bold text-slate-700 text-xs uppercase tracking-wider mb-2">Jadwal Belajar per Mapel</span>
+                            <div class="space-y-2">
+                                <span class="block font-bold text-slate-700 text-[11px] uppercase tracking-wider mb-1.5">Jadwal Belajar & Harga Buku per Mapel</span>
                                 @foreach($mapelJadwal as $idx => $namaMapel)
                                     @php
                                         $sesiIdx  = !empty($sesiPerMapel[$idx]) ? $sesiPerMapel[$idx] : 4;
@@ -219,16 +219,16 @@
                                         $tgl      = $tanggalArr[$idx] ?? null;
                                         $tglStr   = $tgl ? \Carbon\Carbon::parse($tgl)->format('d M Y') : '-';
                                         $hargaMapel = $harga * $sesiIdx;
+                                        $hbMapel  = $hargaBukuPerMapel[$idx] ?? 0;
                                     @endphp
-                                    <div class="bg-purple-50/60 rounded-xl p-3 border border-purple-100">
-                                        <div class="flex justify-between items-center mb-1.5">
-                                            <span class="font-bold text-purple-900 text-xs">{{ $namaMapel }}</span>
-                                            <span class="text-[11px] font-semibold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200">{{ $sesiIdx }}x sesi</span>
+                                    <div class="bg-purple-50/50 rounded-xl p-2.5 border border-purple-100/80">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <span class="font-bold text-purple-950 text-xs">{{ $namaMapel }}</span>
+                                            <span class="text-[10px] font-bold text-purple-700 bg-white px-2 py-0.5 rounded-full border border-purple-200">{{ $sesiIdx }}x sesi</span>
                                         </div>
-                                        <div class="text-[11px] text-slate-500 space-y-0.5">
-                                            <div class="text-right font-semibold text-purple-700 mt-1">
-                                                Rp {{ number_format($harga, 0, ',', '.') }} × {{ $sesiIdx }} = Rp {{ number_format($hargaMapel, 0, ',', '.') }}
-                                            </div>
+                                        <div class="grid grid-cols-2 gap-1 text-[11px] text-slate-600 pt-1 border-t border-purple-100/60">
+                                            <div>Biaya Sesi: <span class="font-semibold text-purple-900">Rp {{ number_format($hargaMapel, 0, ',', '.') }}</span></div>
+                                            <div class="text-right">Buku Modul: <span class="font-bold text-amber-700">Rp {{ number_format($hbMapel, 0, ',', '.') }}</span></div>
                                         </div>
                                     </div>
                                 @endforeach
@@ -250,33 +250,42 @@
                         @endif
                     </div>
 
-                    <div class="border-t border-dashed border-slate-100 my-4"></div>
-
                     <!-- Total Tagihan (Perkiraan) -->
-                    <div class="space-y-2 mb-6">
-                        <div class="flex justify-between text-xs text-slate-500">
+                    <div class="space-y-2 my-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80">
+                        <div class="flex justify-between text-xs text-slate-600">
                             <span>Harga per sesi (est.)</span>
-                            <span class="font-semibold text-slate-700">Rp {{ number_format($harga, 0, ',', '.') }}</span>
+                            <span class="font-semibold text-slate-800">Rp {{ number_format($harga, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between text-xs text-slate-500">
-                            <span>Total estimasi sesi</span>
-                            <span class="font-semibold text-slate-700">{{ $totalSesi ?? 1 }}x</span>
+                        <div class="flex justify-between text-xs text-slate-600">
+                            <span>Total Sesi Bimbingan</span>
+                            <span class="font-semibold text-slate-800">{{ $totalSesi ?? 1 }}x sesi</span>
                         </div>
-                        <div class="flex justify-between items-baseline pt-2 border-t border-slate-100">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Perkiraan Total Biaya</span>
-                            <span class="text-3xl font-black text-violet-950">Rp {{ number_format($total, 0, ',', '.') }}</span>
+                        <div class="flex justify-between text-xs text-purple-900 font-semibold pt-1 border-t border-slate-200/60">
+                            <span>Subtotal Biaya Sesi</span>
+                            <span>Rp {{ number_format($totalSesiHarga ?? ($harga * $totalSesi), 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-amber-900 font-bold">
+                            <span><i class="fas fa-book text-amber-500 mr-1"></i> Total Biaya Buku Modul</span>
+                            <span class="text-amber-700">Rp {{ number_format($totalHargaBuku ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2.5 border-t border-slate-200">
+                            <div>
+                                <span class="text-xs font-extrabold text-slate-800 uppercase tracking-wider block">Perkiraan Total Biaya</span>
+                                <small class="text-[10px] text-slate-400 font-medium">(Bimbingan + Buku)</small>
+                            </div>
+                            <span class="text-xl sm:text-2xl font-black text-violet-950">Rp {{ number_format($total, 0, ',', '.') }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Submit Button Area -->
-                <div>
-                    <button type="submit" id="btnBayar" class="btn-brand font-bold text-md mb-4 border-0">
+                <div class="mt-2">
+                    <button type="submit" id="btnBayar" class="btn-brand font-bold text-md mb-3 border-0 w-full py-3">
                         Selanjutnya <i class="fas fa-arrow-right ml-1.5"></i>
                     </button>
 
-                    <div class="p-3 bg-violet-50/50 rounded-2xl border border-violet-100/50 flex items-start gap-2.5">
-                        <i class="fas fa-calculator text-violet-600 mt-0.5 text-xs"></i>
+                    <div class="p-2.5 bg-violet-50/50 rounded-xl border border-violet-100/50 flex items-start gap-2">
+                        <i class="fas fa-calculator text-violet-600 mt-0.5 text-xs shrink-0"></i>
                         <p class="text-[10px] text-violet-950 mb-0 leading-relaxed font-medium">
                             <strong class="text-violet-700">Catatan Perkiraan Harga:</strong> Nominal di atas merupakan estimasi perkiraan biaya bimbingan. Tarif akhir akan dikonfirmasi kembali oleh Admin / Tutor.
                         </p>

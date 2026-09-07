@@ -207,9 +207,9 @@
                 <div class="mb-3">
                     <i class="fas fa-graduation-cap fa-3x text-amber-500"></i>
                 </div>
-                <h5 class="font-weight-bold text-purple-950 mb-1" style="color: #2e1065;">Sesi Bimbingan Les</h5>
-                <div class="mb-2" id="modalBadgeContainer">
-                    <span id="modalSessionIndex" class="badge badge-warning text-purple-950 font-weight-bold px-3 py-1.5 rounded-full text-xs">Sesi 1 dari 9</span>
+                <h5 class="font-weight-bold text-purple-950 mb-2" style="color: #2e1065;">Sesi Bimbingan Les</h5>
+                <div class="mb-3 d-flex flex-wrap justify-content-center align-items-center gap-1.5" id="modalBadgeContainer">
+                    <span id="modalSessionIndex" class="badge badge-warning text-purple-950 font-weight-bold px-3 py-1.5 rounded-full text-xs" style="white-space: normal; word-break: break-word; max-width: 100%;">Sesi 1 dari 9</span>
                 </div>
                 <p id="modalDate" class="text-sm font-semibold text-purple-700 mb-4" style="color: #7c3aed;">Senin, 10 Agustus 2026</p>
                 
@@ -500,9 +500,28 @@
             const isDoneToday = (currentDate.getTime() === today.getTime()) && curMin > endMin;
             const isCompleted = isPast || isDoneToday;
 
-            // Badges atas modal
-            const badgeLabel = sessionsToday.map(s => `${s.mapelName}: Sesi ${s.sessionIndex}/${s.totalSesi}`).join(' | ');
-            document.getElementById('modalSessionIndex').textContent = badgeLabel + (isCompleted ? ' (Selesai)' : ' (Belum Mulai)');
+            // Badges atas modal (render individual badge pills per mapel for clean wrap)
+            const badgeContainer = document.getElementById('modalBadgeContainer');
+            if (badgeContainer) {
+                const statusText = isCompleted ? 'Selesai' : 'Belum Mulai';
+                const statusStyle = isCompleted 
+                    ? 'background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;' 
+                    : 'background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;';
+
+                let badgesHtml = sessionsToday.map(s => {
+                    const color = mapelColors[s.mapelIdx % mapelColors.length];
+                    return `<span class="badge font-weight-bold px-2.5 py-1 rounded-full text-xs" 
+                                  style="background-color: ${color.light}; color: ${color.text}; border: 1px solid ${color.bg}40; white-space: normal; text-align: center;">
+                                <i class="fas fa-book-open mr-1" style="color: ${color.bg};"></i>${s.mapelName}: Sesi ${s.sessionIndex} dari ${s.totalSesi}
+                            </span>`;
+                }).join('');
+
+                badgesHtml += `<span class="badge font-weight-bold px-2.5 py-1 rounded-full text-xs" style="${statusStyle}">
+                                ${statusText}
+                              </span>`;
+
+                badgeContainer.innerHTML = badgesHtml;
+            }
 
             // Build dynamic details box per mapel session
             const sessionsListEl = document.getElementById('modalSessionsList');

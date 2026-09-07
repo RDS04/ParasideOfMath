@@ -40,6 +40,7 @@
         @media (min-width: 1024px) {
             .payment-container {
                 height: 750px;
+                max-height: 85vh;
             }
 
             .scrollable-left {
@@ -49,24 +50,28 @@
 
             .fixed-right {
                 height: 100%;
-                overflow: hidden;
+                overflow-y: auto;
             }
         }
 
-        .scrollable-left::-webkit-scrollbar {
+        .scrollable-left::-webkit-scrollbar,
+        .fixed-right::-webkit-scrollbar {
             width: 6px;
         }
 
-        .scrollable-left::-webkit-scrollbar-track {
+        .scrollable-left::-webkit-scrollbar-track,
+        .fixed-right::-webkit-scrollbar-track {
             background: transparent;
         }
 
-        .scrollable-left::-webkit-scrollbar-thumb {
+        .scrollable-left::-webkit-scrollbar-thumb,
+        .fixed-right::-webkit-scrollbar-thumb {
             background: #d8d3e8;
             border-radius: 10px;
         }
 
-        .scrollable-left::-webkit-scrollbar-thumb:hover {
+        .scrollable-left::-webkit-scrollbar-thumb:hover,
+        .fixed-right::-webkit-scrollbar-thumb:hover {
             background: #a78bfa;
         }
     </style>
@@ -225,10 +230,10 @@
 
         <!-- ══════════════ RIGHT COLUMN: BILLING INVOICE DETAILS (5 COLS) ══════════════ -->
         <div
-            class="lg:col-span-5 p-6 sm:p-10 bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col justify-center fixed-right">
+            class="lg:col-span-5 p-4 sm:p-6 bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-100 flex flex-col justify-start fixed-right">
 
             <div
-                class="bg-white rounded-3xl border border-violet-100 p-8 shadow-lg shadow-violet-100/30 flex flex-col justify-between min-h-[500px] relative">
+                class="bg-white rounded-3xl border border-violet-100 p-6 sm:p-7 shadow-lg shadow-violet-100/30 flex flex-col justify-between relative min-h-fit">
                 <div>
                     <!-- Kategori Badge -->
                     <div class="mb-4 flex justify-between items-center">
@@ -272,6 +277,12 @@
                                         <span>Hari: <strong class="text-slate-700">{{ $rincian['hari_list'] ?: '-' }}</strong></span>
                                         <span class="font-bold text-purple-900">Rp {{ number_format($rincian['subtotal'], 0, ',', '.') }}</span>
                                     </div>
+                                    @if (!empty($rincian['harga_buku']) && $rincian['harga_buku'] > 0)
+                                        <div class="flex justify-between items-center text-[11px] text-amber-700 pt-1 mt-1 border-t border-purple-100/60">
+                                            <span><i class="fas fa-book mr-1 text-amber-600"></i>Harga Buku Modul:</span>
+                                            <span class="font-bold">Rp {{ number_format($rincian['harga_buku'], 0, ',', '.') }}</span>
+                                        </div>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>
@@ -289,6 +300,16 @@
                             <span>Total Pertemuan Bulan Ini</span>
                             <span class="font-bold text-purple-900">{{ $totalSesiBulanIni }}x Sesi</span>
                         </div>
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>Subtotal Biaya Sesi</span>
+                            <span class="font-semibold text-slate-700">Rp {{ number_format($harga * $totalSesiBulanIni, 0, ',', '.') }}</span>
+                        </div>
+                        @if (isset($totalHargaBuku) && $totalHargaBuku > 0)
+                            <div class="flex justify-between text-xs text-amber-800 font-semibold bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-200/70">
+                                <span><i class="fas fa-book mr-1 text-amber-600"></i>Total Harga Buku Modul</span>
+                                <span>Rp {{ number_format($totalHargaBuku, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
                         <div class="flex justify-between items-baseline pt-2 border-t border-slate-100">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Tagihan</span>
                             <span class="text-3xl font-black text-violet-950">Rp {{ number_format($totalBiayaBulanIni, 0, ',', '.') }}</span>

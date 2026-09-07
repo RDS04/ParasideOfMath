@@ -416,7 +416,7 @@ class AdminController extends Controller
         $siswa->biodata = $biodata;
         $siswa->save();
 
-        return redirect()->route('admin.siswa.detail', $id)
+        return redirect()->route('admin.siswa.requests.index')
             ->with('success', 'Hari bimbingan untuk mapel baru siswa ' . $siswa->name . ' berhasil ditentukan! Siswa dapat melanjutkan ke tahap pembayaran.');
     }
 
@@ -431,6 +431,22 @@ class AdminController extends Controller
 
         $siswa = Siswa::findOrFail($id);
         $biodata = $siswa->biodata ?? [];
+
+        $biodata = $this->mergePendingBiodata($biodata);
+        $siswa->update(['biodata' => $biodata]);
+
+        RiwayatPembayaran::where('siswa_id', $siswa->id)
+            ->where('status', 'under_review')
+            ->update(['status' => 'approved', 'approved_at' => now()]);
+
+        return back()->with('success', 'Request tambah mapel siswa ' . $siswa->name . ' berhasil disetujui.');
+    }
+
+    /**
+     * Merge pending schedule & lesson data into active biodata.
+     */
+    protected function mergePendingBiodata(array $biodata): array
+    {
         $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
         $pendingSesi = $biodata['pending_sesi_per_mapel'] ?? [];
         $pendingHari = $biodata['pending_hari_per_mapel'] ?? [];
@@ -464,15 +480,9 @@ class AdminController extends Controller
                 $biodata['pending_jumlah_pertemuan'],
                 $biodata['pending_mapel_status']
             );
-
-            $siswa->update(['biodata' => $biodata]);
         }
 
-        RiwayatPembayaran::where('siswa_id', $siswa->id)
-            ->where('status', 'under_review')
-            ->update(['status' => 'approved', 'approved_at' => now()]);
-
-        return back()->with('success', 'Request tambah mapel siswa ' . $siswa->name . ' berhasil disetujui.');
+        return $biodata;
     }
 
     /**
@@ -716,6 +726,40 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', 'Daftar mata pelajaran untuk ' . $siswa->name . ' berhasil diperbarui!');
+    }
+
+    /**
+     * Update jenjang, tingkat kelas, dan paket belajar siswa.
+     */
+    public function updateJenjangSiswa(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'kelas' => ['required', 'string', 'max:255'],
+            'jurusan' => ['nullable', 'string', 'max:255'],
+            'paket_id' => ['nullable', 'exists:paket_belajar,id'],
+        ]);
+
+        $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        
+        $biodata['kelas'] = trim($request->input('kelas'));
+        if ($request->has('jurusan')) {
+            $biodata['jurusan'] = trim($request->input('jurusan')) ?: '— Tidak berlaku / pilih jurusan —';
+        }
+
+        $updateData = ['biodata' => $biodata];
+
+        if ($request->filled('paket_id')) {
+            $updateData['paket_id'] = $request->input('paket_id');
+        }
+
+        $siswa->update($updateData);
+
+        return back()->with('success', 'Jenjang dan tingkat kelas untuk siswa ' . $siswa->name . ' berhasil diperbarui!');
     }
 
     /**
@@ -1273,6 +1317,40 @@ class AdminController extends Controller
         $mapel->delete();
 
         return back()->with('success', 'Mata Pelajaran berhasil dihapus!');
+    }
+
+    public function inputHargaBuku()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $mapels = Mapel::orderBy('nama_mapel', 'asc')->get();
+        return view('admin.inputHargaBuku', compact('mapels'));
+    }
+
+    public function updateHargaBuku(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $request->validate([
+            'harga_buku' => 'required|array',
+            'harga_buku.*' => 'nullable|numeric|min:0',
+        ]);
+
+        $hargaBukuInput = $request->input('harga_buku', []);
+        foreach ($hargaBukuInput as $mapelId => $harga) {
+            $mapel = Mapel::find($mapelId);
+            if ($mapel) {
+                $mapel->update([
+                    'harga_buku' => (int) $harga
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Harga buku mata pelajaran berhasil diperbarui!');
     }
 
     public function tambahSiswa()

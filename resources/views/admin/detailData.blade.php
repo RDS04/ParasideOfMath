@@ -289,24 +289,40 @@
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div class="font-weight-bold text-slate-800 text-xs mr-1">
                                                     @php
-                                                        $tutorPerMapel = $bio['tutor_per_mapel'] ?? [];
-                                                        $currentGurus = $currentGurus ?? [];
-                                                        if (empty($currentGurus) && $student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
-                                                            $currentGurus = array_map('trim', explode(',', $matches[1]));
-                                                        }
                                                         $mapelJadwal = $bio['mapel_jadwal'] ?? [];
                                                         if (empty($mapelJadwal) && $student->tipe_paket) {
                                                             if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
                                                                 $mapelJadwal = array_map('trim', explode(',', $matches[1]));
                                                             }
                                                         }
+                                                        $tutorPerMapel = $bio['tutor_per_mapel'] ?? [];
+                                                        $currentGurus = $currentGurus ?? [];
+                                                        if (empty($currentGurus) && $student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
+                                                            $currentGurus = array_map('trim', explode(',', $matches[1]));
+                                                        }
                                                     @endphp
 
-                                                    @if(!empty($tutorPerMapel))
+                                                    @if(!empty($mapelJadwal))
+                                                        @foreach($mapelJadwal as $mName)
+                                                            @php
+                                                                $gName = $tutorPerMapel[$mName] ?? null;
+                                                            @endphp
+                                                            <div class="mb-1 d-flex align-items-center gap-1">
+                                                                <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $mName }}:</span>
+                                                                <span class="text-xs">
+                                                                    @if(!empty($gName))
+                                                                        <span class="text-purple-950 font-weight-bold">{{ $gName }}</span>
+                                                                    @else
+                                                                        <span class="text-muted font-italic">-</span>
+                                                                    @endif
+                                                                </span>
+                                                            </div>
+                                                        @endforeach
+                                                    @elseif(!empty($tutorPerMapel))
                                                         @foreach($tutorPerMapel as $mName => $gName)
                                                             <div class="mb-1 d-flex align-items-center gap-1">
                                                                 <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $mName }}:</span>
-                                                                <span class="text-purple-950 font-weight-bold text-xs">{{ $gName }}</span>
+                                                                <span class="text-purple-950 font-weight-bold text-xs">{{ $gName ?: '-' }}</span>
                                                             </div>
                                                         @endforeach
                                                     @elseif(!empty($currentGurus))
@@ -386,8 +402,8 @@
                                                         @php
                                                             $isChecked = in_array($dayName, (array)$selectedHari);
                                                         @endphp
-                                                        <label class="d-inline-flex align-items-center bg-white px-2.5 py-1 rounded-lg border text-xs cursor-pointer hover:border-purple-400 transition-all m-0 font-semibold {{ $isChecked ? 'border-purple-500 text-purple-950 bg-purple-50' : 'border-slate-200 text-slate-600' }}">
-                                                            <input type="checkbox" name="hari_per_mapel[{{ $pIdx }}][]" value="{{ $dayName }}" class="mr-1.5 accent-purple-600" {{ $isChecked ? 'checked' : '' }}>
+                                                        <label class="d-inline-flex align-items-center px-2.5 py-1 rounded-lg border text-xs cursor-pointer hover:border-purple-400 transition-all m-0 font-semibold {{ $isChecked ? 'bg-purple-600 text-white border-purple-600 shadow-xs' : 'bg-white border-slate-200 text-slate-600' }}">
+                                                            <input type="checkbox" name="hari_per_mapel[{{ $pIdx }}][]" value="{{ $dayName }}" class="mr-1.5 accent-purple-600" {{ $isChecked ? 'checked' : '' }} onchange="toggleDayPillStyle(this)">
                                                             {{ $dayName }}
                                                         </label>
                                                     @endforeach
@@ -672,8 +688,15 @@
                                             <span class="font-weight-semibold text-slate-700 text-sm">{{ $jenisKelamin }}</span>
                                         </div>
                                         <div class="col-md-6 mb-2">
-                                            <span class="text-xs text-muted d-block">Tingkat Kelas &amp; Jurusan</span>
-                                            <span class="font-weight-semibold text-slate-700 text-sm">{{ $kelas }} @if($jurusan && $jurusan !== '— Tidak berlaku / pilih jurusan —') ({{ $jurusan }}) @endif</span>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div>
+                                                    <span class="text-xs text-muted d-block">Tingkat Kelas &amp; Jurusan</span>
+                                                    <span class="font-weight-semibold text-slate-700 text-sm">{{ $kelas }} @if($jurusan && $jurusan !== '— Tidak berlaku / pilih jurusan —') ({{ $jurusan }}) @endif</span>
+                                                </div>
+                                                <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2.5 py-1 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#editJenjangModal" style="border-color: #cbd5e1; color: #475569;">
+                                                    <i class="fas fa-graduation-cap mr-1 text-purple-600"></i> Edit Jenjang
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="col-12 mb-2">
                                             <span class="text-xs text-muted d-block">Alamat Rumah</span>
@@ -875,6 +898,85 @@
             </div>
         </div>
     </section>
+
+    <!-- Modal Edit Jenjang & Tingkat Kelas Siswa -->
+    <div class="modal fade" id="editJenjangModal" tabindex="-1" role="dialog" aria-labelledby="editJenjangModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+                <form action="{{ route('admin.siswa.update-jenjang', $student->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                        <h5 class="modal-title font-weight-bold text-md text-white" id="editJenjangModalLabel" style="color: #fff;">
+                            <i class="fas fa-graduation-cap mr-2 text-amber-400"></i>Edit Jenjang &amp; Tingkat Kelas
+                        </h5>
+                        <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 text-left">
+                        <p class="text-xs text-muted mb-3">Ubah tingkat kelas, jenjang pendidikan, serta paket bimbel siswa jika siswa naik jenjang (SD ke SMP/SMA).</p>
+                        
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-purple-950 text-xs d-block mb-1">
+                                Tingkat Kelas &amp; Jenjang <span class="text-danger">*</span>
+                            </label>
+                            <select name="kelas" class="form-control custom-select text-xs rounded-xl" required>
+                                <option value="">-- Pilih Tingkat Kelas --</option>
+                                <optgroup label="SD (Sekolah Dasar)">
+                                    @foreach(['Kelas 1 SD', 'Kelas 2 SD', 'Kelas 3 SD', 'Kelas 4 SD', 'Kelas 5 SD', 'Kelas 6 SD'] as $kOpt)
+                                        <option value="{{ $kOpt }}" {{ $kelas === $kOpt ? 'selected' : '' }}>{{ $kOpt }}</option>
+                                    @endforeach
+                                </optgroup>
+                                <optgroup label="SMP (Sekolah Menengah Pertama)">
+                                    @foreach(['Kelas 7 SMP', 'Kelas 8 SMP', 'Kelas 9 SMP'] as $kOpt)
+                                        <option value="{{ $kOpt }}" {{ $kelas === $kOpt ? 'selected' : '' }}>{{ $kOpt }}</option>
+                                    @endforeach
+                                </optgroup>
+                                <optgroup label="SMA (Sekolah Menengah Atas)">
+                                    @foreach(['Kelas 10 SMA', 'Kelas 11 SMA', 'Kelas 12 SMA'] as $kOpt)
+                                        <option value="{{ $kOpt }}" {{ $kelas === $kOpt ? 'selected' : '' }}>{{ $kOpt }}</option>
+                                    @endforeach
+                                </optgroup>
+                                <option value="lainnya" {{ !in_array($kelas, ['Kelas 1 SD','Kelas 2 SD','Kelas 3 SD','Kelas 4 SD','Kelas 5 SD','Kelas 6 SD','Kelas 7 SMP','Kelas 8 SMP','Kelas 9 SMP','Kelas 10 SMA','Kelas 11 SMA','Kelas 12 SMA']) && $kelas !== '-' ? 'selected' : '' }}>Lainnya / Umum</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-purple-950 text-xs d-block mb-1">
+                                Jurusan (Khusus SMA)
+                            </label>
+                            <select name="jurusan" class="form-control custom-select text-xs rounded-xl">
+                                <option value="— Tidak berlaku / pilih jurusan —" {{ empty($jurusan) || $jurusan === '— Tidak berlaku / pilih jurusan —' ? 'selected' : '' }}>— Tidak berlaku / pilih jurusan —</option>
+                                <option value="IPA" {{ $jurusan === 'IPA' ? 'selected' : '' }}>IPA</option>
+                                <option value="IPS" {{ $jurusan === 'IPS' ? 'selected' : '' }}>IPS</option>
+                                <option value="Bahasa" {{ $jurusan === 'Bahasa' ? 'selected' : '' }}>Bahasa</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-purple-950 text-xs d-block mb-1">
+                                Paket Belajar Siswa
+                            </label>
+                            @php
+                                $allPaketsList = \App\Models\PaketBelajar::all();
+                            @endphp
+                            <select name="paket_id" class="form-control custom-select text-xs rounded-xl">
+                                @foreach($allPaketsList as $pItem)
+                                    <option value="{{ $pItem->id }}" {{ $student->paket_id == $pItem->id ? 'selected' : '' }}>
+                                        {{ $pItem->nama_paket }} ({{ $pItem->kategori }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">Simpan Perubahan Jenjang</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal Edit Hari Bimbel Per Mapel -->
     <div class="modal fade" id="editBimbelDaysModal" tabindex="-1" role="dialog" aria-labelledby="editBimbelDaysModalLabel" aria-hidden="true">
@@ -1543,4 +1645,18 @@
             border-radius: 16px !important;
         }
     </style>
+
+    <script>
+        function toggleDayPillStyle(input) {
+            const label = input.closest('label');
+            if (!label) return;
+            if (input.checked) {
+                label.classList.remove('bg-white', 'border-slate-200', 'text-slate-600');
+                label.classList.add('bg-purple-600', 'text-white', 'border-purple-600', 'shadow-xs');
+            } else {
+                label.classList.remove('bg-purple-600', 'text-white', 'border-purple-600', 'shadow-xs');
+                label.classList.add('bg-white', 'border-slate-200', 'text-slate-600');
+            }
+        }
+    </script>
 @endsection
