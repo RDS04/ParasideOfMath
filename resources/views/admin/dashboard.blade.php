@@ -141,7 +141,7 @@
                                 <h5 class="font-weight-bold text-purple-950 mb-1">Laporan Pendapatan</h5>
                                 <p class="text-sm text-muted mb-0">Pendapatan siswa aktif berdasarkan filter bulanan atau tahunan.</p>
                             </div>
-                            <form action="{{ route('admin.laporan-pendapatan') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2">
+                            <form action="{{ route('admin.dashboard') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2">
                                 <div class="d-flex align-items-center gap-2">
                                     <label for="filterSelect" class="mb-0 small fw-semibold">Filter</label>
                                     <select name="filter" id="filterSelect" class="form-select form-select-sm" onchange="this.form.submit()" style="width:auto;">
@@ -313,8 +313,13 @@
                                 ticks: {
                                     color: '#5f4b8b',
                                     font: { size: 11 },
+                                    precision: 0,
                                     callback: function(value) {
-                                        return value >= 1000 ? 'Rp ' + (value / 1000).toFixed(0) + 'rb' : 'Rp ' + value;
+                                        if (value === 0) return 'Rp 0';
+                                        if (Math.floor(value) !== value) return '';
+                                        if (value >= 1000000) return 'Rp ' + (value / 1000000).toFixed(1).replace('.0','') + 'jt';
+                                        if (value >= 1000) return 'Rp ' + (value / 1000).toFixed(0) + 'rb';
+                                        return 'Rp ' + value;
                                     }
                                 },
                                 grid: { color: 'rgba(108, 85, 210, 0.12)', drawBorder: false }

@@ -115,6 +115,7 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::post('/profil', 'updateProfil')->name('guru.profil.update');
     Route::get('/jadwal', 'showJadwal')->name('guru.jadwal');
     Route::get('/siswa', 'showSiswa')->name('guru.siswa');
+    Route::get('/siswa/detail/{id}', 'detailSiswa')->name('guru.siswa.detail');
 
     Route::get('/ujian', 'showUjianGuru')->name('guru.ujian.index');
     Route::post('/ujian/assign', 'assignUjianGuru')->name('guru.ujian.assign');
@@ -158,10 +159,12 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/admin/siswa/requests', 'requestTambahMapel')->name('admin.siswa.requests.index');
     Route::post('/admin/siswa/request/{id}', 'approveRequestTambahMapel')->name('admin.siswa.requests.approve');
     Route::post('/admin/siswa/request/{id}/reject', 'rejectRequestTambahMapel')->name('admin.siswa.requests.reject');
+    Route::post('/admin/siswa/set-jadwal-tambah-mapel/{id}', 'setJadwalTambahMapel')->name('admin.siswa.set-jadwal-tambah-mapel');
     Route::get('/admin/siswa/detail/{id}', 'detailSiswa')->name('admin.siswa.detail');
     Route::post('/admin/siswa/update-bimbel-days/{id}', 'updateBimbelDays')->name('admin.siswa.update-bimbel-days');
     Route::post('/admin/siswa/update-jam-bimbel/{id}', 'updateJamBimbel')->name('admin.siswa.update-jam-bimbel');
     Route::post('/admin/siswa/update-tanggal-mulai/{id}', 'updateTanggalMulai')->name('admin.siswa.update-tanggal-mulai');
+    Route::post('/admin/siswa/update-mapel/{id}', 'updateMapelSiswa')->name('admin.siswa.update-mapel');
     Route::post('/admin/siswa/assign-tutor/{id}', 'assignTutor')->name('admin.siswa.assign-tutor');
     Route::post('/admin/siswa/add-catatan-bon/{id}', 'addCatatanBon')->name('admin.siswa.add-catatan-bon');
     Route::delete('/admin/siswa/delete-catatan-bon/{id}/{itemId}', 'deleteCatatanBon')->name('admin.siswa.delete-catatan-bon');

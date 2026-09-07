@@ -15,6 +15,8 @@
   $isGuruBiodataActive = Request::is('guru/biodata') || Request::is('guru/biodata/*');
   $isGuruJadwalActive = Request::is('guru/jadwal') || Request::is('guru/jadwal/*');
   $isGuruUjianActive = Request::is('guru/ujian') || Request::is('guru/ujian/*');
+  $isGuruBankSoalActive = Request::is('guru/bank-soal') || Request::is('guru/bank-soal/*') || Request::is('guru/list-soal') || Request::is('guru/list-soal/*');
+  $isGuruSiswaActive = Request::is('guru/siswa') || Request::is('guru/siswa/*');
 @endphp
 
 @if ($isGuru)
@@ -23,27 +25,41 @@
     style="position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; background-color: #ffffff; border-top: 1px solid #ece7f7; padding-bottom: env(safe-area-inset-bottom, 12px); padding-top: 10px; box-shadow: 0 -4px 20px rgba(46, 16, 101, 0.08);">
     <div style="max-width: 480px; margin: 0 auto; width: 100%;">
       <div
-        style="display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; padding-left: 12px; padding-right: 12px;">
+        style="display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; padding-left: 8px; padding-right: 8px;">
 
         <!-- Home Dashboard Guru -->
         <a href="{{ route('guru.dashboard') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruDashboardActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isGuruDashboardActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruDashboardActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruDashboardActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
               style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruDashboardActive ? 'scale(1.08)' : 'scale(1)' }};">
               <path d="M12 2.5 1.5 11h3V21h6v-6h3v6h6V11h3L12 2.5z" />
             </svg>
           </div>
           <span
-            style="font-size: 10px; font-weight: {{ $isGuruDashboardActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Dashboard</span>
+            style="font-size: 9.5px; font-weight: {{ $isGuruDashboardActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Dashboard</span>
+        </a>
+
+        <!-- Input Soal / Modul -->
+        <a href="{{ route('guru.bank-soal.index') }}"
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 58px; color: {{ $isGuruBankSoalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          <div
+            style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruBankSoalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruBankSoalActive ? 'scale(1.08)' : 'scale(1)' }};">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+            </svg>
+          </div>
+          <span
+            style="font-size: 9.5px; font-weight: {{ $isGuruBankSoalActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s; white-space: nowrap;">Input Soal</span>
         </a>
 
         <!-- Penugasan Ujian -->
         <a href="{{ route('guru.ujian.index') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruUjianActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isGuruUjianActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruUjianActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruUjianActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
               style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruUjianActive ? 'scale(1.08)' : 'scale(1)' }};">
               <path
@@ -51,12 +67,14 @@
             </svg>
           </div>
           <span
-            style="font-size: 10px; font-weight: {{ $isGuruUjianActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Ujian</span>
+            style="font-size: 9.5px; font-weight: {{ $isGuruUjianActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Ujian</span>
         </a>
+
+        <!-- Jadwal -->
         <a href="{{ route('guru.jadwal') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 64px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 40px; height: 28px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
               style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isGuruJadwalActive ? 'scale(1.08)' : 'scale(1)' }};">
               <path
@@ -64,39 +82,110 @@
             </svg>
           </div>
           <span
-            style="font-size: 10px; font-weight: {{ $isGuruJadwalActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Jadwal</span>
+            style="font-size: 9.5px; font-weight: {{ $isGuruJadwalActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Jadwal</span>
         </a>
+
         <!-- Chat -->
         <a href="{{ route('guru.chat.index') }}"
-          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isChatActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
+          style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isChatActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
-            style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isChatActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
+            style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isChatActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              style="width: 20px; height: 20px; transition: transform 0.25s ease; transform: {{ $isChatActive ? 'scale(1.08)' : 'scale(1)' }};">
-              <path d="M4 4h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3.5V15H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
-                opacity="0.55" />
+              style="width: 18px; height: 18px; transition: transform 0.25s ease; transform: {{ $isChatActive ? 'scale(1.08)' : 'scale(1)' }};">
+              <path d="M4 4h13a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3.5V15H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" opacity="0.55" />
               <path d="M9 8h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1v2.8L16 18h-7a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z" />
             </svg>
           </div>
           <span
-            style="font-size: 10px; font-weight: {{ $isChatActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Chat</span>
+            style="font-size: 9.5px; font-weight: {{ $isChatActive ? '700' : '500' }}; font-family: 'Inter', sans-serif; transition: font-weight 0.25s;">Chat</span>
         </a>
-        <!-- Keluar / Logout -->
-        <form action="{{ route('logout') }}" method="POST" id="mobileGuruLogoutForm" style="display: inline;">
-          @csrf
-          <button type="submit"
-            style="background: none; border: none; padding: 0; cursor: pointer; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; width: 72px; color: #ef4444; transition: all 0.25s ease;">
-            <div
-              style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: rgba(239, 68, 68, 0.08); transition: all 0.25s ease; margin-bottom: 2px;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                style="width: 20px; height: 20px;">
-                <path
-                  d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-              </svg>
-            </div>
-            <span style="font-size: 10px; font-weight: 600; font-family: 'Inter', sans-serif;">Keluar</span>
+
+        <!-- Menu / Lainnya Modal Button -->
+        <button type="button" data-toggle="modal" data-target="#modalMobileGuruMenu"
+          style="background: none; border: none; padding: 0; cursor: pointer; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; width: 56px; color: #64748b; transition: all 0.25s ease;">
+          <div
+            style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: rgba(100, 116, 139, 0.08); transition: all 0.25s ease; margin-bottom: 2px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+              style="width: 18px; height: 18px;">
+              <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z" />
+            </svg>
+          </div>
+          <span style="font-size: 9.5px; font-weight: 600; font-family: 'Inter', sans-serif;">Menu</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Menu Lengkap Mobile untuk Guru -->
+  <div class="modal fade" id="modalMobileGuruMenu" tabindex="-1" role="dialog" aria-labelledby="modalMobileGuruMenuLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document" style="max-width: 360px; margin: 1.75rem auto;">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+        <div class="modal-header py-3 px-4 text-white" style="background-color: #2e1065;">
+          <h5 class="modal-title font-weight-bold text-sm text-white d-flex align-items-center" id="modalMobileGuruMenuLabel">
+            <i class="fas fa-th-large mr-2 text-amber-300"></i> Menu Pengajar
+          </h5>
+          <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.4rem; outline: none; color: #fff;">
+            <span aria-hidden="true">&times;</span>
           </button>
-        </form>
+        </div>
+        <div class="modal-body p-3 bg-slate-50">
+          <div class="grid grid-cols-2 gap-2">
+            <a href="{{ route('guru.dashboard') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="fas fa-chart-line text-purple-600 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">Dashboard</span>
+            </a>
+
+            <a href="{{ route('guru.bank-soal.index') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="fas fa-plus-circle text-purple-600 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">Input Soal</span>
+            </a>
+
+            <a href="{{ route('guru.list-soal.index') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="fas fa-list-alt text-amber-500 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">List Soal</span>
+            </a>
+
+            <a href="{{ route('guru.ujian.index') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="fas fa-file-signature text-indigo-600 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">Penugasan Ujian</span>
+            </a>
+
+            <a href="{{ route('guru.siswa') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="fas fa-user-graduate text-emerald-600 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">Siswa Bimbingan</span>
+            </a>
+
+            <a href="{{ route('guru.jadwal') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="far fa-calendar-alt text-blue-600 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">Jadwal Mengajar</span>
+            </a>
+
+            <a href="{{ route('guru.chat.index') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="fas fa-comments text-pink-600 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">Chat Siswa</span>
+            </a>
+
+            <a href="{{ route('guru.biodata') }}" class="p-3 bg-white rounded-xl shadow-xs border border-purple-100 d-flex flex-column align-items-center text-center text-decoration-none hover:bg-purple-50 transition-all">
+              <i class="fas fa-id-card text-teal-600 text-lg mb-1"></i>
+              <span class="text-xs font-weight-bold text-purple-950">Biodata Guru</span>
+            </a>
+          </div>
+
+          <hr class="my-3 border-slate-200">
+
+          <div class="d-flex align-items-center justify-content-between">
+            <a href="{{ route('pengaturan.index') }}" class="btn btn-sm btn-light border rounded-lg font-weight-bold text-xs text-purple-950">
+              <i class="fas fa-cog mr-1"></i> Pengaturan
+            </a>
+
+            <form action="{{ route('logout') }}" method="POST" class="m-0">
+              @csrf
+              <button type="submit" class="btn btn-sm btn-danger font-weight-bold rounded-lg text-xs">
+                <i class="fas fa-sign-out-alt mr-1"></i> Keluar
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </div>

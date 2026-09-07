@@ -329,7 +329,7 @@
                                                                 <i class="fab fa-whatsapp mr-1 text-sm align-middle"></i> <span class="align-middle">Hubungi</span>
                                                             </a>
                                                         @endif
-                                                        <a href="{{ route('admin.siswa.detail', $s->id) }}" class="btn btn-sm btn-brand px-3 py-1.5 rounded-xl text-xs" style="border-radius: 10px;">
+                                                        <a href="{{ route('guru.siswa.detail', $s->id) }}" class="btn btn-sm btn-brand px-3 py-1.5 rounded-xl text-xs" style="border-radius: 10px;">
                                                             <i class="fas fa-user-info mr-1 align-middle"></i> <span class="align-middle">Profil</span>
                                                         </a>
                                                     </div>

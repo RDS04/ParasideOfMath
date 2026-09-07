@@ -185,20 +185,16 @@
                     <div class="step-panel {{ $isTambahMode ? 'active' : '' }} space-y-5" data-step="2">
                         <div class="field" data-required="true">
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mata
-                                Pelajaran
-                                &amp; Jumlah Minimal Shift/Minggu<span class="text-amber-600 ml-1">*</span></label>
+                                Pelajaran Bimbingan (4x Pertemuan)<span class="text-amber-600 ml-1">*</span></label>
                             <div class="text-xs text-slate-400 mb-3">Pilih semua pelajaran yang ingin di les kan di PM.
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 @foreach($availableMapels as $mapel)
-                                    @php
-                                        $sesiDefault = $mapel->shift ?? 1;
-                                    @endphp
                                     <label class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
                                         <input type="checkbox" name="mapel[]"
-                                            value="{{ $mapel->nama_mapel }} {{ $sesiDefault }}x"
+                                            value="{{ $mapel->nama_mapel }}"
                                             class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-                                        <span>{{ $mapel->nama_mapel }} {{ $sesiDefault }}x</span>
+                                        <span>{{ $mapel->nama_mapel }} <span class="text-xs text-purple-600 font-semibold">(4x Sesi)</span></span>
                                     </label>
                                 @endforeach
                             </div>

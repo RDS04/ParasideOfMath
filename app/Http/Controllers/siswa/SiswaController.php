@@ -230,11 +230,7 @@ class SiswaController extends Controller
             $mapels = $request->input('mapel', []);
             if (is_array($mapels) && !empty($mapels)) {
                 foreach ($mapels as $m) {
-                    if (is_string($m) && preg_match('/(\d+)x/i', $m, $matches)) {
-                        $sesiPerMapel[] = (int) $matches[1];
-                    } else {
-                        $sesiPerMapel[] = $isTambahMode ? 1 : 4;
-                    }
+                    $sesiPerMapel[] = 4;
                 }
             }
         }
@@ -379,10 +375,13 @@ class SiswaController extends Controller
         $rekeningEwallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
         $paket            = $siswa->paket ?: \App\Models\PaketBelajar::first();
 
+        $pendingMapelStatus  = $biodata['pending_mapel_status'] ?? 'menunggu_jadwal_admin';
+        $pendingHariPerMapel = is_array($biodata['pending_hari_per_mapel'] ?? null) ? $biodata['pending_hari_per_mapel'] : [];
+
         return view('siswa.tambahPelajaran', compact(
             'siswa', 'mapels', 'sesiPerMapel', 'availableMapels',
             'rekeningBanks', 'rekeningEwallets', 'paket', 'isPending',
-            'activeMapels', 'activeSesiPerMapel'
+            'activeMapels', 'activeSesiPerMapel', 'pendingMapelStatus', 'pendingHariPerMapel'
         ));
     }
 
@@ -413,19 +412,21 @@ class SiswaController extends Controller
         $sesiPerMapel = [];
         $totalSesi = 0;
         foreach ($selectedMapel as $idx => $mName) {
-            $sVal = isset($sesiMapel[$idx]) ? (int)$sesiMapel[$idx] : (isset($sesiMapel[$mName]) ? (int)$sesiMapel[$mName] : 8);
-            if ($sVal <= 0) $sVal = 8;
+            $sVal = isset($sesiMapel[$idx]) ? (int)$sesiMapel[$idx] : (isset($sesiMapel[$mName]) ? (int)$sesiMapel[$mName] : 4);
+            if ($sVal <= 0) $sVal = 4;
             $sesiPerMapel[] = $sVal;
             $totalSesi += $sVal;
         }
 
-        $biodata['pending_sesi_per_mapel']  = $sesiPerMapel;
+        $biodata['pending_sesi_per_mapel']   = $sesiPerMapel;
         $biodata['pending_jumlah_pertemuan'] = $totalSesi;
+        $biodata['pending_mapel_status']     = 'menunggu_jadwal_admin';
+        $biodata['pending_hari_per_mapel']   = [];
 
         $siswa->biodata = $biodata;
         $siswa->save();
 
-        return redirect()->route('siswa.tambah-pelajaran')->with('success', 'Mata pelajaran berhasil disimpan & ditambahkan!');
+        return redirect()->route('siswa.tambah-pelajaran')->with('success', 'Mata pelajaran berhasil disimpan & ditambahkan! Menunggu Admin menentukan hari bimbingan.');
     }
 
     /**
@@ -570,21 +571,12 @@ class SiswaController extends Controller
         $sesiPerMapel = $request->input('sesi', []);
         if (empty($sesiPerMapel) && !empty($request->input('mapel', []))) {
             foreach ((array) $request->input('mapel', []) as $idx => $rm) {
-                if (is_string($rm) && preg_match('/(\d+)x$/i', trim($rm), $matches)) {
-                    $sesiPerMapel[$idx] = ((int) $matches[1]) * 4;
-                } else {
-                    $mNameClean = trim(preg_replace('/\s+\d+x$/i', '', $rm));
-                    $mObj = \App\Models\Mapel::where('nama_mapel', $mNameClean)->first();
-                    $shift = $mObj ? ($mObj->shift ?? 1) : 1;
-                    $sesiPerMapel[$idx] = $shift * 4;
-                }
+                $sesiPerMapel[$idx] = 4;
             }
         }
         if (empty($sesiPerMapel) && !empty($mapelJadwal)) {
             foreach ($mapelJadwal as $idx => $mName) {
-                $mObj = \App\Models\Mapel::where('nama_mapel', $mName)->first();
-                $shift = $mObj ? ($mObj->shift ?? 1) : 1;
-                $sesiPerMapel[$idx] = $shift * 4;
+                $sesiPerMapel[$idx] = 4;
             }
         }
 
@@ -595,8 +587,39 @@ class SiswaController extends Controller
             $mapelJadwal = $siswa->biodata['mapel_jadwal'];
         }
 
-        if (!is_array($mapelJadwal))  $mapelJadwal  = [];
-        if (!is_array($sesiPerMapel)) $sesiPerMapel = [];
+        if ($siswa->status === 'active') {
+            $biodata = $siswa->biodata ?? [];
+            $biodata['pending_mapel_jadwal']     = array_values($mapelJadwal);
+            $biodata['pending_sesi_per_mapel']   = array_values($sesiPerMapel);
+            $biodata['pending_jumlah_pertemuan'] = array_sum($sesiPerMapel) ?: 4;
+            $biodata['pending_mapel_status']     = 'menunggu_jadwal_admin';
+            $biodata['pending_hari_per_mapel']   = [];
+
+            $siswa->update(['biodata' => $biodata]);
+
+            // Kirim Notifikasi ke Admin
+            $title   = "Permintaan Tambah Mapel Baru";
+            $message = "Siswa " . $siswa->name . " mengajukan tambah mapel: " . implode(', ', $mapelJadwal) . ". Menunggu penentuan hari oleh Admin.";
+            $link    = route('admin.siswa.requests.index');
+
+            try {
+                \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                    'title'      => $title,
+                    'message'    => $message,
+                    'link'       => $link,
+                    'is_read'    => false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $firebaseService = new \App\Services\FirebaseService();
+                $firebaseService->sendToAdmins($title, $message, $link);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal mengirim notifikasi admin: " . $e->getMessage());
+            }
+
+            return redirect()->route('siswa.tambah-pelajaran')
+                ->with('success', 'Mata pelajaran tambahan berhasil diajukan! Menunggu Admin menentukan jadwal hari bimbingan.');
+        }
 
         $biodata = $siswa->biodata ?? [];
         $biodata['mapel_jadwal'] = array_values($mapelJadwal);
@@ -626,7 +649,7 @@ class SiswaController extends Controller
         $siswa->update([
             'paket_id'   => $paketId,
             'tipe_paket' => $detailString,
-            'status'     => $siswa->status === 'active' ? 'active' : 'pending',
+            'status'     => 'pending',
             'biodata'    => $biodata,
         ]);
 
@@ -643,11 +666,88 @@ class SiswaController extends Controller
         if (!$siswa) {
             return redirect()->route('login');
         }
-        if ($siswa->status === 'active') {
-            return redirect()->route('siswa.dashboard');
-        }
 
         $biodata = $siswa->biodata ?? [];
+
+        // ── Khusus Siswa Aktif yang Tambah Mapel ──
+        if ($siswa->status === 'active') {
+            $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
+            $pendingHari   = $biodata['pending_hari_per_mapel'] ?? [];
+            $pendingStatus = $biodata['pending_mapel_status'] ?? 'menunggu_jadwal_admin';
+
+            if (empty($pendingMapels)) {
+                return redirect()->route('siswa.tambah-pelajaran')->with('error', 'Tidak ada permintaan tambah pelajaran.');
+            }
+
+            if ($pendingStatus === 'menunggu_jadwal_admin') {
+                return redirect()->route('siswa.tambah-pelajaran')->with('error', 'Hari bimbingan belum ditentukan oleh Admin.');
+            }
+
+            $paket = $siswa->paket ?: PaketBelajar::first();
+            $harga = $this->extractPrice($siswa->tipe_paket, $paket ? $paket->harga_max : 450000);
+
+            $currentMonth = \Carbon\Carbon::now();
+            $startOfMonth = $currentMonth->copy()->startOfMonth();
+            $endOfMonth   = $currentMonth->copy()->endOfMonth();
+
+            $dayMap = [
+                'senin' => 1, 'selasa' => 2, 'rabu' => 3, 'kamis' => 4,
+                'jumat' => 5, 'sabtu' => 6, 'minggu' => 0
+            ];
+
+            $rincianMapel = [];
+            $totalSesiBulanIni = 0;
+
+            foreach ($pendingMapels as $idx => $namaMapel) {
+                $assignedDays = $pendingHari[$idx] ?? [];
+                if (!is_array($assignedDays)) {
+                    $assignedDays = [$assignedDays];
+                }
+                $assignedDaysClean = array_values(array_filter($assignedDays));
+
+                $countMapelInMonth = 0;
+                $period = \Carbon\CarbonPeriod::create($startOfMonth, $endOfMonth);
+
+                foreach ($period as $date) {
+                    $dayOfWeek = $date->dayOfWeek;
+                    foreach ($assignedDaysClean as $h) {
+                        $hLower = strtolower(trim($h));
+                        if (isset($dayMap[$hLower]) && $dayMap[$hLower] === $dayOfWeek) {
+                            $countMapelInMonth++;
+                        }
+                    }
+                }
+
+                if ($countMapelInMonth === 0) {
+                    $countMapelInMonth = 4;
+                }
+
+                $subtotalMapel = $harga * $countMapelInMonth;
+                $totalSesiBulanIni += $countMapelInMonth;
+
+                $rincianMapel[] = [
+                    'nama_mapel'  => $namaMapel,
+                    'hari_list'   => !empty($assignedDaysClean) ? implode(', ', $assignedDaysClean) : 'Belum diatur Admin',
+                    'jumlah_sesi' => $countMapelInMonth,
+                    'subtotal'    => $subtotalMapel,
+                ];
+            }
+
+            if ($totalSesiBulanIni === 0) {
+                $totalSesiBulanIni = 4;
+            }
+            $totalBiayaBulanIni = $harga * $totalSesiBulanIni;
+
+            $banks    = \App\Models\Rekening::where('tipe', 'bank')->get();
+            $ewallets = \App\Models\Rekening::where('tipe', 'ewallet')->get();
+
+            return view('siswa.bukti_bayar', compact(
+                'siswa', 'paket', 'harga', 'rincianMapel',
+                'totalSesiBulanIni', 'totalBiayaBulanIni',
+                'banks', 'ewallets', 'currentMonth'
+            ));
+        }
+
         $hariPerMapel = $biodata['hari_per_mapel'] ?? [];
 
         // Cek apakah Admin sudah menentukan hari
@@ -780,6 +880,48 @@ class SiswaController extends Controller
 
         $biodata['payment_method'] = $paymentMethod;
 
+        if ($siswa->status === 'active') {
+            $biodata['pending_mapel_status'] = 'pending_approval_admin';
+            $siswa->bukti_transfer = $buktiPath;
+            $siswa->biodata = $biodata;
+            $siswa->save();
+
+            $pendingMapelsStr = implode(', ', $biodata['pending_mapel_jadwal'] ?? []);
+
+            RiwayatPembayaran::create([
+                'siswa_id'            => $siswa->id,
+                'paket_id'            => $paketId,
+                'tipe_paket_snapshot' => 'Tambah Mapel: ' . $pendingMapelsStr,
+                'bukti_transfer'      => $buktiPath,
+                'payment_method'      => $paymentMethod,
+                'jumlah_sesi'         => $totalSesi,
+                'total_harga'         => $totalHarga,
+                'status'              => 'under_review',
+            ]);
+
+            $title   = "Bukti Transfer Tambah Mapel Siswa";
+            $message = "Siswa " . $siswa->name . " telah mengunggah bukti bayar untuk tambah mapel (" . $pendingMapelsStr . ") via " . strtoupper($paymentMethod) . ".";
+            $link    = route('admin.siswa.requests.index');
+
+            try {
+                \Illuminate\Support\Facades\DB::table('notifications')->insert([
+                    'title'      => $title,
+                    'message'    => $message,
+                    'link'       => $link,
+                    'is_read'    => false,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $firebaseService = new \App\Services\FirebaseService();
+                $firebaseService->sendToAdmins($title, $message, $link);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal mengirim FCM: " . $e->getMessage());
+            }
+
+            return redirect()->route('siswa.tambah-pelajaran')
+                ->with('success', 'Bukti pembayaran bimbingan tambahan berhasil dikirim! Menunggu persetujuan Admin.');
+        }
+
         $siswa->update([
             'bukti_transfer' => $buktiPath,
             'status'         => 'under_review',
@@ -826,16 +968,24 @@ class SiswaController extends Controller
      */
     private function extractPrice($str, $default)
     {
-        if (empty($str))
+        if (empty($str)) {
             return $default;
+        }
         if (preg_match('/(\d+)\s*K/i', $str, $matches)) {
-            return (int) $matches[1] * 1000;
+            $val = (int) $matches[1] * 1000;
+            if ($val >= 1000) return $val;
         }
-        if (preg_match('/Rp\s*([\d\.]+)/i', $str, $matches)) {
-            return (int) str_replace('.', '', $matches[1]);
+        if (preg_match('/Rp\s*([\d\.\,]+)/i', $str, $matches)) {
+            $val = (int) preg_replace('/[^\d]/', '', $matches[1]);
+            if ($val >= 1000) return $val;
         }
-        if (preg_match('/(\d[\d\.]*)/', $str, $matches)) {
-            return (int) str_replace('.', '', $matches[1]);
+        if (preg_match_all('/(\d[\d\.]*)/', $str, $matches)) {
+            foreach ($matches[1] as $m) {
+                $clean = (int) str_replace(['.', ','], '', $m);
+                if ($clean >= 1000) {
+                    return $clean;
+                }
+            }
         }
         return $default;
     }
@@ -1415,6 +1565,9 @@ class SiswaController extends Controller
 
         $categories = $categoriesQuery->get();
 
+        // Ambil seluruh kategori soal sesuai jenjang siswa untuk PDF latihan soal
+        $pdfCategories = KategoriSoal::where('jenjang', $jenjang)->get();
+
         // Riwayat Ujian Siswa
         $riwayatUjian = HasilUjian::where('siswa_id', $siswa->id)
             ->with('kategori')
@@ -1433,6 +1586,7 @@ class SiswaController extends Controller
             'sub_kategori',
             'allSubKategori',
             'categories',
+            'pdfCategories',
             'riwayatUjian',
             'assignedExams',
             'siswaMapelList',

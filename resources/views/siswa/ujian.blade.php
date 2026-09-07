@@ -14,6 +14,19 @@
                     <p class="text-sm text-slate-500 mb-0 mt-1">
                         Uji pemahaman materi Anda melalui paket-paket soal latihan yang tersedia.
                     </p>
+                    <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+                        <a class="btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-white btn-nav-mode active" 
+                           id="btn-mode-paket" data-toggle="pill" href="#content-soal-web" role="tab" 
+                           aria-controls="content-soal-web" aria-selected="true"
+                           style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); border: none;">
+                            <i class="fas fa-layer-group mr-1.5 text-amber-300"></i> Daftar Paket Ujian
+                        </a>
+                        <a class="btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-purple-900 bg-white border border-purple-200 hover:bg-purple-50 btn-nav-mode" 
+                           id="btn-mode-pdf" data-toggle="pill" href="#content-modul-pdf-siswa" role="tab"
+                           aria-controls="content-modul-pdf-siswa" aria-selected="false">
+                            <i class="fas fa-file-pdf text-rose-500 mr-1.5"></i> Latihan Soal (PDF Jenjang {{ $jenjang }})
+                        </a>
+                    </div>
                 </div>
                 <div class="col-sm-5">
                     <ol class="breadcrumb float-sm-right text-sm bg-transparent p-0 m-0 mt-2 mt-sm-0">
@@ -195,7 +208,7 @@
                                         @php $hasAnyDocFilesSiswa = false; @endphp
 
                                         <div class="d-flex flex-column doc-group-list">
-                                            @foreach ($categories as $catMod)
+                                            @foreach (($pdfCategories ?? $categories) as $catMod)
                                                 @php
                                                     $gModDocFilesSiswa = glob(public_path("uploads/bank_soal_docs/doc_{$catMod->id}_*.*")) ?: [];
                                                 @endphp
@@ -792,6 +805,43 @@
                     }
                 });
             });
+
+            // Sync active state for header mode buttons
+            const btnPaket = document.getElementById('btn-mode-paket');
+            const btnPdf = document.getElementById('btn-mode-pdf');
+            const tabPaket = document.getElementById('tab-soal-web');
+            const tabPdf = document.getElementById('tab-modul-pdf-siswa');
+
+            function activateMode(mode) {
+                if (mode === 'paket') {
+                    if (btnPaket) {
+                        btnPaket.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-white btn-nav-mode active';
+                        btnPaket.style.background = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
+                        btnPaket.style.border = 'none';
+                    }
+                    if (btnPdf) {
+                        btnPdf.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-purple-900 bg-white border border-purple-200 hover:bg-purple-50 btn-nav-mode';
+                        btnPdf.style.background = '';
+                    }
+                    if (tabPaket && typeof $(tabPaket).tab === 'function') $(tabPaket).tab('show');
+                } else {
+                    if (btnPdf) {
+                        btnPdf.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-white btn-nav-mode active';
+                        btnPdf.style.background = 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)';
+                        btnPdf.style.border = 'none';
+                    }
+                    if (btnPaket) {
+                        btnPaket.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-purple-900 bg-white border border-purple-200 hover:bg-purple-50 btn-nav-mode';
+                        btnPaket.style.background = '';
+                    }
+                    if (tabPdf && typeof $(tabPdf).tab === 'function') $(tabPdf).tab('show');
+                }
+            }
+
+            if (btnPaket) btnPaket.addEventListener('click', function(e) { e.preventDefault(); activateMode('paket'); });
+            if (btnPdf) btnPdf.addEventListener('click', function(e) { e.preventDefault(); activateMode('pdf'); });
+            if (tabPaket && window.jQuery) $(tabPaket).on('shown.bs.tab', function() { activateMode('paket'); });
+            if (tabPdf && window.jQuery) $(tabPdf).on('shown.bs.tab', function() { activateMode('pdf'); });
         });
     </script>
 @endsection

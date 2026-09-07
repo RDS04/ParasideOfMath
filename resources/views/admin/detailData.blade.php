@@ -90,10 +90,8 @@
                 $ayahPekerjaan = $bio['ayah_pekerjaan'] ?? '-';
                 $ayahInstagram = $bio['ayah_instagram'] ?? '-';
 
-                $hariPilihan = $bio['hari_pertemuan'] ?? [];
-
-                // Fallback baru: gabungkan hari dari semua mapel (hari_per_mapel)
-                if (empty($hariPilihan) && !empty($bio['hari_per_mapel']) && is_array($bio['hari_per_mapel'])) {
+                $hariPilihan = [];
+                if (!empty($bio['hari_per_mapel']) && is_array($bio['hari_per_mapel'])) {
                     foreach ($bio['hari_per_mapel'] as $hariArr) {
                         if (is_array($hariArr)) {
                             foreach ($hariArr as $hari) {
@@ -102,6 +100,9 @@
                         }
                     }
                     $hariPilihan = array_values(array_unique($hariPilihan));
+                }
+                if (empty($hariPilihan) && !empty($bio['hari_pertemuan'])) {
+                    $hariPilihan = (array)$bio['hari_pertemuan'];
                 }
 
                 if (empty($hariPilihan) && $student->tipe_paket) {
@@ -178,7 +179,33 @@
                                     @endif
                                     <tr>
                                         <td class="text-muted py-2">Detail Pilihan</td>
-                                        <td class="text-purple-900 font-weight-bold py-2 text-xs">{{ $student->tipe_paket ?? '-' }}</td>
+                                        <td class="py-2">
+                                            <div class="d-flex align-items-start justify-content-between">
+                                                <div class="text-purple-900 font-weight-bold text-xs mr-1">
+                                                    @php
+                                                        $activeMapelsList = $bio['mapel_jadwal'] ?? [];
+                                                        $activeHariMapel  = $bio['hari_per_mapel'] ?? [];
+                                                    @endphp
+                                                    @if(!empty($activeMapelsList))
+                                                        @foreach($activeMapelsList as $aIdx => $aMapel)
+                                                            @php
+                                                                $hArr = $activeHariMapel[$aIdx] ?? [];
+                                                                $hStr = !empty($hArr) ? implode(' & ', (array)$hArr) : 'Belum diatur';
+                                                            @endphp
+                                                            <div class="mb-1 d-flex align-items-center gap-1">
+                                                                <span class="badge bg-purple-100 text-purple-800 text-[10px] font-bold px-1.5 py-0.5 rounded">{{ $aMapel }}</span>
+                                                                <span class="text-xs text-slate-700 font-semibold">Hari: <strong class="text-purple-900">{{ $hStr }}</strong></span>
+                                                            </div>
+                                                        @endforeach
+                                                    @else
+                                                        {{ $student->tipe_paket ?? '-' }}
+                                                    @endif
+                                                </div>
+                                                <button type="button" class="btn btn-xs btn-outline-primary rounded-lg px-2 py-0.5 font-weight-bold text-[10px] shrink-0" data-toggle="modal" data-target="#kelolaMapelSiswaModal" style="border-color: #cbd5e1; color: #475569;">
+                                                    <i class="fas fa-book-open mr-0.5 text-purple-600"></i> Kelola Mapel
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                     <tr class="border-top border-light">
                                         <td class="text-muted py-2">Jam Bimbel</td>
@@ -303,6 +330,100 @@
                             </table>
                         </div>
                     </div>
+
+                    @php
+                        $pendingMapelList = $bio['pending_mapel_jadwal'] ?? [];
+                        $pendingSesiList  = $bio['pending_sesi_per_mapel'] ?? [];
+                        $pendingHariList  = $bio['pending_hari_per_mapel'] ?? [];
+                        $pendingMapelStat = $bio['pending_mapel_status'] ?? 'menunggu_jadwal_admin';
+                        $allDaysList      = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                    @endphp
+
+                    @if (!empty($pendingMapelList))
+                        <div class="card shadow-sm border-amber-200 rounded-2xl overflow-hidden mb-4 bg-amber-50/30" id="request-tambah-mapel">
+                            <div class="card-header bg-gradient-to-r from-amber-500 to-purple-800 text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                                <h3 class="card-title font-weight-bold text-white mb-0 text-sm d-flex align-items-center">
+                                    <i class="fas fa-plus-circle text-amber-300 mr-2"></i> Permintaan Tambah Mapel Siswa ({{ count($pendingMapelList) }})
+                                </h3>
+                                @if ($pendingMapelStat === 'menunggu_jadwal_admin')
+                                    <span class="badge bg-amber-300 text-purple-950 font-extrabold px-2.5 py-1 rounded-full text-xxs">
+                                        <i class="fas fa-clock mr-1"></i> Perlu Atur Hari
+                                    </span>
+                                @elseif ($pendingMapelStat === 'menunggu_pembayaran_siswa')
+                                    <span class="badge bg-blue-400 text-white font-extrabold px-2.5 py-1 rounded-full text-xxs">
+                                        <i class="fas fa-hourglass-half mr-1"></i> Menunggu Bayar Siswa
+                                    </span>
+                                @elseif ($pendingMapelStat === 'pending_approval_admin')
+                                    <span class="badge bg-emerald-400 text-purple-950 font-extrabold px-2.5 py-1 rounded-full text-xxs">
+                                        <i class="fas fa-check-double mr-1"></i> Perlu Persetujuan Pembayaran
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="card-body p-4 bg-white">
+                                <form action="{{ route('admin.siswa.set-jadwal-tambah-mapel', $student->id) }}" method="POST">
+                                    @csrf
+                                    <div class="space-y-4 mb-3">
+                                        @foreach ($pendingMapelList as $pIdx => $pName)
+                                            @php
+                                                $pSesi = $pendingSesiList[$pIdx] ?? 4;
+                                                $selectedHari = $pendingHariList[$pIdx] ?? [];
+                                            @endphp
+                                            <div class="p-3 bg-purple-50/50 rounded-xl border border-purple-100 mb-3">
+                                                <div class="d-flex justify-between align-items-center mb-2">
+                                                    <h6 class="font-weight-bold text-purple-950 mb-0 text-sm">
+                                                        <i class="fas fa-book text-purple-600 mr-1.5"></i> {{ $pName }}
+                                                    </h6>
+                                                    <span class="badge bg-purple-200 text-purple-900 font-bold px-2 py-0.5 rounded text-xxs">
+                                                        {{ $pSesi }} Sesi
+                                                    </span>
+                                                </div>
+
+                                                <label class="text-xxs font-bold text-slate-500 uppercase tracking-wider mb-1.5 d-block">
+                                                    Pilih Hari Bimbingan Mapel Ini:
+                                                </label>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach ($allDaysList as $dayName)
+                                                        @php
+                                                            $isChecked = in_array($dayName, (array)$selectedHari);
+                                                        @endphp
+                                                        <label class="d-inline-flex align-items-center bg-white px-2.5 py-1 rounded-lg border text-xs cursor-pointer hover:border-purple-400 transition-all m-0 font-semibold {{ $isChecked ? 'border-purple-500 text-purple-950 bg-purple-50' : 'border-slate-200 text-slate-600' }}">
+                                                            <input type="checkbox" name="hari_per_mapel[{{ $pIdx }}][]" value="{{ $dayName }}" class="mr-1.5 accent-purple-600" {{ $isChecked ? 'checked' : '' }}>
+                                                            {{ $dayName }}
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-2 border-top">
+                                        <button type="submit" class="btn btn-sm btn-primary font-weight-bold rounded-xl px-3.5 py-2 text-xs shadow-xs" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none;">
+                                            <i class="fas fa-save mr-1.5 text-amber-300"></i> Simpan Hari &amp; Minta Pembayaran Siswa
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div class="mt-3 pt-3 border-top">
+                                    @if ($pendingMapelStat === 'pending_approval_admin' || !empty($student->bukti_transfer))
+                                        <form action="{{ route('admin.siswa.requests.approve', $student->id) }}" method="POST" class="m-0" onsubmit="return confirm('Setujui pembayaran & aktifkan mapel baru untuk {{ $student->name }}?')">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-success font-weight-bold rounded-xl px-3.5 py-2 text-xs shadow-sm w-100">
+                                                <i class="fas fa-check-circle mr-1.5"></i> Setujui Pembayaran &amp; Aktifkan Mapel
+                                            </button>
+                                        </form>
+                                    @elseif ($pendingMapelStat === 'menunggu_jadwal_admin')
+                                        <button type="button" class="btn btn-sm btn-secondary font-weight-bold rounded-xl px-3.5 py-2 text-xs w-100 opacity-60" disabled title="Simpan hari bimbingan terlebih dahulu di atas">
+                                            <i class="fas fa-lock mr-1.5"></i> Approve (Simpan Hari Dulu)
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-sm btn-secondary font-weight-bold rounded-xl px-3.5 py-2 text-xs w-100 opacity-60" disabled title="Menunggu siswa mengirimkan bukti pembayaran via Bukti Bayar">
+                                            <i class="fas fa-lock mr-1.5"></i> Approve (Nunggu Bayar Siswa)
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Catatan Bon / Biaya Extra Card -->
                     <div class="card shadow-sm border-light rounded-2xl overflow-hidden mb-4">
@@ -913,6 +1034,120 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Kelola Mata Pelajaran Siswa -->
+    <div class="modal fade" id="kelolaMapelSiswaModal" tabindex="-1" role="dialog" aria-labelledby="kelolaMapelSiswaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content border-0 shadow" style="border-radius: 18px; overflow: hidden;">
+                <form action="{{ route('admin.siswa.update-mapel', $student->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header bg-purple-950 text-white border-0 py-3" style="background-color: #2e1065;">
+                        <h5 class="modal-title font-weight-bold text-md text-white" id="kelolaMapelSiswaModalLabel" style="color: #fff;">
+                            <i class="fas fa-book-open mr-2"></i>Kelola Mata Pelajaran Siswa
+                        </h5>
+                        <button type="button" class="close text-white border-0 bg-transparent" data-dismiss="modal" aria-label="Close" style="font-size: 1.5rem; outline: none; color: #fff;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 text-left">
+                        @php
+                            $activeMapelList = $bio['mapel_jadwal'] ?? [];
+                            if (empty($activeMapelList) && $student->tipe_paket) {
+                                if (preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+                                    $activeMapelList = array_map('trim', explode(',', $matches[1]));
+                                }
+                            }
+                            $allMasterMapels = \App\Models\Mapel::orderBy('nama_mapel')->pluck('nama_mapel')->unique();
+                        @endphp
+
+                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 mb-4" style="background-color:#fffbeb; border-color:#fde68a;">
+                            <p class="text-xs mb-0 text-amber-900 font-weight-semibold">
+                                <i class="fas fa-exclamation-triangle mr-1 text-amber-600"></i>
+                                <strong>Catatan Kelola Mapel:</strong> Anda dapat menambah atau menghapus mata pelajaran siswa (misal jika siswa menambah/menghentikan mapel bimbingan tertentu).
+                                <br><span class="text-amber-800 font-italic">Perhatian: Menghapus mapel akan otomatis membersihkan penugasan guru pendamping pada mapel tersebut (mencegah bug guru nempel).</span>
+                            </p>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="font-weight-bold text-xs text-purple-950 uppercase tracking-wider mb-2">Daftar Mata Pelajaran Aktif Siswa:</label>
+                            <div id="mapelListContainer" class="space-y-2">
+                                @if(!empty($activeMapelList))
+                                    @foreach($activeMapelList as $mIdx => $mName)
+                                        <div class="d-flex align-items-center gap-2 mb-2 mapel-row-item">
+                                            <input type="text" name="mapel_jadwal[]" class="form-control form-control-sm rounded-lg font-weight-semibold text-purple-950" value="{{ $mName }}" required style="font-size:12px;">
+                                            <button type="button" class="btn btn-xs btn-outline-danger rounded-lg px-2 py-1 font-weight-bold btn-remove-mapel" onclick="this.closest('.mapel-row-item').remove()" title="Hapus Mapel Ini">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <p class="text-xs text-muted font-italic mb-2 no-mapel-text">Belum ada mata pelajaran aktif.</p>
+                                @endif
+                            </div>
+                        </div>
+
+                        <hr class="my-3 border-light">
+
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold text-xs text-purple-950 uppercase tracking-wider mb-1">Pilih / Tambah Mata Pelajaran Baru:</label>
+                            <div class="input-group input-group-sm">
+                                <select id="selectMasterMapel" class="form-control form-control-sm rounded-l-lg" style="font-size:12px;">
+                                    <option value="">-- Pilih dari Master Mapel --</option>
+                                    @foreach($allMasterMapels as $mOption)
+                                        <option value="{{ $mOption }}">{{ $mOption }}</option>
+                                    @endforeach
+                                </select>
+                                <input type="text" id="customMapelInput" class="form-control form-control-sm" placeholder="Atau ketik nama mapel kustom..." style="font-size:12px;">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-sm btn-purple text-white font-weight-bold px-3" id="btnAddMapelToContainer" style="background-color: #6b21a8;">
+                                        <i class="fas fa-plus mr-1"></i> Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light p-3 d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold px-3" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-sm btn-primary rounded-lg font-weight-bold px-3" style="background-color: #7c3aed; border-color: #7c3aed;">Simpan Perubahan Mapel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnAdd = document.getElementById('btnAddMapelToContainer');
+            const selectMaster = document.getElementById('selectMasterMapel');
+            const inputCustom = document.getElementById('customMapelInput');
+            const container = document.getElementById('mapelListContainer');
+
+            if (btnAdd && container) {
+                btnAdd.addEventListener('click', function () {
+                    let val = selectMaster ? selectMaster.value.trim() : '';
+                    if (!val && inputCustom) {
+                        val = inputCustom.value.trim();
+                    }
+                    if (val) {
+                        const noText = container.querySelector('.no-mapel-text');
+                        if (noText) noText.remove();
+
+                        const div = document.createElement('div');
+                        div.className = 'd-flex align-items-center gap-2 mb-2 mapel-row-item';
+                        div.innerHTML = `
+                            <input type="text" name="mapel_jadwal[]" class="form-control form-control-sm rounded-lg font-weight-semibold text-purple-950" value="${val}" required style="font-size:12px;">
+                            <button type="button" class="btn btn-xs btn-outline-danger rounded-lg px-2 py-1 font-weight-bold btn-remove-mapel" onclick="this.closest('.mapel-row-item').remove()" title="Hapus Mapel Ini">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        `;
+                        container.appendChild(div);
+                        if (selectMaster) selectMaster.value = '';
+                        if (inputCustom) inputCustom.value = '';
+                    }
+                });
+            }
+        });
+    </script>
 
     <!-- Modal Edit Jam Bimbel Per Mapel -->
     <div class="modal fade" id="editJamBimbelModal" tabindex="-1" role="dialog" aria-labelledby="editJamBimbelModalLabel" aria-hidden="true">

@@ -93,6 +93,78 @@ class DatabaseSeeder extends Seeder
         $firstPaketId = \App\Models\PaketBelajar::first()?->id;
 
         // 3. Seed / Update Akun Dummy Siswa (Siswa table) untuk kemudahan Testing Lokal
+        $dummySiswas = [
+            [
+                'name' => 'Siswa Test',
+                'email' => 'siswa@example.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'paket_id' => $firstPaketId,
+                'tipe_paket' => 'Mapel: Matematika | Hari: Senin,Rabu | Sesi: 6x | Guru: Kak Ika',
+                'whatsapp' => '081234567890',
+                'sekolah' => 'SMA Negeri 1 Jakarta',
+                'status' => 'active',
+                'biodata' => [
+                    'nisn' => '1234567890',
+                    'kelas' => '11 IPA',
+                    'alamat' => 'Jl. Merdeka No. 10',
+                    'nama_orang_tua' => 'Budi Pendamping',
+                    'no_hp_orang_tua' => '081298765432',
+                    'mapel_jadwal' => ['Matematika'],
+                    'sesi_per_mapel' => [6],
+                    'hari_per_mapel' => [['Senin', 'Rabu']],
+                    'jam_per_mapel' => [['jam_mulai' => '09:00', 'jam_selesai' => '10:30']],
+                    'tutor_per_mapel' => ['Matematika' => 'Kak Ika'],
+                ],
+            ],
+            [
+                'name' => 'Budi Santoso',
+                'email' => 'budi@gmail.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'paket_id' => $firstPaketId,
+                'tipe_paket' => 'Mapel: Matematika | Hari: Selasa,Kamis | Sesi: 6x | Guru: Kak Angel',
+                'whatsapp' => '081987654321',
+                'sekolah' => 'SMP Negeri 5 Surabaya',
+                'status' => 'active',
+                'biodata' => [
+                    'nisn' => '0987654321',
+                    'kelas' => '9 SMP',
+                    'alamat' => 'Jl. Pemuda No. 12',
+                    'nama_orang_tua' => 'Santoso',
+                    'no_hp_orang_tua' => '081987654321',
+                    'mapel_jadwal' => ['Matematika'],
+                    'sesi_per_mapel' => [6],
+                    'hari_per_mapel' => [['Selasa', 'Kamis']],
+                    'jam_per_mapel' => [['jam_mulai' => '14:00', 'jam_selesai' => '15:30']],
+                    'tutor_per_mapel' => ['Matematika' => 'Kak Angel'],
+                ],
+            ],
+            [
+                'name' => 'Siti Aminah',
+                'email' => 'siti@gmail.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'paket_id' => $firstPaketId,
+                'tipe_paket' => 'Mapel: Matematika',
+                'whatsapp' => '081345678901',
+                'sekolah' => 'SMA Negeri 2 Bandung',
+                'status' => 'under_review',
+                'bukti_transfer' => 'dummy_bukti.jpg',
+            ],
+            [
+                'name' => 'Siswa Dummy',
+                'email' => 'siswa@gmail.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+                'whatsapp' => '081122334455',
+                'sekolah' => 'SMA Negeri 1 Jakarta',
+                'status' => 'pending',
+            ],
+        ];
+
+        foreach ($dummySiswas as $siswaData) {
+            \App\Models\Siswa::updateOrCreate(
+                ['email' => $siswaData['email']],
+                $siswaData
+            );
+        }
 
         if (\App\Models\Rekening::count() == 0) {
             \App\Models\Rekening::create([

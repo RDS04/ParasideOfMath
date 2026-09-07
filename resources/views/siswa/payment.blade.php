@@ -213,7 +213,7 @@
                                 <span class="block font-bold text-slate-700 text-xs uppercase tracking-wider mb-2">Jadwal Belajar per Mapel</span>
                                 @foreach($mapelJadwal as $idx => $namaMapel)
                                     @php
-                                        $sesiIdx  = !empty($sesiPerMapel[$idx]) ? $sesiPerMapel[$idx] : 1;
+                                        $sesiIdx  = !empty($sesiPerMapel[$idx]) ? $sesiPerMapel[$idx] : 4;
                                         $hariListMapel = $hariPerMapel[$idx] ?? [];
                                         $hariDisplay = !empty($hariListMapel) ? implode(' & ', array_filter($hariListMapel)) : '-';
                                         $tgl      = $tanggalArr[$idx] ?? null;

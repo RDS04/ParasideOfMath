@@ -31,9 +31,15 @@
                 <a href="{{ route('admin.guru.daftar.index') }}" class="btn btn-sm btn-light border rounded-lg font-weight-bold text-purple-950 px-3">
                     <i class="fas fa-arrow-left mr-1.5"></i> Kembali ke Daftar Guru
                 </a>
-                <button type="button" class="btn btn-sm btn-danger font-weight-bold px-3 py-1.5 rounded-lg shadow-sm" data-toggle="modal" data-target="#modalHapusGuru">
-                    <i class="fas fa-trash-alt mr-1.5"></i> Hapus Akun Guru
-                </button>
+                @if(strtolower($guru->status ?? '') === 'nonaktif')
+                    <button type="button" class="btn btn-sm btn-success font-weight-bold px-3 py-1.5 rounded-lg shadow-sm" data-toggle="modal" data-target="#modalHapusGuru">
+                        <i class="fas fa-check-circle mr-1.5"></i> Aktifkan Akun Guru
+                    </button>
+                @else
+                    <button type="button" class="btn btn-sm btn-danger font-weight-bold px-3 py-1.5 rounded-lg shadow-sm" data-toggle="modal" data-target="#modalHapusGuru">
+                        <i class="fas fa-ban mr-1.5"></i> Nonaktifkan Akun Guru
+                    </button>
+                @endif
             </div>
 
             <!-- Alert success -->
@@ -158,9 +164,15 @@
                                 </div>
 
                                 <div class="mt-4 pt-3 border-top text-center">
-                                    <button type="button" class="btn btn-xs btn-outline-danger btn-block font-weight-bold py-2 rounded-xl" data-toggle="modal" data-target="#modalHapusGuru">
-                                        <i class="fas fa-trash-alt mr-1.5"></i> Hapus Akun Guru Ini
-                                    </button>
+                                    @if(strtolower($guru->status ?? '') === 'nonaktif')
+                                        <button type="button" class="btn btn-xs btn-outline-success btn-block font-weight-bold py-2 rounded-xl" data-toggle="modal" data-target="#modalHapusGuru">
+                                            <i class="fas fa-check-circle mr-1.5"></i> Aktifkan Akun Guru Ini
+                                        </button>
+                                    @else
+                                        <button type="button" class="btn btn-xs btn-outline-danger btn-block font-weight-bold py-2 rounded-xl" data-toggle="modal" data-target="#modalHapusGuru">
+                                            <i class="fas fa-ban mr-1.5"></i> Nonaktifkan Akun Guru Ini
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -391,26 +403,34 @@
         </div>
     </section>
 
-    <!-- Modal Confirm Hapus Guru -->
+    <!-- Modal Confirm Toggle Status Guru -->
     <div class="modal fade" id="modalHapusGuru" tabindex="-1" role="dialog" aria-labelledby="modalHapusGuruLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content border-0 shadow-lg rounded-2xl overflow-hidden" style="border-radius: 16px;">
-                <div class="modal-header bg-danger text-white py-3 px-4" style="background-color: #dc2626 !important;">
+                <div class="modal-header {{ strtolower($guru->status ?? '') === 'nonaktif' ? 'bg-success' : 'bg-danger' }} text-white py-3 px-4" style="background-color: {{ strtolower($guru->status ?? '') === 'nonaktif' ? '#059669' : '#dc2626' }} !important;">
                     <h5 class="modal-title font-bold text-base d-flex align-items-center text-white" id="modalHapusGuruLabel">
-                        <i class="fas fa-exclamation-triangle mr-2"></i> Konfirmasi Hapus Akun Guru
+                        <i class="fas {{ strtolower($guru->status ?? '') === 'nonaktif' ? 'fa-check-circle' : 'fa-exclamation-triangle' }} mr-2"></i>
+                        {{ strtolower($guru->status ?? '') === 'nonaktif' ? 'Konfirmasi Aktifkan Akun Guru' : 'Konfirmasi Nonaktifkan Akun Guru' }}
                     </h5>
                     <button type="button" class="close text-white opacity-80 hover:opacity-100" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body p-4 bg-white text-center">
-                    <div class="rounded-circle bg-rose-100 text-rose-600 p-3 mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: #ffe4e6; color: #e11d48;">
-                        <i class="fas fa-user-slash fa-2x"></i>
+                    <div class="rounded-circle p-3 mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: {{ strtolower($guru->status ?? '') === 'nonaktif' ? '#d1fae5' : '#ffe4e6' }}; color: {{ strtolower($guru->status ?? '') === 'nonaktif' ? '#059669' : '#e11d48' }};">
+                        <i class="fas {{ strtolower($guru->status ?? '') === 'nonaktif' ? 'fa-user-check' : 'fa-user-slash' }} fa-2x"></i>
                     </div>
-                    <h5 class="font-weight-bold text-purple-950 mb-2">Hapus Akun Pengajar?</h5>
+                    <h5 class="font-weight-bold text-purple-950 mb-2">
+                        {{ strtolower($guru->status ?? '') === 'nonaktif' ? 'Aktifkan Akun Pengajar?' : 'Nonaktifkan Akun Pengajar?' }}
+                    </h5>
                     <p class="text-sm text-muted mb-0">
-                        Apakah Anda yakin ingin menghapus akun guru <strong>{{ $guru->user->name ?? 'Pengajar' }}</strong> secara permanen?
-                        Tindakan ini tidak dapat dibatalkan dan seluruh data profil pengajar ini akan dihapus dari sistem.
+                        @if(strtolower($guru->status ?? '') === 'nonaktif')
+                            Apakah Anda yakin ingin mengaktifkan kembali akun guru <strong>{{ $guru->user->name ?? 'Pengajar' }}</strong>?
+                            Pengajar akan dapat kembali mengakses dashboard dan membimbing siswa.
+                        @else
+                            Apakah Anda yakin ingin menonaktifkan akun guru <strong>{{ $guru->user->name ?? 'Pengajar' }}</strong>?
+                            Pengajar tidak akan dapat mengakses dashboard hingga diaktifkan kembali oleh Admin.
+                        @endif
                     </p>
                 </div>
                 <div class="modal-footer bg-slate-50 py-2.5 px-4 border-top d-flex justify-content-between">
@@ -418,9 +438,15 @@
                     <form action="{{ route('admin.guru.delete', $guru->id) }}" method="POST" class="m-0">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-sm btn-danger font-weight-bold rounded-lg px-4 text-white">
-                            <i class="fas fa-trash-alt mr-1.5"></i> Ya, Hapus Akun
-                        </button>
+                        @if(strtolower($guru->status ?? '') === 'nonaktif')
+                            <button type="submit" class="btn btn-sm btn-success font-weight-bold rounded-lg px-4 text-white">
+                                <i class="fas fa-check mr-1.5"></i> Ya, Aktifkan Akun
+                            </button>
+                        @else
+                            <button type="submit" class="btn btn-sm btn-danger font-weight-bold rounded-lg px-4 text-white">
+                                <i class="fas fa-ban mr-1.5"></i> Ya, Nonaktifkan Akun
+                            </button>
+                        @endif
                     </form>
                 </div>
             </div>

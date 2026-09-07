@@ -48,24 +48,61 @@ class AdminController extends Controller
      */
     private function getRevenueChartData(string $filter, int $year): array
     {
-        $paymentsQuery = Siswa::with('paket')
-            ->whereNotNull('bukti_transfer')
-            ->where('bukti_transfer', '!=', '')
-            ->where('status', 'active');
+        // 1. Fetch approved transactions from RiwayatPembayaran
+        $riwayatQuery = RiwayatPembayaran::with(['siswa.paket'])
+            ->where('status', 'approved');
 
         if ($filter === 'monthly') {
-            $paymentsQuery->whereYear('updated_at', $year);
+            $riwayatQuery->whereYear('created_at', $year);
         }
 
-        $payments = $paymentsQuery->get();
+        $riwayatPayments = $riwayatQuery->get();
 
-        $availableYears = Siswa::whereNotNull('bukti_transfer')
-            ->where('bukti_transfer', '!=', '')
-            ->where('status', 'active')
-            ->selectRaw('YEAR(updated_at) as year')
+        // Fallback: If no approved records in RiwayatPembayaran, check active Siswa with initial registration
+        if ($riwayatPayments->isEmpty()) {
+            $initialSiswaQuery = Siswa::with('paket')
+                ->where('status', 'active');
+            if ($filter === 'monthly') {
+                $initialSiswaQuery->whereYear('created_at', $year);
+            }
+            $activeSiswas = $initialSiswaQuery->get();
+
+            foreach ($activeSiswas as $s) {
+                $p = $s->paket;
+                $bio = $s->biodata ?? [];
+                $jSesi = $bio['jumlah_pertemuan'] ?? 4;
+                $det = '';
+                if ($s->tipe_paket && $p) {
+                    if (str_contains($s->tipe_paket, $p->detail_1)) $det = $p->detail_1;
+                    elseif (str_contains($s->tipe_paket, $p->detail_2)) $det = $p->detail_2;
+                    elseif (str_contains($s->tipe_paket, $p->detail_3)) $det = $p->detail_3;
+                    elseif (str_contains($s->tipe_paket, $p->detail_4)) $det = $p->detail_4;
+                }
+                $hSesi = $this->extractPrice($det, $p ? $p->harga_max : 450000);
+                $tot = $hSesi * ($jSesi ?: 1);
+
+                $riwayatPayments->push((object) [
+                    'id'               => $s->id,
+                    'siswa'            => $s,
+                    'paket'            => $p,
+                    'total_harga'      => $tot,
+                    'created_at'       => $s->updated_at ?? $s->created_at,
+                ]);
+            }
+        }
+
+        $availableYears = RiwayatPembayaran::where('status', 'approved')
+            ->selectRaw('YEAR(created_at) as year')
             ->distinct()
             ->orderByDesc('year')
             ->pluck('year');
+
+        if ($availableYears->isEmpty()) {
+            $availableYears = Siswa::where('status', 'active')
+                ->selectRaw('YEAR(created_at) as year')
+                ->distinct()
+                ->pluck('year');
+        }
 
         if ($availableYears->isEmpty()) {
             $availableYears = collect([now()->year]);
@@ -78,40 +115,13 @@ class AdminController extends Controller
         $totalRevenue = 0;
         $paymentCount = 0;
 
-        foreach ($payments as $siswa) {
-            $paket = $siswa->paket;
-            $biodata = $siswa->biodata ?? [];
-            $hariPertemuan = $biodata['hari_pertemuan'] ?? [];
-            $jumlahPertemuan = $biodata['jumlah_pertemuan'] ?? null;
-            $tanggalMulai = $biodata['tanggal_mulai'] ?? null;
+        foreach ($riwayatPayments as $r) {
+            $totalHarga = $r->total_harga ?? 0;
+            $paymentDate = $r->created_at ? \Carbon\Carbon::parse($r->created_at) : now();
+            $monthIndex = (int) $paymentDate->format('n') - 1;
+            $paymentYear = (int) $paymentDate->format('Y');
 
-            if (empty($hariPertemuan) && $siswa->tipe_paket) {
-                if (preg_match('/Hari:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
-                    $hariPertemuan = array_map('trim', explode(',', $matches[1]));
-                }
-            }
-            if (!$jumlahPertemuan && $siswa->tipe_paket) {
-                if (preg_match('/Sesi:\s*(\d+)x/i', $siswa->tipe_paket, $matches)) {
-                    $jumlahPertemuan = (int) $matches[1];
-                }
-            }
-
-            $detailString = '';
-            if ($siswa->tipe_paket && $paket) {
-                if (str_contains($siswa->tipe_paket, $paket->detail_1)) $detailString = $paket->detail_1;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_2)) $detailString = $paket->detail_2;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_3)) $detailString = $paket->detail_3;
-                elseif (str_contains($siswa->tipe_paket, $paket->detail_4)) $detailString = $paket->detail_4;
-            }
-
-            $hargaPerSesi = $this->extractPrice($detailString, $paket ? $paket->harga_max : 450000);
-            $totalHarga = $hargaPerSesi * ($jumlahPertemuan ?: 1);
-
-            $paymentDate = $siswa->updated_at ?? $siswa->created_at;
-            $monthIndex = $paymentDate ? ((int) $paymentDate->format('n') - 1) : null;
-            $paymentYear = $paymentDate ? (int) $paymentDate->format('Y') : now()->year;
-
-            if ($filter === 'monthly' && $paymentYear === $year && $monthIndex !== null) {
+            if ($filter === 'monthly' && $paymentYear === $year && isset($monthlyTotals[$monthIndex])) {
                 $monthlyTotals[$monthIndex] += $totalHarga;
             }
 
@@ -125,6 +135,9 @@ class AdminController extends Controller
 
         if ($filter === 'yearly') {
             ksort($yearlyData);
+            if (empty($yearlyData)) {
+                $yearlyData[now()->year] = 0;
+            }
             $chartLabels = array_map('strval', array_keys($yearlyData));
             $chartData = array_values($yearlyData);
         } else {
@@ -374,6 +387,40 @@ class AdminController extends Controller
     }
 
     /**
+     * Set jadwal hari bimbingan untuk permintaan tambah mapel baru oleh Admin.
+     */
+    public function setJadwalTambahMapel(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+        $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
+
+        if (empty($pendingMapels)) {
+            return back()->with('error', 'Tidak ada permintaan tambah mapel aktif.');
+        }
+
+        $hariPerMapelInput = $request->input('hari_per_mapel', []);
+        $pendingHari = [];
+
+        foreach ($pendingMapels as $idx => $mName) {
+            $pendingHari[$idx] = isset($hariPerMapelInput[$idx]) ? (array) $hariPerMapelInput[$idx] : [];
+        }
+
+        $biodata['pending_hari_per_mapel'] = $pendingHari;
+        $biodata['pending_mapel_status']   = 'menunggu_pembayaran_siswa';
+
+        $siswa->biodata = $biodata;
+        $siswa->save();
+
+        return redirect()->route('admin.siswa.detail', $id)
+            ->with('success', 'Hari bimbingan untuk mapel baru siswa ' . $siswa->name . ' berhasil ditentukan! Siswa dapat melanjutkan ke tahap pembayaran.');
+    }
+
+    /**
      * Approve request tambah mapel tanpa mereset status akun.
      */
     public function approveRequestTambahMapel($id)
@@ -398,7 +445,7 @@ class AdminController extends Controller
             foreach ($pendingMapels as $idx => $mapelName) {
                 if (!in_array($mapelName, $activeMapels)) {
                     $activeMapels[] = $mapelName;
-                    $activeSesi[] = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 8;
+                    $activeSesi[] = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 4;
                     $activeHari[] = $pendingHari[$idx] ?? [];
                     $activeTanggal[] = $pendingTanggal[$idx] ?? null;
                 }
@@ -409,7 +456,14 @@ class AdminController extends Controller
             $biodata['hari_per_mapel'] = array_values($activeHari);
             $biodata['tanggal_mulai_per_mapel'] = array_values($activeTanggal);
             $biodata['jumlah_pertemuan'] = array_sum($activeSesi);
-            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_hari_per_mapel'], $biodata['pending_tanggal_mulai_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+            unset(
+                $biodata['pending_mapel_jadwal'], 
+                $biodata['pending_sesi_per_mapel'], 
+                $biodata['pending_hari_per_mapel'], 
+                $biodata['pending_tanggal_mulai_per_mapel'], 
+                $biodata['pending_jumlah_pertemuan'],
+                $biodata['pending_mapel_status']
+            );
 
             $siswa->update(['biodata' => $biodata]);
         }
@@ -588,6 +642,80 @@ class AdminController extends Controller
         }
 
         return back()->with('success', $msg);
+    }
+
+    /**
+     * Update / Kelola daftar mata pelajaran siswa (tambah / hapus mapel)
+     * dan otomatis bersihkan data tutor & jadwal jika mapel dihapus (anti-bug).
+     */
+    public function updateMapelSiswa(Request $request, $id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $siswa = Siswa::findOrFail($id);
+        $biodata = $siswa->biodata ?? [];
+
+        // Ambil daftar mapel baru dari request (bisa array string)
+        $newMapels = $request->input('mapel_jadwal', []);
+        if (is_string($newMapels)) {
+            $newMapels = array_map('trim', explode(',', $newMapels));
+        }
+        $newMapels = array_values(array_unique(array_filter($newMapels)));
+
+        $oldMapels = $biodata['mapel_jadwal'] ?? [];
+        if (empty($oldMapels) && $siswa->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $siswa->tipe_paket, $matches)) {
+            $oldMapels = array_map('trim', explode(',', $matches[1]));
+        }
+
+        // Cari mapel mana saja yang dihapus oleh Admin
+        $deletedMapels = array_diff($oldMapels, $newMapels);
+
+        // Update mapel_jadwal di biodata
+        $biodata['mapel_jadwal'] = $newMapels;
+
+        // Clean up tutor_per_mapel dan tutor_names jika mapel dihapus (Anti-Bug Guru Nempel)
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+        if (!empty($deletedMapels)) {
+            foreach ($deletedMapels as $dMapel) {
+                if (isset($tutorPerMapel[$dMapel])) {
+                    unset($tutorPerMapel[$dMapel]);
+                }
+            }
+        }
+        $biodata['tutor_per_mapel'] = $tutorPerMapel;
+        $biodata['tutor_names'] = array_values(array_unique(array_filter($tutorPerMapel)));
+
+        // Update tipe_paket descriptor string
+        $mapelStr = !empty($newMapels) ? implode(', ', $newMapels) : 'Belum dipilih';
+        $tutorParts = [];
+        foreach ($tutorPerMapel as $mName => $gName) {
+            $tutorParts[] = $mName . ': ' . $gName;
+        }
+        $tutorStr = !empty($tutorParts) ? implode(', ', $tutorParts) : (!empty($biodata['tutor_names']) ? implode(', ', $biodata['tutor_names']) : 'Belum ditentukan');
+
+        if ($siswa->tipe_paket) {
+            $tp = $siswa->tipe_paket;
+            if (preg_match('/Mapel:\s*([^)|]+)/i', $tp)) {
+                $tp = preg_replace('/Mapel:\s*([^)|]+)/i', 'Mapel: ' . $mapelStr, $tp);
+            } else {
+                $tp .= ' | Mapel: ' . $mapelStr;
+            }
+            if (preg_match('/Guru:\s*([^|)]+)/i', $tp)) {
+                $tp = preg_replace('/Guru:\s*([^|)]+)/i', 'Guru: ' . $tutorStr, $tp);
+            }
+            $siswa->tipe_paket = trim($tp);
+        } else {
+            $siswa->tipe_paket = 'Mapel: ' . $mapelStr . ' | Guru: ' . $tutorStr;
+        }
+
+        $siswa->update([
+            'biodata' => $biodata,
+            'tipe_paket' => $siswa->tipe_paket,
+        ]);
+
+        return back()->with('success', 'Daftar mata pelajaran untuk ' . $siswa->name . ' berhasil diperbarui!');
     }
 
     /**
@@ -1016,7 +1144,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Hapus Akun Guru & User Terkait secara Permanen.
+     * Nonaktifkan / Aktifkan Kembali Akun Guru (Status Toggle).
      */
     public function deleteGuru($id)
     {
@@ -1025,26 +1153,23 @@ class AdminController extends Controller
         }
 
         try {
-            $name = 'Guru';
-            DB::transaction(function () use ($id, &$name) {
-                $guru = Guru::with('user')->findOrFail($id);
-                $user = $guru->user;
-                $name = $user->name ?? 'Guru';
+            $guru = Guru::with('user')->findOrFail($id);
+            $name = $guru->user->name ?? 'Guru';
 
-                // Hapus profil guru dahulu
-                $guru->delete();
+            if (strtolower($guru->status ?? '') === 'nonaktif') {
+                $guru->status = 'aktif';
+                $guru->save();
+                $msg = 'Akun Guru (' . $name . ') berhasil DIAKTIFKAN kembali.';
+            } else {
+                $guru->status = 'nonaktif';
+                $guru->save();
+                $msg = 'Akun Guru (' . $name . ') berhasil DINONAKTIFKAN.';
+            }
 
-                // Hapus akun user autentikasi jika ada
-                if ($user) {
-                    $user->delete();
-                }
-            });
-
-            return redirect()->route('admin.guru.daftar.index')
-                ->with('success', 'Akun Guru (' . $name . ') berhasil dihapus secara permanen dari sistem.');
+            return redirect()->back()->with('success', $msg);
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal menghapus akun guru: ' . $e->getMessage());
+                ->with('error', 'Gagal memproses status akun guru: ' . $e->getMessage());
         }
     }
 
@@ -1458,13 +1583,20 @@ class AdminController extends Controller
             return $default;
         }
         if (preg_match('/(\d+)\s*K/i', $str, $matches)) {
-            return (int) $matches[1] * 1000;
+            $val = (int) $matches[1] * 1000;
+            if ($val >= 1000) return $val;
         }
-        if (preg_match('/Rp\s*([\d\.]+)/i', $str, $matches)) {
-            return (int) str_replace('.', '', $matches[1]);
+        if (preg_match('/Rp\s*([\d\.\,]+)/i', $str, $matches)) {
+            $val = (int) preg_replace('/[^\d]/', '', $matches[1]);
+            if ($val >= 1000) return $val;
         }
-        if (preg_match('/(\d[\d\.]*)/', $str, $matches)) {
-            return (int) str_replace('.', '', $matches[1]);
+        if (preg_match_all('/(\d[\d\.]*)/', $str, $matches)) {
+            foreach ($matches[1] as $m) {
+                $clean = (int) str_replace(['.', ','], '', $m);
+                if ($clean >= 1000) {
+                    return $clean;
+                }
+            }
         }
         return $default;
     }

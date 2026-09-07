@@ -666,37 +666,95 @@
                             </div>
                         </div>
                     @else
-                        @if ($isPending)
-                            <div class="mb-4 p-4 rounded-2xl bg-yellow-50 border border-yellow-200 text-slate-700">
+                        @php
+                            $statusMode = $pendingMapelStatus ?? 'menunggu_jadwal_admin';
+                        @endphp
+
+                        @if ($statusMode === 'menunggu_jadwal_admin')
+                            <div class="mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-slate-700">
                                 <div class="d-flex align-items-start gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-yellow-100 text-yellow-700 d-flex align-items-center justify-center">
-                                        <i class="fas fa-clock"></i>
+                                    <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 d-flex align-items-center justify-center shrink-0">
+                                        <i class="fas fa-calendar-alt"></i>
                                     </div>
                                     <div>
-                                        <h6 class="font-weight-bold text-slate-900 mb-1">Menunggu Konfirmasi Admin</h6>
-                                        <p class="text-xs text-muted mb-0">Mata pelajaran yang Anda pilih sudah tersimpan, tetapi jadwal belum aktif sampai admin menyetujui pembayaran.</p>
+                                        <h6 class="font-weight-bold text-amber-950 mb-1">Step 1: Menunggu Penentuan Hari Bimbingan oleh Admin</h6>
+                                        <p class="text-xs text-amber-800 mb-0">
+                                            Permintaan mata pelajaran tambahan telah tersimpan. Admin sedang menentukan jadwal hari bimbingan untuk Anda. 
+                                            <strong>Tombol pembayaran akan otomatis MUNCUL setelah Admin menentukan jadwal hari bimbingan.</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif ($statusMode === 'menunggu_pembayaran_siswa')
+                            <div class="mb-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-slate-700">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 d-flex align-items-center justify-center shrink-0">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="flex-grow-1 d-flex flex-column flex-sm-row justify-between align-items-sm-center gap-3">
+                                        <div>
+                                            <h6 class="font-weight-bold text-emerald-950 mb-1">Step 2: Jadwal Bimbingan Siap — Silakan Lakukan Pembayaran</h6>
+                                            <p class="text-xs text-emerald-800 mb-0">
+                                                Admin telah menentukan hari bimbingan. Silakan tekan tombol <strong>Lakukan Pembayaran</strong> di samping untuk mengaktifkan bimbingan.
+                                            </p>
+                                        </div>
+                                        <a href="{{ route('siswa.bukti-bayar') }}" class="btn btn-emerald font-weight-bold rounded-xl px-4 py-2.5 text-xs shadow-md shrink-0 d-inline-flex align-items-center"
+                                           style="background: linear-gradient(135deg, #059669, #047857); color: #ffffff; border: none;">
+                                            <i class="fas fa-credit-card mr-1.5 text-amber-300"></i> Lakukan Pembayaran
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif ($statusMode === 'pending_approval_admin')
+                            <div class="mb-4 p-4 rounded-2xl bg-purple-50 border border-purple-200 text-slate-700">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-700 d-flex align-items-center justify-center shrink-0">
+                                        <i class="fas fa-receipt"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="font-weight-bold text-purple-950 mb-1">Step 3: Pembayaran Menunggu Persetujuan Admin</h6>
+                                        <p class="text-xs text-purple-800 mb-0">
+                                            Bukti pembayaran bimbingan pelajaran Anda telah terkirim dan sedang ditinjau oleh Admin. Mata pelajaran akan aktif setelah disetujui.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         @endif
+
                         <!-- Display Selected Mapel Requests -->
                         <div class="row">
                             @foreach ($mapels as $idx => $mName)
                                 @php
-                                    $sesiCount = $sesiPerMapel[$idx] ?? 8;
+                                    $sesiCount = $sesiPerMapel[$idx] ?? 4;
                                     $bgColors = ['bg-purple-50 border-purple-200 text-purple-900', 'bg-indigo-50 border-indigo-200 text-indigo-900', 'bg-teal-50 border-teal-200 text-teal-900', 'bg-amber-50 border-amber-200 text-amber-900'];
                                     $badgeColor = $bgColors[$idx % count($bgColors)];
+                                    $hariList = $pendingHariPerMapel[$idx] ?? [];
+                                    $hariStr = !empty($hariList) ? implode(' & ', $hariList) : 'Belum diatur Admin';
                                 @endphp
                                 <div class="col-md-4 col-sm-6 col-12 mb-3">
                                     <div class="p-3.5 rounded-2xl border transition-all hover:shadow-md {{ $badgeColor }}">
-                                        <div class="d-flex justify-between align-items-start">
+                                        <div class="d-flex justify-between align-items-start mb-2">
                                             <div>
-                                                <span class="badge badge-purple mb-1.5 text-xxs px-2.5 py-1 font-semibold uppercase tracking-wider" style="background-color: {{ $isPending ? 'rgba(245, 158, 11, 0.15)' : 'rgba(124, 58, 237, 0.15)'}}; color: {{ $isPending ? '#b45309' : '#6d28d9' }};">
-                                                    {{ $isPending ? 'Menunggu Konfirmasi' : 'Aktif Bimbingan' }}
-                                                </span>
+                                                @if ($statusMode === 'menunggu_jadwal_admin')
+                                                    <span class="badge mb-1.5 text-xxs px-2.5 py-1 font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                                                        <i class="fas fa-hourglass-half mr-1"></i> Menunggu Hari Admin
+                                                    </span>
+                                                @elseif ($statusMode === 'menunggu_pembayaran_siswa')
+                                                    <span class="badge mb-1.5 text-xxs px-2.5 py-1 font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                                        <i class="fas fa-check-circle mr-1"></i> Jadwal Siap — Bayar
+                                                    </span>
+                                                @elseif ($statusMode === 'pending_approval_admin')
+                                                    <span class="badge mb-1.5 text-xxs px-2.5 py-1 font-semibold uppercase tracking-wider bg-purple-100 text-purple-800 border border-purple-200">
+                                                        <i class="fas fa-clock mr-1"></i> Menunggu Approve Admin
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-purple mb-1.5 text-xxs px-2.5 py-1 font-semibold uppercase tracking-wider">
+                                                        Aktif Bimbingan
+                                                    </span>
+                                                @endif
                                                 <h6 class="font-weight-bold mb-1 text-base text-purple-950">{{ $mName }}</h6>
                                                 <p class="text-xs text-muted mb-0">
-                                                    <i class="far fa-clock mr-1"></i> {{ $sesiCount }} Sesi Bimbingan
+                                                    <i class="far fa-clock mr-1"></i> {{ $sesiCount }} Sesi &bull; Hari: <strong class="text-purple-900">{{ $hariStr }}</strong>
                                                 </p>
                                             </div>
                                             <div class="w-12 h-12 rounded-2xl bg-white text-purple-700 shadow-xs d-flex align-items-center justify-center font-bold text-lg flex-shrink-0">
@@ -704,8 +762,14 @@
                                             </div>
                                         </div>
 
-                                        <!-- Aksi: Edit & Hapus -->
+                                        <!-- Aksi: Edit & Hapus & Bayar Button if Ready -->
                                         <div class="d-flex gap-2 mt-3 pt-2 border-top" style="border-color: rgba(0,0,0,0.06) !important;">
+                                            @if ($statusMode === 'menunggu_pembayaran_siswa')
+                                                <a href="{{ route('siswa.bukti-bayar') }}" class="btn btn-sm btn-emerald font-weight-bold rounded-xl text-xxs flex-fill d-inline-flex align-items-center justify-content-center py-1.5 text-white"
+                                                   style="background-color: #059669; border: none;">
+                                                    <i class="fas fa-credit-card mr-1 text-amber-300"></i> Bayar
+                                                </a>
+                                            @endif
                                             <button type="button"
                                                     class="btn btn-sm btn-light rounded-xl text-xxs font-weight-bold flex-fill d-inline-flex align-items-center justify-content-center py-1.5"
                                                     style="background-color: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.08);"
@@ -755,40 +819,48 @@
                         </p>
 
                         <div class="row">
-                            @foreach ($availableMapels as $m)
-                                @php
-                                    $isAlreadySelected = in_array($m->nama_mapel, $mapels);
-                                @endphp
-                                <div class="col-md-6 col-12 mb-3">
-                                    <div class="card h-100 border shadow-xs transition-all mapel-select-card {{ $isAlreadySelected ? 'border-purple-500 bg-purple-50/40' : 'border-slate-200' }}" style="border-radius: 16px;">
-                                        <div class="card-body p-3">
-                                            <div class="custom-control custom-checkbox d-flex align-items-center justify-between">
-                                                <input type="checkbox" class="custom-control-input mapel-checkbox" 
-                                                       id="mapel_cb_{{ $loop->index }}" 
-                                                       name="mapel[]" 
-                                                       value="{{ $m->nama_mapel }}" 
-                                                       {{ $isAlreadySelected ? 'checked' : '' }}>
-                                                <label class="custom-control-label font-weight-bold text-purple-950 text-sm cursor-pointer w-100 pl-2 mb-0" for="mapel_cb_{{ $loop->index }}">
-                                                    {{ $m->nama_mapel }}
-                                                </label>
-                                                <span class="badge badge-purple text-xxs font-semibold ml-2" style="background-color: #f3e8ff; color: #6d28d9;">
-                                                    {{ $m->shift ?? 'Bimbel' }}
-                                                </span>
-                                            </div>
+                            @if ($availableMapels->isEmpty())
+                                <div class="col-12 text-center py-4 px-3 bg-purple-50/50 rounded-2xl border border-purple-100">
+                                    <i class="fas fa-check-circle text-purple-500 fa-2x mb-2"></i>
+                                    <h6 class="font-bold text-purple-950 text-sm mb-1">Semua Mata Pelajaran Sudah Terdaftar</h6>
+                                    <p class="text-xs text-slate-500 mb-0">Anda telah terdaftar atau sedang mengajukan seluruh mata pelajaran bimbingan yang tersedia.</p>
+                                </div>
+                            @else
+                                @foreach ($availableMapels as $m)
+                                    @php
+                                        $isAlreadySelected = in_array($m->nama_mapel, $mapels);
+                                    @endphp
+                                    <div class="col-md-6 col-12 mb-3">
+                                        <div class="card h-100 border shadow-xs transition-all mapel-select-card {{ $isAlreadySelected ? 'border-purple-500 bg-purple-50/40' : 'border-slate-200' }}" style="border-radius: 16px;">
+                                            <div class="card-body p-3">
+                                                <div class="custom-control custom-checkbox d-flex align-items-center justify-between">
+                                                    <input type="checkbox" class="custom-control-input mapel-checkbox" 
+                                                           id="mapel_cb_{{ $loop->index }}" 
+                                                           name="mapel[]" 
+                                                           value="{{ $m->nama_mapel }}" 
+                                                           {{ $isAlreadySelected ? 'checked' : '' }}>
+                                                    <label class="custom-control-label font-weight-bold text-purple-950 text-sm cursor-pointer w-100 pl-2 mb-0" for="mapel_cb_{{ $loop->index }}">
+                                                        {{ $m->nama_mapel }}
+                                                    </label>
+                                                    <span class="badge badge-purple text-xxs font-semibold ml-2" style="background-color: #f3e8ff; color: #6d28d9;">
+                                                        {{ $m->shift ?? 'Bimbel' }}
+                                                    </span>
+                                                </div>
 
-                                            <div class="mt-3 pt-2 border-top">
-                                                <label class="text-xxs font-bold text-muted uppercase tracking-wider mb-1 d-block">Jumlah Sesi Belajar</label>
-                                                <select name="sesi[{{ $m->nama_mapel }}]" class="form-control form-control-sm rounded-lg text-xs" style="border-color: #e2e8f0;">
-                                                    <option value="4">4 Sesi (1 Bulan Dasar)</option>
-                                                    <option value="8" selected>8 Sesi (2 Bulan Intensif)</option>
-                                                    <option value="12">12 Sesi (3 Bulan Penguasaan)</option>
-                                                    <option value="16">16 Sesi (4 Bulan Master)</option>
-                                                </select>
+                                                <div class="mt-3 pt-2 border-top">
+                                                    <label class="text-xxs font-bold text-muted uppercase tracking-wider mb-1 d-block">Jumlah Sesi Belajar</label>
+                                                    <select name="sesi[{{ $m->nama_mapel }}]" class="form-control form-control-sm rounded-lg text-xs" style="border-color: #e2e8f0;">
+                                                        <option value="4" selected>4 Sesi (1 Bulan / 4 Pertemuan)</option>
+                                                        <option value="8">8 Sesi (2 Bulan Intensif)</option>
+                                                        <option value="12">12 Sesi (3 Bulan Penguasaan)</option>
+                                                        <option value="16">16 Sesi (4 Bulan Master)</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            @endif
                         </div>
                     </div>
                     <div class="modal-footer border-0 px-4 pb-4 pt-0 bg-slate-50 d-flex justify-between align-items-center">

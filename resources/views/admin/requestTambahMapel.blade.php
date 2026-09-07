@@ -62,9 +62,13 @@
                         $pendingTanggal  = $bio['pending_tanggal_mulai_per_mapel'] ?? [];
                         $paymentMethod   = $bio['payment_method'] ?? null;
 
+                        $latestPayment = \App\Models\RiwayatPembayaran::where('siswa_id', $student->id)
+                            ->where('status', 'under_review')
+                            ->latest()
+                            ->first();
+
                         $paket = \App\Models\PaketBelajar::find($student->paket_id);
 
-                        // Cari string detail paket yang cocok dengan tipe_paket siswa, untuk hitung harga per sesi
                         $detailString = '';
                         if ($paket && $student->tipe_paket) {
                             if (str_contains($student->tipe_paket, $paket->detail_1 ?? "\0")) $detailString = $paket->detail_1;
@@ -73,24 +77,85 @@
                             elseif (str_contains($student->tipe_paket, $paket->detail_4 ?? "\0")) $detailString = $paket->detail_4;
                         }
 
-                        $hargaPerSesi = 45000;
+                        $hargaPerSesi = 80000;
                         if (!empty($detailString) && preg_match('/(\d+)\s*K/i', $detailString, $mHarga)) {
                             $hargaPerSesi = (int) $mHarga[1] * 1000;
+                        } elseif (!empty($detailString) && preg_match('/Rp\s*([\d\.\,]+)/i', $detailString, $mHarga)) {
+                            $hargaPerSesi = (int) preg_replace('/[^\d]/', '', $mHarga[1]);
                         } elseif ($paket) {
-                            $hargaPerSesi = $paket->harga_max ?? 45000;
+                            $hargaPerSesi = $paket->harga_max ?? 80000;
+                        }
+                        if ($hargaPerSesi < 1000) {
+                            $hargaPerSesi = $paket ? ($paket->harga_max ?: 80000) : 80000;
                         }
 
-                        $totalSesiRequest = array_sum(array_map('intval', $pendingSesi));
-                        $totalTagihan = $hargaPerSesi * $totalSesiRequest;
+                        // Hitung jumlah sesi bulan berjalan berdasarkan hari bimbingan
+                        $currentMonth = \Carbon\Carbon::now();
+                        $startOfMonth = $currentMonth->copy()->startOfMonth();
+                        $endOfMonth   = $currentMonth->copy()->endOfMonth();
+                        $dayMap = [
+                            'senin' => 1, 'selasa' => 2, 'rabu' => 3, 'kamis' => 4,
+                            'jumat' => 5, 'sabtu' => 6, 'minggu' => 0
+                        ];
+
+                        $totalSesiCalculated = 0;
+                        $sesiPerPendingMapel = [];
+
+                        foreach ($pendingMapels as $idx => $mName) {
+                            $assignedDays = $pendingHari[$idx] ?? [];
+                            if (!is_array($assignedDays)) $assignedDays = [$assignedDays];
+                            $assignedDaysClean = array_values(array_filter($assignedDays));
+                            $countMapelInMonth = 0;
+                            if (!empty($assignedDaysClean)) {
+                                $period = \Carbon\CarbonPeriod::create($startOfMonth, $endOfMonth);
+                                foreach ($period as $date) {
+                                    $dayOfWeek = $date->dayOfWeek;
+                                    foreach ($assignedDaysClean as $h) {
+                                        if (isset($dayMap[strtolower(trim($h))]) && $dayMap[strtolower(trim($h))] === $dayOfWeek) {
+                                            $countMapelInMonth++;
+                                        }
+                                    }
+                                }
+                            }
+                            if ($countMapelInMonth === 0) {
+                                $countMapelInMonth = isset($pendingSesi[$idx]) ? (int)$pendingSesi[$idx] : 4;
+                            }
+                            $sesiPerPendingMapel[$idx] = $countMapelInMonth;
+                            $totalSesiCalculated += $countMapelInMonth;
+                        }
+                        if ($totalSesiCalculated === 0) {
+                            $totalSesiCalculated = 4;
+                        }
+
+                        if ($latestPayment) {
+                            $totalSesiRequest = $latestPayment->jumlah_sesi;
+                            $totalTagihan     = $latestPayment->total_harga;
+                        } else {
+                            $totalSesiRequest = $totalSesiCalculated;
+                            $totalTagihan     = $hargaPerSesi * $totalSesiRequest;
+                        }
 
                         $extension = $student->bukti_transfer ? pathinfo($student->bukti_transfer, PATHINFO_EXTENSION) : null;
                         $isTunai = $student->bukti_transfer === 'TUNAI_CASH_PAYMENT' || $paymentMethod === 'tunai';
                     @endphp
+                        @php
+                            $pendingMapelStatus = $bio['pending_mapel_status'] ?? 'menunggu_jadwal_admin';
+                            $hasSetHari = false;
+                            if (!empty($pendingHari) && is_array($pendingHari)) {
+                                foreach ($pendingHari as $hList) {
+                                    if (!empty(array_filter((array)$hList))) {
+                                        $hasSetHari = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            $hasSubmittedPayment = !empty($student->bukti_transfer) || $isTunai || $pendingMapelStatus === 'pending_approval_admin';
+                            $canApprove = $hasSetHari && $hasSubmittedPayment;
+                        @endphp
 
-                    <div class="card shadow-sm border-light rounded-2xl overflow-hidden mb-4">
                         <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
                             <div class="d-flex align-items-center gap-2">
-                                <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-700 d-flex align-items-center justify-content-center font-weight-bold" style="width:40px;height:40px;">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-700 d-flex align-items-center justify-center font-weight-bold" style="width:40px;height:40px;">
                                     {{ strtoupper(substr($student->name, 0, 1)) }}
                                 </div>
                                 <div>
@@ -99,9 +164,19 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-amber-100 text-amber-800 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-amber-200">
-                                    <i class="fas fa-clock mr-1"></i> Menunggu Approve
-                                </span>
+                                @if ($pendingMapelStatus === 'menunggu_jadwal_admin')
+                                    <span class="badge bg-amber-100 text-amber-800 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-amber-200">
+                                        <i class="fas fa-calendar-alt mr-1"></i> Step 1: Belum Set Hari
+                                    </span>
+                                @elseif ($pendingMapelStatus === 'menunggu_pembayaran_siswa')
+                                    <span class="badge bg-emerald-100 text-emerald-800 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-emerald-200">
+                                        <i class="fas fa-credit-card mr-1"></i> Step 2: Menunggu Bayar Siswa
+                                    </span>
+                                @elseif ($pendingMapelStatus === 'pending_approval_admin')
+                                    <span class="badge bg-purple-100 text-purple-800 px-2.5 py-1 text-[10px] font-bold uppercase rounded-pill border border-purple-200">
+                                        <i class="fas fa-check-circle mr-1"></i> Step 3: Siap Di-Approve
+                                    </span>
+                                @endif
                                 <span class="text-[10px] text-muted">
                                     Diajukan {{ $student->updated_at ? $student->updated_at->diffForHumans() : '-' }}
                                 </span>
@@ -137,7 +212,7 @@
                                     @else
                                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center" style="min-height: 160px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                                             <i class="fas fa-exclamation-triangle text-slate-300 fa-2x mb-2"></i>
-                                            <span class="text-xs text-slate-500">Belum ada bukti transfer</span>
+                                            <span class="text-xs text-slate-500 font-weight-semibold">Belum ada bukti bayar dari siswa</span>
                                         </div>
                                     @endif
 
@@ -160,11 +235,9 @@
                                         <div class="d-flex flex-column gap-2">
                                             @foreach ($pendingMapels as $idx => $mapelName)
                                                 @php
-                                                    $sesi = $pendingSesi[$idx] ?? 8;
-                                                    $hari1 = $pendingHari[$idx][1] ?? null;
-                                                    $hari2 = $pendingHari[$idx][2] ?? null;
-                                                    $tglMulai = $pendingTanggal[$idx] ?? null;
-                                                    $tglStr = $tglMulai ? \Carbon\Carbon::parse($tglMulai)->format('d M Y') : null;
+                                                    $sesi = $sesiPerPendingMapel[$idx] ?? ($pendingSesi[$idx] ?? 4);
+                                                    $hariListMapel = $pendingHari[$idx] ?? [];
+                                                    $hariStr = !empty($hariListMapel) ? implode(' & ', array_filter((array)$hariListMapel)) : null;
                                                 @endphp
                                                 <div class="p-2.5 bg-purple-50/60 rounded-xl border border-purple-100">
                                                     <div class="d-flex justify-content-between align-items-center mb-1">
@@ -172,14 +245,10 @@
                                                         <span class="text-[10px] font-weight-bold text-purple-700 bg-white px-2 py-0.5 rounded-pill border border-purple-200">{{ $sesi }}x sesi</span>
                                                     </div>
                                                     <div class="text-[10px] text-slate-500">
-                                                        @if ($hari1 || $hari2)
-                                                            <div><i class="fas fa-calendar-week mr-1 text-purple-400"></i>Hari: <strong class="text-slate-700">{{ $hari1 ?? '-' }}{{ $hari2 ? ' & '.$hari2 : '' }}</strong></div>
-                                                        @endif
-                                                        @if ($tglStr)
-                                                            <div><i class="fas fa-calendar-alt mr-1 text-purple-400"></i>Mulai: <strong class="text-slate-700">{{ $tglStr }}</strong></div>
-                                                        @endif
-                                                        @if (!$hari1 && !$hari2 && !$tglStr)
-                                                            <span class="font-italic">Detail jadwal belum tersedia.</span>
+                                                        @if ($hariStr)
+                                                            <div><i class="fas fa-calendar-week mr-1 text-purple-500"></i>Hari: <strong class="text-purple-900">{{ $hariStr }}</strong></div>
+                                                        @else
+                                                            <div class="text-amber-700 font-weight-semibold"><i class="fas fa-exclamation-circle mr-1"></i>Belum diatur Admin (Klik Setting Hari)</div>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -207,25 +276,38 @@
                                     </div>
 
                                     <div class="d-flex flex-column gap-2">
-                                        <form action="{{ route('admin.siswa.requests.approve', $student->id) }}" method="POST" class="m-0" onsubmit="return confirm('Setujui request tambah mapel untuk {{ $student->name }}? Mata pelajaran akan langsung aktif di jadwal siswa.')">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-success rounded-lg font-weight-bold w-100">
-                                                <i class="fas fa-check mr-1"></i> Approve
+                                        <!-- Tombol Setting Hari (Mengarahkan ke detailData) -->
+                                        <a href="{{ route('admin.siswa.detail', $student->id) }}#request-tambah-mapel" class="btn btn-sm btn-primary rounded-lg font-weight-bold w-100" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); border: none;">
+                                            <i class="fas fa-calendar-day mr-1"></i> Setting Hari (Detail Data)
+                                        </a>
+
+                                        @if ($canApprove)
+                                            <form action="{{ route('admin.siswa.requests.approve', $student->id) }}" method="POST" class="m-0" onsubmit="return confirm('Setujui request tambah mapel untuk {{ $student->name }}? Mata pelajaran akan langsung aktif di jadwal siswa.')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success rounded-lg font-weight-bold w-100">
+                                                    <i class="fas fa-check mr-1"></i> Approve Request Mapel
+                                                </button>
+                                            </form>
+                                        @elseif (!$hasSetHari)
+                                            <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold w-100 opacity-60" disabled title="Centang hari bimbingan terlebih dahulu di Detail Data Siswa">
+                                                <i class="fas fa-lock mr-1"></i> Approve (Set Hari Dulu)
                                             </button>
-                                        </form>
-                                        <form action="{{ route('admin.siswa.requests.reject', $student->id) }}" method="POST" class="m-0" onsubmit="return confirm('Tolak request tambah mapel dari {{ $student->name }}? Data pengajuan ini akan dihapus dan siswa perlu mengajukan ulang.')">
+                                        @else
+                                            <button type="button" class="btn btn-sm btn-secondary rounded-lg font-weight-bold w-100 opacity-60" disabled title="Menunggu siswa melakukan pembayaran & upload bukti transfer">
+                                                <i class="fas fa-lock mr-1"></i> Approve (Nunggu Bayar Siswa)
+                                            </button>
+                                        @endif
+
+                                        <form action="{{ route('admin.siswa.requests.reject', $student->id) }}" method="POST" class="m-0" onsubmit="return confirm('Tolak request tambah mapel dari {{ $student->name }}? Data pengajuan ini akan dihapus.')">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-outline-danger rounded-lg font-weight-bold w-100">
                                                 <i class="fas fa-times mr-1"></i> Tolak
                                             </button>
                                         </form>
-                                        <a href="{{ route('admin.siswa.detail', $student->id) }}" class="btn btn-sm btn-light border rounded-lg font-weight-bold w-100 text-slate-600">
-                                            <i class="fas fa-user mr-1"></i> Profil Siswa
-                                        </a>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>>
                     </div>
                 @endforeach
             @endif

@@ -30,6 +30,9 @@ class GuruController extends Controller
         } elseif (strtolower($guruProfile->status ?? 'aktif') === 'ditolak') {
             Auth::guard('web')->logout();
             return redirect()->route('login')->with('error', 'Maaf, pendaftaran akun Guru Anda ditolak oleh Admin.');
+        } elseif (strtolower($guruProfile->status ?? 'aktif') === 'nonaktif') {
+            Auth::guard('web')->logout();
+            return redirect()->route('login')->with('error', 'Maaf, akun Guru Anda saat ini dinonaktifkan oleh Admin. Silakan hubungi Admin.');
         }
 
         $isBiodataComplete = $guruProfile->isComplete();
@@ -1257,5 +1260,34 @@ class GuruController extends Controller
         }
 
         return response()->json(['mapel' => $mapelList]);
+    }
+
+    /**
+     * Tampilkan Halaman Detail Data / Profil Siswa Bimbingan untuk Guru.
+     */
+    public function detailSiswa($id)
+    {
+        $user = Auth::user();
+        if (!$user || (!$user->isGuru() && !$user->isAdmin())) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+        }
+
+        $student = \App\Models\Siswa::with('paket')->findOrFail($id);
+        $paket = \App\Models\PaketBelajar::find($student->paket_id);
+
+        $biodata = $student->biodata ?? [];
+        $tutorPerMapel = $biodata['tutor_per_mapel'] ?? [];
+        $currentGurus = $biodata['tutor_names'] ?? [];
+
+        if (empty($currentGurus) && $student->tipe_paket && preg_match('/Guru:\s*([^|)]+)/i', $student->tipe_paket, $matches)) {
+            $currentGurus = array_map('trim', explode(',', $matches[1]));
+        }
+
+        $mapelJadwal = $biodata['mapel_jadwal'] ?? [];
+        if (empty($mapelJadwal) && $student->tipe_paket && preg_match('/Mapel:\s*([^)|]+)/i', $student->tipe_paket, $matches)) {
+            $mapelJadwal = array_map('trim', explode(',', $matches[1]));
+        }
+
+        return view('guru.detailSiswa', compact('student', 'paket', 'currentGurus', 'mapelJadwal', 'tutorPerMapel'));
     }
 }
