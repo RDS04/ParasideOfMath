@@ -14,19 +14,7 @@
                     <p class="text-sm text-slate-500 mb-0 mt-1">
                         Uji pemahaman materi Anda melalui paket-paket soal latihan yang tersedia.
                     </p>
-                    <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
-                        <a class="btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-white btn-nav-mode active" 
-                           id="btn-mode-paket" data-toggle="pill" href="#content-soal-web" role="tab" 
-                           aria-controls="content-soal-web" aria-selected="true"
-                           style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); border: none;">
-                            <i class="fas fa-layer-group mr-1.5 text-amber-300"></i> Daftar Paket Ujian
-                        </a>
-                        <a class="btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-purple-900 bg-white border border-purple-200 hover:bg-purple-50 btn-nav-mode" 
-                           id="btn-mode-pdf" data-toggle="pill" href="#content-modul-pdf-siswa" role="tab"
-                           aria-controls="content-modul-pdf-siswa" aria-selected="false">
-                            <i class="fas fa-file-pdf text-rose-500 mr-1.5"></i> Latihan Soal (PDF Jenjang {{ $jenjang }})
-                        </a>
-                    </div>
+
                 </div>
                 <div class="col-sm-5">
                     <ol class="breadcrumb float-sm-right text-sm bg-transparent p-0 m-0 mt-2 mt-sm-0">
@@ -120,53 +108,40 @@
                         </span>
                     </div>
 
-                    @if ($categories->isEmpty() && empty($assignedExams))
-                        <div class="card border-0 shadow-sm rounded-2xl text-center py-5 px-4 bg-white">
-                            <div class="card-body">
-                                <div class="mx-auto mb-3 rounded-full bg-purple-50 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                                    <i class="fas fa-folder-open text-purple-400 fa-2x"></i>
-                                </div>
-                                <h5 class="font-bold text-purple-950 mb-1">Belum Ada Ujian Tersedia</h5>
-                                <p class="text-slate-500 text-sm max-w-md mx-auto mb-0">
-                                    Belum terdapat paket soal latihan untuk <strong>Jenjang {{ $jenjang }} - {{ $sub_kategori }}</strong>. Silakan pilih jenjang atau sub-kategori lain di atas.
-                                </p>
-                            </div>
+                    @php
+                        $allDocFilesCountSiswa = 0;
+                        foreach (($pdfCategories ?? []) as $cCheck) {
+                            $allDocFilesCountSiswa += count(glob(public_path("uploads/bank_soal_docs/doc_{$cCheck->id}_*.*")) ?: []);
+                        }
+                    @endphp
+
+                    <!-- ═══════ TAB: SOAL UJIAN (Web) | MODUL PDF ═══════ -->
+                    <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
+                        <div class="card-header p-2 bg-slate-100 border-bottom">
+                            <ul class="nav nav-pills nav-justified w-100 tab-nav-list" id="tabUjianSoalModul" role="tablist">
+                                <li class="nav-item flex-1" role="presentation">
+                                    <a class="nav-link active tab-nav-link tab-nav-soal" id="tab-soal-web" data-toggle="pill"
+                                        href="#content-soal-web" role="tab" aria-controls="content-soal-web" aria-selected="true">
+                                        <i class="fas fa-list-ol"></i>
+                                        <span>Soal Ujian ({{ $categories->count() }})</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item flex-1" role="presentation">
+                                    <a class="nav-link tab-nav-link tab-nav-modul" id="tab-modul-pdf-siswa" data-toggle="pill"
+                                        href="#content-modul-pdf-siswa" role="tab" aria-controls="content-modul-pdf-siswa" aria-selected="false">
+                                        <i class="fas fa-file-pdf"></i>
+                                        <span>Modul PDF ({{ $allDocFilesCountSiswa }})</span>
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
-                    @elseif ($categories->isEmpty())
-                    @else
-                        @php
-                            $allDocFilesCountSiswa = 0;
-                            foreach ($categories as $cCheck) {
-                                $allDocFilesCountSiswa += count(glob(public_path("uploads/bank_soal_docs/doc_{$cCheck->id}_*.*")) ?: []);
-                            }
-                        @endphp
 
-                        <!-- ═══════ TAB: SOAL UJIAN (Web) | MODUL PDF ═══════ -->
-                        <div class="card border-0 shadow-sm rounded-2xl mb-4 bg-white overflow-hidden">
-                            <div class="card-header p-2 bg-slate-100 border-bottom">
-                                <ul class="nav nav-pills nav-justified w-100 tab-nav-list" id="tabUjianSoalModul" role="tablist">
-                                    <li class="nav-item flex-1" role="presentation">
-                                        <a class="nav-link active tab-nav-link tab-nav-soal" id="tab-soal-web" data-toggle="pill"
-                                            href="#content-soal-web" role="tab" aria-controls="content-soal-web" aria-selected="true">
-                                            <i class="fas fa-list-ol"></i>
-                                            <span>Soal Ujian ({{ $categories->count() }})</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item flex-1" role="presentation">
-                                        <a class="nav-link tab-nav-link tab-nav-modul" id="tab-modul-pdf-siswa" data-toggle="pill"
-                                            href="#content-modul-pdf-siswa" role="tab" aria-controls="content-modul-pdf-siswa" aria-selected="false">
-                                            <i class="fas fa-file-pdf"></i>
-                                            <span>Modul PDF ({{ $allDocFilesCountSiswa }})</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+                        <div class="card-body p-3 p-md-4 bg-slate-50">
+                            <div class="tab-content" id="tabUjianSoalModulContent">
 
-                            <div class="card-body p-3 p-md-4 bg-slate-50">
-                                <div class="tab-content" id="tabUjianSoalModulContent">
-
-                                    <!-- TAB 1: SOAL UJIAN (dibuat guru lewat web) -->
-                                    <div class="tab-pane fade show active" id="content-soal-web" role="tabpanel" aria-labelledby="tab-soal-web">
+                                <!-- TAB 1: SOAL UJIAN (dibuat guru lewat web) -->
+                                <div class="tab-pane fade show active" id="content-soal-web" role="tabpanel" aria-labelledby="tab-soal-web">
+                                    @if ($categories->isNotEmpty())
                                         <div class="row">
                                             @foreach ($categories as $cat)
                                                 <div class="col-md-6 col-lg-4 mb-4">
@@ -201,109 +176,121 @@
                                                 </div>
                                             @endforeach
                                         </div>
-                                    </div>
+                                    @else
+                                        <div class="card border-0 shadow-none text-center py-5 px-4 bg-white rounded-2xl">
+                                            <div class="card-body">
+                                                <div class="mx-auto mb-3 rounded-full bg-purple-50 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                                    <i class="fas fa-folder-open text-purple-400 fa-2x"></i>
+                                                </div>
+                                                <h5 class="font-bold text-purple-950 mb-1">Belum Ada Soal Ujian Web Tersedia</h5>
+                                                <p class="text-slate-500 text-sm max-w-md mx-auto mb-0">
+                                                    Belum terdapat paket soal latihan online untuk <strong>Jenjang {{ $jenjang }} - {{ $sub_kategori }}</strong>. Silakan pilih sub-kategori lain di atas atau baca modul PDF yang tersedia.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
 
-                                    <!-- TAB 2: MODUL PDF -->
-                                    <div class="tab-pane fade" id="content-modul-pdf-siswa" role="tabpanel" aria-labelledby="tab-modul-pdf-siswa">
-                                        @php $hasAnyDocFilesSiswa = false; @endphp
+                                <!-- TAB 2: MODUL PDF -->
+                                <div class="tab-pane fade" id="content-modul-pdf-siswa" role="tabpanel" aria-labelledby="tab-modul-pdf-siswa">
+                                    @php $hasAnyDocFilesSiswa = false; @endphp
 
-                                        <div class="d-flex flex-column doc-group-list">
-                                            @foreach (($pdfCategories ?? $categories) as $catMod)
-                                                @php
-                                                    $gModDocFilesSiswa = glob(public_path("uploads/bank_soal_docs/doc_{$catMod->id}_*.*")) ?: [];
-                                                @endphp
-                                                @if (count($gModDocFilesSiswa) > 0)
-                                                    @php $hasAnyDocFilesSiswa = true; @endphp
-                                                    <div class="doc-group-card">
-                                                        <div class="doc-group-header">
-                                                            <span class="doc-group-title">
-                                                                <i class="fas fa-folder"></i> {{ $catMod->deskripsi ?: $catMod->nama_kategori }}
-                                                            </span>
-                                                            <span class="doc-group-count">{{ count($gModDocFilesSiswa) }} File PDF</span>
-                                                        </div>
-                                                        <div class="doc-group-body">
-                                                            <div class="d-flex flex-column doc-file-list">
-                                                                @foreach($gModDocFilesSiswa as $sDocIdx => $sDocPath)
-                                                                    @php
-                                                                        $sDocFileName = basename($sDocPath);
-                                                                        $sDocExt = strtolower(pathinfo($sDocFileName, PATHINFO_EXTENSION));
-                                                                        $sDocDisplay = preg_replace('/^doc_\d+_\d+_/', '', $sDocFileName);
-                                                                        $sDocUrl = asset("uploads/bank_soal_docs/{$sDocFileName}");
-                                                                        $sIsPdf = $sDocExt === 'pdf';
-                                                                    @endphp
-                                                                    <div class="doc-file-item">
-                                                                        <div class="doc-file-left">
-                                                                            <div class="doc-file-icon {{ $sIsPdf ? 'doc-file-icon-pdf' : 'doc-file-icon-word' }}">
-                                                                                <i class="fas {{ $sIsPdf ? 'fa-file-pdf' : 'fa-file-word' }}"></i>
-                                                                            </div>
-                                                                            <div class="doc-file-info">
-                                                                                <div class="doc-file-name-row">
-                                                                                    <h6 class="doc-file-name" title="{{ $sDocDisplay }}">{{ $sDocDisplay }}</h6>
-                                                                                    <span class="doc-file-ext {{ $sIsPdf ? 'doc-file-ext-pdf' : 'doc-file-ext-word' }}">
-                                                                                        {{ strtoupper($sDocExt) }}
-                                                                                    </span>
-                                                                                </div>
-                                                                                <span class="doc-file-sub">File Dokumen Modul Pembelajaran</span>
-                                                                            </div>
+                                    <div class="d-flex flex-column doc-group-list">
+                                        @foreach (($pdfCategories ?? $categories) as $catMod)
+                                            @php
+                                                $gModDocFilesSiswa = glob(public_path("uploads/bank_soal_docs/doc_{$catMod->id}_*.*")) ?: [];
+                                            @endphp
+                                            @if (count($gModDocFilesSiswa) > 0)
+                                                @php $hasAnyDocFilesSiswa = true; @endphp
+                                                <div class="doc-group-card">
+                                                    <div class="doc-group-header">
+                                                        <span class="doc-group-title">
+                                                            <i class="fas fa-folder"></i> {{ $catMod->deskripsi ?: $catMod->nama_kategori }}
+                                                        </span>
+                                                        <span class="doc-group-count">{{ count($gModDocFilesSiswa) }} File PDF</span>
+                                                    </div>
+                                                    <div class="doc-group-body">
+                                                        <div class="d-flex flex-column doc-file-list">
+                                                            @foreach($gModDocFilesSiswa as $sDocIdx => $sDocPath)
+                                                                @php
+                                                                    $sDocFileName = basename($sDocPath);
+                                                                    $sDocExt = strtolower(pathinfo($sDocFileName, PATHINFO_EXTENSION));
+                                                                    $sDocDisplay = preg_replace('/^doc_\d+_\d+_/', '', $sDocFileName);
+                                                                    $sDocUrl = asset("uploads/bank_soal_docs/{$sDocFileName}");
+                                                                    $sIsPdf = $sDocExt === 'pdf';
+                                                                @endphp
+                                                                <div class="doc-file-item">
+                                                                    <div class="doc-file-left">
+                                                                        <div class="doc-file-icon {{ $sIsPdf ? 'doc-file-icon-pdf' : 'doc-file-icon-word' }}">
+                                                                            <i class="fas {{ $sIsPdf ? 'fa-file-pdf' : 'fa-file-word' }}"></i>
                                                                         </div>
-                                                                        <div class="doc-file-right">
-                                                                            @if($sIsPdf)
-                                                                                <button type="button" class="doc-file-read-btn" data-toggle="modal"
-                                                                                    data-target="#modalUjianPreviewDoc_{{ $catMod->id }}_{{ $sDocIdx }}">
-                                                                                    <i class="fas fa-book-reader"></i> Baca Dokumen PDF
-                                                                                </button>
-                                                                            @endif
+                                                                        <div class="doc-file-info">
+                                                                            <div class="doc-file-name-row">
+                                                                                <h6 class="doc-file-name" title="{{ $sDocDisplay }}">{{ $sDocDisplay }}</h6>
+                                                                                <span class="doc-file-ext {{ $sIsPdf ? 'doc-file-ext-pdf' : 'doc-file-ext-word' }}">
+                                                                                    {{ strtoupper($sDocExt) }}
+                                                                                </span>
+                                                                            </div>
+                                                                            <span class="doc-file-sub">File Dokumen Modul Pembelajaran</span>
                                                                         </div>
                                                                     </div>
+                                                                    <div class="doc-file-right">
+                                                                        @if($sIsPdf)
+                                                                            <button type="button" class="doc-file-read-btn" data-toggle="modal"
+                                                                                data-target="#modalUjianPreviewDoc_{{ $catMod->id }}_{{ $sDocIdx }}">
+                                                                                <i class="fas fa-book-reader"></i> Baca Dokumen PDF
+                                                                            </button>
+                                                                        @endif
+                                                                    </div>
+                                                                </div>
 
-                                                                    @if($sIsPdf)
-                                                                        <div class="modal fade p-0" id="modalUjianPreviewDoc_{{ $catMod->id }}_{{ $sDocIdx }}"
-                                                                            tabindex="-1" role="dialog" aria-hidden="true" style="padding-right: 0 !important;">
-                                                                            <div class="modal-dialog m-0 pdf-modal-dialog" role="document">
-                                                                                <div class="modal-content border-0 rounded-0 shadow-none h-100 pdf-modal-content">
-                                                                                    <div class="pdf-modal-header">
-                                                                                        <div class="pdf-modal-header-left">
-                                                                                            <i class="fas fa-file-pdf"></i>
-                                                                                            <div class="min-w-0">
-                                                                                                <h5 class="pdf-modal-title" title="{{ $sDocDisplay }}">{{ $sDocDisplay }}</h5>
-                                                                                                <span class="pdf-modal-protection">
-                                                                                                    <i class="fas fa-shield-alt mr-1"></i>Mode Baca Saja (Proteksi Unduh Aktif)
-                                                                                                </span>
-                                                                                            </div>
+                                                                @if($sIsPdf)
+                                                                    <div class="modal fade p-0" id="modalUjianPreviewDoc_{{ $catMod->id }}_{{ $sDocIdx }}"
+                                                                        tabindex="-1" role="dialog" aria-hidden="true" style="padding-right: 0 !important;">
+                                                                        <div class="modal-dialog m-0 pdf-modal-dialog" role="document">
+                                                                            <div class="modal-content border-0 rounded-0 shadow-none h-100 pdf-modal-content">
+                                                                                <div class="pdf-modal-header">
+                                                                                    <div class="pdf-modal-header-left">
+                                                                                        <i class="fas fa-file-pdf"></i>
+                                                                                        <div class="min-w-0">
+                                                                                            <h5 class="pdf-modal-title" title="{{ $sDocDisplay }}">{{ $sDocDisplay }}</h5>
+                                                                                            <span class="pdf-modal-protection">
+                                                                                                <i class="fas fa-shield-alt mr-1"></i>Mode Baca Saja (Proteksi Unduh Aktif)
+                                                                                            </span>
                                                                                         </div>
-                                                                                        <button type="button" class="pdf-modal-close-btn" data-dismiss="modal" aria-label="Close">
-                                                                                            <i class="fas fa-times mr-1"></i> Tutup Reader
-                                                                                        </button>
                                                                                     </div>
-                                                                                    <div class="pdf-modal-body" oncontextmenu="return false;">
-                                                                                        <iframe src="{{ $sDocUrl }}#toolbar=0&navpanes=0&scrollbar=1&view=FitH"
-                                                                                            class="w-100 h-100 border-0" oncontextmenu="return false;"></iframe>
-                                                                                    </div>
+                                                                                    <button type="button" class="pdf-modal-close-btn" data-dismiss="modal" aria-label="Close">
+                                                                                        <i class="fas fa-times mr-1"></i> Tutup Reader
+                                                                                    </button>
+                                                                                </div>
+                                                                                <div class="pdf-modal-body" oncontextmenu="return false;">
+                                                                                    <iframe src="{{ $sDocUrl }}#toolbar=0&navpanes=0&scrollbar=1&view=FitH"
+                                                                                        class="w-100 h-100 border-0" oncontextmenu="return false;"></iframe>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
-                                                                    @endif
-                                                                @endforeach
-                                                            </div>
+                                                                    </div>
+                                                                @endif
+                                                            @endforeach
                                                         </div>
                                                     </div>
-                                                @endif
-                                            @endforeach
-
-                                            @if (!$hasAnyDocFilesSiswa)
-                                                <div class="text-center py-5 bg-white empty-state-box">
-                                                    <i class="fas fa-file-pdf empty-state-icon"></i>
-                                                    <h6 class="font-bold empty-state-title">Belum ada dokumen modul PDF terunggah untuk {{ $jenjang }} - {{ $sub_kategori }}.</h6>
-                                                    <p class="empty-state-text">Modul PDF akan muncul di sini setelah guru mengunggahnya.</p>
                                                 </div>
                                             @endif
-                                        </div>
-                                    </div>
+                                        @endforeach
 
+                                        @if (!$hasAnyDocFilesSiswa)
+                                            <div class="text-center py-5 bg-white empty-state-box">
+                                                <i class="fas fa-file-pdf empty-state-icon"></i>
+                                                <h6 class="font-bold empty-state-title">Belum ada dokumen modul PDF terunggah untuk Jenjang {{ $jenjang }}.</h6>
+                                                <p class="empty-state-text">Modul PDF akan muncul di sini setelah guru mengunggahnya.</p>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
+
                             </div>
                         </div>
-                    @endif
+                    </div>
                 </div>
 
                 <!-- 4. RIWAYAT HASIL UJIAN SISWA -->
@@ -806,42 +793,7 @@
                 });
             });
 
-            // Sync active state for header mode buttons
-            const btnPaket = document.getElementById('btn-mode-paket');
-            const btnPdf = document.getElementById('btn-mode-pdf');
-            const tabPaket = document.getElementById('tab-soal-web');
-            const tabPdf = document.getElementById('tab-modul-pdf-siswa');
 
-            function activateMode(mode) {
-                if (mode === 'paket') {
-                    if (btnPaket) {
-                        btnPaket.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-white btn-nav-mode active';
-                        btnPaket.style.background = 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)';
-                        btnPaket.style.border = 'none';
-                    }
-                    if (btnPdf) {
-                        btnPdf.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-purple-900 bg-white border border-purple-200 hover:bg-purple-50 btn-nav-mode';
-                        btnPdf.style.background = '';
-                    }
-                    if (tabPaket && typeof $(tabPaket).tab === 'function') $(tabPaket).tab('show');
-                } else {
-                    if (btnPdf) {
-                        btnPdf.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-white btn-nav-mode active';
-                        btnPdf.style.background = 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)';
-                        btnPdf.style.border = 'none';
-                    }
-                    if (btnPaket) {
-                        btnPaket.className = 'btn font-weight-bold rounded-xl px-4 py-2 text-xs shadow-xs text-purple-900 bg-white border border-purple-200 hover:bg-purple-50 btn-nav-mode';
-                        btnPaket.style.background = '';
-                    }
-                    if (tabPdf && typeof $(tabPdf).tab === 'function') $(tabPdf).tab('show');
-                }
-            }
-
-            if (btnPaket) btnPaket.addEventListener('click', function(e) { e.preventDefault(); activateMode('paket'); });
-            if (btnPdf) btnPdf.addEventListener('click', function(e) { e.preventDefault(); activateMode('pdf'); });
-            if (tabPaket && window.jQuery) $(tabPaket).on('shown.bs.tab', function() { activateMode('paket'); });
-            if (tabPdf && window.jQuery) $(tabPdf).on('shown.bs.tab', function() { activateMode('pdf'); });
         });
     </script>
 @endsection

@@ -1505,12 +1505,12 @@ class SiswaController extends Controller
         // Deteksi jenjang otomatis dari biodata atau paket siswa jika belum di-set
         if (empty($jenjangInput)) {
             $kelasSiswa = $siswa->biodata['kelas'] ?? ($siswa->paket->nama_paket ?? '');
-            if (preg_match('/(sd|1|2|3|4|5|6)/i', $kelasSiswa)) {
-                $jenjangInput = 'SD';
-            } elseif (preg_match('/(smp|7|8|9)/i', $kelasSiswa)) {
-                $jenjangInput = 'SMP';
-            } elseif (preg_match('/(sma|smk|10|11|12)/i', $kelasSiswa)) {
+            if (stripos($kelasSiswa, 'SMA') !== false || stripos($kelasSiswa, 'SMK') !== false || preg_match('/\b(10|11|12)\b/', $kelasSiswa)) {
                 $jenjangInput = 'SMA';
+            } elseif (stripos($kelasSiswa, 'SMP') !== false || preg_match('/\b(7|8|9)\b/', $kelasSiswa)) {
+                $jenjangInput = 'SMP';
+            } elseif (stripos($kelasSiswa, 'SD') !== false || preg_match('/\b([1-6])\b/', $kelasSiswa)) {
+                $jenjangInput = 'SD';
             } else {
                 $jenjangInput = 'SD';
             }
