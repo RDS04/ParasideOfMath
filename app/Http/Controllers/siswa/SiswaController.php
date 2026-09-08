@@ -1338,7 +1338,8 @@ class SiswaController extends Controller
             ->where(function ($q) use ($month, $year) {
                 $monthName = \Carbon\Carbon::createFromDate($year, $month, 1)->locale('id')->isoFormat('MMMM');
                 $q->where('tipe_paket_snapshot', 'LIKE', "%{$monthName}%{$year}%")
-                  ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$month, $year]);
+                  ->orWhereRaw("MONTH(created_at) = ? AND YEAR(created_at) = ?", [$month, $year])
+                  ->orWhereRaw("MONTH(approved_at) = ? AND YEAR(approved_at) = ?", [$month, $year]);
             })
             ->get();
 

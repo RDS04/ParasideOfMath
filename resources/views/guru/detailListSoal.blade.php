@@ -148,6 +148,11 @@
                                                 <div class="font-bold text-slate-900 mb-3 text-xs sm:text-sm whitespace-pre-line leading-relaxed soal-text-content">
                                                     {{ $soalItem->soal }}
                                                 </div>
+                                                @if (!empty($soalItem->gambar))
+                                                    <div class="mb-3 text-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                                        <img src="{{ asset($soalItem->gambar) }}" alt="Gambar Soal No. {{ $soalItem->nomor }}" class="img-fluid rounded-lg max-h-52 object-contain mx-auto shadow-xs">
+                                                    </div>
+                                                @endif
                                                 <div class="row g-2">
                                                     @foreach (['A' => $soalItem->opsi_a, 'B' => $soalItem->opsi_b, 'C' => $soalItem->opsi_c, 'D' => $soalItem->opsi_d] as $optKey => $optVal)
                                                         @php $isCorrect = $soalItem->kunci_jawaban === $optKey; @endphp

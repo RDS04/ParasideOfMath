@@ -78,9 +78,9 @@
                 <i class="fas fa-user-slash text-3xl"></i>
             </div>
 
-            <h1 class="font-display text-2xl font-bold text-red-700 mb-3">Akun Dinonaktifkan</h1>
+            <h1 class="font-display text-2xl font-bold text-red-700 mb-3">Akun Belajar Dinonaktifkan</h1>
             <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                Mohon maaf, akun belajar Anda saat ini <strong>dinonaktifkan oleh Admin</strong> dan tidak dapat mengakses fitur belajar untuk sementara. Jika Anda merasa ini adalah kesalahan, silakan hubungi Admin melalui tombol di bawah ini.
+                Mohon maaf, akun bimbingan belajar Anda saat ini sedang dinonaktifkan untuk sementara waktu. Apabila ada pertanyaan atau butuh bantuan mengaktifkan kembali akun Anda, silakan hubungi Admin Paradise of Math melalui tombol WhatsApp di bawah ini.
             </p>
         @elseif (!empty($sudahUploadBukti))
             <!-- Top decorative border color -->
@@ -91,9 +91,9 @@
                 <i class="far fa-clock text-3xl"></i>
             </div>
 
-            <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Pembayaran Ditinjau</h1>
+            <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Verifikasi Pembayaran</h1>
             <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                Terima kasih! Bukti transfer Anda telah kami terima dan saat ini sedang dalam proses verifikasi oleh Admin. Akun belajar Anda akan aktif otomatis maksimal dalam waktu 1x24 jam.
+                Terima kasih banyak! Bukti pembayaran Anda telah kami terima dan sedang dalam proses verifikasi oleh Admin. Akun bimbingan Anda akan aktif secara otomatis begitu pembayaran terkonfirmasi. Mohon tunggu sebentar ya!
             </p>
         @elseif (!empty($hariSudahDitentukan))
             <!-- Top decorative border color -->
@@ -104,9 +104,9 @@
                 <i class="fas fa-calendar-check text-3xl"></i>
             </div>
 
-            <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Jadwal Ditentukan</h1>
+            <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Jadwal Bimbingan Siap!</h1>
             <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                Hari bimbingan Anda telah selesai ditentukan oleh Admin! Silakan lakukan pembayaran dengan menekan tombol <strong>"Bayar"</strong> di bawah ini untuk menyelesaikan pendaftaran.
+                Kabar baik! Hari bimbingan belajar Anda telah selesai ditentukan oleh Admin. Yuk, selesaikan pendaftaran Anda dengan menekan tombol <strong>"Bayar"</strong> di bawah ini.
             </p>
         @else
             <!-- Top decorative border color -->
@@ -119,7 +119,7 @@
 
             <h1 class="font-display text-2xl font-bold text-purple-950 mb-3">Diskusi Penentuan Jadwal</h1>
             <p class="text-sm text-slate-500 leading-relaxed mb-6">
-                Pendaftaran berhasil! <strong>Mohon datang ke lokasi untuk diskusi</strong> dan penentuan jadwal hari belajar Anda bersama Admin lembaga bimbingan belajar Paradise of Math.
+                Pendaftaran Anda berhasil dicatat! Selanjutnya, silakan lakukan diskusi penentuan hari bimbingan belajar Anda bersama Admin Paradise of Math melalui <strong>WhatsApp</strong>, <strong>Google Meet</strong>, atau <strong>datang langsung ke lokasi bimbel</strong>.
             </p>
         @endif
 

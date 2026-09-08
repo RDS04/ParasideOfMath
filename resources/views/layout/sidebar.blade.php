@@ -131,13 +131,15 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.riwayat-pembayaran') }}"
-                                    class="nav-link {{ Route::is('admin.riwayat-pembayaran') ? 'active' : '' }}">
+                                <a href="{{ route('admin.approve-pembayaran.index') }}"
+                                    class="nav-link {{ Route::is('admin.approve-pembayaran.*') ? 'active' : '' }}">
                                     <i class="fas fa-file-invoice-dollar nav-icon text-amber-400"></i>
                                     <p>
                                         Approve Pembayaran
                                         @php
-                                            $pendingPaymentCount = \App\Models\RiwayatPembayaran::where('status', 'under_review')->count();
+                                            $pendingPaymentCount = \App\Models\RiwayatPembayaran::where('status', 'under_review')
+                                                ->where('tipe_paket_snapshot', 'NOT LIKE', '%Tambah Mapel%')
+                                                ->count();
                                         @endphp
                                         @if($pendingPaymentCount > 0)
                                             <span class="badge badge-warning right">{{ $pendingPaymentCount }}</span>

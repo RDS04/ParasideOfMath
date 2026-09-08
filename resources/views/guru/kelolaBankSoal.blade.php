@@ -203,7 +203,7 @@
                         <div class="card-body p-3.5 sm:p-4 bg-slate-50/40 tab-content" id="tabMenuBankSoalContent">
                             <!-- ══════════════ MENU 1: BUAT SOAL MANUAL ══════════════ -->
                             <div class="tab-pane fade show active" id="tab-manual-content" role="tabpanel" aria-labelledby="tab-manual-btn">
-                                <form action="{{ route($prefixRoute . '.soal.store') }}" method="POST" id="formInputSoalLive">
+                                <form action="{{ route($prefixRoute . '.soal.store') }}" method="POST" id="formInputSoalLive" enctype="multipart/form-data">
                                     @csrf
                                     <input type="hidden" name="kategori_soal_id" value="{{ $selectedCategory->id }}">
 
@@ -238,6 +238,12 @@
                                                 class="form-control rounded-xl font-medium text-sm border-slate-200"
                                                 rows="3" placeholder="Tuliskan teks pertanyaan soal..." required
                                                 oninput="updateLivePreview()">{{ old('soal') }}</textarea>
+                                        </div>
+
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label text-xs font-bold text-slate-700 uppercase">Gambar Soal (Opsional)</label>
+                                            <input type="file" name="gambar" class="form-control rounded-xl text-xs border-slate-200" accept="image/*">
+                                            <small class="text-slate-400 d-block mt-1">Format: JPG, PNG, WEBP, GIF. Maksimal 5MB.</small>
                                         </div>
 
                                         <div class="col-md-6 mb-3">
@@ -471,6 +477,13 @@
                                                 <p class="font-bold text-slate-900 mb-3 text-xs sm:text-sm whitespace-pre-line leading-relaxed">
                                                     {{ $soalItem->soal }}
                                                 </p>
+
+                                                @if (!empty($soalItem->gambar))
+                                                    <div class="mb-3 text-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                                        <img src="{{ asset($soalItem->gambar) }}" alt="Gambar Soal No. {{ $soalItem->nomor }}" class="img-fluid rounded-lg max-h-52 object-contain mx-auto shadow-xs">
+                                                    </div>
+                                                @endif
+
                                                 <div class="row g-2">
                                                     @foreach (['A' => $soalItem->opsi_a, 'B' => $soalItem->opsi_b, 'C' => $soalItem->opsi_c, 'D' => $soalItem->opsi_d] as $optKey => $optVal)
                                                         @php $isCorrect = $soalItem->kunci_jawaban === $optKey; @endphp
@@ -500,7 +513,7 @@
                                                             <span aria-hidden="true">&times;</span>
                                                         </button>
                                                     </div>
-                                                    <form action="{{ route($prefixRoute . '.soal.update', $soalItem->id) }}" method="POST">
+                                                    <form action="{{ route($prefixRoute . '.soal.update', $soalItem->id) }}" method="POST" enctype="multipart/form-data">
                                                         @csrf
                                                         @method('PUT')
                                                         <div class="modal-body p-4 bg-slate-50/50">
@@ -526,6 +539,23 @@
                                                                 <div class="col-12 mb-3">
                                                                     <label class="form-label text-xs font-bold text-slate-700 uppercase">Pertanyaan / Soal</label>
                                                                     <textarea name="soal" class="form-control rounded-xl font-medium text-sm" rows="3" required>{{ old('soal', $soalItem->soal) }}</textarea>
+                                                                </div>
+
+                                                                <div class="col-12 mb-3">
+                                                                    <label class="form-label text-xs font-bold text-slate-700 uppercase">Gambar Soal (Opsional)</label>
+                                                                    @if (!empty($soalItem->gambar))
+                                                                        <div class="mb-2 d-flex align-items-center gap-3 bg-white p-2.5 rounded-xl border border-slate-200">
+                                                                            <img src="{{ asset($soalItem->gambar) }}" alt="Gambar Soal Current" class="h-16 rounded-lg object-contain border">
+                                                                            <div class="form-check text-xs">
+                                                                                <input class="form-check-input" type="checkbox" name="remove_gambar" value="1" id="remove_gambar_{{ $soalItem->id }}">
+                                                                                <label class="form-check-label font-bold text-rose-600 cursor-pointer" for="remove_gambar_{{ $soalItem->id }}">
+                                                                                    <i class="fas fa-trash-alt mr-1"></i> Hapus Gambar Saat Ini
+                                                                                </label>
+                                                                            </div>
+                                                                        </div>
+                                                                    @endif
+                                                                    <input type="file" name="gambar" class="form-control rounded-xl text-xs border-slate-200" accept="image/*">
+                                                                    <small class="text-slate-400 d-block mt-1">Unggah file gambar baru jika ingin mengganti.</small>
                                                                 </div>
 
                                                                 <div class="col-md-6 mb-3">
@@ -584,15 +614,23 @@
                         <div class="alert alert-emerald bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-3 text-xs">
                             <div class="d-flex align-items-center gap-2 mb-1">
                                 <i class="fas fa-info-circle text-emerald-700 fa-lg"></i>
-                                <strong class="text-emerald-950">Petunjuk Import Excel</strong>
+                                <strong class="text-emerald-950">Petunjuk Import Excel &amp; Gambar Soal</strong>
                             </div>
+                            <p class="text-emerald-800 mb-1 leading-relaxed">
+                                Upload file Excel sesuai format template. Kolom ke-8 (opsional) dapat diisi nama file gambar (misal: <code>soal3.png</code>).
+                            </p>
                             <p class="text-emerald-800 mb-0 leading-relaxed">
-                                Upload file Excel sesuai dengan format template yang disediakan.
+                                Jika ada gambar soal, Anda dapat memilih file-file gambarnya sekaligus di bawah ini.
                             </p>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label text-xs font-bold text-slate-700 uppercase">Pilih File Excel (.xlsx / .xls)</label>
+                            <label class="form-label text-xs font-bold text-slate-700 uppercase">Pilih File Excel (.xlsx / .xls / .csv)</label>
                             <input type="file" name="file_excel" class="form-control form-control-file text-xs" accept=".xlsx,.xls,.csv" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-xs font-bold text-slate-700 uppercase">File Gambar Soal Pendukung (Opsional, Multiple)</label>
+                            <input type="file" name="soal_images[]" class="form-control form-control-file text-xs" accept="image/*" multiple>
+                            <small class="text-slate-400 d-block mt-1">Pilih file gambar yang dirujuk pada kolom 8 Excel.</small>
                         </div>
                     </div>
                     <div class="modal-footer bg-white py-3 px-4 border-top">

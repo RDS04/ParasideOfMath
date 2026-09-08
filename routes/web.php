@@ -21,6 +21,10 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/verify-otp', 'showVerifyOtp')->name('verify.otp');
     Route::post('/verify-otp', 'verifyOtp')->name('verify.otp.post');
     Route::post('/resend-otp', 'resendOtp')->name('resend.otp');
+    Route::get('/forgot-password', 'showForgotPassword')->name('password.request');
+    Route::post('/forgot-password', 'sendResetOtp')->name('password.email');
+    Route::get('/reset-password-otp', 'showResetPasswordOtp')->name('password.otp');
+    Route::post('/reset-password-otp', 'submitResetPassword')->name('password.update');
     Route::post('/logout', 'logout')->name('logout');
 });
 
@@ -204,6 +208,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::delete('/admin/guru/delete/{id}', 'deleteGuru')->name('admin.guru.delete');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
     Route::get('/admin/riwayat-pembayaran', 'allRiwayatPayment')->name('admin.riwayat-pembayaran');
+    Route::get('/admin/approve-pembayaran', 'approvePembayaranPage')->name('admin.approve-pembayaran.index');
     Route::get('/admin/laporan-pendapatan', 'laporanPendapatan')->name('admin.laporan-pendapatan');
     Route::get('/admin/laporan-pendapatan/export-excel', 'exportRevenueExcel')->name('admin.laporan-pendapatan.export.excel');
     Route::get('/admin/laporan-pendapatan/export-pdf', 'exportRevenuePdf')->name('admin.laporan-pendapatan.export.pdf');

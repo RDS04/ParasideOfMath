@@ -412,7 +412,13 @@
                                     </div>
                                     <div class="card-body p-4">
                                         <!-- Pertanyaan Soal -->
-                                        <h5 class="font-bold text-purple-950 mb-4 leading-relaxed text-base whitespace-pre-line">{{ $soalItem->soal }}</h5>
+                                        <h5 class="font-bold text-purple-950 mb-3 leading-relaxed text-base whitespace-pre-line">{{ $soalItem->soal }}</h5>
+
+                                        @if (!empty($soalItem->gambar))
+                                            <div class="mb-4 text-center bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                                                <img src="{{ asset($soalItem->gambar) }}" alt="Gambar Soal No. {{ $soalItem->nomor }}" class="img-fluid rounded-xl max-h-80 object-contain mx-auto shadow-sm">
+                                            </div>
+                                        @endif
 
                                         <!-- Opsi Jawaban Radio Buttons -->
                                         <div class="space-y-3">

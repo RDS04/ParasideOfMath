@@ -134,12 +134,22 @@
                             $totalSesiRequest = $totalSesiCalculated;
                             $totalTagihan     = $hargaPerSesi * $totalSesiRequest;
                         }
-
-                        $extension = $student->bukti_transfer ? pathinfo($student->bukti_transfer, PATHINFO_EXTENSION) : null;
-                        $isTunai = $student->bukti_transfer === 'TUNAI_CASH_PAYMENT' || $paymentMethod === 'tunai';
-                    @endphp
-                        @php
+                            
                             $pendingMapelStatus = $bio['pending_mapel_status'] ?? 'menunggu_jadwal_admin';
+                            
+                            // Hanya ambil bukti bayar jika siswa sudah sampai pada tahap pengunggahan bukti (pending_approval_admin)
+                            $buktiRequest = null;
+                            if ($pendingMapelStatus === 'pending_approval_admin') {
+                                if ($latestPayment && !empty($latestPayment->bukti_transfer)) {
+                                    $buktiRequest = $latestPayment->bukti_transfer;
+                                } elseif (!empty($student->bukti_transfer)) {
+                                    $buktiRequest = $student->bukti_transfer;
+                                }
+                            }
+
+                            $extension = $buktiRequest ? pathinfo($buktiRequest, PATHINFO_EXTENSION) : null;
+                            $isTunai   = ($buktiRequest === 'TUNAI_CASH_PAYMENT') || ($paymentMethod === 'tunai' && $pendingMapelStatus === 'pending_approval_admin');
+
                             $hasSetHari = false;
                             if (!empty($pendingHari) && is_array($pendingHari)) {
                                 foreach ($pendingHari as $hList) {
@@ -149,8 +159,9 @@
                                     }
                                 }
                             }
-                            $hasSubmittedPayment = !empty($student->bukti_transfer) || $isTunai || $pendingMapelStatus === 'pending_approval_admin';
-                            $canApprove = $hasSetHari && $hasSubmittedPayment;
+
+                            $hasSubmittedPayment = !empty($buktiRequest) || $isTunai;
+                            $canApprove          = $hasSetHari && $hasSubmittedPayment;
                         @endphp
 
                         <div class="card-header bg-white py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
@@ -195,10 +206,10 @@
                                             <span class="text-xs font-weight-bold text-amber-800">Pembayaran Tunai</span>
                                             <span class="text-[10px] text-amber-700 mt-1">Dibayar langsung di tempat / ke tutor</span>
                                         </div>
-                                    @elseif ($student->bukti_transfer)
+                                    @elseif ($buktiRequest)
                                         <div class="w-100 bg-light p-2 rounded-xl border mb-2 d-flex align-items-center justify-content-center" style="background-color: #faf9fd; border-radius: 12px; border: 1px solid #f3f0fc; min-height: 160px;">
                                             @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png']))
-                                                <img src="{{ asset($student->bukti_transfer) }}" alt="Bukti Pembayaran" class="img-fluid rounded-xl shadow-sm" style="object-fit: contain; max-height: 160px; max-width: 100%;" />
+                                                <img src="{{ asset($buktiRequest) }}" alt="Bukti Pembayaran" class="img-fluid rounded-xl shadow-sm" style="object-fit: contain; max-height: 160px; max-width: 100%;" />
                                             @else
                                                 <div class="py-4 text-center">
                                                     <i class="fas fa-file-pdf text-danger fa-2x mb-2"></i>
@@ -206,7 +217,7 @@
                                                 </div>
                                             @endif
                                         </div>
-                                        <a href="{{ asset($student->bukti_transfer) }}" target="_blank" class="btn btn-xs btn-outline-purple font-weight-bold py-2 rounded-lg text-xs w-100 d-block text-center">
+                                        <a href="{{ asset($buktiRequest) }}" target="_blank" class="btn btn-xs btn-outline-purple font-weight-bold py-2 rounded-lg text-xs w-100 d-block text-center">
                                             <i class="fas fa-external-link-alt mr-1"></i> Lihat Bukti Penuh
                                         </a>
                                     @else

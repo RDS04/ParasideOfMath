@@ -424,7 +424,7 @@
                         <input type="checkbox" id="loginRemember" name="remember" class="check-custom" />
                         <label for="loginRemember" class="text-sm text-gray-600 cursor-pointer select-none">Ingat saya</label>
                     </div>
-                    <a href="#" class="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors">Lupa sandi?</a>
+                    <a href="{{ route('password.request') }}" class="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors">Lupa sandi?</a>
                 </div>
 
                 <button type="submit" class="btn-primary" id="loginSubmit">Masuk</button>

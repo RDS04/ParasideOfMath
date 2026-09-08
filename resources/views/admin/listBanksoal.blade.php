@@ -520,7 +520,7 @@
                                 <div class="tab-pane fade show active" id="tab-manual-admin-content" role="tabpanel"
                                     aria-labelledby="tab-manual-admin-btn">
                                     <form action="{{ route($prefixRoute . '.soal.store') }}" method="POST"
-                                        id="formInputSoalLive">
+                                        id="formInputSoalLive" enctype="multipart/form-data">
                                         @csrf
                                         <input type="hidden" name="kategori_soal_id" value="{{ $selectedCategory->id }}">
 
@@ -560,6 +560,12 @@
                                                     class="form-control rounded-xl font-medium text-sm border-slate-200"
                                                     rows="3" placeholder="Tuliskan teks pertanyaan soal..." required
                                                     oninput="updateLivePreview()">{{ old('soal') }}</textarea>
+                                            </div>
+
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label text-xs font-bold text-slate-700 uppercase">Gambar Soal (Opsional)</label>
+                                                <input type="file" name="gambar" class="form-control rounded-xl text-xs border-slate-200" accept="image/*">
+                                                <small class="text-slate-400 d-block mt-1">Format: JPG, PNG, WEBP, GIF. Maksimal 5MB.</small>
                                             </div>
 
                                             <div class="col-md-6 mb-3">
@@ -919,6 +925,11 @@
                                                     <p class="font-bold text-slate-900 mb-3 text-sm whitespace-pre-line">
                                                         {{ $soalItem->soal }}
                                                     </p>
+                                                    @if (!empty($soalItem->gambar))
+                                                        <div class="mb-3 text-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                                            <img src="{{ asset($soalItem->gambar) }}" alt="Gambar Soal No. {{ $soalItem->nomor }}" class="img-fluid rounded-lg max-h-52 object-contain mx-auto shadow-xs">
+                                                        </div>
+                                                    @endif
                                                     <div class="row g-2">
                                                         @foreach (['A' => $soalItem->opsi_a, 'B' => $soalItem->opsi_b, 'C' => $soalItem->opsi_c, 'D' => $soalItem->opsi_d] as $optKey => $optVal)
                                                             @php $isCorrect = $soalItem->kunci_jawaban === $optKey; @endphp
@@ -1228,6 +1239,7 @@
                                     <li>Kolom 5: <code>jawaban_c</code> (Opsi Jawaban C)</li>
                                     <li>Kolom 6: <code>jawaban_d</code> (Opsi Jawaban D)</li>
                                     <li>Kolom 7: <code>kunci_jawaban</code> (A / B / C / D)</li>
+                                    <li>Kolom 8: <code>gambar</code> (Nama File Gambar / URL - Opsional)</li>
                                 </ol>
                             </div>
                             <div class="mb-3">
@@ -1238,6 +1250,13 @@
                                     accept=".xlsx,.xls,.csv,.txt" required>
                                 <span class="text-xs text-slate-400 mt-1 d-block">Format didukung: .xlsx, .xls, .csv (Maksimal
                                     5MB)</span>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-xs font-bold text-slate-700 uppercase">File Gambar Soal Pendukung (Opsional, Multiple)</label>
+                                <input type="file" name="soal_images[]"
+                                    class="form-control-file border rounded-xl p-2 bg-white w-100 text-xs"
+                                    accept="image/*" multiple>
+                                <small class="text-slate-400 d-block mt-1">Pilih file gambar yang dirujuk pada kolom 8 Excel.</small>
                             </div>
                             <div class="text-center pt-2">
                                 <a href="{{ route($prefixRoute . '.template') }}"

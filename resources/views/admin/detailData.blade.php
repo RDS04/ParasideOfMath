@@ -352,7 +352,7 @@
                         $pendingSesiList  = $bio['pending_sesi_per_mapel'] ?? [];
                         $pendingHariList  = $bio['pending_hari_per_mapel'] ?? [];
                         $pendingMapelStat = $bio['pending_mapel_status'] ?? 'menunggu_jadwal_admin';
-                        $allDaysList      = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                        $allDaysList      = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     @endphp
 
                     @if (!empty($pendingMapelList))
@@ -418,25 +418,6 @@
                                         </button>
                                     </div>
                                 </form>
-
-                                <div class="mt-3 pt-3 border-top">
-                                    @if ($pendingMapelStat === 'pending_approval_admin' || !empty($student->bukti_transfer))
-                                        <form action="{{ route('admin.siswa.requests.approve', $student->id) }}" method="POST" class="m-0" onsubmit="return confirm('Setujui pembayaran & aktifkan mapel baru untuk {{ $student->name }}?')">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-success font-weight-bold rounded-xl px-3.5 py-2 text-xs shadow-sm w-100">
-                                                <i class="fas fa-check-circle mr-1.5"></i> Setujui Pembayaran &amp; Aktifkan Mapel
-                                            </button>
-                                        </form>
-                                    @elseif ($pendingMapelStat === 'menunggu_jadwal_admin')
-                                        <button type="button" class="btn btn-sm btn-secondary font-weight-bold rounded-xl px-3.5 py-2 text-xs w-100 opacity-60" disabled title="Simpan hari bimbingan terlebih dahulu di atas">
-                                            <i class="fas fa-lock mr-1.5"></i> Approve (Simpan Hari Dulu)
-                                        </button>
-                                    @else
-                                        <button type="button" class="btn btn-sm btn-secondary font-weight-bold rounded-xl px-3.5 py-2 text-xs w-100 opacity-60" disabled title="Menunggu siswa mengirimkan bukti pembayaran via Bukti Bayar">
-                                            <i class="fas fa-lock mr-1.5"></i> Approve (Nunggu Bayar Siswa)
-                                        </button>
-                                    @endif
-                                </div>
                             </div>
                         </div>
                     @endif

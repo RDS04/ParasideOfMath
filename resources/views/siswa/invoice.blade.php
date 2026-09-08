@@ -251,7 +251,12 @@
                             </div>
                             
                             <!-- Large Amount & Date Box -->
-                            <div class="d-flex flex-column align-items-end">
+                            <div class="d-flex flex-column align-items-end" style="position: relative;">
+                                @if(!empty($hasPaidCurrentMonth))
+                                    <div style="border: 2.5px solid #10b981; color: #10b981; font-size: 13px; font-weight: 900; padding: 2px 8px; transform: rotate(-8deg); border-radius: 6px; background-color: #ecfdf5; margin-bottom: 4px; letter-spacing: 1.5px; text-transform: uppercase;">
+                                        <i class="fas fa-check-circle mr-1"></i> LUNAS
+                                    </div>
+                                @endif
                                 <!-- Price Box -->
                                 <div class="px-3 py-1.5 text-center font-weight-bold shadow-xs" style="border: 2px solid #000; background-color: #fff; font-size: 16px; color: #e11d48; min-width: 140px;">
                                     {{ number_format($grandTotal ?? $totalHarga) }}

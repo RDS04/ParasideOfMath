@@ -381,6 +381,145 @@ class AuthController extends Controller
     }
 
     /**
+     * Tampilkan Halaman Lupa Password (Input Email).
+     */
+    public function showForgotPassword()
+    {
+        return view('auth.forgot_password');
+    }
+
+    /**
+     * Kirim Kode OTP Reset Password ke Email.
+     */
+    public function sendResetOtp(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ], [
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+        ]);
+
+        $email = strtolower(trim($request->email));
+        $name = '';
+        $role = '';
+
+        // Cek di Siswa terlebih dahulu
+        $siswa = Siswa::where('email', $email)->first();
+        if ($siswa) {
+            $name = $siswa->name;
+            $role = 'siswa';
+        } else {
+            // Cek di User (Admin / Guru)
+            $user = User::where('email', $email)->first();
+            if ($user) {
+                $name = $user->name;
+                $role = $user->role ?? 'user';
+            }
+        }
+
+        if (!$name) {
+            return back()->withInput()->with('error', 'Alamat email (' . $email . ') belum terdaftar di sistem.');
+        }
+
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        OtpVerification::updateOrCreate(
+            ['email' => $email],
+            [
+                'role' => 'reset_' . $role,
+                'name' => $name,
+                'phone' => '-',
+                'password' => '-',
+                'otp' => $otp,
+                'expires_at' => Carbon::now()->addMinutes(10),
+            ]
+        );
+
+        $this->dispatchOtpEmail($email, $otp, $name, 'reset_password');
+
+        $request->session()->put('reset_otp_email', $email);
+
+        return redirect()->route('password.otp')
+            ->with('success', 'Kode OTP reset kata sandi telah dikirimkan ke email (' . $email . '). Silakan cek kotak masuk/spam.');
+    }
+
+    /**
+     * Tampilkan Halaman Form Verifikasi OTP & Password Baru.
+     */
+    public function showResetPasswordOtp(Request $request)
+    {
+        $email = $request->query('email') ?? session('reset_otp_email');
+
+        if (!$email) {
+            return redirect()->route('password.request')->with('error', 'Sesi reset kata sandi berakhir. Silakan masukkan email Anda kembali.');
+        }
+
+        return view('auth.reset_password_otp', compact('email'));
+    }
+
+    /**
+     * Eksekusi Reset Password menggunakan OTP.
+     */
+    public function submitResetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+            'otp' => ['required', 'string', 'size:6'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.required' => 'Email tidak valid.',
+            'otp.required' => 'Kode OTP wajib diisi.',
+            'otp.size' => 'Kode OTP harus 6 digit angka.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min' => 'Kata sandi minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+        ]);
+
+        $email = strtolower(trim($request->email));
+        $otpRecord = OtpVerification::where('email', $email)->first();
+
+        if (!$otpRecord) {
+            return redirect()->route('password.request')->with('error', 'Permintaan reset kata sandi tidak ditemukan atau sudah diproses. Silakan minta OTP baru.');
+        }
+
+        if ($otpRecord->isExpired()) {
+            return back()->withInput()->with('error', 'Kode OTP telah kadaluarsa (lebih dari 10 menit). Silakan klik "Kirim Ulang OTP".');
+        }
+
+        if ($otpRecord->otp !== $request->otp) {
+            return back()->withInput()->with('error', 'Kode OTP yang Anda masukkan tidak sesuai. Silakan periksa kembali email Anda.');
+        }
+
+        // Update password di Siswa atau User
+        $hashedPassword = Hash::make($request->password);
+        $updated = false;
+
+        $siswa = Siswa::where('email', $email)->first();
+        if ($siswa) {
+            $siswa->password = $hashedPassword;
+            $siswa->save();
+            $updated = true;
+        }
+
+        $user = User::where('email', $email)->first();
+        if ($user) {
+            $user->password = $hashedPassword;
+            $user->save();
+            $updated = true;
+        }
+
+        if (!$updated) {
+            return back()->withInput()->with('error', 'Akun tidak ditemukan untuk memperbarui kata sandi.');
+        }
+
+        $otpRecord->delete();
+        $request->session()->forget('reset_otp_email');
+
+        return redirect()->route('login')->with('success', 'Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru Anda.');
+    }
+
+    /**
      * Redirect user based on their role (for web guard).
      */
     protected function redirectUserBasedOnRole($user)

@@ -20,6 +20,7 @@ class BankSoal extends Model
         'opsi_c',
         'opsi_d',
         'kunci_jawaban',
+        'gambar',
     ];
 
     public function kategori()

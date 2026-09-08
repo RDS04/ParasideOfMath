@@ -781,7 +781,19 @@ class GuruController extends Controller
             'opsi_c' => 'required|string',
             'opsi_d' => 'required|string',
             'kunci_jawaban' => 'required|in:A,B,C,D',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
         ]);
+
+        if ($request->hasFile('gambar')) {
+            $destDir = public_path('uploads/soal_images');
+            if (!file_exists($destDir)) {
+                mkdir($destDir, 0777, true);
+            }
+            $file = $request->file('gambar');
+            $fileName = 'soal_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($destDir, $fileName);
+            $validated['gambar'] = 'uploads/soal_images/' . $fileName;
+        }
 
         $soal = BankSoal::create($validated);
         $kategori = $soal->kategori;
@@ -814,7 +826,27 @@ class GuruController extends Controller
             'opsi_c' => 'required|string',
             'opsi_d' => 'required|string',
             'kunci_jawaban' => 'required|in:A,B,C,D',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
         ]);
+
+        if ($request->input('remove_gambar') == '1') {
+            if ($soal->gambar && file_exists(public_path($soal->gambar))) {
+                @unlink(public_path($soal->gambar));
+            }
+            $validated['gambar'] = null;
+        } elseif ($request->hasFile('gambar')) {
+            if ($soal->gambar && file_exists(public_path($soal->gambar))) {
+                @unlink(public_path($soal->gambar));
+            }
+            $destDir = public_path('uploads/soal_images');
+            if (!file_exists($destDir)) {
+                mkdir($destDir, 0777, true);
+            }
+            $file = $request->file('gambar');
+            $fileName = 'soal_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move($destDir, $fileName);
+            $validated['gambar'] = 'uploads/soal_images/' . $fileName;
+        }
 
         $soal->update($validated);
         $kategori = $soal->kategori;
@@ -840,6 +872,11 @@ class GuruController extends Controller
         $soal = BankSoal::findOrFail($id);
         $kategori = $soal->kategori;
         $nomor = $soal->nomor;
+
+        if ($soal->gambar && file_exists(public_path($soal->gambar))) {
+            @unlink(public_path($soal->gambar));
+        }
+
         $soal->delete();
 
         return redirect()->route('guru.bank-soal.index', [
@@ -863,6 +900,7 @@ class GuruController extends Controller
         $request->validate([
             'kategori_soal_id' => 'required|exists:kategori_soals,id',
             'file_excel'        => 'required|file|mimes:pdf,doc,docx,xlsx,xls,csv,txt|max:10240',
+            'soal_images.*'     => 'nullable|file|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
         ], [
             'file_excel.required' => 'File dokumen wajib diunggah.',
             'file_excel.mimes'    => 'Format file harus berupa PDF (.pdf), Word (.doc, .docx), Excel (.xlsx, .xls), atau CSV.',
@@ -895,7 +933,23 @@ class GuruController extends Controller
             ])->with('success', 'File dokumen ' . strtoupper($extension) . ' ("' . $file->getClientOriginalName() . '") berhasil diunggah & tersimpan untuk kategori ini!');
         }
 
+        // Simpan file gambar pendukung yang diunggah secara batch (bila ada)
+        $uploadedImagesMap = [];
+        if ($request->hasFile('soal_images')) {
+            $destImgDir = public_path('uploads/soal_images');
+            if (!file_exists($destImgDir)) {
+                mkdir($destImgDir, 0777, true);
+            }
+            foreach ($request->file('soal_images') as $imgFile) {
+                $clientName = $imgFile->getClientOriginalName();
+                $savedName = 'import_' . time() . '_' . uniqid() . '_' . preg_replace('/[^A-Za-z0-9_\-\.]/', '_', $clientName);
+                $imgFile->move($destImgDir, $savedName);
+                $uploadedImagesMap[strtolower($clientName)] = 'uploads/soal_images/' . $savedName;
+            }
+        }
+
         $rows = [];
+        $embeddedDrawingsMap = [];
 
         try {
             if (in_array($extension, ['csv', 'txt'])) {
@@ -912,6 +966,44 @@ class GuruController extends Controller
                 $spreadsheet = IOFactory::load($filePath);
                 $worksheet   = $spreadsheet->getActiveSheet();
                 $rows        = $worksheet->toArray();
+
+                // Ekstrak gambar yang di-paste/insert langsung ke dalam sel Excel
+                $destImgDir = public_path('uploads/soal_images');
+                if (!file_exists($destImgDir)) {
+                    mkdir($destImgDir, 0777, true);
+                }
+
+                foreach ($worksheet->getDrawingCollection() as $drawing) {
+                    $coord = $drawing->getCoordinates();
+                    if (preg_match('/(\d+)/', $coord, $m)) {
+                        $rowNum = (int)$m[1];
+                        $savedName = null;
+
+                        if ($drawing instanceof \PhpOffice\PhpSpreadsheet\Worksheet\Drawing) {
+                            $path = $drawing->getPath();
+                            if (file_exists($path)) {
+                                $ext = pathinfo($path, PATHINFO_EXTENSION) ?: 'png';
+                                $savedName = 'embed_' . time() . '_' . uniqid() . '.' . $ext;
+                                copy($path, $destImgDir . '/' . $savedName);
+                            }
+                        } elseif ($drawing instanceof \PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing) {
+                            ob_start();
+                            call_user_func($drawing->getRenderingFunction(), $drawing->getImageResource());
+                            $imageString = ob_get_contents();
+                            ob_end_clean();
+                            $ext = 'png';
+                            if ($drawing->getMimeType() == \PhpOffice\PhpSpreadsheet\Worksheet\MemoryDrawing::MIMETYPE_JPEG) {
+                                $ext = 'jpg';
+                            }
+                            $savedName = 'embed_' . time() . '_' . uniqid() . '.' . $ext;
+                            file_put_contents($destImgDir . '/' . $savedName, $imageString);
+                        }
+
+                        if ($savedName) {
+                            $embeddedDrawingsMap[$rowNum] = 'uploads/soal_images/' . $savedName;
+                        }
+                    }
+                }
             }
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal membaca file Excel: ' . $e->getMessage());
@@ -940,6 +1032,7 @@ class GuruController extends Controller
             $opsiC     = trim((string)($row[4] ?? ''));
             $opsiD     = trim((string)($row[5] ?? ''));
             $kunciRaw  = strtoupper(trim((string)($row[6] ?? 'A')));
+            $gambarVal = trim((string)($row[7] ?? ''));
 
             if (empty($soalText) || empty($opsiA) || empty($opsiB)) {
                 continue;
@@ -947,6 +1040,22 @@ class GuruController extends Controller
 
             $nomorSoal = is_numeric($no) && (int)$no > 0 ? (int)$no : ($maxNo + count($previewData) + 1);
             $kunci     = in_array($kunciRaw, ['A', 'B', 'C', 'D']) ? $kunciRaw : 'A';
+            $excelRowNumber = $index + 1;
+
+            // Resolve gambar path (Prioritaskan gambar yang ter-embed langsung di Excel sel baris ini)
+            $finalGambar = null;
+            if (isset($embeddedDrawingsMap[$excelRowNumber])) {
+                $finalGambar = $embeddedDrawingsMap[$excelRowNumber];
+            } elseif (!empty($gambarVal)) {
+                $lowerVal = strtolower($gambarVal);
+                if (isset($uploadedImagesMap[$lowerVal])) {
+                    $finalGambar = $uploadedImagesMap[$lowerVal];
+                } elseif (str_starts_with($gambarVal, 'http://') || str_starts_with($gambarVal, 'https://') || str_starts_with($gambarVal, 'uploads/')) {
+                    $finalGambar = $gambarVal;
+                } else {
+                    $finalGambar = 'uploads/soal_images/' . $gambarVal;
+                }
+            }
 
             $previewData[] = [
                 'nomor'        => $nomorSoal,
@@ -956,6 +1065,7 @@ class GuruController extends Controller
                 'opsi_c'       => $opsiC,
                 'opsi_d'       => $opsiD,
                 'kunci_jawaban' => $kunci,
+                'gambar'       => $finalGambar,
             ];
         }
 
@@ -1016,6 +1126,7 @@ class GuruController extends Controller
                 'opsi_c'        => $item['opsi_c'],
                 'opsi_d'        => $item['opsi_d'],
                 'kunci_jawaban' => $item['kunci_jawaban'],
+                'gambar'        => $item['gambar'] ?? null,
             ]);
             $savedCount++;
         }
@@ -1055,12 +1166,13 @@ class GuruController extends Controller
             // Write UTF-8 BOM
             fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
-            // Header: 1 no, 2 soal, jawaban A, jawaban B, jawaban C, jawaban D, Kunci jawaban
-            fputcsv($file, ['no', 'soal', 'jawaban_a', 'jawaban_b', 'jawaban_c', 'jawaban_d', 'kunci_jawaban']);
+            // Header: no, soal, jawaban_a, jawaban_b, jawaban_c, jawaban_d, kunci_jawaban, gambar
+            fputcsv($file, ['no', 'soal', 'jawaban_a', 'jawaban_b', 'jawaban_c', 'jawaban_d', 'kunci_jawaban', 'gambar']);
 
             // Sample rows
-            fputcsv($file, ['1', 'Berapakah hasil dari 15 + 25?', '30', '35', '40', '45', 'C']);
-            fputcsv($file, ['2', 'Apa nama ibu kota negara Indonesia?', 'Jakarta', 'Bandung', 'Surabaya', 'Medan', 'A']);
+            fputcsv($file, ['1', 'Berapakah hasil dari 15 + 25?', '30', '35', '40', '45', 'C', '']);
+            fputcsv($file, ['2', 'Apa nama ibu kota negara Indonesia?', 'Jakarta', 'Bandung', 'Surabaya', 'Medan', 'A', '']);
+            fputcsv($file, ['3', 'Perhatikan gambar bangun datar di samping. Berapakah luasnya?', '12 cm²', '24 cm²', '36 cm²', '48 cm²', 'B', 'soal3.png']);
 
             fclose($file);
         };
