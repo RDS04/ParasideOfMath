@@ -7,6 +7,11 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Siswa\SiswaController;
 use App\Http\Controllers\Guru\GuruController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\OnboardingController;
+
+// Onboarding Routes
+Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
+Route::post('/onboarding/reset', [OnboardingController::class, 'reset'])->name('onboarding.reset');
 
 
 

@@ -28,7 +28,7 @@
         style="display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; padding-left: 8px; padding-right: 8px;">
 
         <!-- Home Dashboard Guru -->
-        <a href="{{ route('guru.dashboard') }}"
+        <a href="{{ route('guru.dashboard') }}" data-tour-mobile="guru-dashboard"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isGuruDashboardActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruDashboardActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -42,7 +42,7 @@
         </a>
 
         <!-- Input Soal / Modul -->
-        <a href="{{ route('guru.bank-soal.index') }}"
+        <a href="{{ route('guru.bank-soal.index') }}" data-tour-mobile="guru-modul"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 58px; color: {{ $isGuruBankSoalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruBankSoalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -56,7 +56,7 @@
         </a>
 
         <!-- Penugasan Ujian -->
-        <a href="{{ route('guru.ujian.index') }}"
+        <a href="{{ route('guru.ujian.index') }}" data-tour-mobile="guru-ujian"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isGuruUjianActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruUjianActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -71,7 +71,7 @@
         </a>
 
         <!-- Jadwal -->
-        <a href="{{ route('guru.jadwal') }}"
+        <a href="{{ route('guru.jadwal') }}" data-tour-mobile="guru-jadwal"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isGuruJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isGuruJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -86,7 +86,7 @@
         </a>
 
         <!-- Chat -->
-        <a href="{{ route('guru.chat.index') }}"
+        <a href="{{ route('guru.chat.index') }}" data-tour-mobile="guru-chat"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 56px; color: {{ $isChatActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; background-color: {{ $isChatActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -198,7 +198,7 @@
       <div
         style="display: flex !important; flex-direction: row !important; justify-content: space-around !important; align-items: center !important; padding-left: 12px; padding-right: 12px;">
         <!-- Home -->
-        <a href="{{ route('siswa.dashboard') }}"
+        <a href="{{ route('siswa.dashboard') }}" data-tour-mobile="siswa-dashboard"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isHomeActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isHomeActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -212,7 +212,7 @@
         </a>
 
         <!-- Class Room -->
-        <a href="{{ route('siswa.jadwal') }}"
+        <a href="{{ route('siswa.jadwal') }}" data-tour-mobile="siswa-jadwal"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isJadwalActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isJadwalActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -232,7 +232,7 @@
         </a>
 
         <!-- Explore / Tambah Pelajaran -->
-        <a href="{{ route('siswa.tambah-pelajaran') }}"
+        <a href="{{ route('siswa.tambah-pelajaran') }}" data-tour-mobile="siswa-tambah-pelajaran"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ Request::is('siswa/tambah-mapel') ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ Request::is('siswa/tambah-mapel') ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -246,7 +246,7 @@
         </a>
 
         <!-- Chat -->
-        <a href="{{ route('siswa.chat.index') }}"
+        <a href="{{ route('siswa.chat.index') }}" data-tour-mobile="siswa-chat"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isChatActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isChatActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">
@@ -262,7 +262,7 @@
         </a>
 
         <!-- Account -->
-        <a href="#"
+        <a href="#" data-tour-mobile="siswa-account"
           style="display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; text-decoration: none !important; width: 68px; color: {{ $isAccountActive ? '#7c3aed' : '#94a3b8' }}; transition: all 0.25s ease;">
           <div
             style="display: flex; align-items: center; justify-content: center; width: 44px; height: 30px; border-radius: 14px; background-color: {{ $isAccountActive ? 'rgba(124, 58, 237, 0.08)' : 'transparent' }}; transition: all 0.25s ease; margin-bottom: 2px;">

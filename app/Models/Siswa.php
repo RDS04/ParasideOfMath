@@ -33,6 +33,7 @@ class Siswa extends Authenticatable
         'bukti_transfer',
         'status',
         'biodata',
+        'has_seen_onboarding',
     ];
 
     /**
@@ -63,6 +64,7 @@ class Siswa extends Authenticatable
         return [
             'password' => 'hashed',
             'biodata' => 'array',
+            'has_seen_onboarding' => 'boolean',
         ];
     }
 

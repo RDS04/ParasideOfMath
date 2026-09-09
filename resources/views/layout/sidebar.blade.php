@@ -38,28 +38,28 @@
                     <!-- ══════ STUDENT NAVIGATION ══════ -->
                     <li class="nav-header">BELAJAR</li>
                     <li class="nav-item">
-                        <a href="{{ route('siswa.tambah-pelajaran') }}"
+                        <a href="{{ route('siswa.tambah-pelajaran') }}" data-tour="siswa-tambah-pelajaran"
                             class="nav-link {{ Route::is('siswa.tambah-pelajaran') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-medical text-purple-400"></i>
                             <p>Tambah Pelajaran</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('siswa.jadwal') }}"
+                        <a href="{{ route('siswa.jadwal') }}" data-tour="siswa-jadwal"
                             class="nav-link {{ Route::is('siswa.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-alt text-amber-400"></i>
                             <p>Jadwal Belajar</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('siswa.ujian') }}"
+                        <a href="{{ route('siswa.ujian') }}" data-tour="siswa-ujian"
                             class="nav-link {{ Route::is('siswa.ujian') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-pencil-alt text-teal-400"></i>
                             <p>Latihan Soal &amp; Ujian</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('siswa.transkip-nilai') }}"
+                        <a href="{{ route('siswa.transkip-nilai') }}" data-tour="siswa-transkip"
                             class="nav-link {{ Route::is('siswa.transkip-nilai') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-alt text-cyan-400"></i>
                             <p>Transkip Nilai</p>
@@ -84,10 +84,16 @@
 
                     <li class="nav-header">LAINNYA</li>
                     <li class="nav-item">
-                        <a href="{{ route('siswa.chat.index') }}"
+                        <a href="{{ route('siswa.chat.index') }}" data-tour="siswa-chat"
                             class="nav-link {{ Route::is('siswa.chat') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-comments text-blue-400"></i>
                             <p>Chat Guru</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:void(0)" onclick="startOnboardingTour()" data-tour="siswa-panduan" class="nav-link">
+                            <i class="nav-icon fas fa-question-circle text-amber-400"></i>
+                            <p>Panduan Penggunaan</p>
                         </a>
                     </li>
 
@@ -346,28 +352,28 @@
                     <!-- ══════ GURU (TUTOR) NAVIGATION ══════ -->
                     <li class="nav-header">MENGAJAR</li>
                     <li class="nav-item">
-                        <a href="{{ route('guru.jadwal') }}"
+                        <a href="{{ route('guru.jadwal') }}" data-tour="guru-jadwal"
                             class="nav-link {{ Route::is('guru.jadwal') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-calendar-check text-purple-400"></i>
                             <p>Jadwal Mengajar</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('guru.siswa') }}" class="nav-link {{ Route::is('guru.siswa') ? 'active' : '' }}">
+                        <a href="{{ route('guru.siswa') }}" data-tour="guru-siswa" class="nav-link {{ Route::is('guru.siswa') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users text-teal-400"></i>
                             <p>Daftar Siswa Anda</p>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('guru.ujian.index') }}"
+                        <a href="{{ route('guru.ujian.index') }}" data-tour="guru-ujian"
                             class="nav-link {{ Route::is('guru.ujian.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-file-signature text-purple-400"></i>
                             <p>Ujian Siswa</p>
                         </a>
                     </li>
-                    <li
+                    <li id="tour-modul-parent"
                         class="nav-item has-treeview {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'menu-open' : '' }}">
-                        <a href="#"
+                        <a href="#" data-tour="guru-modul"
                             class="nav-link {{ Route::is('guru.bank-soal.*') || Route::is('guru.list-soal.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-book-reader text-rose-400"></i>
                             <p>
@@ -395,7 +401,7 @@
                     </li>
                     <li class="nav-header">LAINNYA</li>
                     <li class="nav-item">
-                        <a href="{{ route('guru.chat.index') }}"
+                        <a href="{{ route('guru.chat.index') }}" data-tour="guru-chat"
                             class="nav-link {{ Route::is('guru.chat.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-comments text-blue-400"></i>
                             <p>Chat Siswa</p>
@@ -406,6 +412,12 @@
                             class="nav-link {{ Route::is('guru.biodata') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-id-card text-info"></i>
                             <p>Biodata Guru</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:void(0)" onclick="startOnboardingTour()" data-tour="guru-panduan" class="nav-link">
+                            <i class="nav-icon fas fa-question-circle text-amber-400"></i>
+                            <p>Panduan Penggunaan</p>
                         </a>
                     </li>
                 @endif
