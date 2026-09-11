@@ -194,6 +194,48 @@
             font-weight: 800;
         }
 
+        /* Round Discount Seal Badge (Bulat, Overlap di Sisi Kanan Judul Sesuai Wireframe Figma) */
+        .discount-round-seal {
+            width: 95px;
+            height: 95px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e11d48 0%, #dc2626 50%, #f59e0b 100%);
+            border: 3.5px solid #ffffff;
+            box-shadow: 0 12px 28px rgba(225, 29, 72, 0.5), inset 0 0 12px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @media (min-width: 640px) {
+            .discount-round-seal {
+                width: 110px;
+                height: 110px;
+            }
+        }
+
+        .discount-round-inner {
+            width: calc(100% - 8px);
+            height: calc(100% - 8px);
+            border-radius: 50%;
+            border: 1.5px dashed rgba(255, 255, 255, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            background: radial-gradient(circle, rgba(225, 29, 72, 0.5) 0%, rgba(185, 28, 28, 0.85) 100%);
+        }
+
+        .discount-round-seal:hover {
+            transform: scale(1.08) rotate(0deg) !important;
+            box-shadow: 0 16px 36px rgba(225, 29, 72, 0.7);
+        }
+
         /* Animations */
         @keyframes float {
 
@@ -750,24 +792,39 @@
             <!-- Kiri (Text & CTA) -->
             <div class="text-center md:text-left reveal-element">
 
-                <!-- Floating pill badge -->
-                <div
-                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 font-bold text-xs sm:text-sm tracking-wide mb-6 shadow-sm backdrop-blur-md animate-float">
-                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-                    ✨ Bimbingan Belajar Terpercaya
-                </div>
-
                 <!-- MAIN HERO HEADING MATCHING THE UPLOADED IMAGE (YELLOW STICKER BADGE WITH DARK PURPLE FONT) -->
-                <h1
-                    class="font-black text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] leading-snug mb-6 tracking-tight">
-                    <span
-                        class="yellow-sticker-badge my-1.5 shadow-xl transform -rotate-1 hover:rotate-0 transition-transform duration-300">
-                        Sukses Akademik
-                    </span><br />
-                    <span
-                        class="yellow-sticker-badge my-1.5 shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-300">
-                        bersama Paradise of Math!
-                    </span>
+                <h1 class="font-black text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] leading-snug mb-6 tracking-tight relative inline-block">
+
+                    <!-- Wrapper supaya badge diskon bisa nempel di pojok kanan-atas seluruh heading -->
+                    <div class="relative inline-block">
+
+                        <span class="yellow-sticker-badge my-1.5 shadow-xl transform -rotate-1 hover:rotate-0 transition-transform duration-300 relative z-10 inline-block">
+                            Sukses Akademik
+                        </span><br />
+                        <span class="yellow-sticker-badge my-1.5 shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-300 relative z-10 inline-block">
+                            bersama Paradise of Math!
+                        </span>
+
+                        <!-- Badge Bubble Diskon "Bimbel & Privat Terpercaya" (Premium Design - Geser 3px ke Kiri) -->
+                        <div class="absolute -top-3 -right-[21px] sm:-top-2 sm:-right-[29px] md:-right-[45px] z-30 transform rotate-[8deg] hover:rotate-0 hover:scale-110 transition-all duration-300 animate-float cursor-pointer">
+                            <div class="w-[92px] h-[92px] sm:w-[108px] sm:h-[108px] rounded-full bg-white p-[3px] shadow-2xl shadow-rose-600/40 relative overflow-hidden group">
+                                <!-- Inner badge container -->
+                                <div class="w-full h-full rounded-full border-2 border-dashed border-amber-300/80 bg-gradient-to-br from-rose-600 via-red-500 to-amber-500 flex flex-col items-center justify-center text-center p-2 relative z-10 shadow-inner">
+                                    <!-- Glossy Highlight Effect -->
+                                    <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/35 via-white/5 to-transparent pointer-events-none"></div>
+
+                                    <span class="text-amber-300 text-xs sm:text-sm font-black mb-0.5 drop-shadow">✨</span>
+                                    <span class="text-white font-black text-[10px] sm:text-[11px] leading-tight uppercase tracking-tight drop-shadow-md">
+                                        Bimbel &amp; Privat
+                                    </span>
+                                    <span class="bg-amber-300/90 text-red-950 font-black text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider block mt-1 shadow-sm">
+                                        Terpercaya
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </h1>
 
                 <p
