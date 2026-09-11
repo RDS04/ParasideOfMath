@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Siswa;
 use App\Models\Setting;
+use App\Models\Rating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -62,7 +63,37 @@ class AuthController extends Controller
     public function information()
     {
         $youtubeLinks = \App\Models\YoutubeLink::orderBy('urutan', 'asc')->orderBy('id', 'desc')->get();
-        return view('informasi.index', compact('youtubeLinks'));
+        $ratings = Rating::where('status', 'approved')->latest()->get();
+        $avgRating = count($ratings) > 0 ? round($ratings->avg('rating'), 1) : 5.0;
+        $totalRatings = count($ratings);
+        return view('informasi.index', compact('youtubeLinks', 'ratings', 'avgRating', 'totalRatings'));
+    }
+
+    /**
+     * Simpan rating dan ulasan pengunjung/siswa.
+     */
+    public function storeRating(Request $request)
+    {
+        $validated = $request->validate([
+            'nama' => 'required|string|max:100',
+            'deskripsi' => 'required|string|max:1000',
+            'rating' => 'required|integer|min:1|max:5',
+        ], [
+            'nama.required' => 'Nama lengkap wajib diisi.',
+            'deskripsi.required' => 'Ulasan / deskripsi pengalaman Anda wajib diisi.',
+            'rating.required' => 'Silakan beri nilai rating bintang (1-5).',
+            'rating.min' => 'Rating minimal 1 bintang.',
+            'rating.max' => 'Rating maksimal 5 bintang.',
+        ]);
+
+        Rating::create([
+            'nama' => $validated['nama'],
+            'deskripsi' => $validated['deskripsi'],
+            'rating' => $validated['rating'],
+            'status' => 'approved',
+        ]);
+
+        return redirect()->to(url('/#ulasan-rating'))->with('rating_success', 'Terima kasih! Ulasan dan rating bintang Anda berhasil dikirim.');
     }
     public function showLoginForm()
     {

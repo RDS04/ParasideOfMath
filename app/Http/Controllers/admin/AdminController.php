@@ -19,6 +19,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Validation\Rule;
 use App\Models\RiwayatPembayaran;
 use App\Models\YoutubeLink;
+use App\Models\Rating;
 
 class AdminController extends Controller
 {
@@ -3289,6 +3290,57 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('info', 'Pembayaran "' . $riwayat->tipe_paket_snapshot . '" ditolak oleh Admin.');
+    }
+
+    /**
+     * Tampilkan Halaman Kelola Rating & Ulasan (Admin).
+     */
+    public function showRating()
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $ratings = Rating::orderBy('id', 'desc')->get();
+        $totalRatings = count($ratings);
+        $avgRating = $totalRatings > 0 ? round($ratings->avg('rating'), 1) : 5.0;
+        $approvedCount = $ratings->where('status', 'approved')->count();
+        $pendingCount = $ratings->where('status', 'pending')->count();
+
+        return view('admin.kelolaRating', compact('ratings', 'totalRatings', 'avgRating', 'approvedCount', 'pendingCount'));
+    }
+
+    /**
+     * Toggle Status Rating (Approved / Pending) (Admin).
+     */
+    public function toggleStatusRating($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $rating = Rating::findOrFail($id);
+        $newStatus = $rating->status === 'approved' ? 'pending' : 'approved';
+        $rating->update(['status' => $newStatus]);
+
+        $statusMsg = $newStatus === 'approved' ? 'ditampilkan di landing page' : 'disembunyikan dari landing page';
+        return redirect()->back()->with('success', 'Status ulasan "' . $rating->nama . '" berhasil ' . $statusMsg . '!');
+    }
+
+    /**
+     * Hapus Ulasan Rating (Admin).
+     */
+    public function deleteRating($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $rating = Rating::findOrFail($id);
+        $nama = $rating->nama;
+        $rating->delete();
+
+        return redirect()->back()->with('success', 'Ulasan rating dari "' . $nama . '" berhasil dihapus.');
     }
 }
 

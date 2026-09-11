@@ -307,6 +307,13 @@
                                     <p>Kelola Link YouTube</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.rating.index') }}"
+                                    class="nav-link {{ Route::is('admin.rating.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-star text-amber-400"></i>
+                                    <p>Kelola Rating &amp; Ulasan</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 

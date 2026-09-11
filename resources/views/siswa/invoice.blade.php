@@ -88,16 +88,14 @@
                         <img src="{{ asset('images/logoPM.webp') }}" alt="Logo PM" style="height: 52px; object-fit: contain;">
                     </div>
                 </div>
-                
                 <!-- Center Brand Text -->
                 <div class="col-12 col-md-6 text-center mb-3 mb-md-0 title-col">
                     <h5 class="font-weight-bold mb-0 brand-title" style="color: #b91c1c; font-size: 16px; font-family: 'Arial', sans-serif; letter-spacing: 0.5px;">PARADISE OF MATH</h5>
                     <h6 class="font-weight-bold mb-0 subtitle-1" style="font-size: 10px; font-family: 'Arial', sans-serif;">PUSAT BIMBINGAN BELAJAR DAN PRIVAT</h6>
                     <h6 class="font-weight-bold mb-1 subtitle-2" style="font-size: 9px; font-family: 'Arial', sans-serif;">SD, SMP, SMA, SBMPTN</h6>
                     <p class="mb-0 address-text" style="font-size: 8px; line-height: 1.2;">Jln. Jati 1 No. 19, Padang Telp. (0751) 812050</p>
-                    <p class="mb-0 text-muted phone-text" style="font-size: 7.5px; line-height: 1.2;">Hp. 08126762341 (Owner), 08116612050 (Pimpinan-K' Ika), 082386720060 (K' Angel)</p>
+                    <p class="mb-0 text-muted phone-text" style="font-size: 7.5px; line-height: 1.2;">Hp. 08126762341 (Admin), 089675053537 (Pimpinan-K' Ika), 08116612050</p>
                 </div>
-
                 <!-- Right Student Header -->
                 <div class="col-12 col-md-3 student-info-col">
                     <table class="w-100 text-left text-xs table-bordered student-info-table" style="border: 1px solid #cbd5e1; font-size: 10px;">

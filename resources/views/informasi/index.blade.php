@@ -793,31 +793,42 @@
             <div class="text-center md:text-left reveal-element">
 
                 <!-- MAIN HERO HEADING MATCHING THE UPLOADED IMAGE (YELLOW STICKER BADGE WITH DARK PURPLE FONT) -->
-                <h1 class="font-black text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] leading-snug mb-6 tracking-tight relative inline-block">
+                <h1
+                    class="font-black text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] leading-snug mb-6 tracking-tight relative inline-block">
 
                     <!-- Wrapper supaya badge diskon bisa nempel di pojok kanan-atas seluruh heading -->
                     <div class="relative inline-block">
 
-                        <span class="yellow-sticker-badge my-1.5 shadow-xl transform -rotate-1 hover:rotate-0 transition-transform duration-300 relative z-10 inline-block">
+                        <span
+                            class="yellow-sticker-badge my-1.5 shadow-xl transform -rotate-1 hover:rotate-0 transition-transform duration-300 relative z-10 inline-block">
                             Sukses Akademik
                         </span><br />
-                        <span class="yellow-sticker-badge my-1.5 shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-300 relative z-10 inline-block">
+                        <span
+                            class="yellow-sticker-badge my-1.5 shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-300 relative z-10 inline-block">
                             bersama Paradise of Math!
                         </span>
 
                         <!-- Badge Bubble Diskon "Bimbel & Privat Terpercaya" (Premium Design - Geser 3px ke Kiri) -->
-                        <div class="absolute -top-3 -right-[21px] sm:-top-2 sm:-right-[29px] md:-right-[45px] z-30 transform rotate-[8deg] hover:rotate-0 hover:scale-110 transition-all duration-300 animate-float cursor-pointer">
-                            <div class="w-[92px] h-[92px] sm:w-[108px] sm:h-[108px] rounded-full bg-white p-[3px] shadow-2xl shadow-rose-600/40 relative overflow-hidden group">
+                        <div
+                            class="absolute -top-3 -right-[21px] sm:-top-2 sm:-right-[29px] md:-right-[45px] z-30 transform rotate-[8deg] hover:rotate-0 hover:scale-110 transition-all duration-300 animate-float cursor-pointer">
+                            <div
+                                class="w-[92px] h-[92px] sm:w-[108px] sm:h-[108px] rounded-full bg-white p-[3px] shadow-2xl shadow-rose-600/40 relative overflow-hidden group">
                                 <!-- Inner badge container -->
-                                <div class="w-full h-full rounded-full border-2 border-dashed border-amber-300/80 bg-gradient-to-br from-rose-600 via-red-500 to-amber-500 flex flex-col items-center justify-center text-center p-2 relative z-10 shadow-inner">
+                                <div
+                                    class="w-full h-full rounded-full border-2 border-dashed border-amber-300/80 bg-gradient-to-br from-rose-600 via-red-500 to-amber-500 flex flex-col items-center justify-center text-center p-2 relative z-10 shadow-inner">
                                     <!-- Glossy Highlight Effect -->
-                                    <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/35 via-white/5 to-transparent pointer-events-none"></div>
+                                    <div
+                                        class="absolute inset-0 rounded-full bg-gradient-to-b from-white/35 via-white/5 to-transparent pointer-events-none">
+                                    </div>
 
-                                    <span class="text-amber-300 text-xs sm:text-sm font-black mb-0.5 drop-shadow">✨</span>
-                                    <span class="text-white font-black text-[10px] sm:text-[11px] leading-tight uppercase tracking-tight drop-shadow-md">
+                                    <span
+                                        class="text-amber-300 text-xs sm:text-sm font-black mb-0.5 drop-shadow">✨</span>
+                                    <span
+                                        class="text-white font-black text-[10px] sm:text-[11px] leading-tight uppercase tracking-tight drop-shadow-md">
                                         Bimbel &amp; Privat
                                     </span>
-                                    <span class="bg-amber-300/90 text-red-950 font-black text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider block mt-1 shadow-sm">
+                                    <span
+                                        class="bg-amber-300/90 text-red-950 font-black text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full uppercase tracking-wider block mt-1 shadow-sm">
                                         Terpercaya
                                     </span>
                                 </div>
@@ -2449,6 +2460,344 @@
         </div>
     </section>
 
+    <!-- ================= RATING & ULASAN SECTION ================= -->
+    <section id="ulasan-rating"
+        class="py-16 sm:py-24 bg-gradient-to-b from-black via-purple-950/90 to-black text-white relative overflow-hidden border-t border-b border-purple-900/50 bg-[radial-gradient(rgba(255,255,255,0.1)_1px,transparent_1px)] [background-size:28px_28px]">
+        <!-- Animated Background Orbs / Purple & Amber Glow Mesh -->
+        <div
+            class="w-[600px] h-[600px] bg-purple-600/25 rounded-full blur-3xl absolute -top-40 -left-40 pointer-events-none animate-pulse-glow">
+        </div>
+        <div
+            class="w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-3xl absolute -bottom-32 -right-32 pointer-events-none animate-float">
+        </div>
+        <div
+            class="w-[400px] h-[400px] bg-amber-400/10 rounded-full blur-3xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+        </div>
+
+        <!-- Floating Vibrant Glowing Math & Academic Symbols -->
+        <div
+            class="absolute top-10 left-8 text-amber-400/90 text-4xl sm:text-6xl font-black animate-float pointer-events-none select-none font-mono drop-shadow-[0_0_18px_rgba(251,191,36,0.6)]">
+            π</div>
+        <div
+            class="absolute top-1/4 right-10 text-purple-300/90 text-5xl sm:text-7xl font-black animate-float-reverse pointer-events-none select-none font-mono drop-shadow-[0_0_18px_rgba(216,180,254,0.6)]">
+            √</div>
+        <div
+            class="absolute bottom-20 left-12 text-yellow-400/90 text-4xl sm:text-6xl font-black animate-float pointer-events-none select-none font-mono drop-shadow-[0_0_18px_rgba(250,204,21,0.6)]">
+            ∑</div>
+        <div
+            class="absolute bottom-1/3 right-16 text-rose-400/90 text-4xl sm:text-6xl font-black animate-float-reverse pointer-events-none select-none font-mono drop-shadow-[0_0_18px_rgba(251,113,133,0.6)]">
+            ÷</div>
+        <div
+            class="absolute top-1/3 left-1/6 text-indigo-300/90 text-5xl sm:text-6xl font-black animate-float pointer-events-none select-none font-mono drop-shadow-[0_0_18px_rgba(165,180,252,0.6)]">
+            ×</div>
+        <div
+            class="absolute bottom-12 right-1/4 text-emerald-400/90 text-4xl sm:text-5xl font-black animate-float-reverse pointer-events-none select-none font-mono drop-shadow-[0_0_18px_rgba(52,211,153,0.6)]">
+            +</div>
+        <div
+            class="absolute top-20 right-1/4 text-cyan-400/90 text-4xl sm:text-5xl font-black animate-float pointer-events-none select-none font-mono drop-shadow-[0_0_18px_rgba(34,211,238,0.6)]">
+            ∞</div>
+
+        <!-- Floating Glassmorphic Icon Badges -->
+        <div
+            class="absolute top-16 right-12 p-3.5 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-500/40 text-amber-400 animate-float pointer-events-none hidden sm:block drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+            <i class="fas fa-calculator text-2xl"></i>
+        </div>
+        <div
+            class="absolute bottom-24 left-1/5 p-3.5 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-500/40 text-sky-400 animate-float-reverse pointer-events-none hidden sm:block drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+            <i class="fas fa-graduation-cap text-2xl"></i>
+        </div>
+        <div
+            class="absolute top-1/2 left-6 p-3.5 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-500/40 text-amber-300 animate-float pointer-events-none hidden sm:block drop-shadow-[0_0_15px_rgba(252,211,77,0.3)]">
+            <i class="fas fa-award text-2xl"></i>
+        </div>
+        <div
+            class="absolute bottom-16 right-10 p-3.5 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-500/40 text-yellow-300 animate-float-reverse pointer-events-none hidden sm:block drop-shadow-[0_0_15px_rgba(253,224,71,0.3)]">
+            <i class="fas fa-lightbulb text-2xl"></i>
+        </div>
+        <div
+            class="absolute top-28 left-1/3 p-3.5 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-500/40 text-rose-400 animate-float-reverse pointer-events-none hidden sm:block drop-shadow-[0_0_15px_rgba(251,113,133,0.3)]">
+            <i class="fas fa-brain text-2xl"></i>
+        </div>
+        <div
+            class="absolute bottom-1/4 right-8 p-3.5 bg-black/60 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-500/40 text-emerald-400 animate-float pointer-events-none hidden sm:block drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+            <i class="fas fa-square-root-variable text-2xl"></i>
+        </div>
+
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-12 sm:mb-16 reveal-element">
+                <span
+                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-900/60 border border-purple-500/50 text-amber-300 text-xs sm:text-sm font-extrabold tracking-wide uppercase shadow-lg shadow-purple-950/50 mb-4">
+                    <i class="fas fa-star text-amber-400"></i> Ulasan &amp; Pengalaman Siswa
+                </span>
+                <h2 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-purple-400 to-violet-300 drop-shadow-sm">Apa Kata Siswa &amp; Orang Tua tentang</span> <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500">Paradise
+                        of Math?</span>
+                </h2>
+                <p class="mt-4 text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+                    Tingkat kepuasan dan ulasan asli dari para siswa serta orang tua murid bimbingan belajar kami.
+                </p>
+            </div>
+
+            <!-- Average Rating Summary Card -->
+            <div
+                class="bg-gradient-to-r from-black/90 via-purple-950/70 to-black/90 backdrop-blur-2xl border border-purple-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-purple-950/80 mb-12 flex flex-col md:flex-row items-center justify-between gap-6 reveal-element delay-100">
+                <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+                    <div
+                        class="text-5xl sm:text-6xl font-black text-amber-400 leading-none drop-shadow-[0_0_12px_rgba(251,191,36,0.5)] flex items-center gap-1">
+                        {{ number_format($avgRating ?? 5.0, 1) }}
+                    </div>
+                    <div>
+                        <div
+                            class="flex items-center justify-center sm:justify-start gap-1 text-amber-400 text-lg sm:text-xl mb-1">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star"></i>
+                            @endfor
+                        </div>
+                        <p class="text-xs sm:text-sm font-bold text-slate-300">
+                            Berdasarkan <span class="text-amber-300 font-extrabold">{{ $totalRatings ?? 0 }}
+                                ulasan</span> siswa &amp; orangtua murid
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" onclick="openRatingModal()"
+                        class="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-400/25 hover:shadow-amber-400/40 hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer">
+                        <i class="fas fa-pen"></i> Tulis Ulasan Anda
+                    </button>
+                </div>
+            </div>
+
+            @if(session('rating_success'))
+                <div
+                    class="mb-8 p-4 sm:p-5 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-200 text-xs sm:text-sm font-semibold flex items-center gap-3 animate-fadeIn shadow-lg">
+                    <i class="fas fa-check-circle text-emerald-400 text-2xl shrink-0"></i>
+                    <div>{{ session('rating_success') }}</div>
+                </div>
+            @endif
+
+            <!-- Review Cards Grid -->
+            @if(isset($ratings) && count($ratings) > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16 reveal-element delay-200">
+                    @foreach($ratings as $ratingItem)
+                        <div
+                            class="bg-black/70 backdrop-blur-xl border border-purple-900/50 rounded-2xl p-6 shadow-xl flex flex-col justify-between hover:border-amber-400/80 hover:bg-purple-950/40 hover:-translate-y-1 transition-all duration-300 group">
+                            <div>
+                                <!-- Stars -->
+                                <div class="flex items-center gap-1 text-amber-400 text-sm mb-3">
+                                    @for($s = 1; $s <= 5; $s++)
+                                        @if($s <= $ratingItem->rating)
+                                            <i class="fas fa-star drop-shadow-[0_0_6px_rgba(251,191,36,0.6)]"></i>
+                                        @else
+                                            <i class="far fa-star text-slate-600"></i>
+                                        @endif
+                                    @endfor
+                                </div>
+                                <!-- Content -->
+                                <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal italic mb-4">
+                                    "{{ $ratingItem->deskripsi }}"
+                                </p>
+                            </div>
+                            <!-- Reviewer info -->
+                            <div class="pt-4 border-t border-purple-900/40 flex items-center justify-between text-xs">
+                                <div class="flex items-center gap-2.5">
+                                    <div
+                                        class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 text-slate-950 font-extrabold flex items-center justify-center text-xs shadow-md">
+                                        {{ strtoupper(substr($ratingItem->nama, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <h5 class="font-extrabold text-white text-xs sm:text-sm leading-tight">
+                                            {{ $ratingItem->nama }}</h5>
+                                        <span class="text-[10px] text-slate-400 font-medium">Siswa / Orangtua</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] text-slate-400 font-mono">
+                                    {{ $ratingItem->created_at ? $ratingItem->created_at->diffForHumans() : '' }}
+                                </span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-12 bg-black/60 border border-purple-900/40 rounded-3xl mb-12 shadow-xl">
+                    <i class="fas fa-star text-amber-400 text-4xl mb-3"></i>
+                    <h4 class="text-base font-bold text-white mb-1">Belum Ada Ulasan</h4>
+                    <p class="text-xs text-slate-400 mb-4">Jadilah yang pertama memberikan ulasan bimbingan belajar!</p>
+                    <button type="button" onclick="openRatingModal()"
+                        class="px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs shadow-md hover:scale-105 transition-transform cursor-pointer">
+                        <i class="fas fa-pen mr-1"></i> Tulis Ulasan Pertama
+                    </button>
+                </div>
+            @endif
+        </div>
+    </section>
+
+    <!-- ================= MODAL FORM ULASAN & RATING ================= -->
+    <div id="rating-modal"
+        class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div
+            class="relative w-full max-w-xl bg-gradient-to-b from-slate-950 via-purple-950 to-black border border-purple-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-purple-950/80 animate-fadeIn text-white">
+            <!-- Close Button -->
+            <button type="button" onclick="closeRatingModal()"
+                class="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors focus:outline-none cursor-pointer">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <span
+                    class="w-12 h-12 rounded-2xl bg-purple-900/60 text-amber-300 flex items-center justify-center mx-auto mb-3 text-xl font-bold border border-purple-500/40 shadow-lg shadow-purple-950/50">
+                    ⭐
+                </span>
+                <h3 class="text-xl sm:text-2xl font-black text-white">Beri Rating &amp; Ulasan Pengalaman Anda</h3>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1 font-normal">
+                    Masukan Anda sangat berharga untuk peningkatan kualitas bimbingan belajar kami.
+                </p>
+            </div>
+
+            @if($errors->any())
+                <div
+                    class="mb-6 p-4 rounded-2xl bg-rose-500/20 border border-rose-400/50 text-rose-200 text-xs sm:text-sm font-semibold flex flex-col gap-1">
+                    @foreach($errors->all() as $err)
+                        <div class="flex items-center gap-2"><i class="fas fa-exclamation-circle text-rose-400"></i> {{ $err }}
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <form action="{{ route('rating.store') }}" method="POST" class="space-y-5">
+                @csrf
+
+                <!-- Selection Star Rating 1-5 -->
+                <div class="flex flex-col items-center justify-center">
+                    <label class="text-xs sm:text-sm font-extrabold text-amber-300 uppercase tracking-wider mb-1">
+                        Pilih Penilaian Bintang (1 - 5) <span class="text-rose-400">*</span>
+                    </label>
+
+                    <!-- Interactive Star Rating Picker -->
+                    <div class="flex items-center justify-center gap-2 sm:gap-3 my-2" id="star-picker-container"
+                        onmouseleave="resetStars()">
+                        @for($star = 1; $star <= 5; $star++)
+                            <button type="button" onclick="setRating({{ $star }})" onmouseover="highlightStars({{ $star }})"
+                                class="star-btn cursor-pointer p-1.5 transition-all duration-200 focus:outline-none"
+                                title="{{ $star }} Bintang">
+                                <i id="star-icon-{{ $star }}"
+                                    class="fas fa-star text-amber-400 text-3xl sm:text-4xl transition-all duration-200"></i>
+                            </button>
+                        @endfor
+                        <input type="hidden" id="selected-rating-input" name="rating" value="{{ old('rating', 5) }}"
+                            required />
+                    </div>
+                    <p id="star-rating-label" class="text-xs sm:text-sm font-extrabold text-amber-300 mt-0.5">Sangat
+                        Memuaskan (5/5) ⭐⭐⭐⭐⭐</p>
+                </div>
+
+                <!-- Input Nama -->
+                <div>
+                    <label for="rating_nama"
+                        class="block text-xs sm:text-sm font-extrabold text-slate-200 uppercase tracking-wider mb-2">
+                        Nama Lengkap / Nama Panggilan <span class="text-rose-400">*</span>
+                    </label>
+                    <input type="text" id="rating_nama" name="nama" required value="{{ old('nama') }}"
+                        placeholder="Contoh: Budi Santoso / Orang Tua Rani"
+                        class="w-full bg-purple-950/40 border border-purple-800/60 rounded-2xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all">
+                </div>
+
+                <!-- Input Deskripsi / Ulasan -->
+                <div>
+                    <label for="rating_deskripsi"
+                        class="block text-xs sm:text-sm font-extrabold text-slate-200 uppercase tracking-wider mb-2">
+                        Ulasan &amp; Deskripsi Pengalaman <span class="text-rose-400">*</span>
+                    </label>
+                    <textarea id="rating_deskripsi" name="deskripsi" rows="3" required
+                        placeholder="Tuliskan kesan dan pengalaman belajar Anda bersama tutor Paradise of Math..."
+                        class="w-full bg-purple-950/40 border border-purple-800/60 rounded-2xl p-4 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all resize-none">{{ old('deskripsi') }}</textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit"
+                        class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider shadow-xl shadow-amber-400/20 hover:shadow-amber-400/35 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
+                        <i class="fas fa-paper-plane text-sm"></i> Kirim Ulasan Sekarang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Star Picker & Modal Helper Script -->
+    <script>
+        function openRatingModal() {
+            const modal = document.getElementById('rating-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+            }
+        }
+
+        function closeRatingModal() {
+            const modal = document.getElementById('rating-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+        }
+        const starLabels = {
+            1: 'Kurang Memuaskan (1/5) ⭐',
+            2: 'Cukup (2/5) ⭐⭐',
+            3: 'Bagus (3/5) ⭐⭐⭐',
+            4: 'Sangat Bagus (4/5) ⭐⭐⭐⭐',
+            5: 'Sangat Memuaskan (5/5) ⭐⭐⭐⭐⭐'
+        };
+
+        let activeRatingVal = {{ old('rating', 5) }};
+
+        function setRating(val) {
+            activeRatingVal = val;
+            const inputEl = document.getElementById('selected-rating-input');
+            if (inputEl) inputEl.value = val;
+            renderStars(val);
+            updateStarText(val);
+        }
+
+        function highlightStars(val) {
+            renderStars(val);
+            updateStarText(val);
+        }
+
+        function resetStars() {
+            renderStars(activeRatingVal);
+            updateStarText(activeRatingVal);
+        }
+
+        function renderStars(val) {
+            for (let i = 1; i <= 5; i++) {
+                const icon = document.getElementById('star-icon-' + i);
+                if (icon) {
+                    if (i <= val) {
+                        icon.className = 'fas fa-star text-amber-400 text-3xl sm:text-4xl transition-all duration-200 drop-shadow-[0_0_12px_rgba(251,191,36,0.7)] scale-110';
+                    } else {
+                        icon.className = 'far fa-star text-slate-500 text-3xl sm:text-4xl transition-all duration-200 opacity-60';
+                    }
+                }
+            }
+        }
+
+        function updateStarText(val) {
+            const labelEl = document.getElementById('star-rating-label');
+            if (labelEl && starLabels[val]) {
+                labelEl.innerText = starLabels[val];
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setRating(activeRatingVal);
+            @if($errors->any())
+                openRatingModal();
+            @endif
+        });
+    </script>
+
     <!-- ================= FOOTER SECTION ================= -->
     <footer
         class="bg-gradient-to-br from-violet-950 via-violet-900 to-violet-950 text-white pt-16 pb-8 border-t border-violet-850 relative overflow-hidden">
@@ -3125,18 +3474,18 @@
                             });
                     }
 
-                    } catch (e) {
-                        console.error("Error logging device:", e);
-                    }
+                } catch (e) {
+                    console.error("Error logging device:", e);
                 }
+            }
 
             if (document.readyState === 'complete') {
-                    captureVisitorDeviceLog();
-                } else {
-                    window.addEventListener('load', captureVisitorDeviceLog);
-                }
-                window.addEventListener('pageshow', captureVisitorDeviceLog);
-            }) ();
+                captureVisitorDeviceLog();
+            } else {
+                window.addEventListener('load', captureVisitorDeviceLog);
+            }
+            window.addEventListener('pageshow', captureVisitorDeviceLog);
+        })();
     </script>
     @include('layout.developerModal')
 </body>

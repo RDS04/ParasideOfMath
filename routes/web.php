@@ -31,6 +31,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/reset-password-otp', 'showResetPasswordOtp')->name('password.otp');
     Route::post('/reset-password-otp', 'submitResetPassword')->name('password.update');
     Route::post('/logout', 'logout')->name('logout');
+    Route::post('/rating/store', 'storeRating')->name('rating.store');
 });
 
 // Admin Registration Routes
@@ -242,6 +243,11 @@ Route::controller(AdminController::class)->group(function () {
     Route::delete('/admin/ujian/unassign', 'unassignUjianAdmin')->name('admin.ujian.unassign');
 
     Route::post('/admin/siswa/toggle-status/{id}', 'toggleStatusSiswa')->name('admin.siswa.toggle-status');
+
+    // Kelola Rating & Ulasan
+    Route::get('/admin/rating', 'showRating')->name('admin.rating.index');
+    Route::post('/admin/rating/toggle/{id}', 'toggleStatusRating')->name('admin.rating.toggle');
+    Route::delete('/admin/rating/{id}', 'deleteRating')->name('admin.rating.delete');
 })->middleware('auth:web');
 
 // Realtime Chat API and Admin Panel
