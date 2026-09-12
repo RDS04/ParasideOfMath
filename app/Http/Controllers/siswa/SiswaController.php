@@ -48,6 +48,10 @@ class SiswaController extends Controller
      */
     public function submitBiodata(Request $request)
     {
+        $request->validate([
+            'nama_panggilan' => ['nullable', 'string', 'max:50'],
+        ]);
+
         $siswa = auth()->guard('siswa')->user();
         if ($siswa) {
             if ($request->filled('no_hp')) {
@@ -59,8 +63,10 @@ class SiswaController extends Controller
             if ($request->filled('nama_lengkap')) {
                 $siswa->name = $request->input('nama_lengkap');
             }
-            // Save all other form inputs in the biodata array in database
-            $siswa->biodata = $request->except(['_token', 'no_hp', 'sekolah', 'nama_lengkap']);
+            // Save all other form inputs in the biodata array in database, merging with existing array if any
+            $existingBiodata = is_array($siswa->biodata) ? $siswa->biodata : [];
+            $newBiodata = $request->except(['_token', 'no_hp', 'sekolah', 'nama_lengkap']);
+            $siswa->biodata = array_merge($existingBiodata, $newBiodata);
             $siswa->save();
         }
 
@@ -155,7 +161,7 @@ class SiswaController extends Controller
             }
         }
 
-        $sudahUploadBukti = ($siswa->status === 'under_review' || !empty($siswa->bukti_transfer));
+        $sudahUploadBukti = !empty($siswa->bukti_transfer);
 
         if ($siswa && $siswa->status === 'nonaktif') {
             $waMessage = "Halo Admin Paradise of Math,\n\nSaya ingin menanyakan terkait akun belajar saya yang saat ini berstatus *nonaktif*. Berikut data diri saya:\n\n";

@@ -128,7 +128,6 @@
             <div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl text-left mb-8">
                 <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Rincian Paket Pilihan</span>
                 <span class="d-block text-sm font-bold text-purple-950">{{ $paket->nama_paket }}</span>
-                <span class="d-block text-xs text-slate-500 mt-0.5">{{ $siswa->tipe_paket }}</span>
                 <div class="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between">
                     <span class="text-xs text-slate-400 font-medium">Status Pendaftaran</span>
                     @if ($siswa->status === 'nonaktif')

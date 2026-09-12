@@ -183,7 +183,7 @@
                             </span>
                             <h2 class="font-serif mt-3 text-3xl font-bold d-flex align-items-center">
                                 <i class="fas {{ $greetingIcon }} mr-3 mr-xs-2 welcome-icon"></i>
-                                <span>{{ $greeting }}, {{ Auth::guard('siswa')->user()->name }}!</span>
+                                <span>{{ $greeting }}, {{ Auth::guard('siswa')->user()->nama_panggilan }}!</span>
                             </h2>
                             <p class="text-purple-200 mt-2 mb-0 max-w-xl text-sm">
                                 Tetap semangat! Setiap tantangan matematika adalah langkah menuju prestasi terbaikmu. Pantau

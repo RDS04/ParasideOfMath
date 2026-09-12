@@ -353,7 +353,7 @@
                                                                         <span class="doc-file-sub">File Dokumen Modul Pembelajaran</span>
                                                                     </div>
                                                                 </div>
-                                                                <div class="doc-file-right">
+                                                                <div class="doc-file-right d-flex items-center gap-2">
                                                                     @if($isPdf)
                                                                         <button type="button" class="doc-file-read-btn" data-toggle="modal"
                                                                             data-target="#modalListPreviewDoc_{{ $kMod->id }}_{{ $gDocIdx }}">

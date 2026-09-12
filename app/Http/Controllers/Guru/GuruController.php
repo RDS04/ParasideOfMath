@@ -1402,4 +1402,27 @@ class GuruController extends Controller
 
         return view('guru.detailSiswa', compact('student', 'paket', 'currentGurus', 'mapelJadwal', 'tutorPerMapel'));
     }
+
+    /**
+     * Hapus berkas dokumen bank soal/modul oleh Guru.
+     */
+    public function deleteDoc(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user || (!$user->isGuru() && !$user->isAdmin())) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Guru.');
+        }
+
+        $fileName = basename($request->input('filename'));
+
+        if ($fileName && preg_match('/^doc_\d+_\d+_.+$/', $fileName)) {
+            $filePath = public_path('uploads/bank_soal_docs/' . $fileName);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+                return back()->with('success', 'Dokumen "' . preg_replace('/^doc_\d+_\d+_/', '', $fileName) . '" berhasil dihapus!');
+            }
+        }
+
+        return back()->with('error', 'Dokumen tidak ditemukan atau gagal dihapus.');
+    }
 }

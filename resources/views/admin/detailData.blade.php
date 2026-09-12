@@ -151,6 +151,10 @@
                                         <td class="font-weight-bold text-purple-950 py-2">{{ $student->name }}</td>
                                     </tr>
                                     <tr class="border-bottom border-light">
+                                        <td class="text-muted py-2">Nama Panggilan</td>
+                                        <td class="font-weight-bold text-purple-600 py-2">{{ $namaPanggilan }}</td>
+                                    </tr>
+                                    <tr class="border-bottom border-light">
                                         <td class="text-muted py-2">Email</td>
                                         <td class="text-slate-700 py-2 font-mono text-xs">{{ $student->email }}</td>
                                     </tr>
@@ -355,7 +359,7 @@
                         $allDaysList      = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     @endphp
 
-                    @if (!empty($pendingMapelList))
+                    @if ($student->status === 'active' && !empty($pendingMapelList))
                         <div class="card shadow-sm border-amber-200 rounded-2xl overflow-hidden mb-4 bg-amber-50/30" id="request-tambah-mapel">
                             <div class="card-header bg-gradient-to-r from-amber-500 to-purple-800 text-white py-3 px-4 d-flex justify-content-between align-items-center">
                                 <h3 class="card-title font-weight-bold text-white mb-0 text-sm d-flex align-items-center">

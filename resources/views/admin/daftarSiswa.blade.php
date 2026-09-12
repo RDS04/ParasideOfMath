@@ -44,8 +44,8 @@
                     </div>
                     <div class="col-sm-7">
                         <form action="{{ route('admin.siswa.daftar.index') }}" method="GET" class="float-sm-right">
-                            <div class="input-group input-group-sm" style="width: 280px; max-width: 100%;">
-                                <input type="text" name="search" class="form-control" placeholder="Cari nama, email, WA, sekolah..." value="{{ $search ?? '' }}">
+                            <div class="input-group input-group-sm" style="width: 320px; max-width: 100%;">
+                                <input type="text" name="search" class="form-control" placeholder="Cari nama, panggilan, email, WA, sekolah..." value="{{ $search ?? '' }}">
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-purple" type="submit"><i class="fas fa-search"></i></button>
                                     @if (!empty($search))
@@ -83,9 +83,15 @@
                                     @foreach ($students as $student)
                                         @php
                                             $paket = \App\Models\PaketBelajar::find($student->paket_id);
+                                            $panggilan = $student->biodata['nama_panggilan'] ?? null;
                                         @endphp
                                         <tr>
-                                            <td class="px-4 py-3 font-weight-bold text-purple-950">{{ $student->name }}</td>
+                                            <td class="px-4 py-3 font-weight-bold text-purple-950">
+                                                {{ $student->name }}
+                                                @if($panggilan)
+                                                    <span class="text-xs text-purple-600 font-semibold block">({{ $panggilan }})</span>
+                                                @endif
+                                            </td>
                                             <td class="px-4 py-3 text-slate-600">{{ $student->email }}</td>
                                             <td class="px-4 py-3 text-center">
                                                 @if ($student->whatsapp)

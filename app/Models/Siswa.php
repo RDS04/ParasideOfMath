@@ -91,4 +91,22 @@ class Siswa extends Authenticatable
     {
         return true;
     }
+
+    /**
+     * Get nama panggilan siswa (fallback ke nama depan / nama lengkap jika kosong).
+     */
+    public function getNamaPanggilanAttribute(): string
+    {
+        $bio = $this->biodata ?? [];
+        if (!empty($bio['nama_panggilan'])) {
+            return $bio['nama_panggilan'];
+        }
+
+        if (!empty($this->name)) {
+            $parts = explode(' ', trim($this->name));
+            return $parts[0];
+        }
+
+        return 'Siswa';
+    }
 }

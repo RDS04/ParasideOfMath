@@ -301,70 +301,85 @@ class AdminController extends Controller
     /**
      * Tampilkan Halaman Persetujuan Bukti Transfer Siswa.
      */
+    /**
+     * Tampilkan Halaman Persetujuan Bukti Transfer & Pendaftaran Siswa Baru.
+     */
     public function approvSiswa()
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        // Fetch students ordered so that 'under_review' comes first
-        $students = Siswa::orderByRaw("CASE WHEN status = 'under_review' THEN 0 ELSE 1 END")
+        // Fetch ONLY new student registrations requiring approval (status: 'pending' or 'under_review')
+        $students = Siswa::whereIn('status', ['pending', 'under_review'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('admin.approvSiswa', compact('students'));
+        // Fetch active teachers/tutors list for selection in modal
+        $gurus = \App\Models\User::where('role', 'guru')->orderBy('name', 'asc')->get();
+
+        return view('admin.approvSiswa', compact('students', 'gurus'));
     }
 
     /**
-     * Setujui pendaftaran dan pembayaran siswa.
+     * Setujui pendaftaran dan pembayaran siswa beserta pengalokasian jadwal & tutor.
      */
-    public function submitApprovSiswa($id)
+    public function submitApprovSiswa(Request $request, $id)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-
         $siswa = Siswa::findOrFail($id);
         $biodata = $siswa->biodata ?? [];
+
+        // Save tipe_paket if provided by Admin in modal
+        $tipePaketInput = $request->input('tipe_paket');
+        if ($tipePaketInput) {
+            $siswa->tipe_paket = $tipePaketInput;
+        }
+
+        // Save hari_per_mapel if provided by Admin in modal
+        if ($request->has('hari_per_mapel')) {
+            $biodata['hari_per_mapel'] = $request->input('hari_per_mapel', []);
+        }
+
+        // Save jam_per_mapel if provided by Admin in modal
+        if ($request->has('jam_per_mapel')) {
+            $biodata['jam_per_mapel'] = $request->input('jam_per_mapel', []);
+        }
+
+        // Save tutor_per_mapel if provided by Admin in modal
+        if ($request->has('tutor_per_mapel')) {
+            $biodata['tutor_per_mapel'] = $request->input('tutor_per_mapel', []);
+        }
+
+        // Process any pending mapels if present
         $pendingMapels = $biodata['pending_mapel_jadwal'] ?? [];
-        $pendingSesi = $biodata['pending_sesi_per_mapel'] ?? [];
+        $pendingSesi   = $biodata['pending_sesi_per_mapel'] ?? [];
 
         if (!empty($pendingMapels)) {
             $activeMapels = $biodata['mapel_jadwal'] ?? [];
-            $activeSesi = $biodata['sesi_per_mapel'] ?? [];
-
-            $activeHari = $biodata['hari_per_mapel'] ?? [];
-            $activeTanggal = $biodata['tanggal_mulai_per_mapel'] ?? [];
+            $activeSesi   = $biodata['sesi_per_mapel'] ?? [];
 
             foreach ($pendingMapels as $idx => $mapelName) {
                 if (!in_array($mapelName, $activeMapels)) {
                     $activeMapels[] = $mapelName;
-                    $activeSesi[] = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 8;
-
-                    $activeHari[] = $pendingHari[$idx] ?? [];
-                    $activeTanggal[] = $pendingTanggal[$idx] ?? null;
+                    $activeSesi[]   = isset($pendingSesi[$idx]) ? (int) $pendingSesi[$idx] : 4;
                 }
             }
 
             $biodata['mapel_jadwal'] = array_values($activeMapels);
             $biodata['sesi_per_mapel'] = array_values($activeSesi);
-             $biodata['hari_per_mapel'] = array_values($activeHari);
-            $biodata['tanggal_mulai_per_mapel'] = array_values($activeTanggal);
             $biodata['jumlah_pertemuan'] = array_sum($activeSesi);
-            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'],$biodata['pending_hari_per_mapel'], $biodata['pending_tanggal_mulai_per_mapel'], $biodata['pending_jumlah_pertemuan']);
+            unset($biodata['pending_mapel_jadwal'], $biodata['pending_sesi_per_mapel'], $biodata['pending_hari_per_mapel'], $biodata['pending_tanggal_mulai_per_mapel'], $biodata['pending_jumlah_pertemuan']);
         }
 
-        $siswa->update([
-            'status' => 'active',
-            'biodata' => $biodata,
-        ]);
+        $siswa->biodata = $biodata;
+        $siswa->save();
 
-        RiwayatPembayaran::where('siswa_id', $siswa->id)
-            ->where('status', 'under_review')
-            ->update(['status' => 'approved', 'approved_at' => now()]);
-
-        return back()->with('success', 'Akun pendaftaran ' . $siswa->name . ' berhasil disetujui dan diaktifkan!');
+        return redirect()->route('admin.siswa.approve.index')
+            ->with('success', 'Jadwal & pengalokasian bimbingan untuk siswa ' . $siswa->name . ' berhasil disimpan. Siswa kini dapat melanjutkan ke proses pembayaran.');
     }
 
     /**
@@ -1037,7 +1052,8 @@ class AdminController extends Controller
                     $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('whatsapp', 'like', "%{$search}%")
-                    ->orWhere('sekolah', 'like', "%{$search}%");
+                    ->orWhere('sekolah', 'like', "%{$search}%")
+                    ->orWhere('biodata->nama_panggilan', 'like', "%{$search}%");
                 });
             })
             ->orderBy('created_at', 'desc')
@@ -3341,6 +3357,28 @@ class AdminController extends Controller
         $rating->delete();
 
         return redirect()->back()->with('success', 'Ulasan rating dari "' . $nama . '" berhasil dihapus.');
+    }
+
+    /**
+     * Hapus berkas dokumen bank soal/modul oleh Admin.
+     */
+    public function deleteDoc(Request $request)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        $fileName = basename($request->input('filename'));
+
+        if ($fileName && preg_match('/^doc_\d+_\d+_.+$/', $fileName)) {
+            $filePath = public_path('uploads/bank_soal_docs/' . $fileName);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+                return back()->with('success', 'Dokumen "' . preg_replace('/^doc_\d+_\d+_/', '', $fileName) . '" berhasil dihapus!');
+            }
+        }
+
+        return back()->with('error', 'Dokumen tidak ditemukan atau gagal dihapus.');
     }
 }
 

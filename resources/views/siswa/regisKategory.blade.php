@@ -165,15 +165,7 @@
                                 <div class="error">Paket belajar wajib dipilih.</div>
                             </div>
 
-                            <!-- Dropdown Tipe Paket Selector (Privat / Kelompok) -->
-                            <div class="field" data-required="true">
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Tipe
-                                    Pertemuan (Jumlah Peserta)<span class="text-amber-600 ml-1">*</span></label>
-                                <select id="tipeSelect" name="tipe_paket" class="form-input cursor-pointer" required>
-                                    <!-- Dynamically populated via JS based on selected package -->
-                                </select>
-                                <div class="error">Tipe pertemuan wajib dipilih.</div>
-                            </div>
+                            <input type="hidden" name="tipe_paket" id="tipeInput" value="1">
                         </div>
                     @else
                         <input type="hidden" name="paket_id" value="{{ $siswa->paket_id ?? ($paket->id ?? 1) }}">
@@ -243,12 +235,6 @@
                                     <input type="radio" name="pilihan_guru_inggris" value="Kak Angel"
                                         class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
                                     <span>Kak Angel</span>
-                                </label>
-                                <label
-                                    class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
-                                    <input type="radio" name="pilihan_guru_inggris" value="Kak Sofia"
-                                        class="w-4 h-4 mt-0.5 accent-purple-700 shrink-0">
-                                    <span>Kak Sofia</span>
                                 </label>
                                 <label
                                     class="choice flex items-start gap-3 p-3.5 border border-purple-100 rounded-xl bg-slate-50 hover:border-purple-500 cursor-pointer transition-all text-sm text-purple-950">
@@ -376,17 +362,30 @@
             }
 
             function updateTipeHighlight() {
-                if (!selectTipe) return;
-                const selectedTipe = selectTipe.value; // '1', '2', '3', or '4'
+                if (!detailList) return;
                 const items = detailList.querySelectorAll('li');
+
+                // Cek apakah ada tutor khusus (selain Karyawan) yang dipilih
+                const selectedMatematikaGuru = document.querySelector('input[name="pilihan_guru"]:checked');
+                const selectedInggrisGuru = document.querySelector('input[name="pilihan_guru_inggris"]:checked');
+
+                let hasCustomTutor = false;
+                if (selectedMatematikaGuru && selectedMatematikaGuru.value && !selectedMatematikaGuru.value.includes('Karyawan')) {
+                    hasCustomTutor = true;
+                }
+                if (selectedInggrisGuru && selectedInggrisGuru.value && !selectedInggrisGuru.value.includes('Karyawan')) {
+                    hasCustomTutor = true;
+                }
+
                 items.forEach((item, index) => {
-                    // index 0 to 3 correspond to detail_1 to detail_4
+                    // index 0: Privat 1, index 1: Kelompok 2, index 2: Kelompok 3, index 3: Kelompok 4-7
                     if (index < 4) {
-                        if (index + 1 == selectedTipe) {
+                        const isHighlightActive = (index < 3) || (index === 3 && hasCustomTutor);
+                        if (isHighlightActive) {
                             item.className = "flex items-start gap-2.5 p-2 rounded-lg bg-emerald-50 text-emerald-950 font-bold border border-emerald-200 transition-all duration-200";
                             item.querySelector('i').className = "fas fa-check-circle text-emerald-600";
                         } else {
-                            item.className = "flex items-start gap-2.5 p-2 rounded-lg text-slate-500 transition-all duration-200 opacity-60";
+                            item.className = "flex items-start gap-2.5 p-2 rounded-lg text-slate-400 transition-all duration-200 opacity-60";
                             item.querySelector('i').className = "fas fa-check-circle text-slate-300";
                         }
                     }
@@ -439,21 +438,19 @@
                 });
                 detailList.innerHTML = listHtml;
 
-                // Repopulate Tipe select based on new package
-                populateTipe(id);
+                updateTipeHighlight();
             }
 
-            // Listen to dropdown changes
+            // Listen to dropdown & tutor changes
             if (select) {
                 select.addEventListener('change', function () {
                     updatePreview(this.value);
                 });
             }
-            if (selectTipe) {
-                selectTipe.addEventListener('change', function () {
-                    updateTipeHighlight();
-                });
-            }
+
+            document.querySelectorAll('input[name="pilihan_guru"], input[name="pilihan_guru_inggris"]').forEach(radio => {
+                radio.addEventListener('change', updateTipeHighlight);
+            });
 
             // Initial render
             @if($isTambahMode)

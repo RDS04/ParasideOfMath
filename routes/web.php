@@ -148,6 +148,7 @@ Route::middleware('auth:web')->prefix('guru')->controller(GuruController::class)
     Route::post('/bank-soal/import/confirm', 'confirmImportSoal')->name('guru.bank-soal.import.confirm');
     Route::post('/bank-soal/import/cancel', 'cancelImportSoal')->name('guru.bank-soal.import.cancel');
     Route::get('/bank-soal/template', 'downloadTemplateSoal')->name('guru.bank-soal.template');
+    Route::delete('/bank-soal/delete-doc', 'deleteDoc')->name('guru.bank-soal.delete-doc');
     Route::put('/bank-soal/soal/{id}', 'updateSoal')->name('guru.bank-soal.soal.update');
     Route::delete('/bank-soal/soal/{id}', 'deleteSoal')->name('guru.bank-soal.soal.delete');
 });
@@ -234,6 +235,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/bank-soal/import/confirm', 'confirmImportSoalAdmin')->name('admin.bank-soal.import.confirm');
     Route::post('/admin/bank-soal/import/cancel', 'cancelImportSoalAdmin')->name('admin.bank-soal.import.cancel');
     Route::get('/admin/bank-soal/template', 'downloadTemplateSoalAdmin')->name('admin.bank-soal.template');
+    Route::delete('/admin/bank-soal/delete-doc', 'deleteDoc')->name('admin.bank-soal.delete-doc');
 
     Route::get('/admin/bank-soal/ajax/sub-kategori', 'ajaxSubKategoriSoal')->name('admin.bank-soal.ajax.sub');
     Route::get('/admin/bank-soal/ajax/mapel', 'ajaxMapelSoal')->name('admin.bank-soal.ajax.mapel');

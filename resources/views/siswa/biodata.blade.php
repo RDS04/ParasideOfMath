@@ -59,7 +59,8 @@
           <div class="field" data-required="true">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Panggilan<span
                 class="text-amber-600 ml-1">*</span></label>
-            <input type="text" name="nama_panggilan" placeholder="Contoh: Iqbal" class="form-input">
+            <input type="text" name="nama_panggilan" value="{{ old('nama_panggilan', auth()->guard('siswa')->user()?->biodata['nama_panggilan'] ?? '') }}"
+              placeholder="Contoh: Iqbal" class="form-input">
             <div class="error">Nama panggilan wajib diisi.</div>
           </div>
           <div class="field" data-required="true">

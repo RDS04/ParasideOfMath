@@ -2819,7 +2819,7 @@
                         </span>
                     </a>
                     <p class="text-xs sm:text-sm text-violet-200/80 leading-relaxed font-medium">
-                        Lembaga Bimbingan Belajar (LBB) Matematika terpercaya di Kota Padang. Kami berkomitmen
+                        Lembaga Kursus dan Pelatihan (LKP) Matematika terpercaya di Kota Padang. Kami berkomitmen
                         meningkatkan pemahaman dan kecintaan siswa terhadap matematika melalui bimbingan privat
                         berkualitas.
                     </p>

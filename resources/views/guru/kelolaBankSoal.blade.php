@@ -389,6 +389,14 @@
                                                         <i class="fas fa-book-reader text-amber-300"></i> Baca Dokumen PDF
                                                     </button>
                                                 @endif
+                                                <form action="{{ route('guru.bank-soal.delete-doc') }}" method="POST" class="d-inline m-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus dokumen ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <input type="hidden" name="filename" value="{{ $gDocFileName }}">
+                                                    <button type="submit" class="btn btn-xs btn-outline-danger font-bold rounded-xl px-3 py-2.5 d-flex items-center justify-center gap-1.5 text-xs shadow-xs" title="Hapus Dokumen">
+                                                        <i class="fas fa-trash-alt"></i> Hapus
+                                                    </button>
+                                                </form>
                                             </div>
                                         </div>
 
