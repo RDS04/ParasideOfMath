@@ -94,7 +94,8 @@
                     <h6 class="font-weight-bold mb-0 subtitle-1" style="font-size: 10px; font-family: 'Arial', sans-serif;">PUSAT BIMBINGAN BELAJAR DAN PRIVAT</h6>
                     <h6 class="font-weight-bold mb-1 subtitle-2" style="font-size: 9px; font-family: 'Arial', sans-serif;">SD, SMP, SMA, SBMPTN</h6>
                     <p class="mb-0 address-text" style="font-size: 8px; line-height: 1.2;">Jln. Jati 1 No. 19, Padang Telp. (0751) 812050</p>
-                    <p class="mb-0 text-muted phone-text" style="font-size: 7.5px; line-height: 1.2;">Hp. 08126762341 (Admin), 089675053537 (Pimpinan-K' Ika), 08116612050</p>
+                    <p class="mb-0 text-muted phone-text" style="font-size: 7.5px; line-height: 1.2;">Hp. 08126762341/083187143299 (Admin)
+</p>
                 </div>
                 <!-- Right Student Header -->
                 <div class="col-12 col-md-3 student-info-col">
@@ -313,12 +314,16 @@
                     <!-- Rekening Tujuan -->
                     <div class="mb-3">
                         <label class="font-weight-bold text-xs text-purple-950 mb-1">Pilih Rekening Tujuan Transfer <span class="text-danger">*</span></label>
-                        <select name="payment_method" class="form-control form-control-sm rounded-lg font-weight-bold text-xs" required>
+                        <select name="payment_method" id="selectPaymentMethod" class="form-control form-control-sm rounded-lg font-weight-bold text-xs" required onchange="updatePaymentDetails(this)">
                             <option value="" disabled selected>-- Pilih Bank / E-Wallet --</option>
                             @if(isset($banks) && count($banks) > 0)
                                 <optgroup label="Transfer Bank">
                                     @foreach($banks as $b)
-                                        <option value="Bank {{ $b->nama_bank }} ({{ $b->no_rekening }} a.n {{ $b->pemilik }})">
+                                        <option value="Bank {{ $b->nama_bank }} ({{ $b->no_rekening }} a.n {{ $b->pemilik }})"
+                                                data-type="Bank"
+                                                data-name="Bank {{ $b->nama_bank }}"
+                                                data-rekening="{{ $b->no_rekening }}"
+                                                data-pemilik="{{ $b->pemilik }}">
                                             Bank {{ $b->nama_bank }} - {{ $b->no_rekening }} (a.n {{ $b->pemilik }})
                                         </option>
                                     @endforeach
@@ -327,14 +332,50 @@
                             @if(isset($ewallets) && count($ewallets) > 0)
                                 <optgroup label="E-Wallet">
                                     @foreach($ewallets as $ew)
-                                        <option value="{{ $ew->nama_bank }} ({{ $ew->no_rekening }} a.n {{ $ew->pemilik }})">
+                                        <option value="{{ $ew->nama_bank }} ({{ $ew->no_rekening }} a.n {{ $ew->pemilik }})"
+                                                data-type="E-Wallet"
+                                                data-name="{{ $ew->nama_bank }}"
+                                                data-rekening="{{ $ew->no_rekening }}"
+                                                data-pemilik="{{ $ew->pemilik }}">
                                             {{ $ew->nama_bank }} - {{ $ew->no_rekening }} (a.n {{ $ew->pemilik }})
                                         </option>
                                     @endforeach
                                 </optgroup>
                             @endif
-                            <option value="Tunai / Pembayaran di Tempat">Bayar Tunai di Tempat (Admin PM)</option>
+                            <option value="Tunai / Pembayaran di Tempat" data-type="Tunai">Bayar Tunai di Tempat (Admin PM)</option>
                         </select>
+                    </div>
+
+                    <!-- Detail Rekening / Wallet yang Dipilih -->
+                    <div id="paymentDetailBox" class="mb-3 p-3 rounded-xl border d-none" style="background-color: #faf5ff; border-color: #d8b4fe;">
+                        <div id="rekeningDetailContent" class="d-none">
+                            <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom" style="border-color: #e9d5ff !important;">
+                                <span class="font-weight-bold text-xs text-purple-950" id="detailTypeLabel">
+                                    <i class="fas fa-university text-purple-700 mr-1.5"></i> Detail Rekening Tujuan
+                                </span>
+                                <span class="badge px-2 py-1 text-xs font-weight-bold" id="detailBadgeName" style="background-color: #7c3aed; color: #ffffff; border-radius: 6px;">Bank</span>
+                            </div>
+                            <div class="mb-2">
+                                <div class="text-xs text-muted mb-1">Nomor Rekening / No. E-Wallet:</div>
+                                <div class="d-flex align-items-center justify-content-between p-2 rounded-lg bg-white border" style="border-color: #ddd6fe !important;">
+                                    <span class="font-weight-bold text-purple-950 font-mono" id="detailNoRek" style="font-size: 14px; letter-spacing: 0.5px;">-</span>
+                                    <button type="button" class="btn btn-xs font-weight-bold px-2 py-1 rounded-lg" style="background-color: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd;" onclick="copyRekeningNumber()">
+                                        <i class="fas fa-copy mr-1"></i><span id="copyBtnText">Salin</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between text-xs mt-1">
+                                <span class="text-muted">Atas Nama (A.N):</span>
+                                <span class="font-weight-bold text-purple-950 text-uppercase" id="detailPemilik">-</span>
+                            </div>
+                        </div>
+
+                        <div id="tunaiDetailContent" class="d-none">
+                            <div class="d-flex align-items-center text-xs text-purple-950">
+                                <i class="fas fa-money-bill-wave text-amber-500 mr-2 fa-lg"></i>
+                                <span>Pembayaran dapat dilakukan secara tunai di kasir / Admin Paradise of Math.</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Upload File Bukti -->
@@ -507,4 +548,65 @@
         }
     }
 </style>
+
+<script>
+    function updatePaymentDetails(selectEl) {
+        const selectedOption = selectEl.options[selectEl.selectedIndex];
+        const box = document.getElementById('paymentDetailBox');
+        const rekeningContent = document.getElementById('rekeningDetailContent');
+        const tunaiContent = document.getElementById('tunaiDetailContent');
+
+        if (!selectedOption || !selectedOption.value) {
+            box.classList.add('d-none');
+            return;
+        }
+
+        const type = selectedOption.getAttribute('data-type');
+        const name = selectedOption.getAttribute('data-name');
+        const rekening = selectedOption.getAttribute('data-rekening');
+        const pemilik = selectedOption.getAttribute('data-pemilik');
+
+        box.classList.remove('d-none');
+
+        if (type === 'Tunai') {
+            rekeningContent.classList.add('d-none');
+            tunaiContent.classList.remove('d-none');
+        } else if (rekening) {
+            tunaiContent.classList.add('d-none');
+            rekeningContent.classList.remove('d-none');
+
+            const isEwallet = (type === 'E-Wallet');
+            document.getElementById('detailTypeLabel').innerHTML = isEwallet 
+                ? '<i class="fas fa-wallet text-emerald-600 mr-1.5"></i> Detail E-Wallet Tujuan' 
+                : '<i class="fas fa-university text-purple-700 mr-1.5"></i> Detail Rekening Bank Tujuan';
+            
+            const badgeEl = document.getElementById('detailBadgeName');
+            badgeEl.innerText = name || type;
+            badgeEl.style.backgroundColor = isEwallet ? '#059669' : '#7c3aed';
+            
+            document.getElementById('detailNoRek').innerText = rekening;
+            document.getElementById('detailPemilik').innerText = pemilik || '-';
+
+            const copyBtnText = document.getElementById('copyBtnText');
+            if (copyBtnText) copyBtnText.innerText = 'Salin';
+        } else {
+            box.classList.add('d-none');
+        }
+    }
+
+    function copyRekeningNumber() {
+        const noRek = document.getElementById('detailNoRek').innerText;
+        if (noRek && noRek !== '-') {
+            navigator.clipboard.writeText(noRek).then(() => {
+                const btnText = document.getElementById('copyBtnText');
+                if (btnText) {
+                    btnText.innerText = 'Tersalin!';
+                    setTimeout(() => { btnText.innerText = 'Salin'; }, 2000);
+                }
+            }).catch(err => {
+                console.error('Gagal menyalin: ', err);
+            });
+        }
+    }
+</script>
 @endsection
