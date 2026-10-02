@@ -187,7 +187,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::get('/admin/kalender', 'showKalender')->name('admin.kalender');
     Route::get('/admin/foto', 'showFotoMenu')->name('admin.foto.index');
     Route::post('/admin/foto/hero', 'updateHeroFoto')->name('admin.foto.hero.update');
-    Route::post('/admin/foto/hero/delete/{filename?}', 'deleteHeroFotoSingle')->name('admin.foto.hero.delete.single');
+    Route::post('/admin/foto/hero/remove', 'deleteHeroFotoSingle')->name('admin.foto.hero.delete.single');
     Route::get('/admin/galeri', 'showGaleri')->name('admin.galeri.index');
     Route::post('/admin/galeri/update', 'updateGaleriFoto')->name('admin.galeri.update');
     Route::post('/admin/galeri/store-extra', 'storeGaleriTambahan')->name('admin.galeri.extra.store');
@@ -196,7 +196,7 @@ Route::controller(AdminController::class)->group(function () {
     // Kelola Foto Guru & Banner Landing
     Route::get('/admin/foto-guru', 'showInputFotoGuru')->name('admin.foto-guru.index');
     Route::post('/admin/foto-guru/banner', 'storeBannerGuruFoto')->name('admin.foto-guru.banner.store');
-    Route::post('/admin/foto-guru/banner/delete/{filename?}', 'deleteBannerGuruFoto')->name('admin.foto-guru.banner.delete');
+    Route::post('/admin/foto-guru/banner/remove', 'deleteBannerGuruFoto')->name('admin.foto-guru.banner.delete');
     Route::post('/admin/foto-guru/profil/{id}', 'storeProfilGuruFoto')->name('admin.foto-guru.profil.store');
 
     // YouTube Tutorial Link Management Routes

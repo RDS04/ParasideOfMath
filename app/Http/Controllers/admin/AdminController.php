@@ -1967,14 +1967,13 @@ class AdminController extends Controller
     /**
      * Hapus Spesifik Foto Hero dari List.
      */
-    public function deleteHeroFotoSingle(Request $request, $filename = null)
+    public function deleteHeroFotoSingle(Request $request)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        $filename = $filename ?: $request->input('filename');
-        $filename = basename($filename);
+        $filename = basename($request->input('filename'));
         $filePath = public_path("uploads/landing/hero/{$filename}");
 
         if ($filename && file_exists($filePath)) {
@@ -2903,14 +2902,13 @@ class AdminController extends Controller
     /**
      * Hapus Foto Banner Guru Landing Page (Admin).
      */
-    public function deleteBannerGuruFoto(Request $request, $filename = null)
+    public function deleteBannerGuruFoto(Request $request)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
-        $filename = $filename ?: $request->input('filename');
-        $filename = basename($filename);
+        $filename = basename($request->input('filename'));
         $filePath = public_path('uploads/landing/' . $filename);
 
         if ($filename && file_exists($filePath)) {

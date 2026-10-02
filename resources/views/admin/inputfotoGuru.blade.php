@@ -119,7 +119,7 @@
                                                 <p class="text-xs font-weight-bold text-slate-800 truncate mb-0">{{ $bf['filename'] }}</p>
                                                 <span class="badge badge-success text-[10px]">Tampil di Slider</span>
                                             </div>
-                                            <form id="delete-banner-form-{{ $loop->index }}" action="{{ route('admin.foto-guru.banner.delete', $bf['filename']) }}" method="POST">
+                                            <form id="delete-banner-form-{{ $loop->index }}" action="{{ route('admin.foto-guru.banner.delete') }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="filename" value="{{ $bf['filename'] }}">
                                                 <button type="button" onclick="confirmDeleteBanner('{{ $loop->index }}')" class="btn btn-sm btn-outline-danger rounded-lg text-xs" title="Hapus Foto Banner">
