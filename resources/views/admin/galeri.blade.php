@@ -100,11 +100,11 @@
                                                 <div class="card-body p-3">
                                                     <p class="text-xs font-weight-bold text-purple-950 mb-2 text-truncate" title="{{ $photo['filename'] }}">{{ $photo['filename'] }}</p>
                                                     <p class="text-xxs text-slate-500 mb-3">{{ $photo['size'] }}</p>
-                                                    <form action="{{ route('admin.galeri.delete') }}" method="POST" onsubmit="return confirm('Hapus foto galeri ini?')">
+                                                    <form id="delete-galeri-extra-{{ $loop->index }}" action="{{ route('admin.galeri.delete') }}" method="POST">
                                                         @csrf
                                                         <input type="hidden" name="key" value="galeri_extra">
                                                         <input type="hidden" name="filename" value="{{ $photo['filename'] }}">
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger btn-block text-xs font-weight-bold rounded-lg">
+                                                        <button type="button" onclick="confirmDeleteGaleriExtra('{{ $loop->index }}', '{{ $photo['filename'] }}')" class="btn btn-sm btn-outline-danger btn-block text-xs font-weight-bold rounded-lg">
                                                             <i class="fas fa-trash-alt mr-1"></i> Hapus
                                                         </button>
                                                     </form>
@@ -173,10 +173,10 @@
                             </button>
                             </form>
                             @if(isset($galeri['kelas']) && $galeri['kelas'])
-                                <form action="{{ route('admin.galeri.delete') }}" method="POST" onsubmit="return confirm('Reset foto kelas ke default?')">
+                                <form id="reset-galeri-kelas" action="{{ route('admin.galeri.delete') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="key" value="kelas">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
+                                    <button type="button" onclick="confirmResetGaleri('kelas', 'Kelas')" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
                                         <i class="fas fa-trash-alt"></i> Reset
                                     </button>
                                 </form>
@@ -232,10 +232,10 @@
                             </button>
                             </form>
                             @if(isset($galeri['toilet']) && $galeri['toilet'])
-                                <form action="{{ route('admin.galeri.delete') }}" method="POST" onsubmit="return confirm('Reset foto toilet ke default?')">
+                                <form id="reset-galeri-toilet" action="{{ route('admin.galeri.delete') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="key" value="toilet">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
+                                    <button type="button" onclick="confirmResetGaleri('toilet', 'Toilet')" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
                                         <i class="fas fa-trash-alt"></i> Reset
                                     </button>
                                 </form>
@@ -291,10 +291,10 @@
                             </button>
                             </form>
                             @if(isset($galeri['mushala']) && $galeri['mushala'])
-                                <form action="{{ route('admin.galeri.delete') }}" method="POST" onsubmit="return confirm('Reset foto mushala ke default?')">
+                                <form id="reset-galeri-mushala" action="{{ route('admin.galeri.delete') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="key" value="mushala">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
+                                    <button type="button" onclick="confirmResetGaleri('mushala', 'Mushala')" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
                                         <i class="fas fa-trash-alt"></i> Reset
                                     </button>
                                 </form>
@@ -350,10 +350,10 @@
                             </button>
                             </form>
                             @if(isset($galeri['gedung']) && $galeri['gedung'])
-                                <form action="{{ route('admin.galeri.delete') }}" method="POST" onsubmit="return confirm('Reset foto gedung ke default?')">
+                                <form id="reset-galeri-gedung" action="{{ route('admin.galeri.delete') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="key" value="gedung">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
+                                    <button type="button" onclick="confirmResetGaleri('gedung', 'Gedung Bimbel')" class="btn btn-sm btn-outline-danger font-weight-bold text-xs rounded-xl px-2.5" style="border-radius: 10px;">
                                         <i class="fas fa-trash-alt"></i> Reset
                                     </button>
                                 </form>
@@ -368,8 +368,44 @@
     </div>
 </section>
 
-<!-- JS Client-side Image Preview -->
+<!-- JS Client-side Image Preview & SweetAlert -->
 <script>
+    function confirmDeleteGaleriExtra(index, filename) {
+        Swal.fire({
+            title: 'Hapus Foto Galeri?',
+            text: 'Foto ' + filename + ' akan dihapus permanen dari galeri.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-trash-alt mr-1"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-galeri-extra-' + index).submit();
+            }
+        });
+    }
+
+    function confirmResetGaleri(key, label) {
+        Swal.fire({
+            title: 'Reset Foto ' + label + '?',
+            text: 'Foto ' + label + ' akan dikembalikan ke gambar default sistem.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-undo mr-1"></i> Ya, Reset!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('reset-galeri-' + key).submit();
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const inputs = document.querySelectorAll('.galeri-input, .galeri-extra-input');
         inputs.forEach(input => {

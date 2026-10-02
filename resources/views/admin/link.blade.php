@@ -151,10 +151,10 @@
                                                         <button type="button" class="btn btn-sm btn-outline-warning rounded-lg mr-1" data-toggle="modal" data-target="#editModal{{ $link->id }}" title="Edit">
                                                             <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <form action="{{ route('admin.link.delete', $link->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus video tutorial ini?');" class="d-inline">
+                                                        <form id="delete-link-form-{{ $link->id }}" action="{{ route('admin.link.delete', $link->id) }}" method="POST" class="d-inline">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-lg" title="Hapus">
+                                                            <button type="button" onclick="confirmDeleteLink({{ $link->id }}, '{{ addslashes($link->judul) }}')" class="btn btn-sm btn-outline-danger rounded-lg" title="Hapus">
                                                                 <i class="fas fa-trash"></i>
                                                             </button>
                                                         </form>
@@ -231,4 +231,24 @@
 
     </div>
 </section>
+
+<script>
+    function confirmDeleteLink(id, title) {
+        Swal.fire({
+            title: 'Hapus Video Tutorial?',
+            text: 'Video "' + title + '" akan dihapus permanen.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-trash mr-1"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-link-form-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection

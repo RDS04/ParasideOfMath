@@ -119,10 +119,9 @@
                                                 <p class="text-xs font-weight-bold text-slate-800 truncate mb-0">{{ $bf['filename'] }}</p>
                                                 <span class="badge badge-success text-[10px]">Tampil di Slider</span>
                                             </div>
-                                            <form action="{{ route('admin.foto-guru.banner.delete', $bf['filename']) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto banner ini?')">
+                                            <form id="delete-banner-form-{{ $loop->index }}" action="{{ route('admin.foto-guru.banner.delete', $bf['filename']) }}" method="POST">
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-lg text-xs" title="Hapus Foto Banner">
+                                                <button type="button" onclick="confirmDeleteBanner('{{ $loop->index }}', '{{ $bf['filename'] }}')" class="btn btn-sm btn-outline-danger rounded-lg text-xs" title="Hapus Foto Banner">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -146,6 +145,24 @@
 </section>
 
 <script>
+    function confirmDeleteBanner(index, filename) {
+        Swal.fire({
+            title: 'Hapus Foto Banner?',
+            text: 'Foto banner "' + filename + '" akan dihapus.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-trash mr-1"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-banner-form-' + index).submit();
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const input = document.getElementById('fotoBannerInput');
         const label = document.getElementById('fotoBannerLabel');

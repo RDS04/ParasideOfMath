@@ -129,10 +129,9 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <form action="{{ route('admin.foto.hero.delete.single', $img['filename']) }}" method="POST" onsubmit="return confirm('Hapus foto ini dari daftar slider?')">
+                                            <form id="delete-hero-form-{{ $index }}" action="{{ route('admin.foto.hero.delete.single', $img['filename']) }}" method="POST">
                                                 @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-lg p-2 text-xs" title="Hapus Foto">
+                                                <button type="button" onclick="confirmDeleteHero('{{ $index }}', '{{ $img['filename'] }}')" class="btn btn-sm btn-outline-danger border-0 rounded-lg p-2 text-xs" title="Hapus Foto">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </form>
@@ -230,8 +229,26 @@
     </div>
 </section>
 
-<!-- JS Live Multi-Upload Label & Auto-Slider Preview -->
+<!-- JS Live Multi-Upload Label, SweetAlert Delete & Auto-Slider Preview -->
 <script>
+    function confirmDeleteHero(index, filename) {
+        Swal.fire({
+            title: 'Hapus Foto Slider?',
+            text: 'Foto ' + filename + ' akan dihapus dari daftar slider rotasi.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-trash-alt mr-1"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-hero-form-' + index).submit();
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Multi-file label updater
         const fileInput = document.getElementById('heroImagesInput');

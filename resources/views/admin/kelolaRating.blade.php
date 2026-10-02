@@ -164,32 +164,13 @@
                                                     </button>
                                                 @endif
                                             </form>
-                                            <button type="button" class="btn btn-outline-danger btn-sm rounded-lg" data-toggle="modal" data-target="#deleteModal{{ $item->id }}" title="Hapus Ulasan">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-
-                                        <!-- Modal Hapus -->
-                                        <div class="modal fade text-left" id="deleteModal{{ $item->id }}" tabindex="-1" role="dialog" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-                                                <div class="modal-content rounded-2xl border-0 shadow-lg">
-                                                    <div class="modal-body p-4 text-center">
-                                                        <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3 text-xl">
-                                                            <i class="fas fa-trash-alt"></i>
-                                                        </div>
-                                                        <h5 class="font-bold text-slate-800 text-base mb-1">Hapus Ulasan ini?</h5>
-                                                        <p class="text-xs text-slate-500 mb-4">Ulasan dari <strong>"{{ $item->nama }}"</strong> akan dihapus permanen.</p>
-                                                        <div class="flex gap-2 justify-center">
-                                                            <button type="button" class="btn btn-light btn-sm rounded-xl font-bold px-3" data-dismiss="modal">Batal</button>
-                                                            <form action="{{ route('admin.rating.delete', $item->id) }}" method="POST">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="btn btn-danger btn-sm rounded-xl font-bold px-3">Hapus</button>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                            <form id="delete-rating-form-{{ $item->id }}" action="{{ route('admin.rating.delete', $item->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="button" onclick="confirmDeleteRating({{ $item->id }}, '{{ addslashes($item->nama) }}')" class="btn btn-outline-danger btn-sm rounded-lg" title="Hapus Ulasan">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -211,4 +192,24 @@
 
     </div>
 </section>
+
+<script>
+    function confirmDeleteRating(id, name) {
+        Swal.fire({
+            title: 'Hapus Ulasan Rating?',
+            text: 'Ulasan dari "' + name + '" akan dihapus permanen.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="fas fa-trash mr-1"></i> Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-rating-form-' + id).submit();
+            }
+        });
+    }
+</script>
 @endsection
