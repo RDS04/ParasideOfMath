@@ -1967,17 +1967,17 @@ class AdminController extends Controller
     /**
      * Hapus Spesifik Foto Hero dari List.
      */
-    public function deleteHeroFotoSingle(Request $request, $filename)
+    public function deleteHeroFotoSingle(Request $request, $filename = null)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
 
-        // Prevent directory traversal
+        $filename = $filename ?: $request->input('filename');
         $filename = basename($filename);
         $filePath = public_path("uploads/landing/hero/{$filename}");
 
-        if (file_exists($filePath)) {
+        if ($filename && file_exists($filePath)) {
             @unlink($filePath);
             return back()->with('success', 'Foto Hero berhasil dihapus dari daftar slider.');
         }
@@ -2903,15 +2903,18 @@ class AdminController extends Controller
     /**
      * Hapus Foto Banner Guru Landing Page (Admin).
      */
-    public function deleteBannerGuruFoto($filename)
+    public function deleteBannerGuruFoto(Request $request, $filename = null)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
 
-        $filePath = public_path('uploads/landing/' . basename($filename));
-        if (file_exists($filePath)) {
-            unlink($filePath);
+        $filename = $filename ?: $request->input('filename');
+        $filename = basename($filename);
+        $filePath = public_path('uploads/landing/' . $filename);
+
+        if ($filename && file_exists($filePath)) {
+            @unlink($filePath);
             return redirect()->back()->with('success', 'Foto banner berhasil dihapus!');
         }
 

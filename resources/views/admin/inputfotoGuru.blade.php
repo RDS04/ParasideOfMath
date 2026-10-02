@@ -119,9 +119,10 @@
                                                 <p class="text-xs font-weight-bold text-slate-800 truncate mb-0">{{ $bf['filename'] }}</p>
                                                 <span class="badge badge-success text-[10px]">Tampil di Slider</span>
                                             </div>
-                                            <form id="delete-banner-form-{{ $loop->index }}" action="{{ route('admin.foto-guru.banner.delete', $bf['filename']) }}" method="POST">
+                                            <form id="delete-banner-form-{{ $loop->index }}" action="{{ route('admin.foto-guru.banner.delete') }}" method="POST">
                                                 @csrf
-                                                <button type="button" onclick="confirmDeleteBanner('{{ $loop->index }}', '{{ $bf['filename'] }}')" class="btn btn-sm btn-outline-danger rounded-lg text-xs" title="Hapus Foto Banner">
+                                                <input type="hidden" name="filename" value="{{ $bf['filename'] }}">
+                                                <button type="button" onclick="confirmDeleteBanner('{{ $loop->index }}')" class="btn btn-sm btn-outline-danger rounded-lg text-xs" title="Hapus Foto Banner">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
@@ -145,10 +146,10 @@
 </section>
 
 <script>
-    function confirmDeleteBanner(index, filename) {
+    function confirmDeleteBanner(index) {
         Swal.fire({
             title: 'Hapus Foto Banner?',
-            text: 'Foto banner "' + filename + '" akan dihapus.',
+            text: 'Foto banner ini akan dihapus.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc2626',

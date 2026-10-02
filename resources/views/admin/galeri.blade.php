@@ -373,7 +373,7 @@
     function confirmDeleteGaleriExtra(index, filename) {
         Swal.fire({
             title: 'Hapus Foto Galeri?',
-            text: 'Foto ' + filename + ' akan dihapus permanen dari galeri.',
+            text: 'Foto ini akan dihapus permanen dari galeri.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc2626',

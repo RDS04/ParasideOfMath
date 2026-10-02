@@ -129,9 +129,10 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <form id="delete-hero-form-{{ $index }}" action="{{ route('admin.foto.hero.delete.single', $img['filename']) }}" method="POST">
+                                            <form id="delete-hero-form-{{ $index }}" action="{{ route('admin.foto.hero.delete.single') }}" method="POST">
                                                 @csrf
-                                                <button type="button" onclick="confirmDeleteHero('{{ $index }}', '{{ $img['filename'] }}')" class="btn btn-sm btn-outline-danger border-0 rounded-lg p-2 text-xs" title="Hapus Foto">
+                                                <input type="hidden" name="filename" value="{{ $img['filename'] }}">
+                                                <button type="button" onclick="confirmDeleteHero('{{ $index }}')" class="btn btn-sm btn-outline-danger border-0 rounded-lg p-2 text-xs" title="Hapus Foto">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </form>
@@ -234,7 +235,7 @@
     function confirmDeleteHero(index, filename) {
         Swal.fire({
             title: 'Hapus Foto Slider?',
-            text: 'Foto ' + filename + ' akan dihapus dari daftar slider rotasi.',
+            text: 'Foto ini akan dihapus dari daftar slider rotasi.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc2626',
