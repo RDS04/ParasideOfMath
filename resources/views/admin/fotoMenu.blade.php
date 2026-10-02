@@ -129,7 +129,7 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <form id="delete-hero-form-{{ $index }}" action="{{ route('admin.foto.hero.delete.single') }}" method="POST">
+                                            <form id="delete-hero-form-{{ $index }}" action="{{ route('admin.foto.hero.delete.single', $img['filename']) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="filename" value="{{ $img['filename'] }}">
                                                 <button type="button" onclick="confirmDeleteHero('{{ $index }}')" class="btn btn-sm btn-outline-danger border-0 rounded-lg p-2 text-xs" title="Hapus Foto">
