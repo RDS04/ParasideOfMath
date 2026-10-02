@@ -1967,8 +1967,10 @@ class AdminController extends Controller
     /**
      * Hapus Spesifik Foto Hero dari List.
      */
-    public function deleteHeroFotoSingle(Request $request)
+    public function deleteHeroFotoSingle(Request $request = null)
     {
+        $request = $request ?: request();
+
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
         }
@@ -2902,8 +2904,10 @@ class AdminController extends Controller
     /**
      * Hapus Foto Banner Guru Landing Page (Admin).
      */
-    public function deleteBannerGuruFoto(Request $request)
+    public function deleteBannerGuruFoto(Request $request = null)
     {
+        $request = $request ?: request();
+
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             return redirect()->route('login')->with('error', 'Akses ditolak.');
         }
