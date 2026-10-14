@@ -111,9 +111,13 @@
                                                              <i class="fas fa-ban"></i>
                                                          </button>
                                                      @endif
-                                                     <button type="button" class="btn btn-xs btn-outline-danger rounded-lg font-weight-bold px-2 py-1.5" title="Hapus Permanen Data Tutor" data-toggle="modal" data-target="#modalDeletePermanentGuru{{ $guru->id }}">
+                                                     <button type="button" class="btn btn-xs btn-outline-danger rounded-lg font-weight-bold px-2 py-1.5" title="Hapus Permanen Data Tutor" onclick="confirmDeleteGuru({{ $guru->id }}, '{{ addslashes($guru->user->name ?? 'Tutor') }}')">
                                                          <i class="fas fa-trash-alt"></i>
                                                      </button>
+                                                     <form id="delete-guru-form-{{ $guru->id }}" action="{{ route('admin.guru.destroy', $guru->id) }}" method="POST" style="display: none;">
+                                                         @csrf
+                                                         @method('DELETE')
+                                                     </form>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-center">
@@ -304,46 +308,58 @@
                 </div>
             </div>
         </div>
-
-        <!-- Modal Konfirmasi Hapus Permanen Data Guru / Tutor -->
-        <div class="modal fade" id="modalDeletePermanentGuru{{ $guru->id }}" tabindex="-1" role="dialog" aria-labelledby="modalDeletePermanentGuruLabel{{ $guru->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content border-0 shadow-lg rounded-2xl overflow-hidden" style="border-radius: 16px;">
-                    <div class="modal-header bg-danger text-white py-3 px-4" style="background-color: #dc2626 !important;">
-                        <h5 class="modal-title font-bold text-base d-flex align-items-center text-white" id="modalDeletePermanentGuruLabel{{ $guru->id }}">
-                            <i class="fas fa-trash-alt mr-2"></i> Hapus Data Tutor
-                        </h5>
-                        <button type="button" class="close text-white opacity-80 hover:opacity-100" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body p-4 bg-white text-center">
-                        <div class="rounded-circle p-3 mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: #ffe4e6; color: #e11d48;">
-                            <i class="fas fa-user-times fa-2x"></i>
-                        </div>
-                        <h5 class="font-weight-bold text-purple-950 mb-2">
-                            Hapus Tutor: {{ $guru->user->name ?? 'Pengajar' }}?
-                        </h5>
-                        <p class="text-sm text-muted mb-0">
-                            Apakah Anda yakin ingin menghapus data tutor <strong>{{ $guru->user->name ?? 'Pengajar' }}</strong> ({{ $guru->user->email ?? '-' }}) secara permanen?
-                            <br>
-                            <span class="text-danger font-weight-semibold">Akun login, profil tutor, dan riwayat penugasan akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan.</span>
-                        </p>
-                    </div>
-                    <div class="modal-footer bg-slate-50 py-2.5 px-4 border-top d-flex justify-content-between">
-                        <button type="button" class="btn btn-sm btn-light border font-weight-bold rounded-lg px-3" data-dismiss="modal">Batal</button>
-                        <form action="{{ route('admin.guru.destroy', $guru->id) }}" method="POST" class="m-0">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger font-weight-bold rounded-lg px-4 text-white">
-                                <i class="fas fa-trash-alt mr-1.5"></i> Ya, Hapus Tutor
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
     @endforeach
+
+    <!-- SweetAlert2 Scripts -->
+    <script>
+        function confirmDeleteGuru(id, name) {
+            Swal.fire({
+                title: 'Hapus Data Tutor?',
+                html: 'Apakah Anda yakin ingin menghapus data tutor <b>' + name + '</b> secara permanen?<br><small class="text-danger">Akun login, profil tutor, dan riwayat penugasan akan dihapus dari sistem.</small>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fas fa-trash-alt mr-1"></i> Ya, Hapus Tutor',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Sedang Menghapus...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    document.getElementById('delete-guru-form-' + id).submit();
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: {!! json_encode(session('success')) !!},
+                    confirmButtonColor: '#7c3aed',
+                    timer: 3500,
+                    timerProgressBar: true
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: {!! json_encode(session('error')) !!},
+                    confirmButtonColor: '#dc2626'
+                });
+            @endif
+        });
+    </script>
 
     <!-- Custom CSS for purple brand elements -->
     <style>
