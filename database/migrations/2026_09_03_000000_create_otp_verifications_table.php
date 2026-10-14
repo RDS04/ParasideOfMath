@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('otp_verifications', function (Blueprint $table) {
             $table->id();
             $table->string('email')->index();
-            $table->enum('role', ['siswa', 'guru']);
+            $table->string('role', 50);
             $table->string('name');
             $table->string('password');
             $table->string('otp', 6);

@@ -31,8 +31,12 @@ class OtpMail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $subject = ($this->role === 'reset_password' || str_starts_with($this->role, 'reset_'))
+            ? 'Kode OTP Reset Kata Sandi - Paradise of Math'
+            : 'Kode OTP Verifikasi Registrasi - Paradise of Math';
+
         return new Envelope(
-            subject: 'Kode OTP Verifikasi Registrasi - Paradise of Math',
+            subject: $subject,
         );
     }
 

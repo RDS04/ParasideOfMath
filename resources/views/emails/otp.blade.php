@@ -103,14 +103,25 @@
     <div class="container">
         <div class="header">
             <h1>Paradise <span>of Math</span></h1>
-            <p>Verifikasi Akun {{ ucfirst($role) }}</p>
+            @if($role === 'reset_password' || str_starts_with($role, 'reset_'))
+                <p>Reset Kata Sandi Akun</p>
+            @else
+                <p>Verifikasi Akun {{ ucfirst($role) }}</p>
+            @endif
         </div>
         <div class="content">
             <div class="greeting">Halo, {{ $name }}! 👋</div>
-            <p class="message">
-                Terima kasih telah melakukan pendaftaran di <strong>Paradise of Math</strong> sebagai <strong>{{ ucfirst($role) }}</strong>.<br>
-                Gunakan kode OTP di bawah ini untuk menyelesaikan proses verifikasi registrasi Anda:
-            </p>
+            @if($role === 'reset_password' || str_starts_with($role, 'reset_'))
+                <p class="message">
+                    Kami menerima permintaan untuk mereset kata sandi akun Anda di <strong>Paradise of Math</strong>.<br>
+                    Gunakan kode OTP di bawah ini untuk memverifikasi dan mengatur ulang kata sandi Anda:
+                </p>
+            @else
+                <p class="message">
+                    Terima kasih telah melakukan pendaftaran di <strong>Paradise of Math</strong> sebagai <strong>{{ ucfirst($role) }}</strong>.<br>
+                    Gunakan kode OTP di bawah ini untuk menyelesaikan proses verifikasi registrasi Anda:
+                </p>
+            @endif
             <div class="otp-box">
                 <p class="otp-code">{{ $otp }}</p>
             </div>
@@ -119,7 +130,11 @@
                 ⏱️ Kode ini hanya berlaku selama <strong>10 menit</strong>.
             </div>
             <p class="warning-text">
-                Jika Anda tidak melakukan pendaftaran di platform kami, silakan abaikan email ini.<br>
+                @if($role === 'reset_password' || str_starts_with($role, 'reset_'))
+                    Jika Anda tidak meminta reset kata sandi, silakan abaikan email ini. Akun Anda tetap aman.<br>
+                @else
+                    Jika Anda tidak melakukan pendaftaran di platform kami, silakan abaikan email ini.<br>
+                @endif
                 Jangan berikan kode ini kepada siapapun demi keamanan akun Anda.
             </p>
         </div>

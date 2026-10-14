@@ -25,7 +25,15 @@ class AuthController extends Controller
      */
     protected function dispatchOtpEmail(string $email, string $otp, string $name, string $role): array
     {
-        Log::info("KODE OTP REGISTRASI {$role} ({$email}): {$otp}");
+        if ($role === 'reset_password' || str_starts_with($role, 'reset_')) {
+            Log::info("KODE OTP RESET PASSWORD ({$email}): {$otp}");
+        } else {
+            Log::info("KODE OTP REGISTRASI {$role} ({$email}): {$otp}");
+        }
+
+        $mailSubject = ($role === 'reset_password' || str_starts_with($role, 'reset_'))
+            ? 'Kode OTP Reset Kata Sandi - Paradise of Math'
+            : 'Kode OTP Verifikasi - Paradise of Math';
 
         // 1. Cek apakah ada API Key Brevo di .env (Kirim via HTTPS Port 443 - Bebas Blokir ISP)
         $brevoKey = env('BREVO_API_KEY');
@@ -37,7 +45,7 @@ class AuthController extends Controller
                 ])->post('https://api.brevo.com/v3/smtp/email', [
                     'sender' => ['name' => 'Paradise of Math', 'email' => env('MAIL_FROM_ADDRESS', 'syahputrareyhandwi@gmail.com')],
                     'to' => [['email' => $email]],
-                    'subject' => 'Kode OTP Verifikasi - Paradise of Math',
+                    'subject' => $mailSubject,
                     'htmlContent' => view('emails.otp', compact('otp', 'name', 'role'))->render(),
                 ]);
 
