@@ -1717,8 +1717,10 @@
                                 </h3>
                                 <p
                                     class="text-slate-200 text-xs sm:text-sm mt-1.5 font-medium leading-relaxed drop-shadow">
-                                    Kak Ika, S.Pd. (Master Tutor), Kak Angel, dan Kak Sofia membimbing siswa dengan
-                                    pendekatan personal, metode cepat, dan kurikulum terbaik.
+                                    Kak Ika (Herisca Januarita, M.Si), Kak Angel (Angelina, M.Hum), dan Kak Sofia (Sofia
+                                    Zuhrah, S.Pd), dan para tutor keren lainnya. Membimbing siswa dengan pendekatan
+                                    personal, metode cepat, dan kurikulum terbaik (sesuai kurikulum yang diajarkan di
+                                    sekolah) masing-masing siswa.
                                 </p>
                             </div>
 
@@ -2531,7 +2533,9 @@
                     <i class="fas fa-star text-amber-400"></i> Ulasan &amp; Pengalaman Siswa
                 </span>
                 <h2 class="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-purple-400 to-violet-300 drop-shadow-sm">Apa Kata Siswa &amp; Orang Tua tentang</span> <span
+                    <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-purple-400 to-violet-300 drop-shadow-sm">Apa
+                        Kata Siswa &amp; Orang Tua tentang</span> <span
                         class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500">Paradise
                         of Math?</span>
                 </h2>
@@ -2608,7 +2612,8 @@
                                     </div>
                                     <div>
                                         <h5 class="font-extrabold text-white text-xs sm:text-sm leading-tight">
-                                            {{ $ratingItem->nama }}</h5>
+                                            {{ $ratingItem->nama }}
+                                        </h5>
                                         <span class="text-[10px] text-slate-400 font-medium">Siswa / Orangtua</span>
                                     </div>
                                 </div>
