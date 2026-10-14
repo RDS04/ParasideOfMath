@@ -20,6 +20,10 @@ use Illuminate\Validation\Rule;
 use App\Models\RiwayatPembayaran;
 use App\Models\YoutubeLink;
 use App\Models\Rating;
+use App\Models\User;
+use App\Models\Chat;
+use App\Models\OtpVerification;
+use App\Models\HasilUjian;
 
 class AdminController extends Controller
 {
@@ -1084,6 +1088,61 @@ class AdminController extends Controller
     }
 
     /**
+     * Hapus Permanen Data Siswa oleh Admin/Master.
+     */
+    public function deleteSiswa($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        try {
+            $siswa = Siswa::findOrFail($id);
+            $name = $siswa->name;
+
+            // Hapus file bukti transfer jika ada
+            if ($siswa->bukti_transfer) {
+                $buktiPath = public_path('uploads/bukti_transfer/' . basename($siswa->bukti_transfer));
+                if (file_exists($buktiPath) && is_file($buktiPath)) {
+                    @unlink($buktiPath);
+                }
+            }
+
+            // Hapus pas foto dari biodata jika ada
+            if (isset($siswa->biodata['pas_foto']) && $siswa->biodata['pas_foto']) {
+                $fotoPath = public_path($siswa->biodata['pas_foto']);
+                if (file_exists($fotoPath) && is_file($fotoPath)) {
+                    @unlink($fotoPath);
+                }
+            }
+
+            // Hapus riwayat chat siswa jika ada
+            Chat::where('session_id', 'LIKE', '%_' . $siswa->id . '_%')
+                ->orWhere('session_id', 'LIKE', 'sg_' . $siswa->id . '_%')
+                ->orWhere('session_id', 'LIKE', 'siswa_' . $siswa->id)
+                ->orWhere('sender_name', $siswa->name)
+                ->delete();
+
+            // Hapus OTP pending jika ada
+            if (!empty($siswa->email)) {
+                OtpVerification::where('email', $siswa->email)->delete();
+            }
+
+            // Hapus riwayat ujian dan pembayaran terkait
+            HasilUjian::where('siswa_id', $siswa->id)->delete();
+            RiwayatPembayaran::where('siswa_id', $siswa->id)->delete();
+
+            // Hapus data siswa
+            $siswa->delete();
+
+            return redirect()->back()->with('success', 'Data siswa "' . $name . '" berhasil dihapus secara permanen dari sistem.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus data siswa: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Tampilkan Halaman Daftar Guru/Tutor Keseluruhan.
      */
     public function daftarGuru()
@@ -1231,6 +1290,84 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Gagal memproses status akun guru: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Hapus Permanen Data Tutor / Guru oleh Admin/Master.
+     */
+    public function destroyGuru($id)
+    {
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('login')->with('error', 'Akses ditolak. Halaman khusus Admin.');
+        }
+
+        try {
+            $guru = Guru::with('user')->findOrFail($id);
+            $user = $guru->user;
+            $name = $user->name ?? 'Tutor';
+
+            // Hapus file foto profil jika ada
+            if ($guru->foto) {
+                $fotoPath = public_path($guru->foto);
+                if (file_exists($fotoPath) && is_file($fotoPath)) {
+                    @unlink($fotoPath);
+                }
+            }
+
+            // Hapus pesan chat terkait tutor jika ada
+            if ($user) {
+                Chat::where('session_id', 'LIKE', '%_' . $user->id)
+                    ->orWhere('session_id', 'LIKE', 'guru_' . $user->id)
+                    ->orWhere('sender_name', $user->name)
+                    ->delete();
+
+                // Hapus OTP pending jika ada
+                if (!empty($user->email)) {
+                    OtpVerification::where('email', $user->email)->delete();
+                }
+            }
+
+            // Bersihkan nama tutor dari biodata siswa jika sebelumnya ditugaskan
+            if (!empty($name)) {
+                $allSiswa = Siswa::all();
+                foreach ($allSiswa as $st) {
+                    $bio = $st->biodata ?? [];
+                    $isChanged = false;
+                    if (isset($bio['tutor_names']) && is_array($bio['tutor_names'])) {
+                        $filtered = array_values(array_filter($bio['tutor_names'], function ($tn) use ($name) {
+                            return strtolower(trim($tn)) !== strtolower(trim($name));
+                        }));
+                        if (count($filtered) !== count($bio['tutor_names'])) {
+                            $bio['tutor_names'] = $filtered;
+                            $isChanged = true;
+                        }
+                    }
+                    if (isset($bio['tutor_per_mapel']) && is_array($bio['tutor_per_mapel'])) {
+                        foreach ($bio['tutor_per_mapel'] as $mKey => $tVal) {
+                            if (strtolower(trim($tVal)) === strtolower(trim($name))) {
+                                unset($bio['tutor_per_mapel'][$mKey]);
+                                $isChanged = true;
+                            }
+                        }
+                    }
+                    if ($isChanged) {
+                        $st->biodata = $bio;
+                        $st->save();
+                    }
+                }
+            }
+
+            // Hapus data guru dan user terkait (foreign key cascade juga akan membersihkan gurus dan fcm_tokens)
+            $guru->delete();
+            if ($user) {
+                $user->delete();
+            }
+
+            return redirect()->back()->with('success', 'Data tutor (' . $name . ') berhasil dihapus secara permanen dari sistem.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus data tutor: ' . $e->getMessage());
         }
     }
 

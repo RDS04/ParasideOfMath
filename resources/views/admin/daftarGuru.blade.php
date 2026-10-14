@@ -55,7 +55,7 @@
                                         <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold text-center">No. Telepon / WA</th>
                                         <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold">Spesialisasi</th>
                                         <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold text-center">Batas Siswa (Kuota)</th>
-                                        <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold text-center">Detail</th>
+                                        <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold text-center">Aksi</th>
                                         <th class="px-4 py-3 text-xs uppercase tracking-wider font-bold text-center">Status</th>
                                     </tr>
                                 </thead>
@@ -98,8 +98,8 @@
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-center">
-                                                <div class="d-flex align-items-center justify-content-center gap-1">
-                                                    <a href="{{ route('admin.guru.detail', $guru->id) }}" class="btn btn-xs btn-info rounded-lg font-weight-bold px-2.5 py-1.5 mr-1">
+                                                <div class="d-flex align-items-center justify-content-center" style="gap: 4px;">
+                                                    <a href="{{ route('admin.guru.detail', $guru->id) }}" class="btn btn-xs btn-info rounded-lg font-weight-bold px-2.5 py-1.5" title="Detail Tutor">
                                                         <i class="fas fa-eye mr-1"></i> Detail
                                                     </a>
                                                      @if(strtolower($guru->status ?? '') === 'nonaktif')
@@ -107,10 +107,13 @@
                                                              <i class="fas fa-check-circle"></i>
                                                          </button>
                                                      @else
-                                                         <button type="button" class="btn btn-xs btn-outline-danger rounded-lg font-weight-bold px-2 py-1.5" title="Nonaktifkan Akun Guru" data-toggle="modal" data-target="#modalHapusGuruDaftar{{ $guru->id }}">
+                                                         <button type="button" class="btn btn-xs btn-outline-secondary rounded-lg font-weight-bold px-2 py-1.5" title="Nonaktifkan Akun Guru" data-toggle="modal" data-target="#modalHapusGuruDaftar{{ $guru->id }}">
                                                              <i class="fas fa-ban"></i>
                                                          </button>
                                                      @endif
+                                                     <button type="button" class="btn btn-xs btn-outline-danger rounded-lg font-weight-bold px-2 py-1.5" title="Hapus Permanen Data Tutor" data-toggle="modal" data-target="#modalDeletePermanentGuru{{ $guru->id }}">
+                                                         <i class="fas fa-trash-alt"></i>
+                                                     </button>
                                                 </div>
                                             </td>
                                             <td class="px-4 py-3 text-center">
@@ -301,6 +304,45 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal Konfirmasi Hapus Permanen Data Guru / Tutor -->
+        <div class="modal fade" id="modalDeletePermanentGuru{{ $guru->id }}" tabindex="-1" role="dialog" aria-labelledby="modalDeletePermanentGuruLabel{{ $guru->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content border-0 shadow-lg rounded-2xl overflow-hidden" style="border-radius: 16px;">
+                    <div class="modal-header bg-danger text-white py-3 px-4" style="background-color: #dc2626 !important;">
+                        <h5 class="modal-title font-bold text-base d-flex align-items-center text-white" id="modalDeletePermanentGuruLabel{{ $guru->id }}">
+                            <i class="fas fa-trash-alt mr-2"></i> Hapus Data Tutor
+                        </h5>
+                        <button type="button" class="close text-white opacity-80 hover:opacity-100" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4 bg-white text-center">
+                        <div class="rounded-circle p-3 mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: #ffe4e6; color: #e11d48;">
+                            <i class="fas fa-user-times fa-2x"></i>
+                        </div>
+                        <h5 class="font-weight-bold text-purple-950 mb-2">
+                            Hapus Tutor: {{ $guru->user->name ?? 'Pengajar' }}?
+                        </h5>
+                        <p class="text-sm text-muted mb-0">
+                            Apakah Anda yakin ingin menghapus data tutor <strong>{{ $guru->user->name ?? 'Pengajar' }}</strong> ({{ $guru->user->email ?? '-' }}) secara permanen?
+                            <br>
+                            <span class="text-danger font-weight-semibold">Akun login, profil tutor, dan riwayat penugasan akan dihapus dari sistem. Tindakan ini tidak dapat dibatalkan.</span>
+                        </p>
+                    </div>
+                    <div class="modal-footer bg-slate-50 py-2.5 px-4 border-top d-flex justify-content-between">
+                        <button type="button" class="btn btn-sm btn-light border font-weight-bold rounded-lg px-3" data-dismiss="modal">Batal</button>
+                        <form action="{{ route('admin.guru.destroy', $guru->id) }}" method="POST" class="m-0">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger font-weight-bold rounded-lg px-4 text-white">
+                                <i class="fas fa-trash-alt mr-1.5"></i> Ya, Hapus Tutor
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endforeach
 
     <!-- Custom CSS for purple brand elements -->
@@ -315,6 +357,17 @@
             color: white;
             background-color: #10b981;
             border-color: #10b981;
+        }
+        .btn-outline-danger {
+            color: #dc2626;
+            border-color: #fecaca;
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+        .btn-outline-danger:hover {
+            color: white;
+            background-color: #dc2626;
+            border-color: #dc2626;
         }
     </style>
 @endsection

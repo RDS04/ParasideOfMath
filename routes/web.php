@@ -205,6 +205,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::put('/admin/link/{id}', 'updateYoutubeLink')->name('admin.link.update');
     Route::delete('/admin/link/{id}', 'deleteYoutubeLink')->name('admin.link.delete');
     Route::get('/admin/siswa', 'daftarSiswa')->name('admin.siswa.daftar.index');
+    Route::delete('/admin/siswa/delete/{id}', 'deleteSiswa')->name('admin.siswa.delete');
     Route::get('/admin/guru', 'daftarGuru')->name('admin.guru.daftar.index');
     Route::get('/admin/guru/approve', 'approvGuru')->name('admin.guru.approve.index');
     Route::post('/admin/guru/toggle-register', 'toggleGuruRegisterStatus')->name('admin.guru.toggle-register');
@@ -213,6 +214,7 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('/admin/guru/approve/{id}', 'approveGuru')->name('admin.guru.approve');
     Route::post('/admin/guru/reject/{id}', 'rejectGuru')->name('admin.guru.reject');
     Route::delete('/admin/guru/delete/{id}', 'deleteGuru')->name('admin.guru.delete');
+    Route::delete('/admin/guru/destroy/{id}', 'destroyGuru')->name('admin.guru.destroy');
     Route::get('/admin/siswa/tambah', 'tambahSiswa')->name('admin.siswa.tambah.index');
     Route::get('/admin/riwayat-pembayaran', 'allRiwayatPayment')->name('admin.riwayat-pembayaran');
     Route::get('/admin/approve-pembayaran', 'approvePembayaranPage')->name('admin.approve-pembayaran.index');
